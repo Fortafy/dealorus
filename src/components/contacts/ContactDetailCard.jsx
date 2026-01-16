@@ -46,6 +46,18 @@ function InfoRow({ icon: Icon, label, value, isLink }) {
 }
 
 export default function ContactDetailCard({ contact, onEdit, onDelete }) {
+  // Parse source in markdown link format: [display text](url)
+  const parseSource = (source) => {
+    if (!source) return null;
+    const match = source.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (match) {
+      return { text: match[1], url: match[2] };
+    }
+    return null;
+  };
+
+  const parsedSource = parseSource(contact.source);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -111,6 +123,18 @@ export default function ContactDetailCard({ contact, onEdit, onDelete }) {
                   <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Notes</span>
                 </div>
                 <p className="text-sm text-slate-700 leading-relaxed">{contact.notes}</p>
+              </div>
+            )}
+            {parsedSource && (
+              <div className="pt-3 border-t border-slate-100">
+                <a
+                  href={parsedSource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                >
+                  {parsedSource.text}
+                </a>
               </div>
             )}
           </div>
