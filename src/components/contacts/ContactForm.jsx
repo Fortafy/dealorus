@@ -18,6 +18,18 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
     source: "Manual",
   });
 
+  // Parse source in markdown link format: [display text](url)
+  const parseSource = (source) => {
+    if (!source) return null;
+    const match = source.match(/\[([^\]]+)\]\(([^)]+)\)/);
+    if (match) {
+      return { text: match[1], url: match[2] };
+    }
+    return null;
+  };
+
+  const parsedSource = parseSource(formData.source);
+
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -96,6 +108,18 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
                 rows={3}
                 placeholder="Additional information about this contact"
               />
+              {parsedSource && (
+                <div className="mt-2">
+                  <a
+                    href={parsedSource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                  >
+                    {parsedSource.text}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
