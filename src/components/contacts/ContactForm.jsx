@@ -97,14 +97,6 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
                 placeholder="Additional information about this contact"
               />
             </div>
-
-            {formData.data_sources && formData.data_sources.length > 0 && (
-              <div className="col-span-2">
-                <p className="text-xs text-slate-400">
-                  Data sources: {formData.data_sources.join(", ")}
-                </p>
-              </div>
-            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
