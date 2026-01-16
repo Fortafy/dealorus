@@ -127,6 +127,7 @@ export default function ContactDetailCard({ contact, onEdit, onDelete }) {
             )}
             {parsedSource && (
               <div className="pt-3 border-t border-slate-100">
+                <span className="text-xs text-slate-500">Original Source: </span>
                 <a
                   href={parsedSource.url}
                   target="_blank"
