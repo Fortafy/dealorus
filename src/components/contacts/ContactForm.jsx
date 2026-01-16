@@ -128,6 +128,7 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
               />
               {parsedSource && (
                 <div className="mt-2">
+                  <span className="text-xs text-slate-500">Original Source: </span>
                   <a
                     href={parsedSource.url}
                     target="_blank"
