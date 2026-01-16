@@ -4,8 +4,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
+import SearchDialog from "@/components/search/SearchDialog";
 import { motion } from "framer-motion";
-import { Building2, Search, Trash2, X } from "lucide-react";
+import { Building2, Search, Trash2, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [filters, setFilters] = useState({
     state: "",
     organization_type: "",
@@ -106,10 +108,17 @@ export default function Organizations() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="text-xl font-bold text-slate-900">Organizations</h1>
               <p className="text-sm text-slate-500">Browse all enriched organizations</p>
             </div>
+            <Button
+              onClick={() => setSearchDialogOpen(true)}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Search
+            </Button>
           </div>
         </div>
       </header>
@@ -237,6 +246,14 @@ export default function Organizations() {
           </div>
         </div>
       </main>
+
+      <SearchDialog
+        open={searchDialogOpen}
+        onOpenChange={setSearchDialogOpen}
+        onSearchComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ["organizations"] });
+        }}
+      />
     </div>
   );
 }
