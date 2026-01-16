@@ -66,6 +66,19 @@ export default function ContactSearch({ organization }) {
 
   const allContacts = [...savedContacts];
 
+  const cleanLinkedInUrl = (url) => {
+    if (!url) return null;
+    try {
+      // Remove trailing slashes and query parameters
+      let cleaned = url.split('?')[0].replace(/\/$/, '');
+      // Extract the core profile path (e.g., /in/name or /company/name)
+      const match = cleaned.match(/(https?:\/\/(?:www\.)?linkedin\.com\/(?:in|company)\/[^\/\s]+)/i);
+      return match ? match[1] : cleaned;
+    } catch {
+      return url;
+    }
+  };
+
   const searchContacts = async () => {
     setIsSearching(true);
     setHasSearched(false);
@@ -143,7 +156,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           title: contact.title,
           email: contact.email,
           phone: contact.phone,
-          linkedin: contact.linkedin,
+          linkedin: cleanLinkedInUrl(contact.linkedin),
           role_department: contact.role_department,
           source: contact.source || "AI-found",
         });
