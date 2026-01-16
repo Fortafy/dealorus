@@ -29,13 +29,25 @@ export default function Organizations() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SearchResult.delete(id),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
-      if (selectedOrg && selectedOrg.id === deleteMutation.variables) {
+      if (selectedOrg && selectedOrg.id === variables) {
         setSelectedOrg(null);
       }
     },
   });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.SearchResult.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
+    },
+  });
+
+  const handleEdit = (updatedData) => {
+    updateMutation.mutate({ id: updatedData.id, data: updatedData });
+    setSelectedOrg(updatedData);
+  };
 
   const parseRevenue = (revenueStr) => {
     if (!revenueStr) return 0;
@@ -182,18 +194,13 @@ export default function Organizations() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <div className="mb-4 flex justify-end">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteMutation.mutate(selectedOrg.id)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Organization
-                  </Button>
-                </div>
-                <OrganizationCard data={selectedOrg} onSave={() => {}} isSaved={true} />
+                <OrganizationCard 
+                  data={selectedOrg} 
+                  onSave={() => {}} 
+                  isSaved={true}
+                  onDelete={(id) => deleteMutation.mutate(id)}
+                  onEdit={handleEdit}
+                />
                 <ContactSearch organization={selectedOrg} />
               </motion.div>
             ) : (

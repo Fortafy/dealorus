@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
 import {
   Building2,
   MapPin,
@@ -15,7 +16,9 @@ import {
   FileText,
   Save,
   ExternalLink,
-  CheckCircle2
+  CheckCircle2,
+  Pencil,
+  Trash2
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -49,10 +52,18 @@ function DataRow({ icon: Icon, label, value, isLink }) {
   );
 }
 
-export default function OrganizationCard({ data, onSave, isSaved }) {
+export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEdit }) {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const formatAddress = () => {
     const parts = [data.address, data.city, data.state, data.zip_code].filter(Boolean);
     return parts.length > 0 ? parts.join(", ") : null;
+  };
+
+  const handleEdit = (updatedData) => {
+    if (onEdit) {
+      onEdit(updatedData);
+    }
   };
 
   return (
@@ -79,25 +90,41 @@ export default function OrganizationCard({ data, onSave, isSaved }) {
                 )}
               </div>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => onSave(data)}
-              disabled={isSaved}
-              className={`flex-shrink-0 ${isSaved ? "bg-green-100 text-green-700" : "bg-white/90 text-indigo-700 hover:bg-white"}`}
-            >
-              {isSaved ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                  Saved
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-1.5" />
-                  Save
-                </>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => onSave(data)}
+                disabled={isSaved}
+                className={`flex-shrink-0 ${isSaved ? "bg-green-100 text-green-700" : "bg-white/90 text-indigo-700 hover:bg-white"}`}
+                title={isSaved ? "Saved" : "Save"}
+              >
+                {isSaved ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => setEditDialogOpen(true)}
+                className="bg-white/90 text-indigo-700 hover:bg-white"
+                title="Edit"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+              {onDelete && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => onDelete(data.id)}
+                  title="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               )}
-            </Button>
+            </div>
           </div>
         </CardHeader>
 
@@ -136,6 +163,13 @@ export default function OrganizationCard({ data, onSave, isSaved }) {
           )}
         </CardContent>
       </Card>
+
+      <EditOrganizationDialog
+        organization={data}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleEdit}
+      />
     </motion.div>
   );
 }
