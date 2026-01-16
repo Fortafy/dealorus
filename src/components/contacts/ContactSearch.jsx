@@ -112,9 +112,16 @@ Find up to 7-10 key contacts. For each contact, provide:
 - title: Their specific job title/position
 - email: Email address if publicly available (cross-reference with org domain if possible)
 - phone: Direct phone number or extension if available
-- linkedin: LinkedIn profile URL if available
+- linkedin: ONLY the actual LinkedIn profile URL if you can verify it exists (e.g., https://www.linkedin.com/in/firstname-lastname). Do NOT add numeric suffixes or identifiers. If you cannot find the exact verified URL, return null.
 - role_department: Their department or functional area (e.g., "Development", "Programs", "Executive")
 - source: Specific source where this information was found (include URL if possible)
+
+CRITICAL - LinkedIn URL Rules:
+- ONLY include LinkedIn URLs you have actually found and verified
+- Do NOT append random numbers or identifiers to profile URLs
+- Do NOT guess or construct LinkedIn URLs based on names
+- If uncertain about the exact LinkedIn URL, set linkedin to null
+- Valid format: https://www.linkedin.com/in/actual-profile-slug (nothing appended)
 
 VALIDATION: Cross-check found email addresses and phone numbers against the organization's known domain/contact info to ensure accuracy.
 
