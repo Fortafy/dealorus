@@ -18,8 +18,10 @@ import {
   ExternalLink,
   CheckCircle2,
   Pencil,
-  Trash2
+  Trash2,
+  Sparkles
 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 
 function DataRow({ icon: Icon, label, value, isLink }) {
@@ -54,6 +56,7 @@ function DataRow({ icon: Icon, label, value, isLink }) {
 
 export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEdit }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
 
   const formatAddress = () => {
     const parts = [data.address, data.city, data.state, data.zip_code].filter(Boolean);
@@ -63,6 +66,72 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
   const handleEdit = (updatedData) => {
     if (onEdit) {
       onEdit(updatedData);
+    }
+  };
+
+  const handleAIEnrich = async () => {
+    setIsEnriching(true);
+
+    const prompt = `Enrich and improve the following organization data:
+
+Organization: ${data.organization_name}
+State: ${data.state}
+EIN: ${data.ein || "Not provided"}
+Address: ${data.address || "Not provided"}
+City: ${data.city || "Not provided"}
+ZIP: ${data.zip_code || "Not provided"}
+NTEE Code: ${data.ntee_code || "Not provided"}
+Mission: ${data.mission || "Not provided"}
+
+Tasks:
+1. Verify and standardize the address format (use proper USPS format)
+2. Find the EIN if missing, verify if provided
+3. Find the NTEE code if missing, verify if provided
+4. If mission exists, summarize it into 2-3 concise key points
+5. Keep all other fields unchanged
+
+Return the enriched data with these exact fields:
+- address: Standardized street address
+- city: City name
+- zip_code: ZIP code
+- ein: EIN in XX-XXXXXXX format
+- ntee_code: NTEE code
+- mission: Summarized mission (if original exists, otherwise keep original)`;
+
+    try {
+      const enrichedData = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            address: { type: ["string", "null"] },
+            city: { type: ["string", "null"] },
+            zip_code: { type: ["string", "null"] },
+            ein: { type: ["string", "null"] },
+            ntee_code: { type: ["string", "null"] },
+            mission: { type: ["string", "null"] },
+          },
+        },
+      });
+
+      const updatedData = {
+        ...data,
+        address: enrichedData.address || data.address,
+        city: enrichedData.city || data.city,
+        zip_code: enrichedData.zip_code || data.zip_code,
+        ein: enrichedData.ein || data.ein,
+        ntee_code: enrichedData.ntee_code || data.ntee_code,
+        mission: enrichedData.mission || data.mission,
+      };
+
+      if (onEdit) {
+        onEdit(updatedData);
+      }
+    } catch (err) {
+      console.error("AI enrichment failed:", err);
+    } finally {
+      setIsEnriching(false);
     }
   };
 
@@ -90,38 +159,53 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <Button
                 variant="secondary"
-                size="icon"
+                size="sm"
                 onClick={() => onSave(data)}
                 disabled={isSaved}
-                className={`flex-shrink-0 ${isSaved ? "bg-green-100 text-green-700" : "bg-white/90 text-indigo-700 hover:bg-white"}`}
+                className={`flex-shrink-0 h-8 w-8 p-0 ${isSaved ? "bg-green-100 text-green-700" : "bg-white/90 text-indigo-700 hover:bg-white"}`}
                 title={isSaved ? "Saved" : "Save"}
               >
                 {isSaved ? (
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                 ) : (
-                  <Save className="w-4 h-4" />
+                  <Save className="w-3.5 h-3.5" />
                 )}
               </Button>
               <Button
                 variant="secondary"
-                size="icon"
+                size="sm"
+                onClick={handleAIEnrich}
+                disabled={isEnriching}
+                className="bg-white/90 text-indigo-700 hover:bg-white h-8 w-8 p-0"
+                title="AI Enrich"
+              >
+                {isEnriching ? (
+                  <div className="w-3.5 h-3.5 border-2 border-indigo-700/30 border-t-indigo-700 rounded-full animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5" />
+                )}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setEditDialogOpen(true)}
-                className="bg-white/90 text-indigo-700 hover:bg-white"
+                className="bg-white/90 text-indigo-700 hover:bg-white h-8 w-8 p-0"
                 title="Edit"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-3.5 h-3.5" />
               </Button>
               {onDelete && (
                 <Button
                   variant="destructive"
-                  size="icon"
+                  size="sm"
                   onClick={() => onDelete(data.id)}
+                  className="h-8 w-8 p-0"
                   title="Delete"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </Button>
               )}
             </div>
