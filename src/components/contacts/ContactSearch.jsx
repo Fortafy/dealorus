@@ -284,7 +284,9 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                               <Eye className="w-3.5 h-3.5 text-indigo-600" />
                             </a>
                           ) : (
-                            <div className="h-7 w-7" />
+                            <div className="inline-flex items-center justify-center h-7 w-7">
+                              <Eye className="w-3.5 h-3.5 text-slate-300" />
+                            </div>
                           )}
                           <Button
                             variant="ghost"
