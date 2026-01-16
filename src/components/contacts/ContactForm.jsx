@@ -96,6 +96,9 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
                 rows={3}
                 placeholder="Additional information about this contact"
               />
+              {formData.source && (
+                <p className="text-xs text-slate-400 mt-1">Source: {formData.source}</p>
+              )}
             </div>
           </div>
 
