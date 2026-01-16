@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2 } from "lucide-react";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactForm from "./ContactForm";
 import ContactDetailCard from "./ContactDetailCard";
@@ -237,7 +237,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                     <TableHead className="font-semibold">Role/Dept</TableHead>
                     <TableHead className="font-semibold">Email</TableHead>
                     <TableHead className="font-semibold">Phone</TableHead>
-                    <TableHead className="font-semibold">Source</TableHead>
                     <TableHead className="font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -273,9 +272,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                         {contact.phone || <span className="text-slate-400 text-sm">N/A</span>}
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs text-slate-500">{contact.source || "Manual"}</span>
-                      </TableCell>
-                      <TableCell>
                         <div className="flex gap-1">
                           {contact.linkedin ? (
                             <a
@@ -285,7 +281,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                               className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-slate-100 transition-colors"
                               title="LinkedIn Profile"
                             >
-                              <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
+                              <Eye className="w-3.5 h-3.5 text-indigo-600" />
                             </a>
                           ) : (
                             <div className="h-7 w-7" />
