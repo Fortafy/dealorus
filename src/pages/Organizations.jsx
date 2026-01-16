@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OrganizationCard from "@/components/results/OrganizationCard";
+import ContactSearch from "@/components/contacts/ContactSearch";
 import { motion } from "framer-motion";
 import { Building2, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -142,6 +143,7 @@ export default function Organizations() {
                   </Button>
                 </div>
                 <OrganizationCard data={selectedOrg} onSave={() => {}} isSaved={true} />
+                <ContactSearch organization={selectedOrg} />
               </motion.div>
             ) : (
               <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-12 text-center">
