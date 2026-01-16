@@ -370,8 +370,6 @@ Return a JSON object with these fields (use null for any field where data is not
             <div className="sticky top-24">
               <SearchHistory
                 searches={savedSearches}
-                onSelect={handleSelectSaved}
-                onDelete={(id) => deleteMutation.mutate(id)}
               />
 
               {/* Info Card */}
