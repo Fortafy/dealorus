@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
+import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import { motion } from "framer-motion";
 import { Building2, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,13 @@ import { Badge } from "@/components/ui/badge";
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    state: "",
+    organization_type: "",
+    ntee_code: "",
+    min_revenue: "",
+    max_revenue: "",
+  });
   const queryClient = useQueryClient();
 
   const { data: organizations = [], isLoading } = useQuery({
@@ -29,11 +37,42 @@ export default function Organizations() {
     },
   });
 
-  const filteredOrgs = organizations.filter((org) =>
-    org.organization_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.state?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.city?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const parseRevenue = (revenueStr) => {
+    if (!revenueStr) return 0;
+    const cleaned = revenueStr.replace(/[$,]/g, "");
+    return parseFloat(cleaned) || 0;
+  };
+
+  const filteredOrgs = organizations.filter((org) => {
+    // Multi-field search
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = !searchQuery || 
+      org.organization_name?.toLowerCase().includes(searchLower) ||
+      org.state?.toLowerCase().includes(searchLower) ||
+      org.city?.toLowerCase().includes(searchLower) ||
+      org.ein?.toLowerCase().includes(searchLower) ||
+      org.organization_type?.toLowerCase().includes(searchLower) ||
+      org.ntee_code?.toLowerCase().includes(searchLower);
+
+    // Filter by state
+    const matchesState = !filters.state || org.state === filters.state;
+
+    // Filter by organization type
+    const matchesType = !filters.organization_type || 
+      org.organization_type?.toLowerCase().includes(filters.organization_type.toLowerCase());
+
+    // Filter by NTEE code
+    const matchesNtee = !filters.ntee_code || 
+      org.ntee_code?.toLowerCase().includes(filters.ntee_code.toLowerCase());
+
+    // Filter by revenue range
+    const revenue = parseRevenue(org.annual_revenue);
+    const matchesMinRevenue = !filters.min_revenue || revenue >= parseFloat(filters.min_revenue);
+    const matchesMaxRevenue = !filters.max_revenue || revenue <= parseFloat(filters.max_revenue);
+
+    return matchesSearch && matchesState && matchesType && matchesNtee && 
+           matchesMinRevenue && matchesMaxRevenue;
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
@@ -56,16 +95,28 @@ export default function Organizations() {
           {/* Left Column - Organizations List */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sticky top-24 max-h-[calc(100vh-7rem)] flex flex-col">
-              <div className="mb-4">
+              <div className="mb-4 space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search organizations..."
+                    placeholder="Search across all fields..."
                     className="pl-10"
                   />
                 </div>
+                
+                <AdvancedFilters
+                  filters={filters}
+                  onFilterChange={setFilters}
+                  onClear={() => setFilters({
+                    state: "",
+                    organization_type: "",
+                    ntee_code: "",
+                    min_revenue: "",
+                    max_revenue: "",
+                  })}
+                />
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-2 pr-2">
