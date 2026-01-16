@@ -67,15 +67,27 @@ export default function ContactSearch({ organization }) {
   const allContacts = [...savedContacts];
 
   const cleanLinkedInUrl = (url) => {
-    if (!url) return null;
+    if (!url || url === 'null') return null;
     try {
       // Remove trailing slashes and query parameters
       let cleaned = url.split('?')[0].replace(/\/$/, '');
+      
       // Extract the core profile path (e.g., /in/name or /company/name)
-      const match = cleaned.match(/(https?:\/\/(?:www\.)?linkedin\.com\/(?:in|company)\/[^\/\s]+)/i);
-      return match ? match[1] : cleaned;
+      const match = cleaned.match(/(https?:\/\/(?:www\.)?linkedin\.com\/(?:in|company)\/[a-zA-Z0-9-]+)/i);
+      if (!match) return null;
+      
+      const extractedUrl = match[1];
+      
+      // Reject URLs with sequential numbers or suspicious patterns
+      const profileSlug = extractedUrl.split('/').pop();
+      // Check for patterns like "name-12345678" or "name-34567890"
+      if (/[a-z]+-\d{8,}$/i.test(profileSlug)) {
+        return null; // Reject URLs ending with hyphen and 8+ digits
+      }
+      
+      return extractedUrl;
     } catch {
-      return url;
+      return null;
     }
   };
 
@@ -112,16 +124,19 @@ Find up to 7-10 key contacts. For each contact, provide:
 - title: Their specific job title/position
 - email: Email address if publicly available (cross-reference with org domain if possible)
 - phone: Direct phone number or extension if available
-- linkedin: ONLY the actual LinkedIn profile URL if you can verify it exists (e.g., https://www.linkedin.com/in/firstname-lastname). Do NOT add numeric suffixes or identifiers. If you cannot find the exact verified URL, return null.
+- linkedin: LinkedIn profile URL ONLY if you have verified it exists. If you cannot find a verified URL, set this to null (leave blank).
 - role_department: Their department or functional area (e.g., "Development", "Programs", "Executive")
 - source: Specific source where this information was found (include URL if possible)
 
-CRITICAL - LinkedIn URL Rules:
-- ONLY include LinkedIn URLs you have actually found and verified
-- Do NOT append random numbers or identifiers to profile URLs
-- Do NOT guess or construct LinkedIn URLs based on names
-- If uncertain about the exact LinkedIn URL, set linkedin to null
-- Valid format: https://www.linkedin.com/in/actual-profile-slug (nothing appended)
+EXTREMELY CRITICAL - LinkedIn URL Rules (READ CAREFULLY):
+- DO NOT create, construct, or generate LinkedIn URLs
+- DO NOT add ANY numbers, suffixes, or identifiers to LinkedIn URLs
+- DO NOT append sequential numbers like -12345678 or -34567890 to URLs
+- ONLY provide a LinkedIn URL if you have ACTUALLY FOUND it from a verified source
+- If you cannot find the exact verified LinkedIn URL, you MUST set linkedin to null (blank/empty)
+- Valid example: https://www.linkedin.com/in/john-smith (NO numbers or suffixes)
+- Invalid examples: https://www.linkedin.com/in/john-smith-12345678 or any URL with appended numbers
+- When in doubt, set linkedin to null - DO NOT GUESS
 
 VALIDATION: Cross-check found email addresses and phone numbers against the organization's known domain/contact info to ensure accuracy.
 
