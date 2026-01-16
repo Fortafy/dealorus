@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactForm from "./ContactForm";
 import ContactDetailCard from "./ContactDetailCard";
@@ -277,15 +277,19 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedContact(contact)}
-                            className="h-7 w-7 p-0"
-                            title="View Details"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
+                          {contact.source && contact.source !== "Manual" && contact.source.startsWith("http") ? (
+                            <a
+                              href={contact.source}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="h-7 w-7 p-0 inline-flex items-center justify-center rounded hover:bg-slate-100"
+                              title={contact.source}
+                            >
+                              <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
+                            </a>
+                          ) : (
+                            <div className="h-7 w-7" />
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
