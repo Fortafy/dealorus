@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,24 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
     notes: "",
     source: "Manual",
   });
+
+  useEffect(() => {
+    if (contact) {
+      setFormData(contact);
+    } else {
+      setFormData({
+        organization_id: organizationId,
+        name: "",
+        title: "",
+        email: "",
+        phone: "",
+        linkedin: "",
+        role_department: "",
+        notes: "",
+        source: "Manual",
+      });
+    }
+  }, [contact, organizationId]);
 
   // Parse source in markdown link format: [display text](url)
   const parseSource = (source) => {
