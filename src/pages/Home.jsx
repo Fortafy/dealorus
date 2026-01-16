@@ -5,14 +5,22 @@ import SearchForm from "@/components/search/SearchForm";
 import OrganizationCard from "@/components/results/OrganizationCard";
 import SearchHistory from "@/components/results/SearchHistory";
 import EmptyState from "@/components/results/EmptyState";
+import CSVUploader from "@/components/upload/CSVUploader";
+import ProcessingProgress from "@/components/upload/ProcessingProgress";
 import { motion } from "framer-motion";
 import { Sparkles, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const [searchResult, setSearchResult] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
+  const [isProcessingBulk, setIsProcessingBulk] = useState(false);
+  const [bulkResults, setBulkResults] = useState([]);
+  const [bulkTotal, setBulkTotal] = useState(0);
+  const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState("single");
   const queryClient = useQueryClient();
 
   const { data: savedSearches = [] } = useQuery({
@@ -109,6 +117,129 @@ Return a JSON object with these fields (use null for any field where data is not
     setError(null);
   };
 
+  const handleBulkUpload = async (file) => {
+    setIsProcessingBulk(true);
+    setError(null);
+    setBulkResults([]);
+    setActiveTab("bulk");
+
+    try {
+      // Upload the file
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+
+      // Extract data from CSV
+      const extractionResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: "object",
+          properties: {
+            organizations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  organization_name: { type: "string" },
+                  state: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (extractionResult.status === "error") {
+        setError(extractionResult.details || "Failed to parse CSV file");
+        setIsProcessingBulk(false);
+        return;
+      }
+
+      const organizations = extractionResult.output?.organizations || [];
+      if (organizations.length === 0) {
+        setError("No valid organizations found in the CSV file");
+        setIsProcessingBulk(false);
+        return;
+      }
+
+      setBulkTotal(organizations.length);
+      const results = [];
+
+      // Process each organization
+      for (let i = 0; i < organizations.length; i++) {
+        setCurrentBulkIndex(i);
+        const org = organizations[i];
+
+        if (!org.organization_name || !org.state) {
+          results.push({
+            ...org,
+            status: "error",
+            error: "Missing organization name or state",
+          });
+          setBulkResults([...results]);
+          continue;
+        }
+
+        try {
+          const prompt = `Search for nonprofit or government organization data for "${org.organization_name}" in ${org.state}.
+          
+Find and return accurate information from public sources like ProPublica, IRS, Charity Navigator, GuideStar, etc.
+
+Return a JSON object with these fields (use null for any field where data is not found):
+- organization_name, state, ein, address, city, zip_code, phone, email, website, organization_type, mission, annual_revenue, ntee_code, ruling_date, data_sources (array)`;
+
+          const enrichedData = await base44.integrations.Core.InvokeLLM({
+            prompt,
+            add_context_from_internet: true,
+            response_json_schema: {
+              type: "object",
+              properties: {
+                organization_name: { type: "string" },
+                state: { type: "string" },
+                ein: { type: ["string", "null"] },
+                address: { type: ["string", "null"] },
+                city: { type: ["string", "null"] },
+                zip_code: { type: ["string", "null"] },
+                phone: { type: ["string", "null"] },
+                email: { type: ["string", "null"] },
+                website: { type: ["string", "null"] },
+                organization_type: { type: ["string", "null"] },
+                mission: { type: ["string", "null"] },
+                annual_revenue: { type: ["string", "null"] },
+                ntee_code: { type: ["string", "null"] },
+                ruling_date: { type: ["string", "null"] },
+                data_sources: { type: "array", items: { type: "string" } },
+              },
+            },
+          });
+
+          // Save to database
+          await base44.entities.SearchResult.create(enrichedData);
+
+          results.push({
+            ...enrichedData,
+            status: "success",
+          });
+        } catch (err) {
+          results.push({
+            organization_name: org.organization_name,
+            state: org.state,
+            status: "error",
+            error: err.message || "Failed to enrich data",
+          });
+        }
+
+        setBulkResults([...results]);
+      }
+
+      // Refresh the saved searches list
+      queryClient.invalidateQueries({ queryKey: ["searchResults"] });
+    } catch (err) {
+      setError(err.message || "Failed to process CSV file");
+    } finally {
+      setIsProcessingBulk(false);
+      setCurrentBulkIndex(0);
+    }
+  };
+
   const isSaved = searchResult && savedSearches.some(
     (s) => s.ein === searchResult.ein && s.organization_name === searchResult.organization_name
   );
@@ -140,16 +271,38 @@ Return a JSON object with these fields (use null for any field where data is not
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8"
             >
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-1">
-                  Search Organization
-                </h2>
-                <p className="text-sm text-slate-500">
-                  Enter details to enrich your data from public databases
-                </p>
-              </div>
-              <SearchForm onSearch={handleSearch} isLoading={isSearching} />
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="single">Single Search</TabsTrigger>
+                  <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="single" className="mt-0">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold text-slate-900 mb-1">
+                      Search Organization
+                    </h2>
+                    <p className="text-sm text-slate-500">
+                      Enter details to enrich your data from public databases
+                    </p>
+                  </div>
+                  <SearchForm onSearch={handleSearch} isLoading={isSearching} />
+                </TabsContent>
+
+                <TabsContent value="bulk" className="mt-0">
+                  <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
+                </TabsContent>
+              </Tabs>
             </motion.div>
+
+            {/* Bulk Processing Progress */}
+            {isProcessingBulk && (
+              <ProcessingProgress
+                results={bulkResults}
+                total={bulkTotal}
+                currentIndex={currentBulkIndex}
+              />
+            )}
 
             {/* Error State */}
             {error && (
@@ -160,14 +313,46 @@ Return a JSON object with these fields (use null for any field where data is not
             )}
 
             {/* Results */}
-            {searchResult ? (
+            {searchResult && activeTab === "single" ? (
               <OrganizationCard
                 data={searchResult}
                 onSave={handleSave}
                 isSaved={isSaved}
               />
             ) : (
-              !isSearching && <EmptyState />
+              !isSearching && !isProcessingBulk && activeTab === "single" && <EmptyState />
+            )}
+
+            {/* Bulk Results Summary */}
+            {bulkResults.length > 0 && !isProcessingBulk && activeTab === "bulk" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-6 md:p-8 border border-green-100"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                      Bulk Processing Complete
+                    </h3>
+                    <p className="text-slate-700 mb-4">
+                      Successfully processed {bulkResults.filter(r => r.status === "success").length} out of {bulkResults.length} organizations.
+                      All results have been saved to your search history.
+                    </p>
+                    {bulkResults.filter(r => r.status === "error").length > 0 && (
+                      <Alert className="bg-red-50 border-red-200">
+                        <AlertCircle className="h-4 w-4 text-red-600" />
+                        <AlertDescription className="text-sm text-red-800">
+                          {bulkResults.filter(r => r.status === "error").length} organizations failed to process. Check for missing or invalid data in your CSV.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
             )}
 
             {/* Loading State */}
