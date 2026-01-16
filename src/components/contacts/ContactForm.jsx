@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
 
 export default function ContactForm({ contact, organizationId, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(contact || {
@@ -54,7 +55,10 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({
+      ...formData,
+      last_modified: new Date().toISOString()
+    });
     onOpenChange(false);
   };
 
@@ -126,19 +130,28 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
                 rows={3}
                 placeholder="Additional information about this contact"
               />
-              {parsedSource && (
-                <div className="mt-2">
-                  <span className="text-xs text-slate-500">Original Source: </span>
-                  <a
-                    href={parsedSource.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
-                  >
-                    {parsedSource.text}
-                  </a>
+              <div className="mt-2 flex items-center justify-between">
+                <div>
+                  {parsedSource && (
+                    <div>
+                      <span className="text-xs text-slate-500">Original Source: </span>
+                      <a
+                        href={parsedSource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                      >
+                        {parsedSource.text}
+                      </a>
+                    </div>
+                  )}
                 </div>
-              )}
+                {contact?.last_modified && (
+                  <div className="text-xs text-slate-500">
+                    Last Modified: {format(new Date(contact.last_modified), "MMM d, yyyy h:mm a")}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
