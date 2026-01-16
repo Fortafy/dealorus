@@ -234,7 +234,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   <TableRow>
                     <TableHead className="font-semibold">Name</TableHead>
                     <TableHead className="font-semibold">Title</TableHead>
-                    <TableHead className="font-semibold">Role/Dept</TableHead>
                     <TableHead className="font-semibold">Email</TableHead>
                     <TableHead className="font-semibold">Phone</TableHead>
                     <TableHead className="font-semibold">Actions</TableHead>
@@ -251,9 +250,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                       </TableCell>
                       <TableCell>
                         {contact.title || <span className="text-slate-400 text-sm">N/A</span>}
-                      </TableCell>
-                      <TableCell>
-                        {contact.role_department || <span className="text-slate-400 text-sm">N/A</span>}
                       </TableCell>
                       <TableCell>
                         {contact.email ? (
