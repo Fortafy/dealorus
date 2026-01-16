@@ -27,6 +27,18 @@ export default function Organizations() {
     queryFn: () => base44.entities.SearchResult.list("-created_date"),
   });
 
+  // Check for pre-selected organization from URL
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orgId = urlParams.get("id");
+    if (orgId && organizations.length > 0) {
+      const org = organizations.find(o => o.id === orgId);
+      if (org) {
+        setSelectedOrg(org);
+      }
+    }
+  }, [organizations]);
+
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SearchResult.delete(id),
     onSuccess: (data, variables) => {
