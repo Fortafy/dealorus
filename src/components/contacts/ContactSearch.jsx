@@ -72,22 +72,38 @@ export default function ContactSearch({ organization }) {
 
     const prompt = `Find contact information for key personnel at "${organization.organization_name}" located in ${organization.city ? organization.city + ', ' : ''}${organization.state}.
 
-Search the following sources:
-- Organization's website: ${organization.website || 'search for it'}
-- LinkedIn profiles
-- ProPublica Nonprofit Explorer
-- Charity Navigator
-- GuideStar/Candid
-- News articles and press releases
-- Public filings and reports
+ORGANIZATION CONTEXT (use this to cross-reference and validate contact information):
+- Website: ${organization.website || 'unknown'}
+- Organization Email: ${organization.email || 'unknown'}
+- Organization Phone: ${organization.phone || 'unknown'}
+- Address: ${organization.address || 'unknown'}
+- EIN: ${organization.ein || 'unknown'}
 
-Find up to 5-7 key contacts including executives, board members, or department heads. For each contact, provide:
+PRIORITIZED ROLES TO SEARCH FOR:
+1. Executive Leadership: CEO, Executive Director, President, COO, CFO
+2. Development/Fundraising: Director of Development, Fundraising Manager, Grants Manager
+3. Program Management: Program Director, Operations Manager
+4. Communications: Communications Director, Marketing Director
+5. Board Members: Board Chair, Board Members
+
+SEARCH STRATEGY:
+- Use the organization's domain from website/email to find employee email patterns
+- Cross-reference phone numbers and email domains with organization data
+- Look for staff/team pages on the organization's website
+- Search LinkedIn for employees at this specific organization
+- Check ProPublica Nonprofit Explorer, Charity Navigator, GuideStar for leadership
+- Review news articles, press releases, and public filings for names and titles
+
+Find up to 7-10 key contacts. For each contact, provide:
 - name: Full name of the contact
-- title: Their job title/position
-- email: Email address if publicly available (null if not found)
-- phone: Phone number if publicly available (null if not found)
-- linkedin: LinkedIn profile URL if available (null if not found)
-- source: Where this information was found
+- title: Their specific job title/position
+- email: Email address if publicly available (cross-reference with org domain if possible)
+- phone: Direct phone number or extension if available
+- linkedin: LinkedIn profile URL if available
+- role_department: Their department or functional area (e.g., "Development", "Programs", "Executive")
+- source: Specific source where this information was found (include URL if possible)
+
+VALIDATION: Cross-check found email addresses and phone numbers against the organization's known domain/contact info to ensure accuracy.
 
 Return ONLY contacts with publicly verified information. Do not make up or guess contact details.`;
 
@@ -108,6 +124,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   email: { type: ["string", "null"] },
                   phone: { type: ["string", "null"] },
                   linkedin: { type: ["string", "null"] },
+                  role_department: { type: ["string", "null"] },
                   source: { type: "string" },
                 },
               },
@@ -127,6 +144,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           email: contact.email,
           phone: contact.phone,
           linkedin: contact.linkedin,
+          role_department: contact.role_department,
           source: contact.source || "AI-found",
         });
       }
