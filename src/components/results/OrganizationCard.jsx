@@ -57,6 +57,7 @@ function DataRow({ icon: Icon, label, value, isLink }) {
 export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEdit }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
+  const [enrichingSource, setEnrichingSource] = useState(null);
 
   const formatAddress = () => {
     const parts = [data.address, data.city, data.state, data.zip_code].filter(Boolean);
@@ -132,6 +133,76 @@ Return the enriched data with these exact fields:
       console.error("AI enrichment failed:", err);
     } finally {
       setIsEnriching(false);
+    }
+  };
+
+  const handleSourceEnrich = async (source) => {
+    setEnrichingSource(source);
+    setIsEnriching(true);
+
+    const sourceInstructions = {
+      'CharityAPI': 'Query CharityAPI.org ONLY using the API key. Do not use any other sources.',
+      'ProPublica': 'Search ProPublica Nonprofit Explorer ONLY. Use their verified nonprofit financial data.',
+      'IRS': 'Search IRS Ezar Database ONLY. Use official IRS tax-exempt organization data.',
+      'GuideStar': 'Search GuideStar/Candid ONLY. Use their nonprofit profiles and financial data.'
+    };
+
+    const prompt = `Find and enrich data for this organization using ${source} ONLY:
+
+Organization: ${data.organization_name}
+State: ${data.state}
+EIN: ${data.ein || "Unknown"}
+
+CRITICAL: ${sourceInstructions[source]}
+DO NOT use any other data sources. Only return data found in ${source}.
+
+Return complete organization data:
+- organization_name, state, ein, address, city, zip_code, phone, email, website
+- organization_type, mission, annual_revenue, ntee_code, ruling_date
+- data_sources: Must be ["${source}"] only
+
+If any field is not found in ${source}, set it to null.`;
+
+    try {
+      const enrichedData = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            organization_name: { type: "string" },
+            state: { type: "string" },
+            ein: { type: ["string", "null"] },
+            address: { type: ["string", "null"] },
+            city: { type: ["string", "null"] },
+            zip_code: { type: ["string", "null"] },
+            phone: { type: ["string", "null"] },
+            email: { type: ["string", "null"] },
+            website: { type: ["string", "null"] },
+            organization_type: { type: ["string", "null"] },
+            mission: { type: ["string", "null"] },
+            annual_revenue: { type: ["string", "null"] },
+            ntee_code: { type: ["string", "null"] },
+            ruling_date: { type: ["string", "null"] },
+            data_sources: { type: "array", items: { type: "string" } },
+          },
+        },
+      });
+
+      const updatedData = {
+        ...data,
+        ...enrichedData,
+        id: data.id,
+      };
+
+      if (onEdit) {
+        onEdit(updatedData);
+      }
+    } catch (err) {
+      console.error(`${source} enrichment failed:`, err);
+    } finally {
+      setIsEnriching(false);
+      setEnrichingSource(null);
     }
   };
 
@@ -239,10 +310,60 @@ Return the enriched data with these exact fields:
           </div>
 
           {data.data_sources && data.data_sources.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-slate-100">
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
               <p className="text-xs text-slate-400">
                 Data sources: {data.data_sources.join(", ")}
               </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSourceEnrich('CharityAPI')}
+                  disabled={isEnriching}
+                  className="h-7 text-xs"
+                >
+                  {enrichingSource === 'CharityAPI' ? (
+                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
+                  ) : null}
+                  CharityAPI
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSourceEnrich('ProPublica')}
+                  disabled={isEnriching}
+                  className="h-7 text-xs"
+                >
+                  {enrichingSource === 'ProPublica' ? (
+                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
+                  ) : null}
+                  ProPublica
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSourceEnrich('IRS')}
+                  disabled={isEnriching}
+                  className="h-7 text-xs"
+                >
+                  {enrichingSource === 'IRS' ? (
+                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
+                  ) : null}
+                  IRS Ezar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSourceEnrich('GuideStar')}
+                  disabled={isEnriching}
+                  className="h-7 text-xs"
+                >
+                  {enrichingSource === 'GuideStar' ? (
+                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
+                  ) : null}
+                  GuideStar
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
