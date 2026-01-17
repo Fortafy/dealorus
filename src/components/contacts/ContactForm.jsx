@@ -10,6 +10,7 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
   const [formData, setFormData] = useState(contact || {
     organization_id: organizationId,
     name: "",
+    company: "",
     title: "",
     email: "",
     phone: "",
@@ -26,6 +27,7 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
       setFormData({
         organization_id: organizationId,
         name: "",
+        company: "",
         title: "",
         email: "",
         phone: "",
@@ -77,6 +79,15 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
                 value={formData.name || ""}
                 onChange={(e) => handleChange("name", e.target.value)}
                 required
+              />
+            </div>
+
+            <div>
+              <Label>Company</Label>
+              <Input
+                value={formData.company || ""}
+                onChange={(e) => handleChange("company", e.target.value)}
+                placeholder="Organization name"
               />
             </div>
 

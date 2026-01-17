@@ -3,10 +3,12 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactForm from "./ContactForm";
 import ContactDetailCard from "./ContactDetailCard";
+import CSVContactUploader from "./CSVContactUploader";
 
 export default function ContactSearch({ organization }) {
   const [aiContacts, setAiContacts] = useState([]);
@@ -15,6 +17,9 @@ export default function ContactSearch({ organization }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
   const [selectedContact, setSelectedContact] = useState(null);
+  const [selectedContacts, setSelectedContacts] = useState(new Set());
+  const [sortField, setSortField] = useState(null);
+  const [sortDirection, setSortDirection] = useState("asc");
   const queryClient = useQueryClient();
 
   const { data: savedContacts = [] } = useQuery({
@@ -64,7 +69,54 @@ export default function ContactSearch({ organization }) {
     setFormOpen(true);
   };
 
-  const allContacts = [...savedContacts];
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedContacts(new Set(savedContacts.map(c => c.id)));
+    } else {
+      setSelectedContacts(new Set());
+    }
+  };
+
+  const handleSelectContact = (contactId, checked) => {
+    const newSelected = new Set(selectedContacts);
+    if (checked) {
+      newSelected.add(contactId);
+    } else {
+      newSelected.delete(contactId);
+    }
+    setSelectedContacts(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedContacts.size === 0) return;
+    if (!confirm(`Delete ${selectedContacts.size} contact${selectedContacts.size > 1 ? 's' : ''}?`)) return;
+
+    for (const contactId of selectedContacts) {
+      await deleteMutation.mutateAsync(contactId);
+    }
+    setSelectedContacts(new Set());
+  };
+
+  const sortedContacts = [...savedContacts].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    const aVal = a[sortField] || "";
+    const bVal = b[sortField] || "";
+    
+    const comparison = aVal.toString().localeCompare(bVal.toString(), undefined, { numeric: true });
+    return sortDirection === "asc" ? comparison : -comparison;
+  });
+
+  const allContacts = sortedContacts;
 
   const cleanLinkedInUrl = (url) => {
     if (!url || url === 'null') return null;
@@ -194,6 +246,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         const contactData = {
           organization_id: organization.id,
           name: contact.name,
+          company: organization.organization_name,
           title: contact.title,
           email: contact.email,
           phone: contact.phone,
@@ -258,6 +311,10 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                 </div>
               </div>
               <div className="flex gap-2">
+                <CSVContactUploader 
+                  organizationId={organization.id}
+                  onComplete={() => queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] })}
+                />
                 <Button
                   onClick={handleAddNew}
                   variant="outline"
@@ -308,87 +365,156 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           )}
 
           {!isSearching && allContacts.length > 0 && (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="font-semibold">Name</TableHead>
-                    <TableHead className="font-semibold">Title</TableHead>
-                    <TableHead className="font-semibold">Email</TableHead>
-                    <TableHead className="font-semibold">Phone</TableHead>
-                    <TableHead className="font-semibold">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allContacts.map((contact, index) => (
-                    <TableRow key={contact.id || index}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-slate-400" />
-                          {contact.name}
+            <>
+              {selectedContacts.size > 0 && (
+                <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center justify-between">
+                  <span className="text-sm font-medium text-indigo-900">
+                    {selectedContacts.size} contact{selectedContacts.size > 1 ? 's' : ''} selected
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleBulkDelete}
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    Delete Selected
+                  </Button>
+                </div>
+              )}
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10">
+                        <Checkbox
+                          checked={selectedContacts.size === allContacts.length && allContacts.length > 0}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </TableHead>
+                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("name")}>
+                        <div className="flex items-center gap-1">
+                          Name
+                          {sortField === "name" ? (
+                            sortDirection === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-30" />
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        {contact.title || <span className="text-slate-400 text-sm">N/A</span>}
-                      </TableCell>
-                      <TableCell>
-                        {contact.email ? (
-                          <a
-                            href={`mailto:${contact.email}`}
-                            className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
-                          >
-                            <Mail className="w-3 h-3" />
-                            {contact.email}
-                          </a>
-                        ) : (
-                          <span className="text-slate-400 text-sm">N/A</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {contact.phone || <span className="text-slate-400 text-sm">N/A</span>}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          {contact.linkedin ? (
+                      </TableHead>
+                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("company")}>
+                        <div className="flex items-center gap-1">
+                          Company
+                          {sortField === "company" ? (
+                            sortDirection === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-30" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("title")}>
+                        <div className="flex items-center gap-1">
+                          Title
+                          {sortField === "title" ? (
+                            sortDirection === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-30" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("email")}>
+                        <div className="flex items-center gap-1">
+                          Email
+                          {sortField === "email" ? (
+                            sortDirection === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-30" />
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead className="font-semibold">Phone</TableHead>
+                      <TableHead className="font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {allContacts.map((contact, index) => (
+                      <TableRow key={contact.id || index}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedContacts.has(contact.id)}
+                            onCheckedChange={(checked) => handleSelectContact(contact.id, checked)}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-slate-400" />
+                            {contact.name}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {contact.company || <span className="text-slate-400 text-sm">N/A</span>}
+                        </TableCell>
+                        <TableCell>
+                          {contact.title || <span className="text-slate-400 text-sm">N/A</span>}
+                        </TableCell>
+                        <TableCell>
+                          {contact.email ? (
                             <a
-                              href={contact.linkedin}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-slate-100 transition-colors"
-                              title="LinkedIn Profile"
+                              href={`mailto:${contact.email}`}
+                              className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
                             >
-                              <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                              <Mail className="w-3 h-3" />
+                              {contact.email}
                             </a>
                           ) : (
-                            <div className="inline-flex items-center justify-center h-7 w-7">
-                              <Eye className="w-3.5 h-3.5 text-slate-300" />
-                            </div>
+                            <span className="text-slate-400 text-sm">N/A</span>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(contact)}
-                            className="h-7 w-7 p-0"
-                            title="Edit"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteMutation.mutate(contact.id)}
-                            className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                        </TableCell>
+                        <TableCell>
+                          {contact.phone || <span className="text-slate-400 text-sm">N/A</span>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            {contact.linkedin ? (
+                              <a
+                                href={contact.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-slate-100 transition-colors"
+                                title="LinkedIn Profile"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-indigo-600" />
+                              </a>
+                            ) : (
+                              <div className="inline-flex items-center justify-center h-7 w-7">
+                                <Eye className="w-3.5 h-3.5 text-slate-300" />
+                              </div>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(contact)}
+                              className="h-7 w-7 p-0"
+                              title="Edit"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteMutation.mutate(contact.id)}
+                              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
 
         </div>
