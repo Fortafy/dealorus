@@ -21,23 +21,30 @@ export default function MigrateNTEEDescriptions({ onComplete }) {
       
       // Filter records that need updating (have ntee_code but no ntee_description)
       const recordsToUpdate = allRecords.filter(
-        record => record.ntee_code && !record.ntee_description
+        record => record.ntee_code && (!record.ntee_description || record.ntee_description.trim() === '')
       );
 
       setProgress({ current: 0, total: recordsToUpdate.length, updated: 0 });
 
       let updatedCount = 0;
+      let skippedCount = 0;
 
       // Update each record
       for (let i = 0; i < recordsToUpdate.length; i++) {
         const record = recordsToUpdate[i];
-        const description = getNTEEDescription(record.ntee_code);
+        
+        // Clean and normalize the NTEE code
+        const cleanCode = record.ntee_code.trim().toUpperCase();
+        const description = getNTEEDescription(cleanCode);
 
         if (description) {
           await base44.entities.SearchResult.update(record.id, {
+            ntee_code: cleanCode,
             ntee_description: description
           });
           updatedCount++;
+        } else {
+          skippedCount++;
         }
 
         setProgress({ 
@@ -49,7 +56,7 @@ export default function MigrateNTEEDescriptions({ onComplete }) {
 
       setResult({
         success: true,
-        message: `Successfully updated ${updatedCount} out of ${recordsToUpdate.length} records.`
+        message: `Successfully updated ${updatedCount} out of ${recordsToUpdate.length} records.${skippedCount > 0 ? ` Skipped ${skippedCount} records with unknown NTEE codes.` : ''}`
       });
 
       if (onComplete) {
