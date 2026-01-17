@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, CheckCircle, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-export default function CSVContactUploader({ organizationId, onComplete }) {
+export default function CSVContactUploader({ organizationId, onComplete, iconOnly }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -99,7 +99,7 @@ export default function CSVContactUploader({ organizationId, onComplete }) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className={!iconOnly ? "space-y-3" : ""}>
       <div>
         <input
           type="file"
@@ -112,30 +112,25 @@ export default function CSVContactUploader({ organizationId, onComplete }) {
         <label htmlFor="csv-upload">
           <Button
             type="button"
-            variant="outline"
-            size="sm"
+            variant={iconOnly ? "ghost" : "outline"}
+            size={iconOnly ? "sm" : "sm"}
             disabled={isProcessing}
-            className="gap-2"
+            className={iconOnly ? "h-8 w-8 p-0" : "gap-2"}
             asChild
           >
             <span>
               {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-                  Processing...
-                </>
+                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
               ) : (
-                <>
-                  <Upload className="w-4 h-4" />
-                  Import CSV
-                </>
+                <Upload className={iconOnly ? "w-4 h-4 text-slate-600" : "w-4 h-4"} />
               )}
+              {!iconOnly && "Import CSV"}
             </span>
           </Button>
         </label>
       </div>
 
-      {result && (
+      {!iconOnly && result && (
         <Alert variant={result.success ? "default" : "destructive"}>
           {result.success ? (
             <CheckCircle className="h-4 w-4" />
