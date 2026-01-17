@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getNTEEDescription } from "@/utils/nteeCodeLookup";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -261,9 +262,18 @@ If any field is not found in ${source}, set it to null.`;
   };
 
   const handleApplyEnrichment = (updates) => {
+    // Auto-populate ntee_description if ntee_code is updated but description is missing
+    let finalUpdates = { ...updates };
+    if (updates.ntee_code && !updates.ntee_description) {
+      const description = getNTEEDescription(updates.ntee_code);
+      if (description) {
+        finalUpdates.ntee_description = description;
+      }
+    }
+
     const updatedData = {
       ...data,
-      ...updates,
+      ...finalUpdates,
     };
 
     if (onEdit) {
