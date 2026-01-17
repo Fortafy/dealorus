@@ -326,14 +326,9 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900">Key Contacts</h3>
-                  <p className="text-xs text-slate-500">Manage organization contacts</p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <CSVContactUploader 
-                  organizationId={organization.id}
-                  onComplete={() => queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] })}
-                />
                 <Button
                   onClick={handleAddNew}
                   variant="outline"
@@ -342,6 +337,10 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   <Plus className="w-4 h-4 mr-2" />
                   Add Contact
                 </Button>
+                <CSVContactUploader 
+                  organizationId={organization.id}
+                  onComplete={() => queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] })}
+                />
                 <Button
                   onClick={searchContacts}
                   disabled={isSearching}

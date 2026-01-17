@@ -145,10 +145,6 @@ export default function CSVContactUploader({ organizationId, onComplete }) {
           <AlertDescription>{result.message}</AlertDescription>
         </Alert>
       )}
-
-      <div className="text-xs text-slate-500">
-        CSV should include columns: name (required), title, email, phone, linkedin, role_department, notes
-      </div>
     </div>
   );
 }
