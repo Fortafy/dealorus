@@ -118,7 +118,10 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
   const handleConfirmUpdate = async () => {
     await base44.entities.SearchResult.update(existingRecord.id, data);
     setShowUpdateDialog(false);
-    if (onSave) onSave(data);
+    // Don't call onSave as that creates a new record - we just updated existing
+    if (onEdit) {
+      onEdit({ ...data, id: existingRecord.id });
+    }
   };
 
   const formatAddress = () => {
