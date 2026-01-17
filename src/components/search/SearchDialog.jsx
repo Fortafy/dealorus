@@ -73,7 +73,8 @@ ${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least
 ${isMultiSearch ? `
 IMPORTANT: You MUST find and return 15-25 different organizations that match ALL criteria above.
 Do NOT return just 1 or 2 organizations.
-Search ProPublica Nonprofit Explorer, IRS databases, Charity Navigator, and GuideStar to find multiple matching organizations.
+Search ProPublica Nonprofit Explorer, IRS databases, Charity Navigator, GuideStar, and CharityAPI.org to find multiple matching organizations.
+Use the CharityAPI.org API with the provided API key for comprehensive nonprofit data.
 ` : `Find the specific organization that matches the criteria.`}
 
 For each organization found, provide:
