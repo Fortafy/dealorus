@@ -53,13 +53,21 @@ Do not make up or guess any information.`;
         },
       });
 
-      console.log('Contact object:', contact);
-      console.log('Enrichment result:', result);
-      console.log('Result keys:', Object.keys(result));
-      console.log('Result values:', Object.values(result));
+      // Extract the actual enriched data from result.properties
+      const enrichedContactData = result.properties || result;
+      
+      // Filter to only fields that actually have new/different values
+      const fieldsWithUpdates = {};
+      ['title', 'email', 'phone', 'linkedin', 'role_department'].forEach(key => {
+        const resultValue = enrichedContactData[key];
+        const contactValue = contact[key];
+        if (resultValue && resultValue !== contactValue) {
+          fieldsWithUpdates[key] = true;
+        }
+      });
 
-      setEnrichedData(result);
-      setSelectedFields({});
+      setEnrichedData(enrichedContactData);
+      setSelectedFields(fieldsWithUpdates);
     } catch (err) {
       console.error("Enrichment failed:", err);
       setError("Failed to enrich contact information. Please try again.");
