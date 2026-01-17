@@ -61,6 +61,9 @@ Do not make up or guess any information.`;
         }
       });
 
+      console.log('Enrichment result:', result);
+      console.log('Fields with updates:', fieldsWithUpdates);
+
       setEnrichedData(result);
       setSelectedFields(fieldsWithUpdates);
     } catch (err) {
