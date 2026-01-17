@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,7 +37,8 @@ import {
   Pencil,
   Trash2,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  Database
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
@@ -334,6 +341,33 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                   <Sparkles className="w-3.5 h-3.5" />
                 )}
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={isEnriching || !data.ein}
+                    className="bg-white/90 text-indigo-700 hover:bg-white h-8 w-8 p-0"
+                    title="Enrich from data sources"
+                  >
+                    <Database className="w-3.5 h-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleSourceEnrich('CharityAPI')} disabled={isEnriching}>
+                    {enrichingSource === 'CharityAPI' && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                    CharityAPI
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSourceEnrich('ProPublica')} disabled={isEnriching}>
+                    {enrichingSource === 'ProPublica' && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                    ProPublica
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSourceEnrich('Nonprofit Check Plus')} disabled={isEnriching}>
+                    {enrichingSource === 'Nonprofit Check Plus' && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                    Nonprofit Check Plus
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="secondary"
                 size="sm"
@@ -385,78 +419,10 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
           </div>
 
           {data.data_sources && data.data_sources.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-slate-100">
               <p className="text-xs text-slate-400">
                 Data sources: {data.data_sources.join(", ")}
               </p>
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSourceEnrich('CharityAPI')}
-                  disabled={isEnriching || !data.ein}
-                  className="h-7 text-xs"
-                  title={!data.ein ? "EIN required" : "Fetch from CharityAPI"}
-                >
-                  {enrichingSource === 'CharityAPI' ? (
-                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
-                  ) : null}
-                  CharityAPI
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSourceEnrich('ProPublica')}
-                  disabled={isEnriching || !data.ein}
-                  className="h-7 text-xs"
-                  title={!data.ein ? "EIN required" : "Fetch from ProPublica"}
-                >
-                  {enrichingSource === 'ProPublica' ? (
-                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
-                  ) : null}
-                  ProPublica
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleSourceEnrich('Nonprofit Check Plus')}
-                  disabled={isEnriching || !data.ein}
-                  className="h-7 text-xs"
-                  title={!data.ein ? "EIN required" : "Fetch from Nonprofit Check Plus"}
-                >
-                  {enrichingSource === 'Nonprofit Check Plus' ? (
-                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
-                  ) : null}
-                  Nonprofit Check Plus
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={true}
-                  className="h-7 text-xs opacity-40 cursor-not-allowed"
-                  title="Coming soon"
-                >
-                  Charity Navigator
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={true}
-                  className="h-7 text-xs opacity-40 cursor-not-allowed"
-                  title="Coming soon"
-                >
-                  IRS Ezar
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={true}
-                  className="h-7 text-xs opacity-40 cursor-not-allowed"
-                  title="Coming soon"
-                >
-                  GuideStar
-                </Button>
-              </div>
             </div>
           )}
         </CardContent>
