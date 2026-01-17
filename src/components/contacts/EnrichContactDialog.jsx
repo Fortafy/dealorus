@@ -150,7 +150,7 @@ Do not make up or guess any information.`;
 
         {enrichedData && !isLoading && (
           <div className="space-y-4">
-            {Object.values(selectedFields).some(v => v) ? (
+            {Object.keys(enrichedData).some(key => enrichedData[key] && enrichedData[key] !== contact[key]) ? (
               <>
                 <p className="text-sm text-slate-600 font-medium">Select fields to update:</p>
                 
