@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
 import {
   Building2,
@@ -19,7 +29,8 @@ import {
   CheckCircle2,
   Pencil,
   Trash2,
-  Sparkles
+  Sparkles,
+  AlertTriangle
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
@@ -58,6 +69,57 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
   const [enrichingSource, setEnrichingSource] = useState(null);
+  const [existingRecord, setExistingRecord] = useState(null);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
+  useEffect(() => {
+    checkForDuplicate();
+  }, [data.ein, data.organization_name, data.address]);
+
+  const checkForDuplicate = async () => {
+    try {
+      const allOrgs = await base44.entities.SearchResult.list();
+      
+      const duplicate = allOrgs.find(org => {
+        // Match by EIN if both have it
+        if (data.ein && org.ein && data.ein === org.ein) return true;
+        
+        // Match by name and address
+        if (data.organization_name && org.organization_name &&
+            data.organization_name.toLowerCase() === org.organization_name.toLowerCase()) {
+          // If addresses match too, it's definitely a duplicate
+          if (data.address && org.address && 
+              data.address.toLowerCase() === org.address.toLowerCase()) {
+            return true;
+          }
+          // If same name and state, likely duplicate
+          if (data.state && org.state && data.state === org.state) {
+            return true;
+          }
+        }
+        
+        return false;
+      });
+      
+      setExistingRecord(duplicate || null);
+    } catch (err) {
+      console.error("Error checking for duplicates:", err);
+    }
+  };
+
+  const handleSaveClick = () => {
+    if (existingRecord) {
+      setShowUpdateDialog(true);
+    } else {
+      onSave(data);
+    }
+  };
+
+  const handleConfirmUpdate = async () => {
+    await base44.entities.SearchResult.update(existingRecord.id, data);
+    setShowUpdateDialog(false);
+    if (onSave) onSave(data);
+  };
 
   const formatAddress = () => {
     const parts = [data.address, data.city, data.state, data.zip_code].filter(Boolean);
@@ -231,13 +293,19 @@ If any field is not found in ${source}, set it to null.`;
               </div>
             </div>
             <div className="flex gap-1.5">
+              {existingRecord && !isSaved && (
+                <Badge className="bg-yellow-500 text-white border-0 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Duplicate Found
+                </Badge>
+              )}
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => onSave(data)}
+                onClick={handleSaveClick}
                 disabled={isSaved}
-                className={`flex-shrink-0 h-8 w-8 p-0 ${isSaved ? "bg-green-100 text-green-700" : "bg-white/90 text-indigo-700 hover:bg-white"}`}
-                title={isSaved ? "Saved" : "Save"}
+                className={`flex-shrink-0 h-8 w-8 p-0 ${isSaved ? "bg-green-100 text-green-700" : existingRecord ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-white/90 text-indigo-700 hover:bg-white"}`}
+                title={isSaved ? "Saved" : existingRecord ? "Update Existing" : "Save"}
               >
                 {isSaved ? (
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -375,6 +443,29 @@ If any field is not found in ${source}, set it to null.`;
         onOpenChange={setEditDialogOpen}
         onSave={handleEdit}
       />
+
+      <AlertDialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update Existing Record?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A record for <strong>{data.organization_name}</strong> already exists in your database.
+              {existingRecord?.ein && data.ein && existingRecord.ein === data.ein && (
+                <span className="block mt-2">Matching EIN: {data.ein}</span>
+              )}
+              <span className="block mt-3">
+                Would you like to update the existing record with this new data, or cancel to avoid duplicates?
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmUpdate}>
+              Update Existing Record
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }
