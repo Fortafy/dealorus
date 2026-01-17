@@ -106,6 +106,9 @@ Do not make up or guess any information.`;
             <Sparkles className="w-5 h-5 text-indigo-600" />
             Enrich Contact: {contact.name}
           </DialogTitle>
+          <DialogDescription>
+            Search public sources to find and update contact information.
+          </DialogDescription>
         </DialogHeader>
 
         {error && (
