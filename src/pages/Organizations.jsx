@@ -5,6 +5,7 @@ import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchDialog from "@/components/search/SearchDialog";
+import MigrateNTEEDescriptions from "@/components/organizations/MigrateNTEEDescriptions";
 import { motion } from "framer-motion";
 import { Building2, Search, Trash2, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -112,13 +113,16 @@ export default function Organizations() {
               <h1 className="text-xl font-bold text-slate-900">Organizations</h1>
               <p className="text-sm text-slate-500">Browse all enriched organizations</p>
             </div>
-            <Button
-              onClick={() => setSearchDialogOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Search
-            </Button>
+            <div className="flex items-center gap-2">
+              <MigrateNTEEDescriptions onComplete={() => queryClient.invalidateQueries({ queryKey: ['organizations'] })} />
+              <Button
+                onClick={() => setSearchDialogOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Search
+              </Button>
+            </div>
           </div>
         </div>
       </header>
