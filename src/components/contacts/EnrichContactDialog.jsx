@@ -55,23 +55,11 @@ Do not make up or guess any information.`;
 
       console.log('Contact object:', contact);
       console.log('Enrichment result:', result);
-      
-      // Filter to only fields that actually have new/different values
-      const fieldsWithUpdates = {};
-      ['title', 'email', 'phone', 'linkedin', 'role_department'].forEach(key => {
-        const contactValue = contact[key];
-        const resultValue = result[key];
-        console.log(`Field: ${key}, Contact: "${contactValue}", Result: "${resultValue}", Different: ${resultValue && resultValue !== contactValue}`);
-        
-        if (resultValue && resultValue !== contactValue) {
-          fieldsWithUpdates[key] = true;
-        }
-      });
-
-      console.log('Fields with updates:', fieldsWithUpdates);
+      console.log('Result keys:', Object.keys(result));
+      console.log('Result values:', Object.values(result));
 
       setEnrichedData(result);
-      setSelectedFields(fieldsWithUpdates);
+      setSelectedFields({});
     } catch (err) {
       console.error("Enrichment failed:", err);
       setError("Failed to enrich contact information. Please try again.");
