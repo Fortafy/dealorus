@@ -4,12 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star, Filter } from "lucide-react";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star, Filter, Upload, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ContactForm from "./ContactForm";
 import ContactDetailCard from "./ContactDetailCard";
 import CSVContactUploader from "./CSVContactUploader";
-import ContactFilters from "./ContactFilters";
+import FilterDialog from "./FilterDialog";
 import BulkEditDialog from "./BulkEditDialog";
 import EnhancedAISearchDialog from "./EnhancedAISearchDialog";
 
@@ -23,7 +24,7 @@ export default function ContactSearch({ organization }) {
   const [selectedContacts, setSelectedContacts] = useState(new Set());
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [filters, setFilters] = useState({ title: "", department: "", starredOnly: false });
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
@@ -357,12 +358,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          {showFilters && (
-            <ContactFilters
-              onFilterChange={setFilters}
-              onClose={() => setShowFilters(false)}
-            />
-          )}
           <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -373,73 +368,91 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   <h3 className="font-semibold text-slate-900">Key Contacts</h3>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleAddNew}
-                  variant="outline"
-                  size="sm"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Contact
-                </Button>
-                <CSVContactUploader 
-                  organizationId={organization.id}
-                  onComplete={() => queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] })}
-                />
-                <Button
-                  onClick={() => setShowAdvancedSearch(true)}
-                  disabled={isSearching}
-                  variant="outline"
-                  size="sm"
-                >
-                  {isSearching ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />
-                      Searching...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4 mr-2" />
-                      Advanced Search
-                    </>
-                  )}
-                </Button>
-                <Button
-                  onClick={() => searchContacts()}
-                  disabled={isSearching}
-                  className="bg-indigo-600 hover:bg-indigo-700"
-                  size="sm"
-                >
-                  {isSearching ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                      Searching...
-                    </>
-                  ) : (
-                    <>
-                      <Search className="w-4 h-4 mr-2" />
-                      Quick Search
-                    </>
-                  )}
-                </Button>
-              </div>
+              <TooltipProvider>
+                <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handleAddNew}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Plus className="w-4 h-4 text-slate-600" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Add Contact</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="h-8">
+                        <CSVContactUploader 
+                          organizationId={organization.id}
+                          onComplete={() => queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] })}
+                          iconOnly={true}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>Import CSV</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setShowFilterDialog(true)}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 relative"
+                      >
+                        <Filter className="w-4 h-4 text-slate-600" />
+                        {Object.values(filters).some(v => v) && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Filter</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setShowAdvancedSearch(true)}
+                        disabled={isSearching}
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                      >
+                        {isSearching ? (
+                          <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                        ) : (
+                          <Zap className="w-4 h-4 text-slate-600" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Advanced Search</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => searchContacts()}
+                        disabled={isSearching}
+                        className="bg-indigo-600 hover:bg-indigo-700 h-8 w-8 p-0"
+                      >
+                        {isSearching ? (
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <Search className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Quick Search</TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
             </div>
           </div>
 
         <div className="p-6">
-          <div className="flex gap-2 mb-4">
-            <Button
-              variant={showFilters ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className={showFilters ? "bg-indigo-600 hover:bg-indigo-700" : ""}
-            >
-              <Filter className="w-4 h-4 mr-1" />
-              Filters
-              {Object.values(filters).some(v => v) && <span className="ml-1 w-2 h-2 bg-red-500 rounded-full"></span>}
-            </Button>
-          </div>
-
           {isSearching && (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -647,6 +660,13 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           open={showAdvancedSearch}
           onOpenChange={setShowAdvancedSearch}
           onSearch={searchContacts}
+        />
+
+        <FilterDialog
+          open={showFilterDialog}
+          onOpenChange={setShowFilterDialog}
+          onFilterChange={setFilters}
+          currentFilters={filters}
         />
       </div>
       )}
