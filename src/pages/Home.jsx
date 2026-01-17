@@ -81,17 +81,28 @@ ${state ? `3. State MUST BE "${state}"\n` : ''}
 ${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least $${minRevenue}` : ''}${minRevenue && maxRevenue ? ' and ' : ''}${maxRevenue ? `no more than $${maxRevenue}` : ''}\n` : ''}
 
 ${isMultiSearch ? `
-IMPORTANT: You MUST find and return 15-25 different organizations that match ALL criteria above.
-Search ProPublica Nonprofit Explorer, IRS databases, Charity Navigator, GuideStar, and CharityAPI.org to find multiple matching organizations.
-Use the CharityAPI.org API with the provided API key for comprehensive nonprofit data.
-` : `Find the specific organization that matches the criteria.`}
+TIERED SEARCH APPROACH - FOLLOW THIS ORDER:
+
+TIER 1 - STRUCTURED DATABASES (PRIORITIZE THESE):
+1. CharityAPI.org - Query using the API key for comprehensive 501(c)(3) data
+2. IRS Ezar Database - Official IRS tax-exempt organization search
+3. ProPublica Nonprofit Explorer - Verified nonprofit financial data
+4. GuideStar/Candid - Nonprofit profiles and financials
+
+TIER 2 - SECONDARY SOURCES (if Tier 1 yields insufficient results):
+5. Charity Navigator - Ratings and profiles
+6. State charity registration databases
+7. Official organization websites and public filings
+
+CRITICAL: Return ALL organizations you find that match the criteria. Do NOT limit the number of results. If you find 100 matching organizations, return all 100.
+` : `Find the specific organization that matches the criteria using structured databases first.`}
 
 For each organization, provide:
 - organization_name, state, ein, address, city, zip_code, phone, email, website
 - organization_type: EXACTLY as classified (must match filter if specified)
 - mission, annual_revenue (as "$X,XXX,XXX"), ntee_code, ruling_date, data_sources
 
-${isMultiSearch ? 'Return an array of 15-25 organizations.' : 'Return array with 1 organization.'}`;
+${isMultiSearch ? 'Return ALL organizations found (no limit). Use structured databases for accurate, comprehensive results.' : 'Return array with 1 organization.'}`;
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
