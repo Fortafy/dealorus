@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
+import { getNTEEDescription } from "@/utils/nteeCodeLookup";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
+import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 
 function DataRow({ icon: Icon, label, value, isLink }) {
   if (!value || value === "N/A" || value === "Not found") return null;
@@ -188,14 +189,19 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
         },
       });
 
+      // Auto-map NTEE code to description if code exists but description doesn't
+      if (result.ntee_code && !result.ntee_description) {
+        result.ntee_description = getNTEEDescription(result.ntee_code);
+      }
+
       setEnrichedData(result);
       setShowComparisonDialog(true);
-    } catch (err) {
+      } catch (err) {
       console.error("AI enrichment failed:", err);
-    } finally {
+      } finally {
       setIsEnriching(false);
-    }
-  };
+      }
+      };
 
   const handleSourceEnrich = async (source) => {
     setEnrichingSource(source);
@@ -251,15 +257,20 @@ If any field is not found in ${source}, set it to null.`;
         },
       });
 
+      // Auto-map NTEE code to description if code exists but description doesn't
+      if (result.ntee_code && !result.ntee_description) {
+        result.ntee_description = getNTEEDescription(result.ntee_code);
+      }
+
       setEnrichedData(result);
       setShowComparisonDialog(true);
-    } catch (err) {
+      } catch (err) {
       console.error(`${source} enrichment failed:`, err);
-    } finally {
+      } finally {
       setIsEnriching(false);
       setEnrichingSource(null);
-    }
-  };
+      }
+      };
 
   const handleApplyEnrichment = (updates) => {
     // Auto-populate ntee_description if ntee_code is updated but description is missing
