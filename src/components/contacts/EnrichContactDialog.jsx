@@ -53,16 +53,16 @@ Do not make up or guess any information.`;
         },
       });
 
-      setEnrichedData(result);
-      
-      // Initialize selected fields with fields that have values
-      const initialSelected = {};
-      Object.keys(result).forEach(key => {
+      // Filter to only fields that actually have new/different values
+      const fieldsWithUpdates = {};
+      ['title', 'email', 'phone', 'linkedin', 'role_department'].forEach(key => {
         if (result[key] && result[key] !== contact[key]) {
-          initialSelected[key] = true;
+          fieldsWithUpdates[key] = true;
         }
       });
-      setSelectedFields(initialSelected);
+
+      setEnrichedData(result);
+      setSelectedFields(fieldsWithUpdates);
     } catch (err) {
       console.error("Enrichment failed:", err);
       setError("Failed to enrich contact information. Please try again.");
