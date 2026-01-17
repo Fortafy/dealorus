@@ -4,11 +4,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactForm from "./ContactForm";
 import ContactDetailCard from "./ContactDetailCard";
 import CSVContactUploader from "./CSVContactUploader";
+import ContactFilters from "./ContactFilters";
+import BulkEditDialog from "./BulkEditDialog";
+import EnhancedAISearchDialog from "./EnhancedAISearchDialog";
 
 export default function ContactSearch({ organization }) {
   const [aiContacts, setAiContacts] = useState([]);
@@ -20,6 +23,10 @@ export default function ContactSearch({ organization }) {
   const [selectedContacts, setSelectedContacts] = useState(new Set());
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({ title: "", department: "", starredOnly: false });
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: savedContacts = [] } = useQuery({
@@ -67,6 +74,13 @@ export default function ContactSearch({ organization }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
       setSelectedContact(null);
+    },
+  });
+
+  const starMutation = useMutation({
+    mutationFn: ({ id, starred }) => base44.entities.Contact.update(id, { starred }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
     },
   });
 
@@ -126,7 +140,30 @@ export default function ContactSearch({ organization }) {
     setSelectedContacts(new Set());
   };
 
-  const sortedContacts = [...savedContacts].sort((a, b) => {
+  const handleBulkEdit = async (updates) => {
+    if (selectedContacts.size === 0) return;
+
+    for (const contactId of selectedContacts) {
+      await base44.entities.Contact.update(contactId, updates);
+    }
+    queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+    setSelectedContacts(new Set());
+  };
+
+  const filteredBySearch = savedContacts.filter(contact => {
+    if (filters.title && !contact.title?.toLowerCase().includes(filters.title.toLowerCase())) {
+      return false;
+    }
+    if (filters.department && !contact.role_department?.toLowerCase().includes(filters.department.toLowerCase())) {
+      return false;
+    }
+    if (filters.starredOnly && !contact.starred) {
+      return false;
+    }
+    return true;
+  });
+
+  const sortedContacts = [...filteredBySearch].sort((a, b) => {
     if (!sortField) return 0;
     
     const aVal = a[sortField] || "";
@@ -163,11 +200,13 @@ export default function ContactSearch({ organization }) {
     }
   };
 
-  const searchContacts = async () => {
+  const searchContacts = async (customCriteria = null) => {
     setIsSearching(true);
     setHasSearched(false);
 
-    const prompt = `Find contact information for key personnel at "${organization.organization_name}" located in ${organization.city ? organization.city + ', ' : ''}${organization.state}.
+    let searchScope = customCriteria || `key personnel at "${organization.organization_name}" located in ${organization.city ? organization.city + ', ' : ''}${organization.state}`;
+    
+    const prompt = `Find contact information for ${searchScope}.
 
 ORGANIZATION CONTEXT (use this to cross-reference and validate contact information):
 - Website: ${organization.website || 'unknown'}
