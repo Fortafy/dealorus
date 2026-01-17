@@ -409,7 +409,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                           onCheckedChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("name")}>
+                      <TableHead className="font-semibold cursor-pointer text-sm" onClick={() => handleSort("name")}>
                         <div className="flex items-center gap-1">
                           Name
                           {sortField === "name" ? (
@@ -419,17 +419,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                           )}
                         </div>
                       </TableHead>
-                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("company")}>
-                        <div className="flex items-center gap-1">
-                          Company
-                          {sortField === "company" ? (
-                            sortDirection === "asc" ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-30" />
-                          )}
-                        </div>
-                      </TableHead>
-                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("title")}>
+                      <TableHead className="font-semibold cursor-pointer text-sm" onClick={() => handleSort("title")}>
                         <div className="flex items-center gap-1">
                           Title
                           {sortField === "title" ? (
@@ -439,7 +429,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                           )}
                         </div>
                       </TableHead>
-                      <TableHead className="font-semibold cursor-pointer" onClick={() => handleSort("email")}>
+                      <TableHead className="font-semibold cursor-pointer text-sm" onClick={() => handleSort("email")}>
                         <div className="flex items-center gap-1">
                           Email
                           {sortField === "email" ? (
@@ -449,8 +439,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                           )}
                         </div>
                       </TableHead>
-                      <TableHead className="font-semibold">Phone</TableHead>
-                      <TableHead className="font-semibold">Actions</TableHead>
+                      <TableHead className="font-semibold text-sm">Phone</TableHead>
+                      <TableHead className="font-semibold text-sm">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -462,19 +452,16 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                             onCheckedChange={(checked) => handleSelectContact(contact.id, checked)}
                           />
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-medium text-sm">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-slate-400" />
                             {contact.name}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          {contact.company || <span className="text-slate-400 text-sm">N/A</span>}
+                        <TableCell className="text-sm">
+                          {contact.title || <span className="text-slate-400">N/A</span>}
                         </TableCell>
-                        <TableCell>
-                          {contact.title || <span className="text-slate-400 text-sm">N/A</span>}
-                        </TableCell>
-                        <TableCell>
+                        <TableCell className="text-sm">
                           {contact.email ? (
                             <a
                               href={`mailto:${contact.email}`}
@@ -484,11 +471,20 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                               {contact.email}
                             </a>
                           ) : (
-                            <span className="text-slate-400 text-sm">N/A</span>
+                            <span className="text-slate-400">N/A</span>
                           )}
                         </TableCell>
-                        <TableCell>
-                          {contact.phone || <span className="text-slate-400 text-sm">N/A</span>}
+                        <TableCell className="text-sm">
+                          {contact.phone ? (
+                            <a
+                              href={`tel:${contact.phone}`}
+                              className="text-indigo-600 hover:text-indigo-800 hover:underline"
+                            >
+                              {contact.phone}
+                            </a>
+                          ) : (
+                            <span className="text-slate-400">N/A</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
