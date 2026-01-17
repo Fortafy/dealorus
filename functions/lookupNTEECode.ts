@@ -41,15 +41,13 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log(`CharityAPI response for ${upperCode}:`, JSON.stringify(data));
     
-    // Try different field names that CharityAPI might use
-    const description = data.title || data.name || data.description || null;
+    // CharityAPI returns data nested in a "data" object
+    const nteeData = data.data || data;
     
     return Response.json({
-      code: data.code || upperCode,
-      description: description,
-      raw_response: data  // Include raw response for debugging
+      code: nteeData.code || upperCode,
+      description: nteeData.title || null
     });
 
   } catch (error) {
