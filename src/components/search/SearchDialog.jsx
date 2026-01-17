@@ -19,13 +19,33 @@ export default function SearchDialog({ open, onOpenChange, onSearchComplete }) {
   const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("single");
 
-  const handleSearch = async ({ orgName, state }) => {
+  const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType }) => {
     setIsSearching(true);
     setError(null);
     setSearchResult(null);
 
-    const prompt = `Search for nonprofit or government organization data for "${orgName}" in ${state}.
-    
+    // Build search criteria description
+    let searchCriteria = [];
+    if (orgName) searchCriteria.push(`organization name "${orgName}"`);
+    if (ein) searchCriteria.push(`EIN "${ein}"`);
+    if (city && state) searchCriteria.push(`located in ${city}, ${state}`);
+    else if (city) searchCriteria.push(`in city "${city}"`);
+    else if (state) searchCriteria.push(`in state ${state}`);
+    if (minRevenue && maxRevenue) searchCriteria.push(`annual revenue between $${minRevenue} and $${maxRevenue}`);
+    else if (minRevenue) searchCriteria.push(`annual revenue of at least $${minRevenue}`);
+    else if (maxRevenue) searchCriteria.push(`annual revenue up to $${maxRevenue}`);
+    if (orgType) {
+      const typeMap = {
+        "501c3": "501(c)(3) Public Charity",
+        "foundation": "Private Foundation",
+        "government": "Government Agency",
+        "other": "Other Nonprofit"
+      };
+      searchCriteria.push(`organization type "${typeMap[orgType]}"`);
+    }
+
+    const prompt = `Search for nonprofit or government organizations matching these criteria: ${searchCriteria.join(", ")}.
+
 Find and return accurate information from public sources like:
 - ProPublica Nonprofit Explorer
 - IRS Tax Exempt Organization Search
@@ -34,9 +54,11 @@ Find and return accurate information from public sources like:
 - State charity registrations
 - Official government databases
 
+${searchCriteria.length > 1 && !orgName && !ein ? `IMPORTANT: Find multiple organizations (up to 5) that match the criteria. Return them as an array.` : `Return a single organization that best matches the criteria.`}
+
 Return a JSON object with these fields (use null for any field where data is not found):
 - organization_name: The official registered name
-- state: The state code (${state})
+- state: The state code
 - ein: Employer Identification Number (format: XX-XXXXXXX)
 - address: Street address
 - city: City name
@@ -58,26 +80,40 @@ Return a JSON object with these fields (use null for any field where data is not
         response_json_schema: {
           type: "object",
           properties: {
-            organization_name: { type: "string" },
-            state: { type: "string" },
-            ein: { type: ["string", "null"] },
-            address: { type: ["string", "null"] },
-            city: { type: ["string", "null"] },
-            zip_code: { type: ["string", "null"] },
-            phone: { type: ["string", "null"] },
-            email: { type: ["string", "null"] },
-            website: { type: ["string", "null"] },
-            organization_type: { type: ["string", "null"] },
-            mission: { type: ["string", "null"] },
-            annual_revenue: { type: ["string", "null"] },
-            ntee_code: { type: ["string", "null"] },
-            ruling_date: { type: ["string", "null"] },
-            data_sources: { type: "array", items: { type: "string" } },
+            organizations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  organization_name: { type: "string" },
+                  state: { type: "string" },
+                  ein: { type: ["string", "null"] },
+                  address: { type: ["string", "null"] },
+                  city: { type: ["string", "null"] },
+                  zip_code: { type: ["string", "null"] },
+                  phone: { type: ["string", "null"] },
+                  email: { type: ["string", "null"] },
+                  website: { type: ["string", "null"] },
+                  organization_type: { type: ["string", "null"] },
+                  mission: { type: ["string", "null"] },
+                  annual_revenue: { type: ["string", "null"] },
+                  ntee_code: { type: ["string", "null"] },
+                  ruling_date: { type: ["string", "null"] },
+                  data_sources: { type: "array", items: { type: "string" } },
+                }
+              }
+            }
           },
         },
       });
 
-      setSearchResult(result);
+      // Handle both single and multiple results
+      const orgs = result.organizations || [];
+      if (orgs.length > 0) {
+        setSearchResult(orgs);
+      } else {
+        setError("No organizations found matching the criteria.");
+      }
     } catch (err) {
       setError("Unable to fetch organization data. Please try again.");
     } finally {
@@ -89,7 +125,17 @@ Return a JSON object with these fields (use null for any field where data is not
     await base44.entities.SearchResult.create(data);
     onSearchComplete();
     setSearchResult(null);
-    onOpenChange(false);
+  };
+
+  const handleSaveAll = async () => {
+    if (Array.isArray(searchResult)) {
+      for (const org of searchResult) {
+        await base44.entities.SearchResult.create(org);
+      }
+      onSearchComplete();
+      setSearchResult(null);
+      onOpenChange(false);
+    }
   };
 
   const handleBulkUpload = async (file) => {
@@ -238,12 +284,36 @@ Return a JSON object with these fields (use null for any field where data is not
             )}
 
             {searchResult && !isSearching && (
-              <div className="mt-4">
-                <OrganizationCard
-                  data={searchResult}
-                  onSave={handleSave}
-                  isSaved={false}
-                />
+              <div className="mt-4 space-y-4">
+                {Array.isArray(searchResult) ? (
+                  <>
+                    <div className="flex justify-between items-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <p className="text-sm font-medium text-indigo-900">
+                        Found {searchResult.length} organization{searchResult.length !== 1 ? 's' : ''}
+                      </p>
+                      <Button
+                        onClick={handleSaveAll}
+                        className="bg-indigo-600 hover:bg-indigo-700"
+                      >
+                        Save All Organizations
+                      </Button>
+                    </div>
+                    {searchResult.map((org, index) => (
+                      <OrganizationCard
+                        key={index}
+                        data={org}
+                        onSave={handleSave}
+                        isSaved={false}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <OrganizationCard
+                    data={searchResult}
+                    onSave={handleSave}
+                    isSaved={false}
+                  />
+                )}
               </div>
             )}
           </TabsContent>

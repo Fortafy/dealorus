@@ -36,12 +36,27 @@ const US_STATES = [
 
 export default function SearchForm({ onSearch, isLoading }) {
   const [orgName, setOrgName] = useState("");
+  const [ein, setEin] = useState("");
   const [state, setState] = useState("");
+  const [city, setCity] = useState("");
+  const [minRevenue, setMinRevenue] = useState("");
+  const [maxRevenue, setMaxRevenue] = useState("");
+  const [orgType, setOrgType] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (orgName.trim() && state) {
-      onSearch({ orgName: orgName.trim(), state });
+    // At least one search criteria must be provided
+    const hasSearchCriteria = orgName.trim() || ein.trim() || (state && city.trim()) || minRevenue || maxRevenue || orgType;
+    if (hasSearchCriteria) {
+      onSearch({
+        orgName: orgName.trim() || undefined,
+        ein: ein.trim() || undefined,
+        state: state || undefined,
+        city: city.trim() || undefined,
+        minRevenue: minRevenue || undefined,
+        maxRevenue: maxRevenue || undefined,
+        orgType: orgType || undefined,
+      });
     }
   };
 
@@ -52,30 +67,51 @@ export default function SearchForm({ onSearch, isLoading }) {
       transition={{ duration: 0.5 }}
       className="w-full"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Organization Name
             </label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <Input
-                value={orgName}
-                onChange={(e) => setOrgName(e.target.value)}
-                placeholder="e.g., American Red Cross"
-                className="pl-11 h-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-base"
-              />
-            </div>
+            <Input
+              value={orgName}
+              onChange={(e) => setOrgName(e.target.value)}
+              placeholder="e.g., American Red Cross"
+              className="h-11 bg-white border-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              EIN
+            </label>
+            <Input
+              value={ein}
+              onChange={(e) => setEin(e.target.value)}
+              placeholder="e.g., 12-3456789"
+              className="h-11 bg-white border-slate-200"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              City
+            </label>
+            <Input
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="e.g., Austin"
+              className="h-11 bg-white border-slate-200"
+            />
           </div>
           
-          <div className="md:w-64">
+          <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               State
             </label>
             <Select value={state} onValueChange={setState}>
-              <SelectTrigger className="h-12 bg-white border-slate-200 focus:border-indigo-500 focus:ring-indigo-500">
-                <SelectValue placeholder="Select state" />
+              <SelectTrigger className="h-11 bg-white border-slate-200">
+                <SelectValue placeholder="Select state (optional)" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
                 {US_STATES.map((s) => (
@@ -86,25 +122,70 @@ export default function SearchForm({ onSearch, isLoading }) {
               </SelectContent>
             </Select>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Organization Type
+            </label>
+            <Select value={orgType} onValueChange={setOrgType}>
+              <SelectTrigger className="h-11 bg-white border-slate-200">
+                <SelectValue placeholder="Any type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="501c3">501(c)(3) Public Charity</SelectItem>
+                <SelectItem value="foundation">Private Foundation</SelectItem>
+                <SelectItem value="government">Government Agency</SelectItem>
+                <SelectItem value="other">Other Nonprofit</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Annual Revenue Range
+            </label>
+            <div className="flex gap-2 items-center">
+              <Input
+                type="number"
+                value={minRevenue}
+                onChange={(e) => setMinRevenue(e.target.value)}
+                placeholder="Min ($)"
+                className="h-11 bg-white border-slate-200"
+              />
+              <span className="text-slate-400">-</span>
+              <Input
+                type="number"
+                value={maxRevenue}
+                onChange={(e) => setMaxRevenue(e.target.value)}
+                placeholder="Max ($)"
+                className="h-11 bg-white border-slate-200"
+              />
+            </div>
+          </div>
         </div>
 
-        <Button
-          type="submit"
-          disabled={!orgName.trim() || !state || isLoading}
-          className="w-full md:w-auto h-12 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
-        >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Enriching Data...
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Search className="w-5 h-5" />
-              Search & Enrich
-            </div>
-          )}
-        </Button>
+        <div className="flex justify-between items-center pt-2">
+          <p className="text-xs text-slate-500">
+            Fill in any combination of fields to search
+          </p>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="h-11 px-8 bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Searching...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Search className="w-5 h-5" />
+                Search & Enrich
+              </div>
+            )}
+          </Button>
+        </div>
       </form>
     </motion.div>
   );
