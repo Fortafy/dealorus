@@ -401,7 +401,7 @@ If any field is not found in ${source}, set it to null.`;
               <DataRow icon={Globe} label="Website" value={data.website} isLink />
               <DataRow icon={DollarSign} label="Annual Revenue" value={data.annual_revenue} />
               <DataRow icon={Calendar} label="Tax-Exempt Since" value={data.ruling_date} />
-              <DataRow icon={Tag} label="Classification" value={data.ntee_description || (data.ntee_code ? `NTEE Code: ${data.ntee_code}` : null)} />
+              <DataRow icon={Tag} label="Classification" value={data.ntee_description && data.ntee_code ? `${data.ntee_description} (${data.ntee_code})` : data.ntee_description || data.ntee_code || null} />
             </div>
           </div>
 
