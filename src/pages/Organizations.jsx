@@ -5,7 +5,6 @@ import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchDialog from "@/components/search/SearchDialog";
-import MigrateNTEEDescriptions from "@/components/organizations/MigrateNTEEDescriptions";
 import { motion } from "framer-motion";
 import { Building2, Search, Trash2, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
