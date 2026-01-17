@@ -22,7 +22,7 @@ export default function SearchDialog({ open, onOpenChange, onSearchComplete }) {
   const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("single");
 
-  const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType }) => {
+  const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeDescription }) => {
     setIsSearching(true);
     setError(null);
     setSearchResult(null);
@@ -46,6 +46,8 @@ export default function SearchDialog({ open, onOpenChange, onSearchComplete }) {
       };
       searchCriteria.push(`organization type "${typeMap[orgType]}"`);
     }
+    if (nteeDescription) searchCriteria.push(`NTEE category "${nteeDescription}"`);
+
 
     const orgTypeText = orgType ? (() => {
       const typeMap = {
@@ -69,6 +71,7 @@ ${orgTypeText ? `1. Organization type MUST BE EXACTLY "${orgTypeText}" - reject 
 ${city ? `2. City MUST BE "${city}" - organizations in other cities are NOT acceptable\n` : ''}
 ${state ? `3. State MUST BE "${state}"\n` : ''}
 ${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least $${minRevenue}` : ''}${minRevenue && maxRevenue ? ' and ' : ''}${maxRevenue ? `no more than $${maxRevenue}` : ''}\n` : ''}
+${nteeDescription ? `5. NTEE category MUST match or be related to "${nteeDescription}"\n` : ''}
 
 ${isMultiSearch ? `
 TIERED SEARCH APPROACH - FOLLOW THIS ORDER:
@@ -100,7 +103,8 @@ For each organization found, provide:
 - organization_type: EXACTLY as classified (must match filter if specified)
 - mission: Brief mission statement
 - annual_revenue: Most recent annual revenue as "$X,XXX,XXX" format
-- ntee_code: NTEE code
+- ntee_code: NTEE code (e.g., A03)
+- ntee_description: Full description of the NTEE code (e.g., "Professional Societies & Associations")
 - ruling_date: Tax-exempt status date if applicable
 - data_sources: Array of sources
 
@@ -131,6 +135,7 @@ ${isMultiSearch ? 'Return ALL organizations found (no limit). Use structured dat
                   mission: { type: ["string", "null"] },
                   annual_revenue: { type: ["string", "null"] },
                   ntee_code: { type: ["string", "null"] },
+                  ntee_description: { type: ["string", "null"] },
                   ruling_date: { type: ["string", "null"] },
                   data_sources: { type: "array", items: { type: "string" } },
                 }

@@ -143,29 +143,31 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
 
     const prompt = `Enrich and improve the following organization data:
 
-Organization: ${data.organization_name}
-State: ${data.state}
-EIN: ${data.ein || "Not provided"}
-Address: ${data.address || "Not provided"}
-City: ${data.city || "Not provided"}
-ZIP: ${data.zip_code || "Not provided"}
-NTEE Code: ${data.ntee_code || "Not provided"}
-Mission: ${data.mission || "Not provided"}
+    Organization: ${data.organization_name}
+    State: ${data.state}
+    EIN: ${data.ein || "Not provided"}
+    Address: ${data.address || "Not provided"}
+    City: ${data.city || "Not provided"}
+    ZIP: ${data.zip_code || "Not provided"}
+    NTEE Code: ${data.ntee_code || "Not provided"}
+    Mission: ${data.mission || "Not provided"}
 
-Tasks:
-1. Verify and standardize the address format (use proper USPS format)
-2. Find the EIN if missing, verify if provided
-3. Find the NTEE code if missing, verify if provided
-4. If mission exists, summarize it into 2-3 concise key points
-5. Keep all other fields unchanged
+    Tasks:
+    1. Verify and standardize the address format (use proper USPS format)
+    2. Find the EIN if missing, verify if provided
+    3. Find the NTEE code if missing, verify if provided
+    4. For the NTEE code, provide the full description (e.g., A03 = "Professional Societies & Associations")
+    5. If mission exists, summarize it into 2-3 concise key points
+    6. Keep all other fields unchanged
 
-Return the enriched data with these exact fields:
-- address: Standardized street address
-- city: City name
-- zip_code: ZIP code
-- ein: EIN in XX-XXXXXXX format
-- ntee_code: NTEE code
-- mission: Summarized mission (if original exists, otherwise keep original)`;
+    Return the enriched data with these exact fields:
+    - address: Standardized street address
+    - city: City name
+    - zip_code: ZIP code
+    - ein: EIN in XX-XXXXXXX format
+    - ntee_code: NTEE code
+    - ntee_description: Full description of the NTEE code
+    - mission: Summarized mission (if original exists, otherwise keep original)`;
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
@@ -179,6 +181,7 @@ Return the enriched data with these exact fields:
             zip_code: { type: ["string", "null"] },
             ein: { type: ["string", "null"] },
             ntee_code: { type: ["string", "null"] },
+            ntee_description: { type: ["string", "null"] },
             mission: { type: ["string", "null"] },
           },
         },
@@ -215,7 +218,7 @@ DO NOT use any other data sources. Only return data found in ${source}.
 
 Return complete organization data:
 - organization_name, state, ein, address, city, zip_code, phone, email, website
-- organization_type, mission, annual_revenue, ntee_code, ruling_date
+- organization_type, mission, annual_revenue, ntee_code, ntee_description (full description of NTEE code), ruling_date
 - data_sources: Must be ["${source}"] only
 
 If any field is not found in ${source}, set it to null.`;
@@ -240,6 +243,7 @@ If any field is not found in ${source}, set it to null.`;
             mission: { type: ["string", "null"] },
             annual_revenue: { type: ["string", "null"] },
             ntee_code: { type: ["string", "null"] },
+            ntee_description: { type: ["string", "null"] },
             ruling_date: { type: ["string", "null"] },
             data_sources: { type: "array", items: { type: "string" } },
           },
@@ -284,7 +288,12 @@ If any field is not found in ${source}, set it to null.`;
                     {data.organization_type}
                   </Badge>
                 )}
-                {data.ntee_code && (
+                {data.ntee_description && (
+                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">
+                    {data.ntee_description}
+                  </Badge>
+                )}
+                {data.ntee_code && !data.ntee_description && (
                   <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">
                     NTEE: {data.ntee_code}
                   </Badge>
@@ -372,7 +381,7 @@ If any field is not found in ${source}, set it to null.`;
               <DataRow icon={Globe} label="Website" value={data.website} isLink />
               <DataRow icon={DollarSign} label="Annual Revenue" value={data.annual_revenue} />
               <DataRow icon={Calendar} label="Tax-Exempt Since" value={data.ruling_date} />
-              <DataRow icon={Tag} label="Classification" value={data.ntee_code ? `NTEE Code: ${data.ntee_code}` : null} />
+              <DataRow icon={Tag} label="Classification" value={data.ntee_description || (data.ntee_code ? `NTEE Code: ${data.ntee_code}` : null)} />
             </div>
           </div>
 
