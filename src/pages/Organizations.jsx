@@ -101,9 +101,9 @@ export default function Organizations() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col">
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <Building2 className="w-5 h-5 text-white" />
@@ -124,44 +124,44 @@ export default function Organizations() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Organizations List */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-4 sticky top-24 max-h-[calc(100vh-7rem)] flex flex-col">
-              <div className="mb-4 space-y-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search across all fields..."
-                    className="pl-10 pr-10"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-                
-                <AdvancedFilters
-                  filters={filters}
-                  onFilterChange={setFilters}
-                  onClear={() => setFilters({
-                    state: "",
-                    organization_type: "",
-                    ntee_code: "",
-                    min_revenue: "",
-                    max_revenue: "",
-                  })}
+      <main className="flex flex-1 overflow-hidden">
+        {/* Left Column - Organizations List */}
+        <div className="w-80 border-r border-slate-100 bg-white flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="p-4 flex flex-col flex-1 overflow-hidden flex flex-col">
+            <div className="mb-4 space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search across all fields..."
+                  className="pl-10 pr-10"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
+              
+              <AdvancedFilters
+                filters={filters}
+                onFilterChange={setFilters}
+                onClear={() => setFilters({
+                  state: "",
+                  organization_type: "",
+                  ntee_code: "",
+                  min_revenue: "",
+                  max_revenue: "",
+                })}
+              />
+            </div>
 
-              <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+            <div className="flex-1 overflow-y-auto space-y-2 pr-2">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
@@ -206,45 +206,46 @@ export default function Organizations() {
                     </motion.div>
                   ))
                 )}
-              </div>
+            </div>
 
-              <div className="mt-4 pt-4 border-t border-slate-100">
-                <p className="text-xs text-slate-400 text-center">
-                  {filteredOrgs.length} organization{filteredOrgs.length !== 1 ? "s" : ""}
-                </p>
-              </div>
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              <p className="text-xs text-slate-400 text-center">
+                {filteredOrgs.length} organization{filteredOrgs.length !== 1 ? "s" : ""}
+              </p>
             </div>
           </div>
+        </div>
+        </div>
 
-          {/* Right Column - Organization Details */}
-          <div className="lg:col-span-2">
-            {selectedOrg ? (
-              <motion.div
-                key={selectedOrg.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <OrganizationCard 
-                  data={selectedOrg} 
-                  onSave={() => {}} 
-                  isSaved={true}
-                  onDelete={(id) => deleteMutation.mutate(id)}
-                  onEdit={handleEdit}
-                />
-                <ContactSearch organization={selectedOrg} />
-              </motion.div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-12 text-center">
-                <Building2 className="w-16 h-16 mx-auto mb-4 text-slate-300" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                  Select an Organization
-                </h3>
-                <p className="text-slate-500">
-                  Choose an organization from the list to view its details
-                </p>
-              </div>
-            )}
-          </div>
+        {/* Right Column - Organization Details */}
+        <div className="flex-1 overflow-y-auto">
+          {selectedOrg ? (
+            <motion.div
+              key={selectedOrg.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-6"
+            >
+              <OrganizationCard 
+                data={selectedOrg} 
+                onSave={() => {}} 
+                isSaved={true}
+                onDelete={(id) => deleteMutation.mutate(id)}
+                onEdit={handleEdit}
+              />
+              <ContactSearch organization={selectedOrg} />
+            </motion.div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-12 text-center m-6">
+              <Building2 className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Select an Organization
+              </h3>
+              <p className="text-slate-500">
+                Choose an organization from the list to view its details
+              </p>
+            </div>
+          )}
         </div>
       </main>
 
