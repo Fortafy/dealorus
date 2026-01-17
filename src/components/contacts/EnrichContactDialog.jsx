@@ -138,95 +138,106 @@ Do not make up or guess any information.`;
             <div className="text-center">
               <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
               <p className="text-slate-600 font-medium">Searching for updated information...</p>
-              <p className="text-sm text-slate-400 mt-1">This may take 10-15 seconds</p>
+              <div className="text-sm text-slate-400 mt-3 space-y-1">
+                <p>• Checking LinkedIn profiles</p>
+                <p>• Searching organization websites</p>
+                <p>• Verifying contact details</p>
+                <p className="pt-2 text-xs">This may take 10-15 seconds</p>
+              </div>
             </div>
           </div>
         )}
 
         {enrichedData && !isLoading && (
           <div className="space-y-4">
-            <p className="text-sm text-slate-600 font-medium">Select fields to update:</p>
-            
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {enrichedData.title && enrichedData.title !== contact.title && (
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-                  <Checkbox
-                    checked={selectedFields.title || false}
-                    onCheckedChange={() => handleToggleField('title')}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-slate-500 mb-1">Title</p>
-                    <p className="text-sm text-slate-600 line-through">{contact.title || "Not set"}</p>
-                    <p className="text-sm text-indigo-600 font-medium">{enrichedData.title}</p>
-                  </div>
-                </label>
-              )}
+            {Object.values(selectedFields).some(v => v) ? (
+              <>
+                <p className="text-sm text-slate-600 font-medium">Select fields to update:</p>
+                
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {enrichedData.title && enrichedData.title !== contact.title && (
+                    <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                      <Checkbox
+                        checked={selectedFields.title || false}
+                        onCheckedChange={() => handleToggleField('title')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Title</p>
+                        <p className="text-sm text-slate-600 line-through">{contact.title || "Not set"}</p>
+                        <p className="text-sm text-indigo-600 font-medium">{enrichedData.title}</p>
+                      </div>
+                    </label>
+                  )}
 
-              {enrichedData.email && enrichedData.email !== contact.email && (
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-                  <Checkbox
-                    checked={selectedFields.email || false}
-                    onCheckedChange={() => handleToggleField('email')}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-slate-500 mb-1">Email</p>
-                    <p className="text-sm text-slate-600 line-through">{contact.email || "Not set"}</p>
-                    <p className="text-sm text-indigo-600 font-medium">{enrichedData.email}</p>
-                  </div>
-                </label>
-              )}
+                  {enrichedData.email && enrichedData.email !== contact.email && (
+                    <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                      <Checkbox
+                        checked={selectedFields.email || false}
+                        onCheckedChange={() => handleToggleField('email')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Email</p>
+                        <p className="text-sm text-slate-600 line-through">{contact.email || "Not set"}</p>
+                        <p className="text-sm text-indigo-600 font-medium">{enrichedData.email}</p>
+                      </div>
+                    </label>
+                  )}
 
-              {enrichedData.phone && enrichedData.phone !== contact.phone && (
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-                  <Checkbox
-                    checked={selectedFields.phone || false}
-                    onCheckedChange={() => handleToggleField('phone')}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-slate-500 mb-1">Phone</p>
-                    <p className="text-sm text-slate-600 line-through">{contact.phone || "Not set"}</p>
-                    <p className="text-sm text-indigo-600 font-medium">{enrichedData.phone}</p>
-                  </div>
-                </label>
-              )}
+                  {enrichedData.phone && enrichedData.phone !== contact.phone && (
+                    <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                      <Checkbox
+                        checked={selectedFields.phone || false}
+                        onCheckedChange={() => handleToggleField('phone')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Phone</p>
+                        <p className="text-sm text-slate-600 line-through">{contact.phone || "Not set"}</p>
+                        <p className="text-sm text-indigo-600 font-medium">{enrichedData.phone}</p>
+                      </div>
+                    </label>
+                  )}
 
-              {enrichedData.linkedin && enrichedData.linkedin !== contact.linkedin && (
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-                  <Checkbox
-                    checked={selectedFields.linkedin || false}
-                    onCheckedChange={() => handleToggleField('linkedin')}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-slate-500 mb-1">LinkedIn</p>
-                    <p className="text-sm text-slate-600 line-through">{contact.linkedin || "Not set"}</p>
-                    <p className="text-sm text-indigo-600 font-medium break-all">{enrichedData.linkedin}</p>
-                  </div>
-                </label>
-              )}
+                  {enrichedData.linkedin && enrichedData.linkedin !== contact.linkedin && (
+                    <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                      <Checkbox
+                        checked={selectedFields.linkedin || false}
+                        onCheckedChange={() => handleToggleField('linkedin')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-slate-500 mb-1">LinkedIn</p>
+                        <p className="text-sm text-slate-600 line-through">{contact.linkedin || "Not set"}</p>
+                        <p className="text-sm text-indigo-600 font-medium break-all">{enrichedData.linkedin}</p>
+                      </div>
+                    </label>
+                  )}
 
-              {enrichedData.role_department && enrichedData.role_department !== contact.role_department && (
-                <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
-                  <Checkbox
-                    checked={selectedFields.role_department || false}
-                    onCheckedChange={() => handleToggleField('role_department')}
-                    className="mt-1"
-                  />
-                  <div className="flex-1">
-                    <p className="text-xs font-medium text-slate-500 mb-1">Department</p>
-                    <p className="text-sm text-slate-600 line-through">{contact.role_department || "Not set"}</p>
-                    <p className="text-sm text-indigo-600 font-medium">{enrichedData.role_department}</p>
-                  </div>
-                </label>
-              )}
-
-              {Object.values(selectedFields).every(v => !v) && (
-                <p className="text-sm text-slate-400 text-center py-4">No changes found</p>
-              )}
-            </div>
+                  {enrichedData.role_department && enrichedData.role_department !== contact.role_department && (
+                    <label className="flex items-start gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer">
+                      <Checkbox
+                        checked={selectedFields.role_department || false}
+                        onCheckedChange={() => handleToggleField('role_department')}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-slate-500 mb-1">Department</p>
+                        <p className="text-sm text-slate-600 line-through">{contact.role_department || "Not set"}</p>
+                        <p className="text-sm text-indigo-600 font-medium">{enrichedData.role_department}</p>
+                      </div>
+                    </label>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="py-8 text-center">
+                <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-slate-600 font-medium mb-1">No new information found</p>
+                <p className="text-sm text-slate-400">We searched public sources but didn't find any updates different from the current contact information. The contact details appear to be up to date.</p>
+              </div>
+            )}
           </div>
         )}
 
