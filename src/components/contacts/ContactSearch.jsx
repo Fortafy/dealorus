@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star } from "lucide-react";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star, Filter } from "lucide-react";
 import { motion } from "framer-motion";
 import ContactForm from "./ContactForm";
 import ContactDetailCard from "./ContactDetailCard";
@@ -357,6 +357,12 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          {showFilters && (
+            <ContactFilters
+              onFilterChange={setFilters}
+              onClose={() => setShowFilters(false)}
+            />
+          )}
           <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -381,7 +387,25 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   onComplete={() => queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] })}
                 />
                 <Button
-                  onClick={searchContacts}
+                  onClick={() => setShowAdvancedSearch(true)}
+                  disabled={isSearching}
+                  variant="outline"
+                  size="sm"
+                >
+                  {isSearching ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 mr-2" />
+                      Advanced Search
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => searchContacts()}
                   disabled={isSearching}
                   className="bg-indigo-600 hover:bg-indigo-700"
                   size="sm"
@@ -394,7 +418,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   ) : (
                     <>
                       <Search className="w-4 h-4 mr-2" />
-                      AI Search
+                      Quick Search
                     </>
                   )}
                 </Button>
@@ -403,6 +427,19 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           </div>
 
         <div className="p-6">
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className={showFilters ? "bg-indigo-600 hover:bg-indigo-700" : ""}
+            >
+              <Filter className="w-4 h-4 mr-1" />
+              Filters
+              {Object.values(filters).some(v => v) && <span className="ml-1 w-2 h-2 bg-red-500 rounded-full"></span>}
+            </Button>
+          </div>
+
           {isSearching && (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -428,14 +465,24 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   <span className="text-sm font-medium text-indigo-900">
                     {selectedContacts.size} contact{selectedContacts.size > 1 ? 's' : ''} selected
                   </span>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleBulkDelete}
-                  >
-                    <Trash2 className="w-3.5 h-3.5 mr-1" />
-                    Delete Selected
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowBulkEdit(true)}
+                      className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                    >
+                      Edit Selected
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1" />
+                      Delete Selected
+                    </Button>
+                  </div>
                 </div>
               )}
               <div className="overflow-x-auto">
@@ -526,7 +573,16 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 items-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => starMutation.mutate({ id: contact.id, starred: !contact.starred })}
+                              className="h-7 w-7 p-0"
+                              title={contact.starred ? "Unstar" : "Star"}
+                            >
+                              <Star className={`w-3.5 h-3.5 ${contact.starred ? "fill-yellow-400 text-yellow-400" : "text-slate-400"}`} />
+                            </Button>
                             {contact.linkedin ? (
                               <a
                                 href={contact.linkedin}
@@ -578,6 +634,19 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           open={formOpen}
           onOpenChange={setFormOpen}
           onSave={handleSaveContact}
+        />
+
+        <BulkEditDialog
+          open={showBulkEdit}
+          onOpenChange={setShowBulkEdit}
+          selectedCount={selectedContacts.size}
+          onApply={handleBulkEdit}
+        />
+
+        <EnhancedAISearchDialog
+          open={showAdvancedSearch}
+          onOpenChange={setShowAdvancedSearch}
+          onSearch={searchContacts}
         />
       </div>
       )}
