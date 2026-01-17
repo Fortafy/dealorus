@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star, Filter, Upload, Zap } from "lucide-react";
+import { Users, Search, Mail, User, Briefcase, Linkedin, ExternalLink, Plus, Pencil, Trash2, Eye, ArrowUpDown, ArrowUp, ArrowDown, Star, Filter, Upload, Zap, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ContactForm from "./ContactForm";
@@ -13,6 +13,7 @@ import CSVContactUploader from "./CSVContactUploader";
 import FilterDialog from "./FilterDialog";
 import BulkEditDialog from "./BulkEditDialog";
 import EnhancedAISearchDialog from "./EnhancedAISearchDialog";
+import EnrichContactDialog from "./EnrichContactDialog";
 
 export default function ContactSearch({ organization }) {
   const [aiContacts, setAiContacts] = useState([]);
@@ -28,6 +29,7 @@ export default function ContactSearch({ organization }) {
   const [filters, setFilters] = useState({ title: "", department: "", starredOnly: false });
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [enrichingContactId, setEnrichingContactId] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: savedContacts = [] } = useQuery({
@@ -84,6 +86,15 @@ export default function ContactSearch({ organization }) {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
     },
   });
+
+  const handleEnrichContact = (contact) => {
+    setEnrichingContactId(contact.id);
+  };
+
+  const handleEnrichSave = () => {
+    queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+    setEnrichingContactId(null);
+  };
 
   const handleSaveContact = (contactData) => {
     if (editingContact) {
@@ -546,18 +557,24 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   <TableBody>
                     {allContacts.map((contact, index) => (
                       <TableRow key={contact.id || index}>
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedContacts.has(contact.id)}
-                            onCheckedChange={(checked) => handleSelectContact(contact.id, checked)}
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium text-sm">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-slate-400" />
-                            {contact.name}
-                          </div>
-                        </TableCell>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedContacts.has(contact.id)}
+                              onCheckedChange={(checked) => handleSelectContact(contact.id, checked)}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium text-sm">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => starMutation.mutate({ id: contact.id, starred: !contact.starred })}
+                                className="hover:opacity-70 transition-opacity"
+                                title={contact.starred ? "Unstar" : "Star"}
+                              >
+                                <Star className={`w-4 h-4 ${contact.starred ? "fill-yellow-400 text-yellow-400" : "text-slate-400"}`} />
+                              </button>
+                              {contact.name}
+                            </div>
+                          </TableCell>
                         <TableCell className="text-sm">
                           {contact.title || <span className="text-slate-400">N/A</span>}
                         </TableCell>
@@ -591,11 +608,11 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => starMutation.mutate({ id: contact.id, starred: !contact.starred })}
+                              onClick={() => handleEnrichContact(contact)}
                               className="h-7 w-7 p-0"
-                              title={contact.starred ? "Unstar" : "Star"}
+                              title="AI Enrich"
                             >
-                              <Star className={`w-3.5 h-3.5 ${contact.starred ? "fill-yellow-400 text-yellow-400" : "text-slate-400"}`} />
+                              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                             </Button>
                             {contact.linkedin ? (
                               <a
@@ -669,6 +686,16 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           onFilterChange={setFilters}
           currentFilters={filters}
         />
+
+        {enrichingContactId && (
+          <EnrichContactDialog
+            open={!!enrichingContactId}
+            onOpenChange={(open) => !open && setEnrichingContactId(null)}
+            contact={savedContacts.find(c => c.id === enrichingContactId)}
+            organization={organization}
+            onSave={handleEnrichSave}
+          />
+        )}
       </div>
       )}
     </motion.div>
