@@ -58,16 +58,43 @@ export default function ContactSearch({ organization }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Contact.create(data),
+    mutationFn: async (data) => {
+      const contact = await base44.entities.Contact.create(data);
+      // Log contact creation
+      await base44.functions.invoke('logContactActivity', {
+        contact_id: contact.id,
+        action: 'create',
+        description: 'Contact created'
+      });
+      return contact;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Contact.update(id, data),
-    onSuccess: () => {
+    mutationFn: async ({ id, data }) => {
+      const contact = await base44.entities.Contact.update(id, data);
+      // Log contact update with field changes
+      const oldContact = savedContacts.find(c => c.id === id);
+      const fieldsChanged = Object.keys(data).map(field => ({
+        field,
+        old_value: oldContact?.[field] || null,
+        new_value: data[field]
+      }));
+
+      await base44.functions.invoke('logContactActivity', {
+        contact_id: id,
+        action: 'edit',
+        description: 'Contact information updated',
+        fields_changed: fieldsChanged
+      });
+      return contact;
+    },
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+      queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
       setSelectedContact(null);
     },
   });
@@ -81,9 +108,19 @@ export default function ContactSearch({ organization }) {
   });
 
   const starMutation = useMutation({
-    mutationFn: ({ id, starred }) => base44.entities.Contact.update(id, { starred }),
-    onSuccess: () => {
+    mutationFn: async ({ id, starred }) => {
+      const contact = await base44.entities.Contact.update(id, { starred });
+      // Log star action
+      await base44.functions.invoke('logContactActivity', {
+        contact_id: id,
+        action: 'star',
+        description: `Contact ${starred ? 'starred' : 'unstarred'}`
+      });
+      return contact;
+    },
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+      queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
     },
   });
 
@@ -91,8 +128,26 @@ export default function ContactSearch({ organization }) {
     setEnrichingContactId(contact.id);
   };
 
-  const handleEnrichSave = () => {
+  const handleEnrichSave = async (updates) => {
+    // Log enrichment activity
+    const contact = savedContacts.find(c => c.id === enrichingContactId);
+    if (contact) {
+      const fieldsChanged = Object.keys(updates).map(field => ({
+        field,
+        old_value: contact[field] || null,
+        new_value: updates[field]
+      }));
+
+      await base44.functions.invoke('logContactActivity', {
+        contact_id: enrichingContactId,
+        action: 'enrich',
+        description: `Contact enriched with updated information from public sources`,
+        fields_changed: fieldsChanged
+      });
+    }
+
     queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+    queryClient.invalidateQueries({ queryKey: ["activities", enrichingContactId] });
     setEnrichingContactId(null);
   };
 
