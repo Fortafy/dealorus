@@ -332,6 +332,14 @@ Return a JSON object with these fields (use null for any field where data is not
                     results={searchResult}
                     onSelectOrganization={setSelectedOrg}
                     onSaveAll={handleSaveAll}
+                    onSaveSelected={async (selected) => {
+                      for (const org of selected) {
+                        await base44.entities.SearchResult.create(org);
+                      }
+                      onSearchComplete();
+                      setSearchResult(null);
+                      setSelectedOrg(null);
+                    }}
                   />
                 ) : (
                   <OrganizationCard

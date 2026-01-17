@@ -42,37 +42,65 @@ export default function Home() {
     },
   });
 
-  const handleSearch = async ({ orgName, state }) => {
+  const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType }) => {
     setIsSearching(true);
     setError(null);
     setSearchResult(null);
+    setSelectedOrg(null);
 
-    const prompt = `Search for nonprofit or government organization data for "${orgName}" in ${state}.
-    
-Find and return accurate information from public sources like:
-- ProPublica Nonprofit Explorer
-- IRS Tax Exempt Organization Search
-- Charity Navigator
-- GuideStar/Candid
-- State charity registrations
-- Official government databases
+    let searchCriteria = [];
+    if (orgName) searchCriteria.push(`organization name "${orgName}"`);
+    if (ein) searchCriteria.push(`EIN "${ein}"`);
+    if (city && state) searchCriteria.push(`located in ${city}, ${state}`);
+    else if (city) searchCriteria.push(`in city "${city}"`);
+    else if (state) searchCriteria.push(`in state ${state}`);
+    if (minRevenue && maxRevenue) searchCriteria.push(`annual revenue between $${minRevenue} and $${maxRevenue}`);
+    else if (minRevenue) searchCriteria.push(`annual revenue of at least $${minRevenue}`);
+    else if (maxRevenue) searchCriteria.push(`annual revenue up to $${maxRevenue}`);
+    if (orgType) {
+      const typeMap = {
+        "501c3": "501(c)(3) Public Charity",
+        "foundation": "Private Foundation",
+        "government": "Government Agency",
+        "other": "Other Nonprofit"
+      };
+      searchCriteria.push(`organization type "${typeMap[orgType]}"`);
+    }
 
-Return a JSON object with these fields (use null for any field where data is not found):
-- organization_name: The official registered name
-- state: The state code (${state})
-- ein: Employer Identification Number (format: XX-XXXXXXX)
-- address: Street address
-- city: City name
-- zip_code: ZIP code
-- phone: Phone number
-- email: Contact email if publicly available
-- website: Official website URL
-- organization_type: Type like "501(c)(3) Public Charity", "Government Agency", etc.
-- mission: Brief mission statement or description
-- annual_revenue: Most recent reported annual revenue (formatted like "$1,234,567")
-- ntee_code: National Taxonomy of Exempt Entities classification code
-- ruling_date: Date tax-exempt status was granted (if applicable)
-- data_sources: Array of source names where information was found`;
+    const orgTypeText = orgType ? (() => {
+      const typeMap = {
+        "501c3": "501(c)(3) Public Charity",
+        "foundation": "Private Foundation",
+        "government": "Government Agency",
+        "other": "Other Nonprofit"
+      };
+      return typeMap[orgType];
+    })() : null;
+
+    const isMultiSearch = !orgName && !ein;
+
+    let prompt = `You are searching databases of nonprofit and government organizations.
+
+SEARCH CRITERIA - ALL must be matched:
+${searchCriteria.join("\n")}
+
+STRICT FILTERING RULES - MUST BE FOLLOWED:
+${orgTypeText ? `1. Organization type MUST BE EXACTLY "${orgTypeText}" - reject any other types\n` : ''}
+${city ? `2. City MUST BE "${city}"\n` : ''}
+${state ? `3. State MUST BE "${state}"\n` : ''}
+${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least $${minRevenue}` : ''}${minRevenue && maxRevenue ? ' and ' : ''}${maxRevenue ? `no more than $${maxRevenue}` : ''}\n` : ''}
+
+${isMultiSearch ? `
+IMPORTANT: You MUST find and return 15-25 different organizations that match ALL criteria above.
+Search ProPublica Nonprofit Explorer, IRS databases, Charity Navigator, and GuideStar to find multiple matching organizations.
+` : `Find the specific organization that matches the criteria.`}
+
+For each organization, provide:
+- organization_name, state, ein, address, city, zip_code, phone, email, website
+- organization_type: EXACTLY as classified (must match filter if specified)
+- mission, annual_revenue (as "$X,XXX,XXX"), ntee_code, ruling_date, data_sources
+
+${isMultiSearch ? 'Return an array of 15-25 organizations.' : 'Return array with 1 organization.'}`;
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
@@ -81,26 +109,39 @@ Return a JSON object with these fields (use null for any field where data is not
         response_json_schema: {
           type: "object",
           properties: {
-            organization_name: { type: "string" },
-            state: { type: "string" },
-            ein: { type: ["string", "null"] },
-            address: { type: ["string", "null"] },
-            city: { type: ["string", "null"] },
-            zip_code: { type: ["string", "null"] },
-            phone: { type: ["string", "null"] },
-            email: { type: ["string", "null"] },
-            website: { type: ["string", "null"] },
-            organization_type: { type: ["string", "null"] },
-            mission: { type: ["string", "null"] },
-            annual_revenue: { type: ["string", "null"] },
-            ntee_code: { type: ["string", "null"] },
-            ruling_date: { type: ["string", "null"] },
-            data_sources: { type: "array", items: { type: "string" } },
+            organizations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  organization_name: { type: "string" },
+                  state: { type: "string" },
+                  ein: { type: ["string", "null"] },
+                  address: { type: ["string", "null"] },
+                  city: { type: ["string", "null"] },
+                  zip_code: { type: ["string", "null"] },
+                  phone: { type: ["string", "null"] },
+                  email: { type: ["string", "null"] },
+                  website: { type: ["string", "null"] },
+                  organization_type: { type: ["string", "null"] },
+                  mission: { type: ["string", "null"] },
+                  annual_revenue: { type: ["string", "null"] },
+                  ntee_code: { type: ["string", "null"] },
+                  ruling_date: { type: ["string", "null"] },
+                  data_sources: { type: "array", items: { type: "string" } },
+                }
+              }
+            }
           },
         },
       });
 
-      setSearchResult(result);
+      const orgs = result.organizations || [];
+      if (orgs.length > 0) {
+        setSearchResult(orgs);
+      } else {
+        setError("No organizations found matching the criteria.");
+      }
     } catch (err) {
       setError("Unable to fetch organization data. Please try again.");
     } finally {
