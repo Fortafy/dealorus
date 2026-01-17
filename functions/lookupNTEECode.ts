@@ -32,6 +32,8 @@ Deno.serve(async (req) => {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.log(`CharityAPI error for ${upperCode}: ${response.status} - ${errorText}`);
       return Response.json({ 
         error: 'NTEE code not found',
         code: upperCode 
@@ -39,6 +41,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
+    console.log(`CharityAPI response for ${upperCode}:`, JSON.stringify(data));
     
     return Response.json({
       code: data.code || upperCode,
