@@ -264,6 +264,10 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
     if (onEdit) {
       onEdit(updatedData);
     }
+
+    // Close dialog and clear state
+    setShowComparisonDialog(false);
+    setEnrichedData(null);
   };
 
   return (
