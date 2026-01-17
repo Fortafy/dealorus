@@ -463,16 +463,32 @@ export const NTEE_CODES = {
 };
 
 /**
- * Get the description for an NTEE code
+ * Get the description for an NTEE code from CharityAPI
  * @param {string} code - The NTEE code (e.g., "A03")
- * @returns {string|null} - The description or null if not found
+ * @returns {Promise<string|null>} - The description or null if not found
  */
-export function getNTEEDescription(code) {
+export async function getNTEEDescription(code) {
   if (!code) return null;
   
   const upperCode = code.toUpperCase().trim();
   
-  // Try exact match first
+  try {
+    // Fetch from CharityAPI
+    const response = await fetch(`https://api.charityapi.org/api/ntee_codes/${upperCode}`, {
+      headers: {
+        'Authorization': 'Bearer ' + import.meta.env.VITE_CHARITY_API_KEY
+      }
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      return data.title || data.description || null;
+    }
+  } catch (err) {
+    console.warn(`CharityAPI lookup failed for ${upperCode}, falling back to local lookup:`, err);
+  }
+  
+  // Fall back to local lookup
   if (NTEE_CODES[upperCode]) {
     return NTEE_CODES[upperCode];
   }
@@ -480,7 +496,6 @@ export function getNTEEDescription(code) {
   // Try category letter only (e.g., "A" from "A03")
   const categoryLetter = upperCode.charAt(0);
   if (NTEE_CODES[categoryLetter]) {
-    // Return the specific code if available, otherwise the category
     return NTEE_CODES[upperCode] || NTEE_CODES[categoryLetter];
   }
   
