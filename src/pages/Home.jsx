@@ -1,19 +1,21 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SearchForm from "@/components/search/SearchForm";
 import OrganizationCard from "@/components/results/OrganizationCard";
-import SearchHistory from "@/components/results/SearchHistory";
+import SearchResultsTable from "@/components/search/SearchResultsTable";
 import EmptyState from "@/components/results/EmptyState";
 import CSVUploader from "@/components/upload/CSVUploader";
 import ProcessingProgress from "@/components/upload/ProcessingProgress";
-import { motion } from "framer-motion";
-import { Sparkles, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import { Sparkles, AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function Home() {
   const [searchResult, setSearchResult] = useState(null);
+  const [selectedOrg, setSelectedOrg] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
   const [isProcessingBulk, setIsProcessingBulk] = useState(false);
@@ -23,22 +25,10 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("single");
   const queryClient = useQueryClient();
 
-  const { data: savedSearches = [] } = useQuery({
-    queryKey: ["searchResults"],
-    queryFn: () => base44.entities.SearchResult.list("-created_date", 20),
-  });
-
-  const saveMutation = useMutation({
+  const saveSearchMutation = useMutation({
     mutationFn: (data) => base44.entities.SearchResult.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["searchResults"] });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.SearchResult.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["searchResults"] });
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
     },
   });
 
@@ -150,12 +140,27 @@ ${isMultiSearch ? 'Return an array of 15-25 organizations.' : 'Return array with
   };
 
   const handleSave = async (data) => {
-    await saveMutation.mutateAsync(data);
+    await saveSearchMutation.mutateAsync(data);
+    setSearchResult(null);
+    setSelectedOrg(null);
   };
 
-  const handleSelectSaved = (search) => {
-    setSearchResult(search);
-    setError(null);
+  const handleSaveAll = async () => {
+    if (Array.isArray(searchResult)) {
+      for (const org of searchResult) {
+        await saveSearchMutation.mutateAsync(org);
+      }
+      setSearchResult(null);
+      setSelectedOrg(null);
+    }
+  };
+
+  const handleSaveSelected = async (selected) => {
+    for (const org of selected) {
+      await saveSearchMutation.mutateAsync(org);
+    }
+    setSearchResult(null);
+    setSelectedOrg(null);
   };
 
   const handleBulkUpload = async (file) => {
@@ -165,10 +170,8 @@ ${isMultiSearch ? 'Return an array of 15-25 organizations.' : 'Return array with
     setActiveTab("bulk");
 
     try {
-      // Upload the file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
-      // Extract data from CSV
       const extractionResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
         file_url,
         json_schema: {
@@ -200,7 +203,6 @@ ${isMultiSearch ? 'Return an array of 15-25 organizations.' : 'Return array with
       setBulkTotal(organizations.length);
       const results = [];
 
-      // Process each organization
       for (let i = 0; i < organizations.length; i++) {
         setCurrentBulkIndex(i);
         const org = organizations[i];
@@ -248,7 +250,6 @@ Return a JSON object with these fields (use null for any field where data is not
             },
           });
 
-          // Save to database
           await base44.entities.SearchResult.create(enrichedData);
 
           results.push({
@@ -267,8 +268,7 @@ Return a JSON object with these fields (use null for any field where data is not
         setBulkResults([...results]);
       }
 
-      // Refresh the saved searches list
-      queryClient.invalidateQueries({ queryKey: ["searchResults"] });
+      queryClient.invalidateQueries({ queryKey: ["organizations"] });
     } catch (err) {
       setError(err.message || "Failed to process CSV file");
     } finally {
@@ -277,13 +277,8 @@ Return a JSON object with these fields (use null for any field where data is not
     }
   };
 
-  const isSaved = searchResult && savedSearches.some(
-    (s) => s.ein === searchResult.ein && s.organization_name === searchResult.organization_name
-  );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
-      {/* Header */}
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3">
@@ -298,139 +293,122 @@ Return a JSON object with these fields (use null for any field where data is not
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Search Section */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6"
+          >
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="single">Single Search</TabsTrigger>
+                <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="single" className="mt-0">
+                <SearchForm onSearch={handleSearch} isLoading={isSearching} />
+              </TabsContent>
+
+              <TabsContent value="bulk" className="mt-0">
+                <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
+              </TabsContent>
+            </Tabs>
+          </motion.div>
+
+          {isProcessingBulk && (
+            <ProcessingProgress
+              results={bulkResults}
+              total={bulkTotal}
+              currentIndex={currentBulkIndex}
+            />
+          )}
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {!searchResult && !isSearching && activeTab === "single" && <EmptyState />}
+
+          {isSearching && (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-16 h-16 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin mb-4" />
+              <p className="text-slate-600 font-medium text-lg">Searching public databases...</p>
+              <p className="text-sm text-slate-400 mt-2">This may take 10-15 seconds</p>
+            </div>
+          )}
+
+          {searchResult && !isSearching && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-6 md:p-8"
             >
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="single">Single Search</TabsTrigger>
-                  <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="single" className="mt-0">
-                  <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-1">
-                      Search Organization
-                    </h2>
-                    <p className="text-sm text-slate-500">
-                      Enter details to enrich your data from public databases
-                    </p>
-                  </div>
-                  <SearchForm onSearch={handleSearch} isLoading={isSearching} />
-                </TabsContent>
-
-                <TabsContent value="bulk" className="mt-0">
-                  <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
-                </TabsContent>
-              </Tabs>
-            </motion.div>
-
-            {/* Bulk Processing Progress */}
-            {isProcessingBulk && (
-              <ProcessingProgress
-                results={bulkResults}
-                total={bulkTotal}
-                currentIndex={currentBulkIndex}
-              />
-            )}
-
-            {/* Error State */}
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Results */}
-            {searchResult && activeTab === "single" ? (
-              <OrganizationCard
-                data={searchResult}
-                onSave={handleSave}
-                isSaved={isSaved}
-              />
-            ) : (
-              !isSearching && !isProcessingBulk && activeTab === "single" && <EmptyState />
-            )}
-
-            {/* Bulk Results Summary */}
-            {bulkResults.length > 0 && !isProcessingBulk && activeTab === "bulk" && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-6 md:p-8 border border-green-100"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                    <AlertCircle className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                      Bulk Processing Complete
-                    </h3>
-                    <p className="text-slate-700 mb-4">
-                      Successfully processed {bulkResults.filter(r => r.status === "success").length} out of {bulkResults.length} organizations.
-                      All results have been saved to your search history.
-                    </p>
-                    {bulkResults.filter(r => r.status === "error").length > 0 && (
-                      <Alert className="bg-red-50 border-red-200">
-                        <AlertCircle className="h-4 w-4 text-red-600" />
-                        <AlertDescription className="text-sm text-red-800">
-                          {bulkResults.filter(r => r.status === "error").length} organizations failed to process. Check for missing or invalid data in your CSV.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
+              {selectedOrg ? (
+                <div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedOrg(null)}
+                    className="mb-4"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Results
+                  </Button>
+                  <OrganizationCard
+                    data={selectedOrg}
+                    onSave={handleSave}
+                    isSaved={false}
+                  />
                 </div>
-              </motion.div>
-            )}
+              ) : Array.isArray(searchResult) && searchResult.length > 1 ? (
+                <SearchResultsTable
+                  results={searchResult}
+                  onSelectOrganization={setSelectedOrg}
+                  onSaveAll={handleSaveAll}
+                  onSaveSelected={handleSaveSelected}
+                />
+              ) : (
+                <OrganizationCard
+                  data={Array.isArray(searchResult) ? searchResult[0] : searchResult}
+                  onSave={handleSave}
+                  isSaved={false}
+                />
+              )}
+            </motion.div>
+          )}
 
-            {/* Loading State */}
-            {isSearching && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-16"
-              >
-                <div className="w-16 h-16 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin mb-4" />
-                <p className="text-slate-600 font-medium">Searching public databases...</p>
-                <p className="text-sm text-slate-400 mt-1">This may take a few seconds</p>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <SearchHistory
-                searches={savedSearches}
-              />
-
-              {/* Info Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-6 p-5 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 text-white"
-              >
-                <h3 className="font-semibold mb-2">Data Sources</h3>
-                <ul className="text-sm text-indigo-100 space-y-1.5">
-                  <li>• ProPublica Nonprofit Explorer</li>
-                  <li>• IRS Tax Exempt Database</li>
-                  <li>• Charity Navigator</li>
-                  <li>• GuideStar/Candid</li>
-                  <li>• State Registrations</li>
-                </ul>
-              </motion.div>
-            </div>
-          </div>
+          {bulkResults.length > 0 && !isProcessingBulk && activeTab === "bulk" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-6 border border-green-100"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    Bulk Processing Complete
+                  </h3>
+                  <p className="text-slate-700 mb-4">
+                    Successfully processed {bulkResults.filter(r => r.status === "success").length} out of {bulkResults.length} organizations.
+                  </p>
+                  {bulkResults.filter(r => r.status === "error").length > 0 && (
+                    <Alert className="bg-red-50 border-red-200">
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-sm text-red-800">
+                        {bulkResults.filter(r => r.status === "error").length} organizations failed to process.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </main>
     </div>
