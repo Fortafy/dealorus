@@ -170,9 +170,28 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
       const foundContacts = result.contacts || [];
       
-      // Save AI-found contacts to database
+      // Save AI-found contacts to database, checking for duplicates
       for (const contact of foundContacts) {
-        await base44.entities.Contact.create({
+        // Split name into first and last name for duplicate checking
+        const nameParts = contact.name.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+        
+        // Check for existing contact with same first name, last name, and email
+        const existingContact = savedContacts.find(existing => {
+          const existingNameParts = existing.name.trim().split(' ');
+          const existingFirstName = existingNameParts[0];
+          const existingLastName = existingNameParts.length > 1 ? existingNameParts[existingNameParts.length - 1] : '';
+          
+          const nameMatch = existingFirstName.toLowerCase() === firstName.toLowerCase() && 
+                           existingLastName.toLowerCase() === lastName.toLowerCase();
+          const emailMatch = existing.email && contact.email && 
+                            existing.email.toLowerCase() === contact.email.toLowerCase();
+          
+          return nameMatch && emailMatch;
+        });
+        
+        const contactData = {
           organization_id: organization.id,
           name: contact.name,
           title: contact.title,
@@ -181,7 +200,15 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           linkedin: cleanLinkedInUrl(contact.linkedin),
           role_department: contact.role_department,
           source: contact.source || "AI-found",
-        });
+        };
+        
+        if (existingContact) {
+          // Update existing contact
+          await base44.entities.Contact.update(existingContact.id, contactData);
+        } else {
+          // Create new contact
+          await base44.entities.Contact.create(contactData);
+        }
       }
       
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
