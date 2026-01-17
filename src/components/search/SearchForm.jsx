@@ -42,11 +42,12 @@ export default function SearchForm({ onSearch, isLoading }) {
   const [minRevenue, setMinRevenue] = useState("");
   const [maxRevenue, setMaxRevenue] = useState("");
   const [orgType, setOrgType] = useState("");
+  const [nteeDescription, setNteeDescription] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // At least one search criteria must be provided
-    const hasSearchCriteria = orgName.trim() || ein.trim() || (state && city.trim()) || minRevenue || maxRevenue || orgType;
+    const hasSearchCriteria = orgName.trim() || ein.trim() || (state && city.trim()) || minRevenue || maxRevenue || orgType || nteeDescription.trim();
     if (hasSearchCriteria) {
       onSearch({
         orgName: orgName.trim() || undefined,
@@ -56,6 +57,7 @@ export default function SearchForm({ onSearch, isLoading }) {
         minRevenue: minRevenue || undefined,
         maxRevenue: maxRevenue || undefined,
         orgType: orgType || undefined,
+        nteeDescription: nteeDescription.trim() || undefined,
       });
     }
   };
@@ -138,6 +140,18 @@ export default function SearchForm({ onSearch, isLoading }) {
                 <SelectItem value="other">Other Nonprofit</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              NTEE Category
+            </label>
+            <Input
+              value={nteeDescription}
+              onChange={(e) => setNteeDescription(e.target.value)}
+              placeholder="e.g., Professional Societies, Arts, Education"
+              className="h-11 bg-white border-slate-200"
+            />
           </div>
 
           <div>
