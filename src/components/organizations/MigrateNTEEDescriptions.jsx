@@ -35,7 +35,7 @@ export default function MigrateNTEEDescriptions({ onComplete }) {
         
         // Clean and normalize the NTEE code
         const cleanCode = record.ntee_code.trim().toUpperCase();
-        const description = getNTEEDescription(cleanCode);
+        const description = await getNTEEDescription(cleanCode);
 
         if (description) {
           await base44.entities.SearchResult.update(record.id, {
