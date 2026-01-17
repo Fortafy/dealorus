@@ -246,11 +246,11 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
     }
   };
 
-  const handleApplyEnrichment = (updates) => {
+  const handleApplyEnrichment = async (updates) => {
     // Auto-populate ntee_description if ntee_code is updated but description is missing
     let finalUpdates = { ...updates };
     if (updates.ntee_code && !updates.ntee_description) {
-      const description = getNTEEDescription(updates.ntee_code);
+      const description = await getNTEEDescription(updates.ntee_code);
       if (description) {
         finalUpdates.ntee_description = description;
       }
