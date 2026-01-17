@@ -366,6 +366,12 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                     {enrichingSource === 'Nonprofit Check Plus' && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
                     Nonprofit Check Plus
                   </DropdownMenuItem>
+                  <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
+                    Candid
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled className="opacity-50 cursor-not-allowed">
+                    IRS Ezar
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button
