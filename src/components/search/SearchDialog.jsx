@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { getNTEEDescription } from "@/utils/nteeCodeLookup";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getNTEEDescription } from "@/utils/nteeCodeLookup";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -283,6 +284,11 @@ Return a JSON object with these fields (use null for any field where data is not
             if (description) {
               enrichedData.ntee_description = description;
             }
+          }
+
+          // Auto-map NTEE code to description
+          if (enrichedData.ntee_code && !enrichedData.ntee_description) {
+            enrichedData.ntee_description = getNTEEDescription(enrichedData.ntee_code);
           }
 
           await base44.entities.SearchResult.create(enrichedData);
