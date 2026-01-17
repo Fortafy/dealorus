@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
+import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
 import {
   Building2,
   MapPin,
@@ -71,6 +72,8 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
   const [enrichingSource, setEnrichingSource] = useState(null);
   const [existingRecord, setExistingRecord] = useState(null);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [enrichedData, setEnrichedData] = useState(null);
+  const [showComparisonDialog, setShowComparisonDialog] = useState(false);
 
   useEffect(() => {
     checkForDuplicate();
@@ -165,7 +168,7 @@ Return the enriched data with these exact fields:
 - mission: Summarized mission (if original exists, otherwise keep original)`;
 
     try {
-      const enrichedData = await base44.integrations.Core.InvokeLLM({
+      const result = await base44.integrations.Core.InvokeLLM({
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
@@ -181,19 +184,8 @@ Return the enriched data with these exact fields:
         },
       });
 
-      const updatedData = {
-        ...data,
-        address: enrichedData.address || data.address,
-        city: enrichedData.city || data.city,
-        zip_code: enrichedData.zip_code || data.zip_code,
-        ein: enrichedData.ein || data.ein,
-        ntee_code: enrichedData.ntee_code || data.ntee_code,
-        mission: enrichedData.mission || data.mission,
-      };
-
-      if (onEdit) {
-        onEdit(updatedData);
-      }
+      setEnrichedData(result);
+      setShowComparisonDialog(true);
     } catch (err) {
       console.error("AI enrichment failed:", err);
     } finally {
@@ -229,7 +221,7 @@ Return complete organization data:
 If any field is not found in ${source}, set it to null.`;
 
     try {
-      const enrichedData = await base44.integrations.Core.InvokeLLM({
+      const result = await base44.integrations.Core.InvokeLLM({
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
@@ -254,20 +246,24 @@ If any field is not found in ${source}, set it to null.`;
         },
       });
 
-      const updatedData = {
-        ...data,
-        ...enrichedData,
-        id: data.id,
-      };
-
-      if (onEdit) {
-        onEdit(updatedData);
-      }
+      setEnrichedData(result);
+      setShowComparisonDialog(true);
     } catch (err) {
       console.error(`${source} enrichment failed:`, err);
     } finally {
       setIsEnriching(false);
       setEnrichingSource(null);
+    }
+  };
+
+  const handleApplyEnrichment = (updates) => {
+    const updatedData = {
+      ...data,
+      ...updates,
+    };
+
+    if (onEdit) {
+      onEdit(updatedData);
     }
   };
 
@@ -469,6 +465,14 @@ If any field is not found in ${source}, set it to null.`;
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EnrichmentComparisonDialog
+        open={showComparisonDialog}
+        onOpenChange={setShowComparisonDialog}
+        currentData={data}
+        enrichedData={enrichedData}
+        onApply={handleApplyEnrichment}
+      />
     </motion.div>
   );
 }
