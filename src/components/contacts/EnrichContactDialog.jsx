@@ -53,15 +53,21 @@ Do not make up or guess any information.`;
         },
       });
 
+      console.log('Contact object:', contact);
+      console.log('Enrichment result:', result);
+      
       // Filter to only fields that actually have new/different values
       const fieldsWithUpdates = {};
       ['title', 'email', 'phone', 'linkedin', 'role_department'].forEach(key => {
-        if (result[key] && result[key] !== contact[key]) {
+        const contactValue = contact[key];
+        const resultValue = result[key];
+        console.log(`Field: ${key}, Contact: "${contactValue}", Result: "${resultValue}", Different: ${resultValue && resultValue !== contactValue}`);
+        
+        if (resultValue && resultValue !== contactValue) {
           fieldsWithUpdates[key] = true;
         }
       });
 
-      console.log('Enrichment result:', result);
       console.log('Fields with updates:', fieldsWithUpdates);
 
       setEnrichedData(result);
