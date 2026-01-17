@@ -3,14 +3,17 @@ import { base44 } from "@/api/base44Client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import SearchForm from "./SearchForm";
 import CSVUploader from "../upload/CSVUploader";
 import ProcessingProgress from "../upload/ProcessingProgress";
 import OrganizationCard from "../results/OrganizationCard";
+import SearchResultsTable from "./SearchResultsTable";
 
 export default function SearchDialog({ open, onOpenChange, onSearchComplete }) {
   const [searchResult, setSearchResult] = useState(null);
+  const [selectedOrg, setSelectedOrg] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
   const [isProcessingBulk, setIsProcessingBulk] = useState(false);
@@ -44,7 +47,23 @@ export default function SearchDialog({ open, onOpenChange, onSearchComplete }) {
       searchCriteria.push(`organization type "${typeMap[orgType]}"`);
     }
 
+    const orgTypeText = orgType ? (() => {
+      const typeMap = {
+        "501c3": "501(c)(3) Public Charity",
+        "foundation": "Private Foundation",
+        "government": "Government Agency",
+        "other": "Other Nonprofit"
+      };
+      return typeMap[orgType];
+    })() : null;
+
     const prompt = `Search for nonprofit or government organizations matching these criteria: ${searchCriteria.join(", ")}.
+
+CRITICAL FILTERING REQUIREMENTS:
+${orgTypeText ? `- ONLY include organizations that are classified as "${orgTypeText}". Do NOT include any other organization types.` : ''}
+${minRevenue ? `- ONLY include organizations with annual revenue of at least $${minRevenue}.` : ''}
+${maxRevenue ? `- ONLY include organizations with annual revenue up to $${maxRevenue}.` : ''}
+${city ? `- ONLY include organizations located in ${city}.` : ''}
 
 Find and return accurate information from public sources like:
 - ProPublica Nonprofit Explorer
@@ -54,9 +73,9 @@ Find and return accurate information from public sources like:
 - State charity registrations
 - Official government databases
 
-${searchCriteria.length > 1 && !orgName && !ein ? `IMPORTANT: Find multiple organizations (up to 5) that match the criteria. Return them as an array.` : `Return a single organization that best matches the criteria.`}
+${!orgName && !ein ? `IMPORTANT: Find up to 50 organizations that match ALL the criteria above. Return them as an array. Make sure every organization matches the filters.` : `Find the specific organization matching the criteria.`}
 
-Return a JSON object with these fields (use null for any field where data is not found):
+For each organization, return a JSON object with these fields (use null for any field where data is not found):
 - organization_name: The official registered name
 - state: The state code
 - ein: Employer Identification Number (format: XX-XXXXXXX)
@@ -66,12 +85,14 @@ Return a JSON object with these fields (use null for any field where data is not
 - phone: Phone number
 - email: Contact email if publicly available
 - website: Official website URL
-- organization_type: Type like "501(c)(3) Public Charity", "Government Agency", etc.
+- organization_type: Type like "501(c)(3) Public Charity", "Government Agency", etc. (MUST match the filter if specified)
 - mission: Brief mission statement or description
 - annual_revenue: Most recent reported annual revenue (formatted like "$1,234,567")
 - ntee_code: National Taxonomy of Exempt Entities classification code
 - ruling_date: Date tax-exempt status was granted (if applicable)
-- data_sources: Array of source names where information was found`;
+- data_sources: Array of source names where information was found
+
+VERIFY: Before returning results, confirm each organization matches ALL specified filters.`;
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
@@ -124,7 +145,9 @@ Return a JSON object with these fields (use null for any field where data is not
   const handleSave = async (data) => {
     await base44.entities.SearchResult.create(data);
     onSearchComplete();
+    setSelectedOrg(null);
     setSearchResult(null);
+    onOpenChange(false);
   };
 
   const handleSaveAll = async () => {
@@ -134,6 +157,7 @@ Return a JSON object with these fields (use null for any field where data is not
       }
       onSearchComplete();
       setSearchResult(null);
+      setSelectedOrg(null);
       onOpenChange(false);
     }
   };
@@ -284,32 +308,33 @@ Return a JSON object with these fields (use null for any field where data is not
             )}
 
             {searchResult && !isSearching && (
-              <div className="mt-4 space-y-4">
-                {Array.isArray(searchResult) ? (
-                  <>
-                    <div className="flex justify-between items-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-                      <p className="text-sm font-medium text-indigo-900">
-                        Found {searchResult.length} organization{searchResult.length !== 1 ? 's' : ''}
-                      </p>
-                      <Button
-                        onClick={handleSaveAll}
-                        className="bg-indigo-600 hover:bg-indigo-700"
-                      >
-                        Save All Organizations
-                      </Button>
-                    </div>
-                    {searchResult.map((org, index) => (
-                      <OrganizationCard
-                        key={index}
-                        data={org}
-                        onSave={handleSave}
-                        isSaved={false}
-                      />
-                    ))}
-                  </>
+              <div className="mt-4">
+                {selectedOrg ? (
+                  <div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedOrg(null)}
+                      className="mb-4"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back to Results
+                    </Button>
+                    <OrganizationCard
+                      data={selectedOrg}
+                      onSave={handleSave}
+                      isSaved={false}
+                    />
+                  </div>
+                ) : Array.isArray(searchResult) && searchResult.length > 1 ? (
+                  <SearchResultsTable
+                    results={searchResult}
+                    onSelectOrganization={setSelectedOrg}
+                    onSaveAll={handleSaveAll}
+                  />
                 ) : (
                   <OrganizationCard
-                    data={searchResult}
+                    data={Array.isArray(searchResult) ? searchResult[0] : searchResult}
                     onSave={handleSave}
                     isSaved={false}
                   />
