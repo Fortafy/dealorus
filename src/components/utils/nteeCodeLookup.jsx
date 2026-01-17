@@ -463,7 +463,7 @@ export const NTEE_CODES = {
 };
 
 /**
- * Get the description for an NTEE code from CharityAPI
+ * Get the description for an NTEE code from CharityAPI via backend
  * @param {string} code - The NTEE code (e.g., "A03")
  * @returns {Promise<string|null>} - The description or null if not found
  */
@@ -473,16 +473,12 @@ export async function getNTEEDescription(code) {
   const upperCode = code.toUpperCase().trim();
   
   try {
-    // Fetch from CharityAPI
-    const response = await fetch(`https://api.charityapi.org/api/ntee_codes/${upperCode}`, {
-      headers: {
-        'Authorization': 'Bearer ' + import.meta.env.VITE_CHARITY_API_KEY
-      }
-    });
+    // Use backend function to lookup NTEE code via CharityAPI
+    const { base44 } = await import('@/api/base44Client');
+    const response = await base44.functions.invoke('lookupNTEECode', { code: upperCode });
     
-    if (response.ok) {
-      const data = await response.json();
-      return data.title || data.description || null;
+    if (response.data?.description) {
+      return response.data.description;
     }
   } catch (err) {
     console.warn(`CharityAPI lookup failed for ${upperCode}, falling back to local lookup:`, err);
