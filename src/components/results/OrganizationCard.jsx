@@ -206,70 +206,45 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
     setEnrichingSource(source);
     setIsEnriching(true);
 
-    const sourceInstructions = {
-      'CharityAPI': 'Query CharityAPI.org ONLY using the API key. Do not use any other sources.',
-      'ProPublica': 'Search ProPublica Nonprofit Explorer ONLY. Use their verified nonprofit financial data.',
-      'IRS': 'Search IRS Ezar Database ONLY. Use official IRS tax-exempt organization data.',
-      'GuideStar': 'Search GuideStar/Candid ONLY. Use their nonprofit profiles and financial data.'
-    };
-
-    const prompt = `Find and enrich data for this organization using ${source} ONLY:
-
-Organization: ${data.organization_name}
-State: ${data.state}
-EIN: ${data.ein || "Unknown"}
-
-CRITICAL: ${sourceInstructions[source]}
-DO NOT use any other data sources. Only return data found in ${source}.
-
-Return complete organization data:
-- organization_name, state, ein, address, city, zip_code, phone, email, website
-- organization_type, mission, annual_revenue, ntee_code, ntee_description (full description of NTEE code), ruling_date
-- data_sources: Must be ["${source}"] only
-
-If any field is not found in ${source}, set it to null.`;
-
     try {
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            organization_name: { type: "string" },
-            state: { type: "string" },
-            ein: { type: ["string", "null"] },
-            address: { type: ["string", "null"] },
-            city: { type: ["string", "null"] },
-            zip_code: { type: ["string", "null"] },
-            phone: { type: ["string", "null"] },
-            email: { type: ["string", "null"] },
-            website: { type: ["string", "null"] },
-            organization_type: { type: ["string", "null"] },
-            mission: { type: ["string", "null"] },
-            annual_revenue: { type: ["string", "null"] },
-            ntee_code: { type: ["string", "null"] },
-            ntee_description: { type: ["string", "null"] },
-            ruling_date: { type: ["string", "null"] },
-            data_sources: { type: "array", items: { type: "string" } },
-          },
-        },
-      });
+      let result = null;
+
+      // Check if EIN is available for API calls
+      if (!data.ein && ['CharityAPI', 'ProPublica', 'Nonprofit Check Plus'].includes(source)) {
+        throw new Error('EIN is required for this data source');
+      }
+
+      // Call direct API functions for supported sources
+      if (source === 'CharityAPI') {
+        const response = await base44.functions.invoke('charityApiSearch', { ein: data.ein });
+        result = response.data;
+      } else if (source === 'ProPublica') {
+        const response = await base44.functions.invoke('propublicaSearch', { ein: data.ein });
+        result = response.data;
+      } else if (source === 'Nonprofit Check Plus') {
+        const response = await base44.functions.invoke('nonprofitCheckPlusSearch', { ein: data.ein });
+        result = response.data;
+      }
+
+      if (!result) {
+        throw new Error(`No data returned from ${source}`);
+      }
 
       // Auto-map NTEE code to description if code exists but description doesn't
       if (result.ntee_code && !result.ntee_description) {
-        result.ntee_description = getNTEEDescription(result.ntee_code);
+        result.ntee_description = await getNTEEDescription(result.ntee_code);
       }
 
       setEnrichedData(result);
       setShowComparisonDialog(true);
-      } catch (err) {
+    } catch (err) {
       console.error(`${source} enrichment failed:`, err);
-      } finally {
+      alert(`Failed to fetch data from ${source}: ${err.message}`);
+    } finally {
       setIsEnriching(false);
       setEnrichingSource(null);
-      }
-      };
+    }
+  };
 
   const handleApplyEnrichment = (updates) => {
     // Auto-populate ntee_description if ntee_code is updated but description is missing
@@ -410,13 +385,14 @@ If any field is not found in ${source}, set it to null.`;
               <p className="text-xs text-slate-400">
                 Data sources: {data.data_sources.join(", ")}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleSourceEnrich('CharityAPI')}
-                  disabled={isEnriching}
+                  disabled={isEnriching || !data.ein}
                   className="h-7 text-xs"
+                  title={!data.ein ? "EIN required" : "Fetch from CharityAPI"}
                 >
                   {enrichingSource === 'CharityAPI' ? (
                     <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
@@ -427,8 +403,9 @@ If any field is not found in ${source}, set it to null.`;
                   variant="outline"
                   size="sm"
                   onClick={() => handleSourceEnrich('ProPublica')}
-                  disabled={isEnriching}
+                  disabled={isEnriching || !data.ein}
                   className="h-7 text-xs"
+                  title={!data.ein ? "EIN required" : "Fetch from ProPublica"}
                 >
                   {enrichingSource === 'ProPublica' ? (
                     <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
@@ -438,25 +415,41 @@ If any field is not found in ${source}, set it to null.`;
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleSourceEnrich('IRS')}
-                  disabled={isEnriching}
+                  onClick={() => handleSourceEnrich('Nonprofit Check Plus')}
+                  disabled={isEnriching || !data.ein}
                   className="h-7 text-xs"
+                  title={!data.ein ? "EIN required" : "Fetch from Nonprofit Check Plus"}
                 >
-                  {enrichingSource === 'IRS' ? (
+                  {enrichingSource === 'Nonprofit Check Plus' ? (
                     <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
                   ) : null}
+                  Nonprofit Check Plus
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={true}
+                  className="h-7 text-xs opacity-40 cursor-not-allowed"
+                  title="Coming soon"
+                >
+                  Charity Navigator
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={true}
+                  className="h-7 text-xs opacity-40 cursor-not-allowed"
+                  title="Coming soon"
+                >
                   IRS Ezar
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleSourceEnrich('GuideStar')}
-                  disabled={isEnriching}
-                  className="h-7 text-xs"
+                  disabled={true}
+                  className="h-7 text-xs opacity-40 cursor-not-allowed"
+                  title="Coming soon"
                 >
-                  {enrichingSource === 'GuideStar' ? (
-                    <div className="w-3 h-3 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin mr-1" />
-                  ) : null}
                   GuideStar
                 </Button>
               </div>
