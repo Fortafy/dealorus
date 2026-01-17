@@ -21,6 +21,10 @@ export default function EnrichmentComparisonDialog({
 }) {
   const [selectedFields, setSelectedFields] = useState({});
 
+  if (!enrichedData || !currentData) {
+    return null;
+  }
+
   const fields = [
     { key: "organization_name", label: "Organization Name" },
     { key: "ein", label: "EIN" },
