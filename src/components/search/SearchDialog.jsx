@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getNTEEDescription } from "@/utils/nteeCodeLookup";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
@@ -150,17 +149,15 @@ ${isMultiSearch ? 'Return ALL organizations found (no limit). Use structured dat
       // Handle both single and multiple results
       const orgs = result.organizations || [];
 
-      // Auto-populate ntee_description from ntee_code if missing
-      const enrichedOrgs = orgs.map(org => {
+      // Auto-map NTEE codes to descriptions
+      orgs.forEach(org => {
         if (org.ntee_code && !org.ntee_description) {
-          const description = getNTEEDescription(org.ntee_code);
-          return description ? { ...org, ntee_description: description } : org;
+          org.ntee_description = getNTEEDescription(org.ntee_code);
         }
-        return org;
       });
-
-      if (enrichedOrgs.length > 0) {
-        setSearchResult(enrichedOrgs);
+      
+      if (orgs.length > 0) {
+        setSearchResult(orgs);
       } else {
         setError("No organizations found matching the criteria.");
       }
@@ -277,14 +274,6 @@ Return a JSON object with these fields (use null for any field where data is not
               },
             },
           });
-
-          // Auto-populate ntee_description from ntee_code if missing
-          if (enrichedData.ntee_code && !enrichedData.ntee_description) {
-            const description = getNTEEDescription(enrichedData.ntee_code);
-            if (description) {
-              enrichedData.ntee_description = description;
-            }
-          }
 
           // Auto-map NTEE code to description
           if (enrichedData.ntee_code && !enrichedData.ntee_description) {
