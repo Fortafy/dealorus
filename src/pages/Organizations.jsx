@@ -111,10 +111,8 @@ export default function Organizations() {
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold text-slate-900">Organizations</h1>
-              <p className="text-sm text-slate-500">Browse all enriched organizations</p>
             </div>
             <div className="flex items-center gap-2">
-              <MigrateNTEEDescriptions onComplete={() => queryClient.invalidateQueries({ queryKey: ['organizations'] })} />
               <Button
                 onClick={() => setSearchDialogOpen(true)}
                 className="bg-indigo-600 hover:bg-indigo-700"
