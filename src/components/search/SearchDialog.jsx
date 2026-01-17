@@ -57,42 +57,43 @@ export default function SearchDialog({ open, onOpenChange, onSearchComplete }) {
       return typeMap[orgType];
     })() : null;
 
-    const prompt = `Search for nonprofit or government organizations matching these criteria: ${searchCriteria.join(", ")}.
+    const isMultiSearch = !orgName && !ein;
 
-CRITICAL FILTERING REQUIREMENTS:
-${orgTypeText ? `- ONLY include organizations that are classified as "${orgTypeText}". Do NOT include any other organization types.` : ''}
-${minRevenue ? `- ONLY include organizations with annual revenue of at least $${minRevenue}.` : ''}
-${maxRevenue ? `- ONLY include organizations with annual revenue up to $${maxRevenue}.` : ''}
-${city ? `- ONLY include organizations located in ${city}.` : ''}
+    let prompt = `You are searching databases of nonprofit and government organizations.
 
-Find and return accurate information from public sources like:
-- ProPublica Nonprofit Explorer
-- IRS Tax Exempt Organization Search
-- Charity Navigator
-- GuideStar/Candid
-- State charity registrations
-- Official government databases
+SEARCH CRITERIA - ALL must be matched:
+${searchCriteria.join("\n")}
 
-${!orgName && !ein ? `IMPORTANT: Find up to 50 organizations that match ALL the criteria above. Return them as an array. Make sure every organization matches the filters.` : `Find the specific organization matching the criteria.`}
+STRICT FILTERING RULES - MUST BE FOLLOWED:
+${orgTypeText ? `1. Organization type MUST BE EXACTLY "${orgTypeText}" - reject any other types including "Government Agency", "Private Foundation", etc. if they don't match\n` : ''}
+${city ? `2. City MUST BE "${city}" - organizations in other cities are NOT acceptable\n` : ''}
+${state ? `3. State MUST BE "${state}"\n` : ''}
+${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least $${minRevenue}` : ''}${minRevenue && maxRevenue ? ' and ' : ''}${maxRevenue ? `no more than $${maxRevenue}` : ''}\n` : ''}
 
-For each organization, return a JSON object with these fields (use null for any field where data is not found):
-- organization_name: The official registered name
-- state: The state code
-- ein: Employer Identification Number (format: XX-XXXXXXX)
+${isMultiSearch ? `
+IMPORTANT: You MUST find and return 15-25 different organizations that match ALL criteria above.
+Do NOT return just 1 or 2 organizations.
+Search ProPublica Nonprofit Explorer, IRS databases, Charity Navigator, and GuideStar to find multiple matching organizations.
+` : `Find the specific organization that matches the criteria.`}
+
+For each organization found, provide:
+- organization_name: Official registered name
+- state: State code
+- ein: Employer Identification Number
 - address: Street address
 - city: City name
 - zip_code: ZIP code
 - phone: Phone number
-- email: Contact email if publicly available
-- website: Official website URL
-- organization_type: Type like "501(c)(3) Public Charity", "Government Agency", etc. (MUST match the filter if specified)
-- mission: Brief mission statement or description
-- annual_revenue: Most recent reported annual revenue (formatted like "$1,234,567")
-- ntee_code: National Taxonomy of Exempt Entities classification code
-- ruling_date: Date tax-exempt status was granted (if applicable)
-- data_sources: Array of source names where information was found
+- email: Contact email if available
+- website: Official website
+- organization_type: EXACTLY as classified (must match filter if specified)
+- mission: Brief mission statement
+- annual_revenue: Most recent annual revenue as "$X,XXX,XXX" format
+- ntee_code: NTEE code
+- ruling_date: Tax-exempt status date if applicable
+- data_sources: Array of sources
 
-VERIFY: Before returning results, confirm each organization matches ALL specified filters.`;
+${isMultiSearch ? 'Return an array of 15-25 organizations. Each must match ALL filters.' : 'Return array with 1 organization.'}`;
 
     try {
       const result = await base44.integrations.Core.InvokeLLM({
