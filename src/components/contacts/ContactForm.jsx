@@ -81,98 +81,97 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
             <TabsContent value="details">
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Name *</Label>
-              <Input
-                value={formData.name || ""}
-                onChange={(e) => handleChange("name", e.target.value)}
-                required
-              />
-            </div>
+                  <div>
+                    <Label>Name *</Label>
+                    <Input
+                      value={formData.name || ""}
+                      onChange={(e) => handleChange("name", e.target.value)}
+                      required
+                    />
+                  </div>
 
-            <div>
-              <Label>Title</Label>
-              <Input
-                value={formData.title || ""}
-                onChange={(e) => handleChange("title", e.target.value)}
-              />
-            </div>
+                  <div>
+                    <Label>Title</Label>
+                    <Input
+                      value={formData.title || ""}
+                      onChange={(e) => handleChange("title", e.target.value)}
+                    />
+                  </div>
 
-            <div>
-              <Label>Email</Label>
-              <Input
-                type="email"
-                value={formData.email || ""}
-                onChange={(e) => handleChange("email", e.target.value)}
-              />
-            </div>
+                  <div>
+                    <Label>Email</Label>
+                    <Input
+                      type="email"
+                      value={formData.email || ""}
+                      onChange={(e) => handleChange("email", e.target.value)}
+                    />
+                  </div>
 
-            <div>
-              <Label>Phone</Label>
-              <Input
-                value={formData.phone || ""}
-                onChange={(e) => handleChange("phone", e.target.value)}
-              />
-            </div>
+                  <div>
+                    <Label>Phone</Label>
+                    <Input
+                      value={formData.phone || ""}
+                      onChange={(e) => handleChange("phone", e.target.value)}
+                    />
+                  </div>
 
-            <div>
-              <Label>LinkedIn URL</Label>
-              <Input
-                value={formData.linkedin || ""}
-                onChange={(e) => handleChange("linkedin", e.target.value)}
-              />
-            </div>
+                  <div>
+                    <Label>LinkedIn URL</Label>
+                    <Input
+                      value={formData.linkedin || ""}
+                      onChange={(e) => handleChange("linkedin", e.target.value)}
+                    />
+                  </div>
 
-            <div>
-              <Label>Role / Department</Label>
-              <Input
-                value={formData.role_department || ""}
-                onChange={(e) => handleChange("role_department", e.target.value)}
-                placeholder="e.g., Executive, Finance, Marketing"
-              />
-            </div>
+                  <div>
+                    <Label>Role / Department</Label>
+                    <Input
+                      value={formData.role_department || ""}
+                      onChange={(e) => handleChange("role_department", e.target.value)}
+                      placeholder="e.g., Executive, Finance, Marketing"
+                    />
+                  </div>
 
-            <div className="col-span-2">
-              <Label>Notes</Label>
-              <Textarea
-                value={formData.notes || ""}
-                onChange={(e) => handleChange("notes", e.target.value)}
-                rows={3}
-                placeholder="Additional information about this contact"
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <div>
-                  {parsedSource && (
-                    <div>
-                      <span className="text-xs text-slate-500">Original Source: </span>
-                      <a
-                        href={parsedSource.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
-                      >
-                        {parsedSource.text}
-                      </a>
+                  <div className="col-span-2">
+                    <Label>Notes</Label>
+                    <Textarea
+                      value={formData.notes || ""}
+                      onChange={(e) => handleChange("notes", e.target.value)}
+                      rows={3}
+                      placeholder="Additional information about this contact"
+                    />
+                    <div className="mt-2 flex items-center justify-between">
+                      <div>
+                        {parsedSource && (
+                          <div>
+                            <span className="text-xs text-slate-500">Original Source: </span>
+                            <a
+                              href={parsedSource.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                            >
+                              {parsedSource.text}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                      {contact?.last_modified && (
+                        <div className="text-xs text-slate-500">
+                          Last Modified: {format(new Date(contact.last_modified), "MMM d, yyyy h:mm a")}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-                {contact?.last_modified && (
-                  <div className="text-xs text-slate-500">
-                    Last Modified: {format(new Date(contact.last_modified), "MMM d, yyyy h:mm a")}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
-                      Save Changes
-                    </Button>
-                  </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+                    Save Changes
+                  </Button>
                 </div>
               </form>
             </TabsContent>
