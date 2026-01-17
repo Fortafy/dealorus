@@ -31,7 +31,6 @@ export default function CSVContactUploader({ organizationId, onComplete }) {
                 type: "object",
                 properties: {
                   name: { type: "string" },
-                  company: { type: "string" },
                   title: { type: "string" },
                   email: { type: "string" },
                   phone: { type: "string" },
@@ -64,7 +63,6 @@ export default function CSVContactUploader({ organizationId, onComplete }) {
           await base44.entities.Contact.create({
             organization_id: organizationId,
             name: contact.name,
-            company: contact.company || null,
             title: contact.title || null,
             email: contact.email || null,
             phone: contact.phone || null,
@@ -149,7 +147,7 @@ export default function CSVContactUploader({ organizationId, onComplete }) {
       )}
 
       <div className="text-xs text-slate-500">
-        CSV should include columns: name (required), company, title, email, phone, linkedin, role_department, notes
+        CSV should include columns: name (required), title, email, phone, linkedin, role_department, notes
       </div>
     </div>
   );

@@ -24,7 +24,27 @@ export default function ContactSearch({ organization }) {
 
   const { data: savedContacts = [] } = useQuery({
     queryKey: ["contacts", organization.id],
-    queryFn: () => base44.entities.Contact.filter({ organization_id: organization.id }),
+    queryFn: async () => {
+      const contacts = await base44.entities.Contact.filter({ organization_id: organization.id });
+      
+      // Fetch all unique organization IDs
+      const orgIds = [...new Set(contacts.map(c => c.organization_id))];
+      const organizations = await Promise.all(
+        orgIds.map(id => base44.entities.SearchResult.list().then(orgs => orgs.find(o => o.id === id)))
+      );
+      
+      // Create a map of org ID to org name
+      const orgMap = {};
+      organizations.forEach(org => {
+        if (org) orgMap[org.id] = org.organization_name;
+      });
+      
+      // Add company name to each contact
+      return contacts.map(contact => ({
+        ...contact,
+        company: orgMap[contact.organization_id] || 'Unknown'
+      }));
+    },
   });
 
   const createMutation = useMutation({
@@ -246,7 +266,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         const contactData = {
           organization_id: organization.id,
           name: contact.name,
-          company: organization.organization_name,
           title: contact.title,
           email: contact.email,
           phone: contact.phone,
