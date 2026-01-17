@@ -374,11 +374,11 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                     <TooltipTrigger asChild>
                       <Button
                         onClick={handleAddNew}
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white"
                       >
-                        <Plus className="w-4 h-4 text-slate-600" />
+                        <Plus className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Add Contact</TooltipContent>
@@ -401,11 +401,11 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                     <TooltipTrigger asChild>
                       <Button
                         onClick={() => setShowFilterDialog(true)}
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
-                        className="h-8 w-8 p-0 relative"
+                        className="h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white relative"
                       >
-                        <Filter className="w-4 h-4 text-slate-600" />
+                        <Filter className="w-4 h-4" />
                         {Object.values(filters).some(v => v) && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
                       </Button>
                     </TooltipTrigger>
@@ -417,14 +417,14 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                       <Button
                         onClick={() => setShowAdvancedSearch(true)}
                         disabled={isSearching}
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white"
                       >
                         {isSearching ? (
-                          <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-indigo-700/30 border-t-indigo-700 rounded-full animate-spin" />
                         ) : (
-                          <Zap className="w-4 h-4 text-slate-600" />
+                          <Zap className="w-4 h-4" />
                         )}
                       </Button>
                     </TooltipTrigger>
@@ -436,7 +436,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                       <Button
                         onClick={() => searchContacts()}
                         disabled={isSearching}
-                        className="bg-indigo-600 hover:bg-indigo-700 h-8 w-8 p-0"
+                        size="sm"
+                        className="h-8 w-8 p-0 bg-indigo-600 text-white hover:bg-indigo-700"
                       >
                         {isSearching ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

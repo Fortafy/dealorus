@@ -112,17 +112,17 @@ export default function CSVContactUploader({ organizationId, onComplete, iconOnl
         <label htmlFor="csv-upload">
           <Button
             type="button"
-            variant={iconOnly ? "ghost" : "outline"}
-            size={iconOnly ? "sm" : "sm"}
+            variant={iconOnly ? "secondary" : "outline"}
+            size="sm"
             disabled={isProcessing}
-            className={iconOnly ? "h-8 w-8 p-0" : "gap-2"}
+            className={iconOnly ? "h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white" : "gap-2"}
             asChild
           >
             <span>
               {isProcessing ? (
-                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-indigo-700/30 border-t-indigo-700 rounded-full animate-spin" />
               ) : (
-                <Upload className={iconOnly ? "w-4 h-4 text-slate-600" : "w-4 h-4"} />
+                <Upload className="w-4 h-4" />
               )}
               {!iconOnly && "Import CSV"}
             </span>
