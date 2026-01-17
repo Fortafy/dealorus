@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     
     return Response.json({
       code: data.code || upperCode,
-      description: data.title || data.description || null
+      description: data.title || null
     });
 
   } catch (error) {
