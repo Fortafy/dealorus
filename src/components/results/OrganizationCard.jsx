@@ -279,6 +279,12 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
       ...finalUpdates,
     };
 
+    // If this is a saved record, update it in the database
+    if (isSaved && data.id) {
+      await base44.entities.SearchResult.update(data.id, updatedData);
+    }
+
+    // Notify parent to refresh
     if (onEdit) {
       onEdit(updatedData);
     }
