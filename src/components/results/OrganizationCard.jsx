@@ -495,9 +495,10 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                 variant="secondary"
                 size="sm"
                 onClick={() => setEditDialogOpen(true)}
+                disabled={!isSaved}
                 className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                 style={{ color: 'hsl(217, 91%, 60%)' }}
-                title="Edit"
+                title={isSaved ? "Edit" : "Save first to enable editing"}
               >
                 <Pencil className="w-3.5 h-3.5" />
               </Button>
