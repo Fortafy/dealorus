@@ -23,7 +23,7 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
   const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("single");
 
-  const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeDescription }) => {
+  const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeCodeId }) => {
     setIsSearching(true);
     setError(null);
     setSearchResult(null);
@@ -36,7 +36,7 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
       if (ein) searchParams.ein = ein;
       if (orgName) searchParams.orgName = orgName;
       if (orgType) searchParams.orgType = orgType;
-      if (nteeDescription) searchParams.nteeDescription = nteeDescription;
+      if (nteeCodeId) searchParams.nteeCodeId = nteeCodeId;
       
       console.log('ProPublica search params:', searchParams);
       
