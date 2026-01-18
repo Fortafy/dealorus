@@ -101,8 +101,8 @@ export default function Organizations() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col">
-      <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl sticky top-0 z-10">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col overflow-hidden">
+      <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/25">
@@ -124,11 +124,11 @@ export default function Organizations() {
         </div>
       </header>
 
-      <main className="flex flex-1 overflow-hidden">
-        {/* Left Column - Organizations List */}
-        <div className="w-80 border-r border-slate-100 bg-white flex flex-col overflow-hidden">
-          <div className="p-4 flex flex-col h-full overflow-hidden">
-            <div className="mb-4 space-y-3">
+      <main className="flex flex-1 overflow-hidden min-h-0">
+        {/* Left Column - Organizations List - Fixed */}
+        <div className="w-80 border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden">
+          <div className="p-4 flex flex-col h-full overflow-hidden min-h-0">
+            <div className="mb-4 space-y-3 flex-shrink-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
@@ -160,7 +160,7 @@ export default function Organizations() {
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+            <div className="flex-1 overflow-y-auto space-y-2 pr-2 min-h-0">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
