@@ -201,6 +201,7 @@ export default function Organizations() {
                           fill="#8884d8"
                           dataKey="value"
                           onClick={(entry) => {
+                            setShowDashboard(false);
                             const newFilters = { ...filters, ntee_code: entry.code };
                             setFilters(newFilters);
                             const firstMatch = organizations.find(org => org.ntee_code?.toLowerCase().includes(entry.code.toLowerCase()));
