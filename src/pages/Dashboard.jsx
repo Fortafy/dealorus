@@ -11,8 +11,11 @@ import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSect
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
+import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -92,10 +95,15 @@ export default function Dashboard() {
     <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
-        <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div>
-            <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
-          </div>
+        <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <img 
+            src={organization?.logo_url || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png"}
+            alt="Organization"
+            className="h-10"
+          />
+          <Link to={createPageUrl("Organizations")}>
+            <Home className="w-5 h-5 text-slate-600 hover:text-slate-900 transition-colors" />
+          </Link>
         </div>
       </header>
 
