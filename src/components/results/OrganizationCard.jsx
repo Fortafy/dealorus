@@ -416,7 +416,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                 disabled={isEnriching || !isSaved}
                 className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                 style={{ color: 'hsl(217, 91%, 60%)' }}
-                title="Smart Enrich (Multi-Source)"
+                title={isSaved ? "Smart Enrich (Multi-Source)" : "Save first to enable enrichment"}
               >
                 <Sparkles className="w-3.5 h-3.5" />
               </Button>
@@ -425,10 +425,10 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                   <Button
                     variant="secondary"
                     size="sm"
-                    disabled={isEnriching || !data.ein}
+                    disabled={isEnriching || !isSaved || !data.ein}
                     className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                     style={{ color: 'hsl(217, 91%, 60%)' }}
-                    title="Enrich from data sources"
+                    title={isSaved ? "Enrich from data sources" : "Save first to enable enrichment"}
                   >
                     <Database className="w-3.5 h-3.5" />
                   </Button>

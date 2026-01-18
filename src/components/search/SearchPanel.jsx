@@ -178,9 +178,11 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   const handleSave = async (data) => {
+    const user = await base44.auth.me();
     await base44.entities.Organization.create({
       ...data,
-      client_id: currentOrganizationId
+      client_id: currentOrganizationId,
+      user_id: user.id
     });
     onSearchComplete();
     setSelectedOrg(null);
@@ -198,10 +200,12 @@ Return a JSON object with these fields (use null for any field where data is not
 
   const handleSaveAll = async () => {
     if (Array.isArray(searchResult)) {
+      const user = await base44.auth.me();
       for (const org of searchResult) {
         await base44.entities.Organization.create({
           ...org,
-          client_id: currentOrganizationId
+          client_id: currentOrganizationId,
+          user_id: user.id
         });
       }
       onSearchComplete();
@@ -306,9 +310,11 @@ Return a JSON object with these fields (use null for any field where data is not
             enrichedData.ein = formatEIN(enrichedData.ein);
           }
 
+          const user = await base44.auth.me();
           await base44.entities.Organization.create({
             ...enrichedData,
-            client_id: currentOrganizationId
+            client_id: currentOrganizationId,
+            user_id: user.id
           });
 
            results.push({
@@ -421,10 +427,12 @@ Return a JSON object with these fields (use null for any field where data is not
                   }}
                   onSaveAll={handleSaveAll}
                   onSaveSelected={async (selected) => {
+                    const user = await base44.auth.me();
                     for (const org of selected) {
                       await base44.entities.Organization.create({
                         ...org,
-                        client_id: currentOrganizationId
+                        client_id: currentOrganizationId,
+                        user_id: user.id
                       });
                     }
                     onSearchComplete();
