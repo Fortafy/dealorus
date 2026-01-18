@@ -628,6 +628,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         onOpenChange={setShowSmartEnrichDialog}
         organization={data}
         onComplete={handleSmartEnrichComplete}
+        organizationSettings={data.organizationSettings}
       />
       </motion.div>
       );
