@@ -101,7 +101,7 @@ export default function Organizations() {
   });
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex flex-col overflow-hidden">
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function Organizations() {
                   setShowSearchPanel(true);
                   setSelectedOrg(null);
                 }}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Search
@@ -166,7 +166,7 @@ export default function Organizations() {
             <div className="flex-1 overflow-y-auto space-y-2 pr-2 min-h-0">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-blue-100 border-t-primary rounded-full animate-spin" />
                   </div>
                 ) : filteredOrgs.length === 0 ? (
                   <div className="text-center py-12 text-slate-500">
@@ -185,7 +185,7 @@ export default function Organizations() {
                         onClick={() => setSelectedOrg(org)}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                           selectedOrg?.id === org.id
-                            ? "border-indigo-500 bg-indigo-50"
+                            ? "border-primary bg-secondary"
                             : "border-slate-100 hover:border-slate-200 bg-white"
                         }`}
                       >
