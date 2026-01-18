@@ -12,7 +12,7 @@ import ProcessingProgress from "../upload/ProcessingProgress";
 import OrganizationCard from "../results/OrganizationCard";
 import SearchResultsTable from "./SearchResultsTable";
 
-export default function SearchPanel({ onSearchComplete, onClose }) {
+export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganization }) {
   const [searchResult, setSearchResult] = useState(null);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
