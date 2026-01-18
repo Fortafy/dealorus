@@ -65,8 +65,12 @@ Deno.serve(async (req) => {
     const searchParams = new URLSearchParams();
     searchParams.append('state%5Bid%5D', state);
     
-    if (orgName || city) {
-      searchParams.append('q', city || orgName);
+    if (orgName) {
+      searchParams.append('q', orgName);
+    }
+    
+    if (city) {
+      searchParams.append('city%5Bid%5D', city);
     }
     
     // Map organization type to c_code[id]
