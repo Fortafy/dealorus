@@ -32,6 +32,20 @@ export default function ContactSearch({ organization }) {
   const [enrichingContactId, setEnrichingContactId] = useState(null);
   const queryClient = useQueryClient();
 
+  const [currentUser, setCurrentUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (err) {
+        console.error("Failed to fetch current user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const { data: savedContacts = [] } = useQuery({
     queryKey: ["contacts", organization.id],
     queryFn: async () => {
@@ -50,7 +64,12 @@ export default function ContactSearch({ organization }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const contact = await base44.entities.Contact.create(data);
+      const contactData = {
+        ...data,
+        app_client_id: currentUser?.organization_id,
+        created_date: new Date().toISOString()
+      };
+      const contact = await base44.entities.Contact.create(contactData);
       // Log contact creation
       await base44.functions.invoke('logContactActivity', {
         contact_id: contact.id,
@@ -61,7 +80,12 @@ export default function ContactSearch({ organization }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+      setFormOpen(false);
+      setEditingContact(null);
     },
+    onError: (error) => {
+      console.error("Failed to create contact:", error);
+    }
   });
 
   const updateMutation = useMutation({
@@ -515,23 +539,29 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           </div>
 
         <div className="p-6">
-          {isSearching && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-slate-600 font-medium">Searching public sources...</p>
-                <p className="text-sm text-slate-400 mt-1">This may take 10-15 seconds</p>
-              </div>
-            </div>
-          )}
+           {isSearching && (
+             <div className="flex items-center justify-center py-12">
+               <div className="text-center">
+                 <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+                 <p className="text-slate-600 font-medium">Searching public sources...</p>
+                 <p className="text-sm text-slate-400 mt-1">This may take 10-15 seconds</p>
+               </div>
+             </div>
+           )}
 
-          {!isSearching && allContacts.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p className="text-slate-600 font-medium mb-1">No contacts yet</p>
-              <p className="text-sm text-slate-400">Add contacts manually or use AI search</p>
-            </div>
-          )}
+           {!isSearching && allContacts.length === 0 && (
+             <div className="text-center py-12">
+               <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+               <p className="text-slate-600 font-medium mb-1">No contacts yet</p>
+               <p className="text-sm text-slate-400">Add contacts manually or use AI search</p>
+             </div>
+           )}
+
+           {createMutation.error && (
+             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+               <p className="text-sm text-red-800">Failed to save contact. Please try again.</p>
+             </div>
+           )}
 
           {!isSearching && allContacts.length > 0 && (
             <>
@@ -710,12 +740,13 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         </div>
         
         <ContactForm
-          contact={editingContact}
-          organizationId={organization.id}
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          onSave={handleSaveContact}
-        />
+           contact={editingContact}
+           organizationId={organization.id}
+           appClientId={currentUser?.organization_id}
+           open={formOpen}
+           onOpenChange={setFormOpen}
+           onSave={handleSaveContact}
+         />
 
         <BulkEditDialog
           open={showBulkEdit}
