@@ -111,7 +111,7 @@ export default function Organizations() {
   });
 
   // Dashboard component
-  const DashboardView = ({ organizations, contacts }) => {
+  const DashboardView = ({ organizations, contacts, onSelectOrg }) => {
     const stats = useMemo(() => {
       const orgCount = organizations.length;
       const contactCount = contacts.length;
