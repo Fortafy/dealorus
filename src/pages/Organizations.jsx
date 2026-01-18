@@ -116,8 +116,21 @@ export default function Organizations() {
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => {
+                  setShowDashboard(true);
+                  setSelectedOrg(null);
+                  setShowSearchPanel(false);
+                }}
+                variant="outline"
+                className="hover:bg-slate-50"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
+              <Button
+                onClick={() => {
                   setShowSearchPanel(true);
                   setSelectedOrg(null);
+                  setShowDashboard(false);
                 }}
                 style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
                 className="hover:opacity-90"
