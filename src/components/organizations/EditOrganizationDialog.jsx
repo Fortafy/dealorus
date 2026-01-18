@@ -5,13 +5,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function EditOrganizationDialog({ organization, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(organization);
   const [nteeValidation, setNteeValidation] = useState({ status: null, description: null });
   const [isValidating, setIsValidating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   useEffect(() => {
     setFormData(organization);
@@ -57,10 +60,40 @@ export default function EditOrganizationDialog({ organization, open, onOpenChang
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
-    onOpenChange(false);
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      let dataToSave = { ...formData };
+
+      // Validate and populate NTEE description if code exists but description is missing
+      if (formData.ntee_code && !formData.ntee_description) {
+        try {
+          const response = await base44.functions.invoke('validateNTEECode', { code: formData.ntee_code });
+          
+          if (response.data.valid && response.data.description) {
+            dataToSave.ntee_description = response.data.description;
+          } else {
+            setSaveError('Invalid NTEE code. Please verify and try again.');
+            setIsSaving(false);
+            return;
+          }
+        } catch (error) {
+          setSaveError('Failed to validate NTEE code. Please try again.');
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      onSave(dataToSave);
+      onOpenChange(false);
+    } catch (error) {
+      setSaveError('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -207,12 +240,26 @@ export default function EditOrganizationDialog({ organization, open, onOpenChang
             </div>
           </div>
 
+          {saveError && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{saveError}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
-              Save Changes
+            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </form>
