@@ -105,12 +105,12 @@ export default function Organizations() {
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-slate-900">Organizations</h1>
-            </div>
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png" 
+              alt="Dealorus" 
+              className="h-10"
+            />
+            <div className="flex-1"></div>
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => {
