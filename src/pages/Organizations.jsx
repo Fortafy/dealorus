@@ -126,9 +126,8 @@ export default function Organizations() {
 
       <main className="flex flex-1 overflow-hidden">
         {/* Left Column - Organizations List */}
-        <div className="w-80 border-r border-slate-100 bg-white flex flex-col">
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="p-4 flex flex-col flex-1 overflow-hidden flex flex-col">
+        <div className="w-80 border-r border-slate-100 bg-white flex flex-col overflow-hidden">
+          <div className="p-4 flex flex-col h-full overflow-hidden">
             <div className="mb-4 space-y-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -208,13 +207,12 @@ export default function Organizations() {
                 )}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-slate-100">
+            <div className="mt-4 pt-4 border-t border-slate-100 flex-shrink-0">
               <p className="text-xs text-slate-400 text-center">
                 {filteredOrgs.length} organization{filteredOrgs.length !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
-        </div>
         </div>
 
         {/* Right Column - Organization Details */}
