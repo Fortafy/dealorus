@@ -51,6 +51,10 @@ Deno.serve(async (req) => {
         ntee_code: org.ntee_code || null,
         ntee_description: null,
         ruling_date: org.ruling_date || null,
+        source_created_date: org.created_at || null,
+        source_updated_date: org.updated_at || null,
+        source_subseccd_code: org.subsection_code ? org.subsection_code.toString() : null,
+        most_recent_990: org.filings_with_data && org.filings_with_data.length > 0 ? org.filings_with_data[0].pdf_url : null,
         data_sources: ['ProPublica']
       };
 
