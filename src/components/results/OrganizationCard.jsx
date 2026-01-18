@@ -114,7 +114,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
       const description = getNTEEDescription(data.ntee_code);
       if (description && onEdit) {
         const updatedData = { ...data, ntee_description: description };
-        base44.entities.SearchResult.update(data.id, updatedData).then(() => {
+        base44.entities.Organization.update(data.id, updatedData).then(() => {
           onEdit(updatedData);
         });
       }
@@ -123,7 +123,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
 
   const checkForDuplicate = async () => {
     try {
-      const allOrgs = await base44.entities.SearchResult.list();
+      const allOrgs = await base44.entities.Organization.list();
       
       const duplicate = allOrgs.find(org => {
         // Match by EIN if both have it (compare normalized versions without dashes)
@@ -169,7 +169,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
     if (onUpdate) {
       await onUpdate(existingRecord.id, data);
     } else if (onEdit) {
-      await base44.entities.SearchResult.update(existingRecord.id, data);
+      await base44.entities.Organization.update(existingRecord.id, data);
       onEdit({ ...data, id: existingRecord.id });
     }
   };
@@ -332,7 +332,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
 
     // If this is a saved record, update it in the database
     if (isSaved && data.id) {
-      await base44.entities.SearchResult.update(data.id, updatedData);
+      await base44.entities.Organization.update(data.id, updatedData);
     }
 
     // Notify parent to refresh
