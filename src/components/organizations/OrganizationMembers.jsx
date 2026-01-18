@@ -131,7 +131,9 @@ function InviteOrganizationUserDialog({ open, onOpenChange, organizationId, orga
           <Button
             onClick={() => inviteMutation.mutate(email)}
             disabled={inviteMutation.isPending || !canInvite || !email}
-            className="bg-blue-600 hover:bg-blue-700"
+            style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
           >
             {inviteMutation.isPending ? (
               <><Loader className="w-4 h-4 mr-2 animate-spin" /> Inviting...</>
@@ -224,7 +226,9 @@ export default function OrganizationMembers({ organizationId }) {
           <h2 className="text-2xl font-bold text-slate-900">Team Members</h2>
           <Button
             onClick={() => setShowInviteDialog(true)}
-            className="bg-blue-600 hover:bg-blue-700"
+            style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
             disabled={isLoadingOrg || currentActiveUsers >= maxUsers}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -258,7 +262,7 @@ export default function OrganizationMembers({ organizationId }) {
           <CardContent className="pt-6">
             {(isLoadingOrg || isLoadingUsers) ? (
               <div className="flex items-center justify-center py-12">
-                <Loader className="w-6 h-6 animate-spin text-blue-600" />
+                <Loader className="w-6 h-6 animate-spin" style={{ color: 'hsl(39, 100%, 50%)' }} />
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-12">
