@@ -51,25 +51,17 @@ export default function ContactSearch({ organization }) {
     queryFn: async () => {
       const contacts = await base44.entities.Contact.filter({ organization_id: organization.id });
       
-      // Fetch the organization for this contact
-      const org = await base44.entities.SearchResult.filter({ organization_id: organization.id }).then(orgs => orgs[0]);
-      
       // Add company name to each contact
       return contacts.map(contact => ({
         ...contact,
-        company: org?.organization_name || 'Unknown'
+        company: organization?.organization_name || 'Unknown'
       }));
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const contactData = {
-        ...data,
-        app_client_id: currentUser?.organization_id,
-        created_date: new Date().toISOString()
-      };
-      const contact = await base44.entities.Contact.create(contactData);
+      const contact = await base44.entities.Contact.create(data);
       // Log contact creation
       await base44.functions.invoke('logContactActivity', {
         contact_id: contact.id,
@@ -385,15 +377,16 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         });
         
         const contactData = {
-          organization_id: organization.id,
-          name: contact.name,
-          title: contact.title,
-          email: contact.email,
-          phone: contact.phone,
-          linkedin: cleanLinkedInUrl(contact.linkedin),
-          role_department: contact.role_department,
-          source: contact.source || "AI-found",
-        };
+             organization_id: organization.id,
+             client_id: currentUser?.organization_id,
+             name: contact.name,
+             title: contact.title,
+             email: contact.email,
+             phone: contact.phone,
+             linkedin: cleanLinkedInUrl(contact.linkedin),
+             role_department: contact.role_department,
+             source: contact.source || "AI-found",
+           };
         
         if (existingContact) {
           // Update existing contact
@@ -742,7 +735,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         <ContactForm
            contact={editingContact}
            organizationId={organization.id}
-           appClientId={currentUser?.organization_id}
+           clientId={currentUser?.organization_id}
            open={formOpen}
            onOpenChange={setFormOpen}
            onSave={handleSaveContact}

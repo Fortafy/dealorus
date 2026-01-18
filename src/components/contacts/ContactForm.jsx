@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import ActivityFeed from "./ActivityFeed";
 
-export default function ContactForm({ contact, organizationId, appClientId, open, onOpenChange, onSave }) {
+export default function ContactForm({ contact, organizationId, clientId, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(contact || {
     organization_id: organizationId,
-    app_client_id: appClientId,
+    client_id: clientId,
     name: "",
     title: "",
     email: "",
@@ -28,7 +28,7 @@ export default function ContactForm({ contact, organizationId, appClientId, open
     } else {
       setFormData({
         organization_id: organizationId,
-        app_client_id: appClientId,
+        client_id: clientId,
         name: "",
         title: "",
         email: "",
@@ -39,7 +39,7 @@ export default function ContactForm({ contact, organizationId, appClientId, open
         source: "Manual",
       });
     }
-  }, [contact, organizationId, appClientId]);
+  }, [contact, organizationId, clientId]);
 
   // Parse source in markdown link format: [display text](url)
   const parseSource = (source) => {

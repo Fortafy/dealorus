@@ -57,13 +57,13 @@ export default function Organizations() {
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["organizations", currentUser?.organization_id],
     enabled: !!currentUser?.organization_id,
-    queryFn: () => base44.entities.SearchResult.filter({ organization_id: currentUser.organization_id }, "-created_date"),
+    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.organization_id }, "-created_date"),
   });
 
   const { data: contacts = [] } = useQuery({
     queryKey: ["contacts", currentUser?.organization_id],
     enabled: !!currentUser?.organization_id,
-    queryFn: () => base44.entities.Contact.filter({ organization_id: currentUser.organization_id }, "-created_date"),
+    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.organization_id }, "-created_date"),
   });
 
   // Check for pre-selected organization from URL
@@ -80,7 +80,7 @@ export default function Organizations() {
   }, [organizations, currentUser]);
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.SearchResult.delete(id),
+    mutationFn: (id) => base44.entities.Organization.delete(id),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
       if (selectedOrg && selectedOrg.id === variables) {
@@ -90,7 +90,7 @@ export default function Organizations() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.SearchResult.update(id, data),
+    mutationFn: ({ id, data }) => base44.entities.Organization.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["organizations"] });
     },
@@ -299,7 +299,7 @@ export default function Organizations() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm font-medium">Recently Saved Organizations</CardTitle>
+                  <CardTitle className="text-sm font-medium">Recently Saved Nonprofits</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {recentOrganizations.length > 0 ? (
@@ -325,7 +325,7 @@ export default function Organizations() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-slate-400 text-center py-8">No organizations yet</p>
+                    <p className="text-sm text-slate-400 text-center py-8">No nonprofits yet</p>
                   )}
                 </CardContent>
               </Card>
