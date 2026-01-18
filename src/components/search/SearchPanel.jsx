@@ -24,6 +24,21 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
   const [activeTab, setActiveTab] = useState("single");
   const [lastSearchParams, setLastSearchParams] = useState(null);
   const [isLLMSearching, setIsLLMSearching] = useState(false);
+  const [currentOrganizationId, setCurrentOrganizationId] = useState(null);
+
+  React.useEffect(() => {
+    const getUser = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user?.organization_id) {
+          setCurrentOrganizationId(user.organization_id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user:', err);
+      }
+    };
+    getUser();
+  }, []);
 
   const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeCodeId }) => {
     setIsSearching(true);
@@ -163,7 +178,10 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   const handleSave = async (data) => {
-    await base44.entities.SearchResult.create(data);
+    await base44.entities.SearchResult.create({
+      ...data,
+      organization_id: currentOrganizationId
+    });
     onSearchComplete();
     setSelectedOrg(null);
     setSearchResult(null);
@@ -181,7 +199,10 @@ Return a JSON object with these fields (use null for any field where data is not
   const handleSaveAll = async () => {
     if (Array.isArray(searchResult)) {
       for (const org of searchResult) {
-        await base44.entities.SearchResult.create(org);
+        await base44.entities.SearchResult.create({
+          ...org,
+          organization_id: currentOrganizationId
+        });
       }
       onSearchComplete();
       setSearchResult(null);
@@ -285,12 +306,15 @@ Return a JSON object with these fields (use null for any field where data is not
             enrichedData.ein = formatEIN(enrichedData.ein);
           }
 
-          await base44.entities.SearchResult.create(enrichedData);
-
-          results.push({
+          await base44.entities.SearchResult.create({
             ...enrichedData,
-            status: "success",
+            organization_id: currentOrganizationId
           });
+
+           results.push({
+             ...enrichedData,
+             status: "success",
+           });
         } catch (err) {
           results.push({
             organization_name: org.organization_name,
@@ -398,7 +422,10 @@ Return a JSON object with these fields (use null for any field where data is not
                   onSaveAll={handleSaveAll}
                   onSaveSelected={async (selected) => {
                     for (const org of selected) {
-                      await base44.entities.SearchResult.create(org);
+                      await base44.entities.SearchResult.create({
+                        ...org,
+                        organization_id: currentOrganizationId
+                      });
                     }
                     onSearchComplete();
                     setSearchResult(null);
