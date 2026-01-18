@@ -41,7 +41,8 @@ import {
   Sparkles,
   AlertTriangle,
   Database,
-  Settings2
+  Settings2,
+  Clock
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
