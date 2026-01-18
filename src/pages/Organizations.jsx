@@ -16,6 +16,7 @@ export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(true);
   const [filters, setFilters] = useState({
     state: "",
     organization_type: "",
