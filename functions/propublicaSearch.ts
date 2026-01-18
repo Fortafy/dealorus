@@ -61,9 +61,8 @@ Deno.serve(async (req) => {
     const searchParams = new URLSearchParams();
     
     if (state) {
-      // ProPublica uses state code (e.g., 'CA', 'NY') directly as the state[id] parameter
-      searchParams.append('state%5Bid%5D', state);
-      console.log('State parameter added:', state);
+      // ProPublica uses state code (e.g., 'CA', 'NY') as the state[id] parameter
+      searchParams.append('state[id]', state);
     }
     
     if (orgName) {
@@ -71,7 +70,7 @@ Deno.serve(async (req) => {
     }
     
     if (city) {
-      searchParams.append('city%5Bid%5D', city);
+      searchParams.append('city[id]', city);
     }
     
     // Map organization type to c_code[id]
@@ -83,13 +82,13 @@ Deno.serve(async (req) => {
         '501c6': '6'
       };
       if (orgTypeMap[orgType]) {
-        searchParams.append('c_code%5Bid%5D', orgTypeMap[orgType]);
+        searchParams.append('c_code[id]', orgTypeMap[orgType]);
       }
     }
     
     // Add NTEE code ID if provided
     if (nteeCodeId) {
-      searchParams.append('ntee%5Bid%5D', nteeCodeId);
+      searchParams.append('ntee[id]', nteeCodeId);
     }
 
     console.log('ProPublica search URL:', `https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);
