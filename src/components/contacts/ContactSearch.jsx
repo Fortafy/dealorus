@@ -484,7 +484,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                         {isSearching ? (
                           <div className="w-4 h-4 border-2 border-blue-300/50 border-t-blue-600 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
                         ) : (
-                          <Zap className="w-4 h-4" />
+                          <Sparkles className="w-4 h-4" />
                         )}
                       </Button>
                     </TooltipTrigger>
