@@ -446,7 +446,11 @@ export default function Organizations() {
                       transition={{ delay: index * 0.05 }}
                     >
                       <button
-                        onClick={() => setSelectedOrg(org)}
+                        onClick={() => {
+                          setSelectedOrg(org);
+                          setShowDashboard(false);
+                          setShowSearchPanel(false);
+                        }}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                           selectedOrg?.id === org.id
                             ? "bg-white"
