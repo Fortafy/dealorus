@@ -303,7 +303,10 @@ Return a JSON object with these fields (use null for any field where data is not
               ) : Array.isArray(searchResult) && searchResult.length > 1 ? (
                 <SearchResultsTable
                   results={searchResult}
-                  onSelectOrganization={setSelectedOrg}
+                  onSelectOrganization={(org) => {
+                    setSelectedOrg(org);
+                    if (onSelectOrganization) onSelectOrganization(org);
+                  }}
                   onSaveAll={handleSaveAll}
                   onSaveSelected={async (selected) => {
                     for (const org of selected) {
