@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
 import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
-import DataSourceSettings from "@/components/organizations/DataSourceSettings";
 import SmartEnrichDialog from "@/components/organizations/SmartEnrichDialog";
 import {
   Building2,
@@ -41,7 +40,6 @@ import {
   Sparkles,
   AlertTriangle,
   Database,
-  Settings2,
   Clock
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -92,7 +90,6 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [enrichedData, setEnrichedData] = useState(null);
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(false);
-  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showSmartEnrichDialog, setShowSmartEnrichDialog] = useState(false);
   const [isDataFreshnessOpen, setIsDataFreshnessOpen] = useState(false);
 
@@ -295,21 +292,6 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
     }
   };
 
-  const handleSaveSettings = async (priority) => {
-    const updatedData = {
-      ...data,
-      data_source_priority: priority,
-    };
-
-    if (isSaved && data.id) {
-      await base44.entities.SearchResult.update(data.id, updatedData);
-    }
-
-    if (onEdit) {
-      onEdit(updatedData);
-    }
-  };
-
   const handleSmartEnrichComplete = (updatedData) => {
     if (onEdit) {
       onEdit(updatedData);
@@ -437,17 +419,6 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                 title="Smart Enrich (Multi-Source)"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowSettingsDialog(true)}
-                disabled={!isSaved}
-                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
-                style={{ color: 'hsl(217, 91%, 60%)' }}
-                title="Data Source Settings"
-              >
-                <Settings2 className="w-3.5 h-3.5" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -650,13 +621,6 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         currentData={data}
         enrichedData={enrichedData}
         onApply={handleApplyEnrichment}
-      />
-
-      <DataSourceSettings
-        open={showSettingsDialog}
-        onOpenChange={setShowSettingsDialog}
-        currentPriority={data.data_source_priority}
-        onSave={handleSaveSettings}
       />
 
       <SmartEnrichDialog
