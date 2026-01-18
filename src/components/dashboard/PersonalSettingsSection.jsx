@@ -63,9 +63,9 @@ export default function PersonalSettingsSection({ user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6"
+      className="max-w-4xl mx-auto px-6 py-6"
     >
-      <div className="max-w-2xl space-y-6">
+      <div className="space-y-6">
         <h2 className="text-2xl font-bold text-slate-900">Personal Settings</h2>
 
         {error && (
