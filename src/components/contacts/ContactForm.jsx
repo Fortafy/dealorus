@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import ActivityFeed from "./ActivityFeed";
 
-export default function ContactForm({ contact, organizationId, open, onOpenChange, onSave }) {
+export default function ContactForm({ contact, organizationId, appClientId, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(contact || {
     organization_id: organizationId,
+    app_client_id: appClientId,
     name: "",
     title: "",
     email: "",
@@ -27,6 +28,7 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
     } else {
       setFormData({
         organization_id: organizationId,
+        app_client_id: appClientId,
         name: "",
         title: "",
         email: "",
@@ -37,7 +39,7 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
         source: "Manual",
       });
     }
-  }, [contact, organizationId]);
+  }, [contact, organizationId, appClientId]);
 
   // Parse source in markdown link format: [display text](url)
   const parseSource = (source) => {
@@ -57,6 +59,9 @@ export default function ContactForm({ contact, organizationId, open, onOpenChang
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.name?.trim()) {
+      return;
+    }
     onSave({
       ...formData,
       last_modified: new Date().toISOString()
