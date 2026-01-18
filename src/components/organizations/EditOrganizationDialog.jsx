@@ -1,12 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 export default function EditOrganizationDialog({ organization, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(organization);
+  const [nteeValidation, setNteeValidation] = useState({ status: null, description: null });
+  const [isValidating, setIsValidating] = useState(false);
+
+  useEffect(() => {
+    setFormData(organization);
+    setNteeValidation({ status: null, description: null });
+  }, [organization, open]);
+
+  const validateNTEECode = async (code) => {
+    if (!code || code.trim() === "") {
+      setNteeValidation({ status: null, description: null });
+      return;
+    }
+
+    setIsValidating(true);
+    try {
+      const response = await fetch(`https://api.charityapi.org/api/ntee_codes/?code=${code.toUpperCase()}`, {
+        headers: {
+          'Authorization': `apikey ${import.meta.env.VITE_CHARITY_API_KEY}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          const nteeData = data[0];
+          setNteeValidation({ 
+            status: 'valid', 
+            description: nteeData.description || nteeData.name 
+          });
+          setFormData(prev => ({ ...prev, ntee_description: nteeData.description || nteeData.name }));
+        } else {
+          setNteeValidation({ status: 'invalid', description: null });
+        }
+      } else {
+        setNteeValidation({ status: 'invalid', description: null });
+      }
+    } catch (error) {
+      console.error('NTEE validation error:', error);
+      setNteeValidation({ status: 'error', description: null });
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleNTEEChange = (value) => {
+    setFormData({ ...formData, ntee_code: value });
+    const debounceTimer = setTimeout(() => {
+      validateNTEECode(value);
+    }, 500);
+    return () => clearTimeout(debounceTimer);
+  };
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -118,10 +172,30 @@ export default function EditOrganizationDialog({ organization, open, onOpenChang
 
             <div>
               <Label>NTEE Code</Label>
-              <Input
-                value={formData.ntee_code || ""}
-                onChange={(e) => handleChange("ntee_code", e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  value={formData.ntee_code || ""}
+                  onChange={(e) => handleNTEEChange(e.target.value)}
+                  className={nteeValidation.status === 'invalid' ? 'border-red-500' : nteeValidation.status === 'valid' ? 'border-green-500' : ''}
+                />
+                {isValidating && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-slate-400" />
+                )}
+                {!isValidating && nteeValidation.status === 'valid' && (
+                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                )}
+                {!isValidating && nteeValidation.status === 'invalid' && (
+                  <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-500" />
+                )}
+              </div>
+              {nteeValidation.status === 'valid' && nteeValidation.description && (
+                <Badge variant="outline" className="mt-1 text-xs bg-green-50 text-green-700 border-green-200">
+                  {nteeValidation.description}
+                </Badge>
+              )}
+              {nteeValidation.status === 'invalid' && (
+                <p className="text-xs text-red-500 mt-1">Invalid NTEE code</p>
+              )}
             </div>
 
             <div>
