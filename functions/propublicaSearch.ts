@@ -35,6 +35,13 @@ Deno.serve(async (req) => {
         }, { status: 404 });
       }
 
+      // Get the first filing with a PDF URL from the root-level filings_with_data array
+      let most_recent_990 = null;
+      if (result.filings_with_data && result.filings_with_data.length > 0) {
+        const filingWithPdf = result.filings_with_data.find(filing => filing.pdf_url);
+        most_recent_990 = filingWithPdf ? filingWithPdf.pdf_url : null;
+      }
+
       const mapped = {
         organization_name: org.name || null,
         state: org.state || null,
@@ -54,7 +61,7 @@ Deno.serve(async (req) => {
         source_created_date: org.created_at || null,
         source_updated_date: org.updated_at || null,
         source_subseccd_code: org.subsection_code ? org.subsection_code.toString() : null,
-        most_recent_990: org.filings_with_date && org.filings_with_date.length > 0 ? org.filings_with_date[0].pdf_url : null,
+        most_recent_990: most_recent_990,
         data_sources: ['ProPublica']
       };
 
