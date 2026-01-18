@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 
-export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin }) {
+export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
   const userSections = [
     {
       id: "profile",
@@ -62,6 +62,29 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {/* Organization Header */}
+      {organization && (
+        <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white flex-shrink-0 border-b border-blue-800">
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-semibold text-blue-100 uppercase tracking-wide mb-1">Organization</p>
+              <h3 className="text-lg font-bold text-white truncate">{organization.name}</h3>
+            </div>
+            <div className="space-y-1 pt-2 border-t border-blue-500">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-blue-100">Plan</span>
+                <span className="font-semibold text-blue-50 capitalize">{organization.subscription_plan || "Basic"}</span>
+              </div>
+              {currentUser && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-blue-100">Admin</span>
+                  <span className="font-semibold text-blue-50 truncate ml-2">{currentUser.full_name}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <nav className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* User Section */}
         <div>
