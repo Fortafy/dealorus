@@ -91,12 +91,21 @@ Deno.serve(async (req) => {
       searchParams.append('ntee[id]', nteeCodeId);
     }
 
+    // Only search if we have at least one search parameter
+    if (!orgName && !state && !city && !ein && !orgType && !nteeCodeId) {
+      return Response.json({ error: 'At least one search parameter is required' }, { status: 400 });
+    }
+
     console.log('ProPublica search URL:', `https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);
 
     const response = await fetch(`https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);
 
     if (!response.ok) {
       console.error('ProPublica API error:', response.status, response.statusText);
+      // Return empty array instead of error for 404s (no results found)
+      if (response.status === 404) {
+        return Response.json([]);
+      }
       return Response.json({ 
         error: 'Failed to search ProPublica',
         status: response.status 
