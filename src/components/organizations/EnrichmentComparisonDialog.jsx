@@ -85,7 +85,12 @@ export default function EnrichmentComparisonDialog({
     const updates = {};
     Object.keys(selectedFields).forEach(key => {
       if (selectedFields[key]) {
-        updates[key] = enrichedData[key];
+        let value = enrichedData[key];
+        // Convert datetime to date-only for source date fields
+        if ((key === 'source_created_date' || key === 'source_updated_date') && value) {
+          value = value.split('T')[0];
+        }
+        updates[key] = value;
       }
     });
     onApply(updates);
