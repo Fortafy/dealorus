@@ -14,12 +14,13 @@ import { base44 } from "@/api/base44Client";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { Sparkles, CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 
-export default function SmartEnrichDialog({ open, onOpenChange, organization, onComplete }) {
+export default function SmartEnrichDialog({ open, onOpenChange, organization, onComplete, organizationSettings }) {
   const [isEnriching, setIsEnriching] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
 
-  const priority = organization.data_source_priority || ["CharityAPI", "ProPublica", "NonprofitCheckPlus", "AI"];
+  // Use organization's default data source priority from org settings, fallback to default
+  const priority = organizationSettings?.default_data_source_priority || ["CharityAPI", "ProPublica", "NonprofitCheckPlus", "AI"];
 
   const handleEnrich = async () => {
     setIsEnriching(true);
