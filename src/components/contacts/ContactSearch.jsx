@@ -418,8 +418,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-4 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'hsl(214, 95%, 93%)' }}>
+                  <Users className="w-5 h-5" style={{ color: 'hsl(217, 91%, 60%)' }} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-slate-900">Key Contacts</h3>
@@ -433,7 +433,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                         onClick={handleAddNew}
                         variant="secondary"
                         size="sm"
-                        className="h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white"
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                        style={{ color: 'hsl(217, 91%, 60%)' }}
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
@@ -460,7 +461,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                         onClick={() => setShowFilterDialog(true)}
                         variant="secondary"
                         size="sm"
-                        className="h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white relative"
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white relative"
+                        style={{ color: 'hsl(217, 91%, 60%)' }}
                       >
                         <Filter className="w-4 h-4" />
                         {Object.values(filters).some(v => v) && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
@@ -476,10 +478,11 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                         disabled={isSearching}
                         variant="secondary"
                         size="sm"
-                        className="h-8 w-8 p-0 bg-white/90 text-indigo-700 hover:bg-white"
+                        className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+                        style={{ color: 'hsl(217, 91%, 60%)' }}
                       >
                         {isSearching ? (
-                          <div className="w-4 h-4 border-2 border-indigo-700/30 border-t-indigo-700 rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-blue-300/50 border-t-blue-600 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
                         ) : (
                           <Zap className="w-4 h-4" />
                         )}
@@ -494,7 +497,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                         onClick={() => searchContacts()}
                         disabled={isSearching}
                         size="sm"
-                        className="h-8 w-8 p-0 bg-indigo-600 text-white hover:bg-indigo-700"
+                        className="h-8 w-8 p-0 text-white"
+                        style={{ backgroundColor: 'hsl(217, 91%, 60%)' }}
                       >
                         {isSearching ? (
                           <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
