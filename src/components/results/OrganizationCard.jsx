@@ -92,6 +92,8 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(false);
   const [showSmartEnrichDialog, setShowSmartEnrichDialog] = useState(false);
   const [isDataFreshnessOpen, setIsDataFreshnessOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Auto-populate NTEE description from code if missing
   const displayData = React.useMemo(() => {
@@ -299,6 +301,36 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
     setShowSmartEnrichDialog(false);
   };
 
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      // Find all contacts related to this organization
+      const relatedContacts = await base44.entities.Contact.filter({
+        organization_id: data.id
+      });
+
+      // Delete all related contacts
+      for (const contact of relatedContacts) {
+        await base44.entities.Contact.delete(contact.id);
+      }
+
+      // Delete the organization
+      await base44.entities.Organization.delete(data.id);
+
+      // Call parent delete handler if provided
+      if (onDelete) {
+        onDelete(data.id);
+      }
+
+      setShowDeleteConfirm(false);
+    } catch (err) {
+      console.error("Error deleting organization and related records:", err);
+      alert("Failed to delete organization. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatLastChecked = (timestamp) => {
     if (!timestamp) return null;
     const date = new Date(timestamp);
@@ -468,7 +500,8 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => onDelete(data.id)}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isDeleting}
                   className="h-8 w-8 p-0"
                   title="Delete"
                 >
@@ -630,6 +663,33 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         onComplete={handleSmartEnrichComplete}
         organizationSettings={data.organizationSettings}
       />
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Organization?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{data.organization_name}</strong> and all related data, including:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Organization contacts</li>
+                <li>Activity history</li>
+                <li>All associated records</li>
+              </ul>
+              <span className="block mt-3 font-semibold text-red-600">This action cannot be undone.</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete Organization"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </motion.div>
       );
       }
