@@ -8,7 +8,7 @@ import BrandingSettings from "@/components/dashboard/BrandingSettings";
 import SubscriptionDetails from "@/components/dashboard/SubscriptionDetails";
 import PersonalProfileSection from "@/components/dashboard/PersonalProfileSection";
 import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSection";
-import AdminOrganizations from "@/components/dashboard/AdminOrganizations";
+import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
