@@ -11,7 +11,6 @@ import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSect
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
-import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
 
@@ -68,10 +67,6 @@ export default function Dashboard() {
       case "organization-settings":
         return isOrgAdmin(currentUser) ? (
           <OrganizationSettings organization={organization} />
-        ) : null;
-      case "branding":
-        return isOrgAdmin(currentUser) ? (
-          <BrandingSettings organization={organization} />
         ) : null;
       case "subscription":
         return isOrgAdmin(currentUser) ? (

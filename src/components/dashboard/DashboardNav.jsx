@@ -6,7 +6,6 @@ import {
   Settings,
   BarChart3,
   Building2,
-  Palette,
   CreditCard,
   Users,
 } from "lucide-react";
@@ -40,11 +39,6 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "organization-settings",
       label: "Organization Settings",
       icon: Building2,
-    },
-    {
-      id: "branding",
-      label: "Branding & Logo",
-      icon: Palette,
     },
     {
       id: "subscription",

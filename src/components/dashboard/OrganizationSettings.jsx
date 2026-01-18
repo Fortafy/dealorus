@@ -17,6 +17,11 @@ export default function OrganizationSettings({ organization }) {
     default_notifications_enabled: true,
     billing_email: "",
   });
+  const [brandingData, setBrandingData] = useState({
+    logo_url: "",
+    primary_color: "#3b82f6",
+  });
+  const [logoPreview, setLogoPreview] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const queryClient = useQueryClient();
@@ -30,6 +35,11 @@ export default function OrganizationSettings({ organization }) {
         default_notifications_enabled: organization.default_notifications_enabled !== false,
         billing_email: organization.billing_email || "",
       });
+      setBrandingData({
+        logo_url: organization.logo_url || "",
+        primary_color: organization.primary_color || "#3b82f6",
+      });
+      setLogoPreview(organization.logo_url);
     }
   }, [organization]);
 
@@ -48,11 +58,40 @@ export default function OrganizationSettings({ organization }) {
     },
   });
 
+  const updateBrandingMutation = useMutation({
+    mutationFn: async () => {
+      await base44.entities.Organization.update(organization.id, brandingData);
+    },
+    onSuccess: () => {
+      setSuccess("Branding settings updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["organization"] });
+      setTimeout(() => setSuccess(null), 3000);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to update branding");
+      setTimeout(() => setError(null), 3000);
+    },
+  });
+
   const handleChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleBrandingChange = (field, value) => {
+    setBrandingData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleLogoUrlChange = (url) => {
+    handleBrandingChange("logo_url", url);
+    if (url) {
+      setLogoPreview(url);
+    }
   };
 
   const handleSave = () => {
@@ -61,6 +100,10 @@ export default function OrganizationSettings({ organization }) {
       return;
     }
     updateMutation.mutate();
+  };
+
+  const handleBrandingSave = () => {
+    updateBrandingMutation.mutate();
   };
 
   return (
@@ -182,6 +225,98 @@ export default function OrganizationSettings({ organization }) {
                   </>
                 ) : (
                   "Save Changes"
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Branding Settings */}
+        <Card className="border-0 shadow-lg mt-6">
+          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
+            <CardTitle>Branding & Logo</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-6">
+            {/* Logo URL */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Logo URL
+              </label>
+              <Input
+                type="url"
+                value={brandingData.logo_url}
+                onChange={(e) => handleLogoUrlChange(e.target.value)}
+                placeholder="https://example.com/logo.png"
+                className="text-base"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Enter the full URL to your organization logo
+              </p>
+            </div>
+
+            {/* Logo Preview */}
+            {logoPreview && (
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <p className="text-sm font-medium text-slate-700 mb-3">Logo Preview</p>
+                <img
+                  src={logoPreview}
+                  alt="Logo preview"
+                  className="h-16 object-contain"
+                  onError={() => {
+                    setError("Failed to load logo preview. Please check the URL.");
+                    setLogoPreview(null);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Primary Color */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Primary Brand Color
+              </label>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    value={brandingData.primary_color}
+                    onChange={(e) => handleBrandingChange("primary_color", e.target.value)}
+                    placeholder="#3b82f6"
+                    className="text-base font-mono"
+                  />
+                </div>
+                <div
+                  className="w-12 h-12 rounded-lg border-2 border-slate-200 cursor-pointer"
+                  style={{ backgroundColor: brandingData.primary_color }}
+                  onClick={() => {
+                    const input = document.createElement("input");
+                    input.type = "color";
+                    input.value = brandingData.primary_color;
+                    input.onchange = (e) => handleBrandingChange("primary_color", e.target.value);
+                    input.click();
+                  }}
+                  title="Click to open color picker"
+                />
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Use hex format (e.g., #3b82f6)
+              </p>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end pt-4 border-t border-slate-200">
+              <Button
+                onClick={handleBrandingSave}
+                disabled={updateBrandingMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {updateBrandingMutation.isPending ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Branding"
                 )}
               </Button>
             </div>
