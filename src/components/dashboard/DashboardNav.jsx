@@ -131,18 +131,19 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
               </h3>
               <div className="space-y-2">
                 {orgSections.map((section) => {
-                  const Icon = section.icon;
-                  const isActive = activeSection === section.id;
-                  return (
-                    <Button
-                      key={section.id}
-                      onClick={() => onSectionChange(section.id)}
-                      variant={isActive ? "default" : "ghost"}
-                      className={`w-full justify-start text-left ${
-                        isActive
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "text-slate-700 hover:bg-slate-100"
-                      }`}
+                    const Icon = section.icon;
+                    const isActive = activeSection === section.id;
+                    return (
+                      <Button
+                        key={section.id}
+                        onClick={() => onSectionChange(section.id)}
+                        variant={isActive ? "default" : "ghost"}
+                        className={`w-full justify-start text-left ${
+                         isActive
+                           ? "text-white hover:opacity-90"
+                           : "text-slate-700 hover:bg-slate-100"
+                       }`}
+                       style={isActive ? { backgroundColor: 'hsl(39, 100%, 50%)' } : {}}
                     >
                       <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
                       <span className="truncate">{section.label}</span>
@@ -164,18 +165,19 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
               </h3>
               <div className="space-y-2">
                 {adminSections.map((section) => {
-                  const Icon = section.icon;
-                  const isActive = activeSection === section.id;
-                  return (
-                    <Button
-                      key={section.id}
-                      onClick={() => onSectionChange(section.id)}
-                      variant={isActive ? "default" : "ghost"}
-                      className={`w-full justify-start text-left ${
-                        isActive
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "text-slate-700 hover:bg-slate-100"
-                      }`}
+                    const Icon = section.icon;
+                    const isActive = activeSection === section.id;
+                    return (
+                      <Button
+                        key={section.id}
+                        onClick={() => onSectionChange(section.id)}
+                        variant={isActive ? "default" : "ghost"}
+                        className={`w-full justify-start text-left ${
+                         isActive
+                           ? "text-white hover:opacity-90"
+                           : "text-slate-700 hover:bg-slate-100"
+                       }`}
+                       style={isActive ? { backgroundColor: 'hsl(39, 100%, 50%)' } : {}}
                     >
                       <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
                       <span className="truncate">{section.label}</span>
