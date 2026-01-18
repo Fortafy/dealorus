@@ -94,6 +94,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showSmartEnrichDialog, setShowSmartEnrichDialog] = useState(false);
+  const [isDataFreshnessOpen, setIsDataFreshnessOpen] = useState(false);
 
   // Auto-populate NTEE description from code if missing
   const displayData = React.useMemo(() => {
