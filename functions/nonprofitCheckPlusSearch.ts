@@ -37,7 +37,8 @@ Deno.serve(async (req) => {
       }, { status: 404 });
     }
 
-    const org = await response.json();
+    const result = await response.json();
+    const org = result.data || result;
 
     if (!org) {
       return Response.json({ 
@@ -63,6 +64,8 @@ Deno.serve(async (req) => {
       ntee_code: org.ntee_code || org.ntee_cd || null,
       ntee_description: null, // Will be populated on frontend
       ruling_date: org.ruling_date || null,
+      source_updated_date: org.organization_info_last_modified || null,
+      source_subseccd_code: org.bmf_subsection ? org.bmf_subsection.toString() : null,
       data_sources: ['Nonprofit Check Plus']
     };
 
