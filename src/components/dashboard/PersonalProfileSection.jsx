@@ -154,7 +154,9 @@ export default function PersonalProfileSection({ user }) {
               <Button
                 onClick={handleSave}
                 disabled={updateMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
               >
                 {updateMutation.isPending ? (
                   <>

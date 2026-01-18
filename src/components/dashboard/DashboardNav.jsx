@@ -70,21 +70,21 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
     <div className="flex flex-col h-full overflow-hidden">
       {/* Organization Header */}
       {organization && (
-        <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white flex-shrink-0 border-b border-blue-800">
+        <div className="p-4 text-white flex-shrink-0 border-b" style={{ backgroundColor: 'hsl(39, 100%, 50%)', borderColor: 'hsl(39, 100%, 45%)' }}>
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-semibold text-blue-100 uppercase tracking-wide mb-1">Organization</p>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-90">Organization</p>
               <h3 className="text-lg font-bold text-white truncate">{organization.name}</h3>
             </div>
-            <div className="space-y-1 pt-2 border-t border-blue-500">
+            <div className="space-y-1 pt-2 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.3)' }}>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-blue-100">Plan</span>
-                <span className="font-semibold text-blue-50 capitalize">{organization.subscription_plan || "Basic"}</span>
+                <span className="opacity-90">Plan</span>
+                <span className="font-semibold capitalize">{organization.subscription_plan || "Basic"}</span>
               </div>
               {currentUser && (
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-blue-100">Admin</span>
-                  <span className="font-semibold text-blue-50 truncate ml-2">{currentUser.full_name}</span>
+                  <span className="opacity-90">Admin</span>
+                  <span className="font-semibold truncate ml-2">{currentUser.full_name}</span>
                 </div>
               )}
             </div>
@@ -108,9 +108,10 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                   variant={isActive ? "default" : "ghost"}
                   className={`w-full justify-start text-left ${
                     isActive
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "text-white hover:opacity-90"
                       : "text-slate-700 hover:bg-slate-100"
                   }`}
+                  style={isActive ? { backgroundColor: 'hsl(39, 100%, 50%)' } : {}}
                 >
                   <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
                   <span className="truncate">{section.label}</span>
