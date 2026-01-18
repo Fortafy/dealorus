@@ -242,6 +242,7 @@ export default function Organizations() {
                           fill="#8884d8"
                           dataKey="value"
                           onClick={(entry) => {
+                            setShowDashboard(false);
                             const newFilters = { ...filters, organization_type: entry.name };
                             setFilters(newFilters);
                             const firstMatch = organizations.find(org => org.organization_type?.toLowerCase().includes(entry.name.toLowerCase()));
