@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     }
     
     // Map organization type to c_code[id]
-    if (orgType) {
+    if (orgType && orgType !== 'Other Nonprofit') {
       const orgTypeMap = {
         '501c3': '3',
         'foundation': '3', // Private foundations are also 501(c)(3)
@@ -85,6 +85,7 @@ Deno.serve(async (req) => {
         searchParams.append('c_code[id]', orgTypeMap[orgType]);
       }
     }
+    // If 'Other Nonprofit' is selected, don't filter by c_code - search all types
     
     // Add NTEE code ID if provided
     if (nteeCodeId) {
