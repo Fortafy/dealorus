@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
+import { formatEIN } from "@/components/utils/einFormatter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, ArrowLeft } from "lucide-react";
@@ -70,10 +71,13 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
         console.log('Results after revenue filter:', results);
       }
 
-      // Enrich NTEE descriptions
+      // Enrich NTEE descriptions and format EINs
       results.forEach(org => {
         if (org.ntee_code && !org.ntee_description) {
           org.ntee_description = getNTEEDescription(org.ntee_code);
+        }
+        if (org.ein) {
+          org.ein = formatEIN(org.ein);
         }
       });
 
@@ -202,6 +206,10 @@ Return a JSON object with these fields (use null for any field where data is not
 
           if (enrichedData.ntee_code && !enrichedData.ntee_description) {
             enrichedData.ntee_description = getNTEEDescription(enrichedData.ntee_code);
+          }
+
+          if (enrichedData.ein) {
+            enrichedData.ein = formatEIN(enrichedData.ein);
           }
 
           await base44.entities.SearchResult.create(enrichedData);

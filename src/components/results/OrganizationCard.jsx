@@ -44,6 +44,7 @@ import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { getDataSourceLinks } from "@/components/utils/dataSourceLinks";
+import { normalizeEIN } from "@/components/utils/einFormatter";
 import { Award, FileCheck, Link2, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -97,8 +98,12 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
       const allOrgs = await base44.entities.SearchResult.list();
       
       const duplicate = allOrgs.find(org => {
-        // Match by EIN if both have it
-        if (data.ein && org.ein && data.ein === org.ein) return true;
+        // Match by EIN if both have it (compare normalized versions without dashes)
+        if (data.ein && org.ein) {
+          const normalizedDataEin = normalizeEIN(data.ein);
+          const normalizedOrgEin = normalizeEIN(org.ein);
+          if (normalizedDataEin === normalizedOrgEin) return true;
+        }
         
         // Match by name and address
         if (data.organization_name && org.organization_name &&
