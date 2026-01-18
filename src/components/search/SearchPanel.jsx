@@ -33,6 +33,9 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
       if (state) searchParams.state = state;
       if (city) searchParams.city = city;
       if (ein) searchParams.ein = ein;
+      if (orgName) searchParams.orgName = orgName;
+      if (orgType) searchParams.orgType = orgType;
+      if (nteeDescription) searchParams.nteeDescription = nteeDescription;
       
       console.log('ProPublica search params:', searchParams);
       

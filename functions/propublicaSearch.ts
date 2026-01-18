@@ -58,14 +58,58 @@ Deno.serve(async (req) => {
     }
 
     // Use ProPublica search endpoint for state/city queries
+    const { orgName, orgType, nteeDescription } = await req.json();
+    
     if (!state) {
       return Response.json({ error: 'Either EIN or state is required' }, { status: 400 });
     }
 
     const searchParams = new URLSearchParams();
-    searchParams.append('state[id]', state);
-    if (city) {
-      searchParams.append('q', city);
+    searchParams.append('state%5Bid%5D', state);
+    
+    if (orgName || city) {
+      searchParams.append('q', city || orgName);
+    }
+    
+    // Map organization type to c_code[id]
+    if (orgType) {
+      const orgTypeMap = {
+        '501c3': '3',
+        'foundation': '3', // Private foundations are also 501(c)(3)
+        '501c4': '4',
+        '501c6': '6'
+      };
+      if (orgTypeMap[orgType]) {
+        searchParams.append('c_code%5Bid%5D', orgTypeMap[orgType]);
+      }
+    }
+    
+    // Map NTEE category to ntee[id]
+    if (nteeDescription) {
+      const nteeMap = {
+        'arts': '1',
+        'culture': '1',
+        'humanities': '1',
+        'education': '2',
+        'environment': '3',
+        'animals': '3',
+        'health': '4',
+        'human services': '5',
+        'international': '6',
+        'foreign affairs': '6',
+        'public': '7',
+        'societal benefit': '7',
+        'religion': '8',
+        'mutual': '9',
+        'membership': '9'
+      };
+      const lowerNtee = nteeDescription.toLowerCase();
+      for (const [key, value] of Object.entries(nteeMap)) {
+        if (lowerNtee.includes(key)) {
+          searchParams.append('ntee%5Bid%5D', value);
+          break;
+        }
+      }
     }
 
     console.log('ProPublica search URL:', `https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);
