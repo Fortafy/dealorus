@@ -90,7 +90,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [enrichedData, setEnrichedData] = useState(null);
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
-  const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(true);
+  const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(false);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showSmartEnrichDialog, setShowSmartEnrichDialog] = useState(false);
 
