@@ -57,13 +57,12 @@ Deno.serve(async (req) => {
       return Response.json(mapped);
     }
 
-    // Use ProPublica search endpoint for state/city queries
-    if (!state) {
-      return Response.json({ error: 'State is required for organization name searches. ProPublica API requires a state parameter.' }, { status: 400 });
-    }
-
+    // Use ProPublica search endpoint for searches
     const searchParams = new URLSearchParams();
-    searchParams.append('state%5Bid%5D', state);
+    
+    if (state) {
+      searchParams.append('state%5Bid%5D', state);
+    }
     
     if (orgName) {
       searchParams.append('q', orgName);

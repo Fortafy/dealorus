@@ -47,12 +47,6 @@ export default function SearchForm({ onSearch, isLoading }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate: if searching by org name, city, or filters, state is required (ProPublica API requirement)
-    if ((orgName.trim() || city.trim() || orgType || nteeDescription.trim()) && !ein.trim() && !state) {
-      alert('State is required when searching by organization name, city, or filters. Please select a state or search by EIN instead.');
-      return;
-    }
-    
     // At least one search criteria must be provided
     const hasSearchCriteria = orgName.trim() || ein.trim() || state || minRevenue || maxRevenue || orgType || nteeDescription.trim();
     if (hasSearchCriteria) {
@@ -129,7 +123,7 @@ export default function SearchForm({ onSearch, isLoading }) {
           
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              State <span className="text-red-500">*</span>
+              State
             </label>
             <Select value={state} onValueChange={setState}>
               <SelectTrigger className="h-11 bg-white border-slate-200">
