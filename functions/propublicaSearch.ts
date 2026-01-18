@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { ein, state, city } = await req.json();
+    const { ein, state, city, orgName, orgType, nteeDescription } = await req.json();
     
-    console.log('ProPublica function received:', { ein, state, city });
+    console.log('ProPublica function received:', { ein, state, city, orgName, orgType, nteeDescription });
 
     // If EIN is provided, use the organization lookup endpoint
     if (ein) {
@@ -58,8 +58,6 @@ Deno.serve(async (req) => {
     }
 
     // Use ProPublica search endpoint for state/city queries
-    const { orgName, orgType, nteeDescription } = await req.json();
-    
     if (!state) {
       return Response.json({ error: 'Either EIN or state is required' }, { status: 400 });
     }
