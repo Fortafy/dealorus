@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { ein, state, city, orgName, orgType, nteeDescription } = await req.json();
+    const { ein, state, city, orgName, orgType, nteeCodeId } = await req.json();
     
-    console.log('ProPublica function received:', { ein, state, city, orgName, orgType, nteeDescription });
+    console.log('ProPublica function received:', { ein, state, city, orgName, orgType, nteeCodeId });
 
     // If EIN is provided, use the organization lookup endpoint
     if (ein) {
@@ -85,32 +85,9 @@ Deno.serve(async (req) => {
       }
     }
     
-    // Map NTEE category to ntee[id]
-    if (nteeDescription) {
-      const nteeMap = {
-        'arts': '1',
-        'culture': '1',
-        'humanities': '1',
-        'education': '2',
-        'environment': '3',
-        'animals': '3',
-        'health': '4',
-        'human services': '5',
-        'international': '6',
-        'foreign affairs': '6',
-        'public': '7',
-        'societal benefit': '7',
-        'religion': '8',
-        'mutual': '9',
-        'membership': '9'
-      };
-      const lowerNtee = nteeDescription.toLowerCase();
-      for (const [key, value] of Object.entries(nteeMap)) {
-        if (lowerNtee.includes(key)) {
-          searchParams.append('ntee%5Bid%5D', value);
-          break;
-        }
-      }
+    // Add NTEE code ID if provided
+    if (nteeCodeId) {
+      searchParams.append('ntee%5Bid%5D', nteeCodeId);
     }
 
     console.log('ProPublica search URL:', `https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);

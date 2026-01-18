@@ -42,25 +42,39 @@ export default function SearchForm({ onSearch, isLoading }) {
   const [minRevenue, setMinRevenue] = useState("");
   const [maxRevenue, setMaxRevenue] = useState("");
   const [orgType, setOrgType] = useState("");
-  const [nteeDescription, setNteeDescription] = useState("");
+  const [nteeCodeId, setNteeCodeId] = useState("");
+
+  const NTEE_CATEGORIES = [
+    { id: "1", name: "Arts, Culture & Humanities" },
+    { id: "2", name: "Education" },
+    { id: "3", name: "Environment and Animals" },
+    { id: "4", name: "Health" },
+    { id: "5", name: "Human Services" },
+    { id: "6", name: "International, Foreign Affairs" },
+    { id: "7", name: "Public, Societal Benefit" },
+    { id: "8", name: "Religion Related" },
+    { id: "9", name: "Mutual/Membership Benefit" },
+    { id: "10", name: "Unknown, Unclassified" },
+  ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // At least one search criteria must be provided
-    const hasSearchCriteria = orgName.trim() || ein.trim() || state || minRevenue || maxRevenue || orgType || nteeDescription.trim();
-    if (hasSearchCriteria) {
-      onSearch({
-        orgName: orgName.trim() || undefined,
-        ein: ein.trim() || undefined,
-        state: state || undefined,
-        city: city.trim() || undefined,
-        minRevenue: minRevenue || undefined,
-        maxRevenue: maxRevenue || undefined,
-        orgType: orgType || undefined,
-        nteeDescription: nteeDescription.trim() || undefined,
-      });
+    // State and organization type are required
+    if (!state || !orgType) {
+      return;
     }
+    
+    onSearch({
+      orgName: orgName.trim() || undefined,
+      ein: ein.trim() || undefined,
+      state: state || undefined,
+      city: city.trim() || undefined,
+      minRevenue: minRevenue || undefined,
+      maxRevenue: maxRevenue || undefined,
+      orgType: orgType || undefined,
+      nteeCodeId: nteeCodeId || undefined,
+    });
   };
 
   const handleClear = () => {
@@ -71,10 +85,10 @@ export default function SearchForm({ onSearch, isLoading }) {
     setMinRevenue("");
     setMaxRevenue("");
     setOrgType("");
-    setNteeDescription("");
+    setNteeCodeId("");
   };
 
-  const hasAnyValue = orgName || ein || state || city || minRevenue || maxRevenue || orgType || nteeDescription;
+  const hasAnyValue = orgName || ein || city || minRevenue || maxRevenue || nteeCodeId;
 
   return (
     <motion.div
@@ -123,14 +137,13 @@ export default function SearchForm({ onSearch, isLoading }) {
           
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              State
+              State <span className="text-red-500">*</span>
             </label>
             <Select value={state} onValueChange={setState}>
               <SelectTrigger className="h-11 bg-white border-slate-200">
-                <SelectValue placeholder="Select state (optional)" />
+                <SelectValue placeholder="Select state" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
-                <SelectItem value={null}>None</SelectItem>
                 {US_STATES.map((s) => (
                   <SelectItem key={s.code} value={s.code}>
                     {s.name}
@@ -142,14 +155,13 @@ export default function SearchForm({ onSearch, isLoading }) {
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Organization Type
+              Organization Type <span className="text-red-500">*</span>
             </label>
             <Select value={orgType} onValueChange={setOrgType}>
               <SelectTrigger className="h-11 bg-white border-slate-200">
-                <SelectValue placeholder="Any type" />
+                <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>None</SelectItem>
                 <SelectItem value="501c3">501(c)(3) Public Charity</SelectItem>
                 <SelectItem value="foundation">Private Foundation</SelectItem>
                 <SelectItem value="government">Government Agency</SelectItem>
@@ -162,12 +174,19 @@ export default function SearchForm({ onSearch, isLoading }) {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               NTEE Category
             </label>
-            <Input
-              value={nteeDescription}
-              onChange={(e) => setNteeDescription(e.target.value)}
-              placeholder="e.g., Professional Societies, Arts, Education"
-              className="h-11 bg-white border-slate-200"
-            />
+            <Select value={nteeCodeId} onValueChange={setNteeCodeId}>
+              <SelectTrigger className="h-11 bg-white border-slate-200">
+                <SelectValue placeholder="Select category (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>None</SelectItem>
+                {NTEE_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -194,10 +213,7 @@ export default function SearchForm({ onSearch, isLoading }) {
           </div>
         </div>
 
-        <div className="flex justify-between items-center pt-2">
-          <p className="text-xs text-slate-500">
-            Fill in any combination of fields to search
-          </p>
+        <div className="flex justify-end items-center pt-2">
           <div className="flex gap-2">
             {hasAnyValue && (
               <Button
