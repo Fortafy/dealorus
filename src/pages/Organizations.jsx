@@ -200,7 +200,7 @@ export default function Organizations() {
                           outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
-                          onClick={(entry) => setFilters({ ...filters, ntee_code: entry.name })}
+                          onClick={(entry) => setFilters({ ...filters, ntee_code: entry.code })}
                         >
                           {stats.nteeData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
