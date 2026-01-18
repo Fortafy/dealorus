@@ -88,9 +88,9 @@ export default function Dashboard() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-12 h-12 border-4 border-orange-100 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: 'hsl(39, 100%, 50%)' }} />
           <p className="text-slate-600">Loading dashboard...</p>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50/30 flex flex-col overflow-hidden">
       {/* Header */}
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -116,7 +116,7 @@ export default function Dashboard() {
             </button>
             <Link to={createPageUrl("Dashboard")} title="User Profile">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-blue-600 text-white text-xs font-semibold">
+                <AvatarFallback className="text-white text-xs font-semibold" style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}>
                   {currentUser?.full_name?.split(" ").map(n => n[0]).join("") || "U"}
                 </AvatarFallback>
               </Avatar>
