@@ -34,6 +34,11 @@ export default function Organizations() {
     queryFn: () => base44.entities.SearchResult.list("-created_date"),
   });
 
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["contacts"],
+    queryFn: () => base44.entities.Contact.list("-created_date"),
+  });
+
   // Check for pre-selected organization from URL
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
