@@ -178,9 +178,9 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   const handleSave = async (data) => {
-    await base44.entities.SearchResult.create({
+    await base44.entities.Organization.create({
       ...data,
-      organization_id: currentOrganizationId
+      client_id: currentOrganizationId
     });
     onSearchComplete();
     setSelectedOrg(null);
@@ -189,7 +189,7 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   const handleUpdate = async (id, data) => {
-    await base44.entities.SearchResult.update(id, data);
+    await base44.entities.Organization.update(id, data);
     onSearchComplete();
     setSelectedOrg(null);
     setSearchResult(null);
@@ -199,9 +199,9 @@ Return a JSON object with these fields (use null for any field where data is not
   const handleSaveAll = async () => {
     if (Array.isArray(searchResult)) {
       for (const org of searchResult) {
-        await base44.entities.SearchResult.create({
+        await base44.entities.Organization.create({
           ...org,
-          organization_id: currentOrganizationId
+          client_id: currentOrganizationId
         });
       }
       onSearchComplete();
@@ -306,9 +306,9 @@ Return a JSON object with these fields (use null for any field where data is not
             enrichedData.ein = formatEIN(enrichedData.ein);
           }
 
-          await base44.entities.SearchResult.create({
+          await base44.entities.Organization.create({
             ...enrichedData,
-            organization_id: currentOrganizationId
+            client_id: currentOrganizationId
           });
 
            results.push({
@@ -422,9 +422,9 @@ Return a JSON object with these fields (use null for any field where data is not
                   onSaveAll={handleSaveAll}
                   onSaveSelected={async (selected) => {
                     for (const org of selected) {
-                      await base44.entities.SearchResult.create({
+                      await base44.entities.Organization.create({
                         ...org,
-                        organization_id: currentOrganizationId
+                        client_id: currentOrganizationId
                       });
                     }
                     onSearchComplete();
