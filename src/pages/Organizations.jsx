@@ -282,7 +282,8 @@ export default function Organizations() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.4 + index * 0.05 }}
-                          className="flex items-start justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors"
+                          className="flex items-start justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors cursor-pointer"
+                          onClick={() => onSelectOrg(org)}
                         >
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-slate-900 truncate">
