@@ -305,9 +305,9 @@ Return a JSON object with these fields (use null for any field where data is not
   return (
     <div className="m-6">
       <div className="bg-white rounded-lg shadow-xl shadow-slate-200/50 overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6">
+        <div className="text-white p-6" style={{ background: 'linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))' }}>
           <h2 className="text-xl font-semibold">Data Enrichment</h2>
-          <p className="text-indigo-100 text-sm mt-1">Search for organizations and enrich data</p>
+          <p className="text-sm mt-1 opacity-90">Search for organizations and enrich data</p>
         </div>
 
         <div className="p-6">
@@ -329,7 +329,7 @@ Return a JSON object with these fields (use null for any field where data is not
 
           {isSearching && (
             <div className="flex flex-col items-center justify-center py-12 mt-4">
-              <div className="w-12 h-12 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin mb-4" />
+              <div className="w-12 h-12 rounded-full border-4 border-blue-100 animate-spin mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
               <p className="text-slate-600 font-medium">Searching public databases...</p>
               <p className="text-sm text-slate-400 mt-1">This may take a few seconds</p>
             </div>
