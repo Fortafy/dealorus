@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
-import Dashboard from "./Dashboard";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { Building2, Search, Trash2, X, Plus, Home } from "lucide-react";
+import { Building2, Search, Trash2, X, Plus, Home, Users, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
 
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
