@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { getDataSourceLinks } from "@/components/utils/dataSourceLinks";
 import { normalizeEIN } from "@/components/utils/einFormatter";
@@ -82,6 +83,7 @@ function DataRow({ icon: Icon, label, value, isLink }) {
 }
 
 export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDelete, onEdit }) {
+  const queryClient = useQueryClient();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
   const [enrichingSource, setEnrichingSource] = useState(null);
@@ -316,6 +318,9 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
 
       // Delete the organization
       await base44.entities.Organization.delete(data.id);
+
+      // Invalidate queries to refresh the organization list
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
 
       // Call parent delete handler if provided
       if (onDelete) {
