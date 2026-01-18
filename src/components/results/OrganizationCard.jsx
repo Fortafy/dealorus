@@ -89,9 +89,33 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(true);
 
+  // Auto-populate NTEE description from code if missing
+  const displayData = React.useMemo(() => {
+    if (data.ntee_code && !data.ntee_description) {
+      return {
+        ...data,
+        ntee_description: getNTEEDescription(data.ntee_code)
+      };
+    }
+    return data;
+  }, [data]);
+
   useEffect(() => {
     checkForDuplicate();
   }, [data.ein, data.organization_name, data.address]);
+
+  // Update database if NTEE description is auto-populated for saved records
+  useEffect(() => {
+    if (isSaved && data.id && data.ntee_code && !data.ntee_description) {
+      const description = getNTEEDescription(data.ntee_code);
+      if (description && onEdit) {
+        const updatedData = { ...data, ntee_description: description };
+        base44.entities.SearchResult.update(data.id, updatedData).then(() => {
+          onEdit(updatedData);
+        });
+      }
+    }
+  }, [data.id, data.ntee_code, data.ntee_description, isSaved]);
 
   const checkForDuplicate = async () => {
     try {
@@ -250,7 +274,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
 
       // Auto-map NTEE code to description if code exists but description doesn't
       if (result.ntee_code && !result.ntee_description) {
-        result.ntee_description = await getNTEEDescription(result.ntee_code);
+        result.ntee_description = getNTEEDescription(result.ntee_code);
       }
 
       setEnrichedData(result);
@@ -317,21 +341,21 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         <CardHeader className="text-white p-6" style={{ background: 'linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))' }}>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-semibold mb-2">{data.organization_name}</h2>
+              <h2 className="text-xl font-semibold mb-2">{displayData.organization_name}</h2>
               <div className="flex flex-wrap gap-2">
-                {data.organization_type && (
+                {displayData.organization_type && (
                   <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">
-                    {data.organization_type}
+                    {displayData.organization_type}
                   </Badge>
                 )}
-                {data.ntee_description && (
+                {displayData.ntee_description && (
                   <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">
-                    {data.ntee_description}
+                    {displayData.ntee_description}
                   </Badge>
                 )}
-                {data.ntee_code && !data.ntee_description && (
+                {displayData.ntee_code && !displayData.ntee_description && (
                   <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">
-                    NTEE: {data.ntee_code}
+                    NTEE: {displayData.ntee_code}
                   </Badge>
                 )}
               </div>
@@ -433,28 +457,28 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         </CardHeader>
 
         <CardContent className="p-6">
-          {data.mission && (
+          {displayData.mission && (
             <div className="mb-6 p-4 bg-slate-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="w-4 h-4 text-slate-500" />
                 <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Mission</span>
               </div>
-              <p className="text-sm text-slate-700 leading-relaxed">{data.mission}</p>
+              <p className="text-sm text-slate-700 leading-relaxed">{displayData.mission}</p>
             </div>
           )}
 
           <div className="grid md:grid-cols-2 gap-x-8">
             <div>
-              <DataRow icon={Hash} label="EIN" value={data.ein} />
+              <DataRow icon={Hash} label="EIN" value={displayData.ein} />
               <DataRow icon={MapPin} label="Address" value={formatAddress()} />
-              <DataRow icon={Phone} label="Phone" value={data.phone} />
-              <DataRow icon={Mail} label="Email" value={data.email} />
+              <DataRow icon={Phone} label="Phone" value={displayData.phone} />
+              <DataRow icon={Mail} label="Email" value={displayData.email} />
             </div>
             <div>
-              <DataRow icon={Globe} label="Website" value={data.website} isLink />
-              <DataRow icon={DollarSign} label="Annual Revenue" value={data.annual_revenue} />
-              <DataRow icon={Calendar} label="Tax-Exempt Since" value={data.ruling_date} />
-              <DataRow icon={Tag} label="Classification" value={data.ntee_description && data.ntee_code ? `${data.ntee_description} (${data.ntee_code})` : data.ntee_description || data.ntee_code || null} />
+              <DataRow icon={Globe} label="Website" value={displayData.website} isLink />
+              <DataRow icon={DollarSign} label="Annual Revenue" value={displayData.annual_revenue} />
+              <DataRow icon={Calendar} label="Tax-Exempt Since" value={displayData.ruling_date} />
+              <DataRow icon={Tag} label="Classification" value={displayData.ntee_description && displayData.ntee_code ? `${displayData.ntee_description} (${displayData.ntee_code})` : displayData.ntee_description || displayData.ntee_code || null} />
             </div>
           </div>
 
