@@ -200,7 +200,12 @@ export default function Organizations() {
                           outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
-                          onClick={(entry) => setFilters({ ...filters, ntee_code: entry.code })}
+                          onClick={(entry) => {
+                            const newFilters = { ...filters, ntee_code: entry.code };
+                            setFilters(newFilters);
+                            const firstMatch = organizations.find(org => org.ntee_code?.toLowerCase().includes(entry.code.toLowerCase()));
+                            if (firstMatch) setSelectedOrg(firstMatch);
+                          }}
                         >
                           {stats.nteeData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
