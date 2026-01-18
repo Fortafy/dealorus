@@ -129,7 +129,7 @@ export default function SearchForm({ onSearch, isLoading }) {
           
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              State
+              State <span className="text-red-500">*</span>
             </label>
             <Select value={state} onValueChange={setState}>
               <SelectTrigger className="h-11 bg-white border-slate-200">
