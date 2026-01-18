@@ -8,6 +8,7 @@ import BrandingSettings from "@/components/dashboard/BrandingSettings";
 import SubscriptionDetails from "@/components/dashboard/SubscriptionDetails";
 import PersonalProfileSection from "@/components/dashboard/PersonalProfileSection";
 import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSection";
+import AdminOrganizations from "@/components/dashboard/AdminOrganizations";
 import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
@@ -50,6 +51,8 @@ export default function Dashboard() {
         return <PersonalProfileSection user={currentUser} />;
       case "settings":
         return <PersonalSettingsSection user={currentUser} />;
+      case "admin-organizations":
+        return currentUser?.role === "admin" ? <AdminOrganizations /> : null;
       case "metrics":
         return isOrgAdmin(currentUser) ? (
           <DashboardMetrics organization={organization} users={users} />
@@ -111,6 +114,7 @@ export default function Dashboard() {
             activeSection={activeSection}
             onSectionChange={setActiveSection}
             isAdmin={isOrgAdmin(currentUser)}
+            isBaseAdmin={currentUser?.role === "admin"}
           />
         </div>
 
