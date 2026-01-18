@@ -135,7 +135,7 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
         },
       };
 
-      await base44.entities.SearchResult.update(organization.id, updatedData);
+      await base44.entities.Organization.update(organization.id, updatedData);
       
       setResults(enrichmentResults);
       
