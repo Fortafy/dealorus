@@ -22,11 +22,17 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
   const [bulkTotal, setBulkTotal] = useState(0);
   const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("single");
+  const [lastSearchParams, setLastSearchParams] = useState(null);
+  const [isLLMSearching, setIsLLMSearching] = useState(false);
 
   const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeCodeId }) => {
     setIsSearching(true);
     setError(null);
     setSearchResult(null);
+
+    // Store search params for LLM search option
+    const fullParams = { orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeCodeId };
+    setLastSearchParams(fullParams);
 
     try {
       // Search ProPublica database
@@ -84,7 +90,7 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
       if (results.length > 0) {
         setSearchResult(results);
       } else {
-        setError("No organizations found matching the criteria.");
+        setSearchResult([]); // Empty array to trigger no results UI
       }
     } catch (err) {
       console.error('ProPublica search error - Full error:', err);
@@ -94,6 +100,65 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
       setError(`Unable to fetch organization data from ProPublica: ${err.message || 'Unknown error'}`);
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleLLMSearch = async () => {
+    if (!lastSearchParams) return;
+    
+    setIsLLMSearching(true);
+    setError(null);
+    
+    try {
+      const { orgName, state, city, orgType } = lastSearchParams;
+      const prompt = `Search for nonprofit or government organization data for "${orgName || 'any organization'}"${city ? ` in ${city}` : ''}${state ? `, ${state}` : ''}.
+          
+Find and return accurate information from public sources like ProPublica, IRS, Charity Navigator, GuideStar, etc.
+
+Return a JSON object with these fields (use null for any field where data is not found):
+- organization_name, state, ein, address, city, zip_code, phone, email, website, organization_type, mission, annual_revenue, ntee_code, ruling_date, data_sources (array)`;
+
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            organization_name: { type: "string" },
+            state: { type: "string" },
+            ein: { type: ["string", "null"] },
+            address: { type: ["string", "null"] },
+            city: { type: ["string", "null"] },
+            zip_code: { type: ["string", "null"] },
+            phone: { type: ["string", "null"] },
+            email: { type: ["string", "null"] },
+            website: { type: ["string", "null"] },
+            organization_type: { type: ["string", "null"] },
+            mission: { type: ["string", "null"] },
+            annual_revenue: { type: ["string", "null"] },
+            ntee_code: { type: ["string", "null"] },
+            ruling_date: { type: ["string", "null"] },
+            data_sources: { type: "array", items: { type: "string" } },
+          },
+        },
+      });
+
+      if (result.organization_name) {
+        if (result.ntee_code && !result.ntee_description) {
+          result.ntee_description = getNTEEDescription(result.ntee_code);
+        }
+        if (result.ein) {
+          result.ein = formatEIN(result.ein);
+        }
+        setSearchResult([result]);
+      } else {
+        setError("LLM search could not find the organization. Please try creating it manually.");
+      }
+    } catch (err) {
+      console.error('LLM search error:', err);
+      setError(`LLM search failed: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsLLMSearching(false);
     }
   };
 
@@ -299,6 +364,29 @@ Return a JSON object with these fields (use null for any field where data is not
                     onUpdate={handleUpdate}
                     isSaved={false}
                   />
+                </div>
+              ) : Array.isArray(searchResult) && searchResult.length === 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
+                  <p className="text-slate-700 mb-6">No organizations found in ProPublica. Try searching via AI or create manually.</p>
+                  <div className="flex gap-3 justify-center">
+                    <Button
+                      onClick={handleLLMSearch}
+                      disabled={isLLMSearching}
+                      style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
+                      className="hover:opacity-90"
+                    >
+                      {isLLMSearching ? "Searching..." : "Search via AI"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchResult(null);
+                        setLastSearchParams(null);
+                      }}
+                    >
+                      Create Manually
+                    </Button>
+                  </div>
                 </div>
               ) : Array.isArray(searchResult) && searchResult.length > 1 ? (
                 <SearchResultsTable
