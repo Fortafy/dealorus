@@ -119,7 +119,11 @@ export default function Organizations() {
       const nteeGroups = {};
       organizations.forEach((org) => {
         const desc = org.ntee_description || "Uncategorized";
-        nteeGroups[desc] = (nteeGroups[desc] || 0) + 1;
+        const code = org.ntee_code || "Unknown";
+        if (!nteeGroups[desc]) {
+          nteeGroups[desc] = { value: 0, code };
+        }
+        nteeGroups[desc].value += 1;
       });
 
       const typeGroups = {};
@@ -128,9 +132,10 @@ export default function Organizations() {
         typeGroups[type] = (typeGroups[type] || 0) + 1;
       });
 
-      const nteeData = Object.entries(nteeGroups).map(([name, value]) => ({
+      const nteeData = Object.entries(nteeGroups).map(([name, data]) => ({
         name: name.length > 30 ? name.substring(0, 27) + "..." : name,
-        value,
+        value: data.value,
+        code: data.code,
       }));
 
       const typeData = Object.entries(typeGroups).map(([name, value]) => ({
