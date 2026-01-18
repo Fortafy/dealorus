@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Building2 } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { motion } from "framer-motion";
 
 const US_STATES = [
@@ -62,6 +62,19 @@ export default function SearchForm({ onSearch, isLoading }) {
     }
   };
 
+  const handleClear = () => {
+    setOrgName("");
+    setEin("");
+    setState("");
+    setCity("");
+    setMinRevenue("");
+    setMaxRevenue("");
+    setOrgType("");
+    setNteeDescription("");
+  };
+
+  const hasAnyValue = orgName || ein || state || city || minRevenue || maxRevenue || orgType || nteeDescription;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -116,6 +129,7 @@ export default function SearchForm({ onSearch, isLoading }) {
                 <SelectValue placeholder="Select state (optional)" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
+                <SelectItem value={null}>None</SelectItem>
                 {US_STATES.map((s) => (
                   <SelectItem key={s.code} value={s.code}>
                     {s.name}
@@ -134,6 +148,7 @@ export default function SearchForm({ onSearch, isLoading }) {
                 <SelectValue placeholder="Any type" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value={null}>None</SelectItem>
                 <SelectItem value="501c3">501(c)(3) Public Charity</SelectItem>
                 <SelectItem value="foundation">Private Foundation</SelectItem>
                 <SelectItem value="government">Government Agency</SelectItem>
@@ -182,23 +197,36 @@ export default function SearchForm({ onSearch, isLoading }) {
           <p className="text-xs text-slate-500">
             Fill in any combination of fields to search
           </p>
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="h-11 px-8 bg-indigo-600 hover:bg-indigo-700 text-white"
-          >
-            {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Searching...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Search & Enrich
-              </div>
+          <div className="flex gap-2">
+            {hasAnyValue && (
+              <Button
+                type="button"
+                onClick={handleClear}
+                variant="outline"
+                className="h-11 px-6"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
             )}
-          </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="h-11 px-8 bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Searching...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Search className="w-5 h-5" />
+                  Search & Enrich
+                </div>
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </motion.div>
