@@ -217,24 +217,26 @@ export default function Organizations() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-sm font-medium">Organizations by Type</CardTitle>
+                  <p className="text-xs text-slate-500 mt-1">{stats.typeData.length} types</p>
                 </CardHeader>
                 <CardContent>
                   {stats.typeData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={400}>
                       <PieChart>
                         <Pie
                           data={stats.typeData}
                           cx="50%"
                           cy="50%"
-                          outerRadius={80}
+                          outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
+                          onClick={(entry) => setFilters({ ...filters, organization_type: entry.name })}
                         >
                           {stats.typeData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip />
+                        <Tooltip formatter={(value) => `${value} organizations`} />
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (
