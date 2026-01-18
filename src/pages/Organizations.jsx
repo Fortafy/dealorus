@@ -27,7 +27,15 @@ export default function Organizations() {
     min_revenue: "",
     max_revenue: "",
   });
+  const rightColumnRef = React.useRef(null);
   const queryClient = useQueryClient();
+
+  // Scroll to top when organization is selected
+  React.useEffect(() => {
+    if (selectedOrg && rightColumnRef.current) {
+      rightColumnRef.current.scrollTop = 0;
+    }
+  }, [selectedOrg]);
 
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["organizations"],
