@@ -27,8 +27,22 @@ export default function Organizations() {
     min_revenue: "",
     max_revenue: "",
   });
+  const [currentUser, setCurrentUser] = useState(null);
   const rightColumnRef = React.useRef(null);
   const queryClient = useQueryClient();
+
+  // Fetch current user
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (err) {
+        console.error("Failed to fetch current user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   // Scroll to top when organization is selected
   React.useEffect(() => {
@@ -38,13 +52,15 @@ export default function Organizations() {
   }, [selectedOrg]);
 
   const { data: organizations = [], isLoading } = useQuery({
-    queryKey: ["organizations"],
-    queryFn: () => base44.entities.SearchResult.list("-created_date"),
+    queryKey: ["organizations", currentUser?.organization_id],
+    enabled: !!currentUser?.organization_id,
+    queryFn: () => base44.entities.SearchResult.filter({ organization_id: currentUser.organization_id }, "-created_date"),
   });
 
   const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts"],
-    queryFn: () => base44.entities.Contact.list("-created_date"),
+    queryKey: ["contacts", currentUser?.organization_id],
+    enabled: !!currentUser?.organization_id,
+    queryFn: () => base44.entities.Contact.filter({ organization_id: currentUser.organization_id }, "-created_date"),
   });
 
   // Check for pre-selected organization from URL
