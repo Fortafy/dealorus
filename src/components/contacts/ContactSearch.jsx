@@ -37,22 +37,13 @@ export default function ContactSearch({ organization }) {
     queryFn: async () => {
       const contacts = await base44.entities.Contact.filter({ organization_id: organization.id });
       
-      // Fetch all unique organization IDs
-      const orgIds = [...new Set(contacts.map(c => c.organization_id))];
-      const organizations = await Promise.all(
-        orgIds.map(id => base44.entities.SearchResult.list().then(orgs => orgs.find(o => o.id === id)))
-      );
-      
-      // Create a map of org ID to org name
-      const orgMap = {};
-      organizations.forEach(org => {
-        if (org) orgMap[org.id] = org.organization_name;
-      });
+      // Fetch the organization for this contact
+      const org = await base44.entities.SearchResult.filter({ organization_id: organization.id }).then(orgs => orgs[0]);
       
       // Add company name to each contact
       return contacts.map(contact => ({
         ...contact,
-        company: orgMap[contact.organization_id] || 'Unknown'
+        company: org?.organization_name || 'Unknown'
       }));
     },
   });
