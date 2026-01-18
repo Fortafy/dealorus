@@ -108,7 +108,7 @@ export default function Organizations() {
             <img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png" 
               alt="Dealorus" 
-              className="h-10"
+              className="h-12"
             />
             <div className="flex-1"></div>
             <div className="flex items-center gap-2">
