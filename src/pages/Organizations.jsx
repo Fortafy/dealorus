@@ -240,7 +240,12 @@ export default function Organizations() {
                           outerRadius={120}
                           fill="#8884d8"
                           dataKey="value"
-                          onClick={(entry) => setFilters({ ...filters, organization_type: entry.name })}
+                          onClick={(entry) => {
+                            const newFilters = { ...filters, organization_type: entry.name };
+                            setFilters(newFilters);
+                            const firstMatch = organizations.find(org => org.organization_type?.toLowerCase().includes(entry.name.toLowerCase()));
+                            if (firstMatch) setSelectedOrg(firstMatch);
+                          }}
                         >
                           {stats.typeData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
