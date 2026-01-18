@@ -47,6 +47,16 @@ Deno.serve(async (req) => {
       }, { status: 404 });
     }
 
+    // Convert organization_info_last_modified from "M/DD/YYYY H:MM:SS AM/PM" to "YYYY-MM-DD"
+    let source_updated_date = null;
+    if (org.organization_info_last_modified) {
+      const dateStr = org.organization_info_last_modified;
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        source_updated_date = date.toISOString().split('T')[0];
+      }
+    }
+
     // Map Nonprofit Check Plus data to our schema
     const mapped = {
       organization_name: org.organization_name || org.name || null,
