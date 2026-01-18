@@ -59,9 +59,9 @@ export default function PersonalProfileSection({ user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6"
+      className="max-w-4xl mx-auto px-6 py-6"
     >
-      <div className="max-w-2xl">
+      <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-6">Personal Profile</h2>
 
         {error && (
