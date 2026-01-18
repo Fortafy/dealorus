@@ -21,7 +21,6 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
   const [bulkTotal, setBulkTotal] = useState(0);
   const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("single");
-  const [useAISearch, setUseAISearch] = useState(false);
 
   const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeDescription }) => {
     setIsSearching(true);
@@ -29,199 +28,51 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
     setSearchResult(null);
 
     try {
-      // Direct API search - try CharityAPI first if we have location info
-      if (!useAISearch && (state || city)) {
-        const results = [];
-        
-        // Try CharityAPI (searches by state and city)
-        try {
-          const charityApiResponse = await base44.functions.invoke('charityApiSearch', { 
-            state: state || undefined,
-            city: city || undefined
-          });
-          
-          if (charityApiResponse.data && Array.isArray(charityApiResponse.data)) {
-            results.push(...charityApiResponse.data);
-          }
-        } catch (err) {
-          console.error('CharityAPI search failed:', err);
-        }
-
-        // Filter results based on search criteria
-        let filteredResults = results;
-        
-        if (orgName) {
-          filteredResults = filteredResults.filter(org => 
-            org.organization_name?.toLowerCase().includes(orgName.toLowerCase())
-          );
-        }
-        
-        if (city) {
-          filteredResults = filteredResults.filter(org => 
-            org.city?.toLowerCase() === city.toLowerCase()
-          );
-        }
-        
-        if (minRevenue || maxRevenue) {
-          filteredResults = filteredResults.filter(org => {
-            if (!org.annual_revenue) return false;
-            const revenue = parseFloat(org.annual_revenue.replace(/[$,]/g, ''));
-            if (minRevenue && revenue < parseFloat(minRevenue)) return false;
-            if (maxRevenue && revenue > parseFloat(maxRevenue)) return false;
-            return true;
-          });
-        }
-
-        // Enrich NTEE descriptions
-        filteredResults.forEach(org => {
-          if (org.ntee_code && !org.ntee_description) {
-            org.ntee_description = getNTEEDescription(org.ntee_code);
-          }
-        });
-
-        if (filteredResults.length > 0) {
-          setSearchResult(filteredResults);
-          setIsSearching(false);
-          return;
-        }
+      // Search ProPublica database
+      const searchParams = {};
+      if (state) searchParams.state = state;
+      if (city) searchParams.city = city;
+      if (ein) searchParams.ein = ein;
+      
+      const response = await base44.functions.invoke('propublicaSearch', searchParams);
+      
+      let results = [];
+      if (response?.data) {
+        results = Array.isArray(response.data) ? response.data : [response.data];
       }
 
-      // If we have an EIN, try direct API lookups
-      if (!useAISearch && ein) {
-        const results = [];
-        
-        // Try all three APIs in parallel
-        const apiCalls = [
-          base44.functions.invoke('charityApiSearch', { ein }).catch(() => null),
-          base44.functions.invoke('propublicaSearch', { ein }).catch(() => null),
-          base44.functions.invoke('nonprofitCheckPlusSearch', { ein }).catch(() => null)
-        ];
-        
-        const responses = await Promise.all(apiCalls);
-        
-        responses.forEach(response => {
-          if (response?.data) {
-            if (Array.isArray(response.data)) {
-              results.push(...response.data);
-            } else {
-              results.push(response.data);
-            }
-          }
+      // Filter results based on search criteria
+      if (orgName) {
+        results = results.filter(org => 
+          org.organization_name?.toLowerCase().includes(orgName.toLowerCase())
+        );
+      }
+      
+      if (minRevenue || maxRevenue) {
+        results = results.filter(org => {
+          if (!org.annual_revenue) return false;
+          const revenue = parseFloat(org.annual_revenue.replace(/[$,]/g, ''));
+          if (minRevenue && revenue < parseFloat(minRevenue)) return false;
+          if (maxRevenue && revenue > parseFloat(maxRevenue)) return false;
+          return true;
         });
-
-        // Enrich NTEE descriptions
-        results.forEach(org => {
-          if (org.ntee_code && !org.ntee_description) {
-            org.ntee_description = getNTEEDescription(org.ntee_code);
-          }
-        });
-
-        if (results.length > 0) {
-          setSearchResult(results);
-          setIsSearching(false);
-          return;
-        }
       }
 
-      // Fall back to AI search if no API results or user requested AI
-      let searchCriteria = [];
-      if (orgName) searchCriteria.push(`organization name "${orgName}"`);
-      if (ein) searchCriteria.push(`EIN "${ein}"`);
-      if (city && state) searchCriteria.push(`located in ${city}, ${state}`);
-      else if (city) searchCriteria.push(`in city "${city}"`);
-      else if (state) searchCriteria.push(`in state ${state}`);
-      if (minRevenue && maxRevenue) searchCriteria.push(`annual revenue between $${minRevenue} and $${maxRevenue}`);
-      else if (minRevenue) searchCriteria.push(`annual revenue of at least $${minRevenue}`);
-      else if (maxRevenue) searchCriteria.push(`annual revenue up to $${maxRevenue}`);
-      if (orgType) {
-        const typeMap = {
-          "501c3": "501(c)(3) Public Charity",
-          "foundation": "Private Foundation",
-          "government": "Government Agency",
-          "other": "Other Nonprofit"
-        };
-        searchCriteria.push(`organization type "${typeMap[orgType]}"`);
-      }
-      if (nteeDescription) searchCriteria.push(`NTEE category "${nteeDescription}"`);
-
-      const orgTypeText = orgType ? (() => {
-        const typeMap = {
-          "501c3": "501(c)(3) Public Charity",
-          "foundation": "Private Foundation",
-          "government": "Government Agency",
-          "other": "Other Nonprofit"
-        };
-        return typeMap[orgType];
-      })() : null;
-
-      const isMultiSearch = !orgName && !ein;
-
-      let prompt = `You are searching databases of nonprofit and government organizations.
-
-SEARCH CRITERIA - ALL must be matched:
-${searchCriteria.join("\n")}
-
-STRICT FILTERING RULES - MUST BE FOLLOWED:
-${orgTypeText ? `1. Organization type MUST BE EXACTLY "${orgTypeText}" - reject any other types\n` : ''}
-${city ? `2. City MUST BE "${city}"\n` : ''}
-${state ? `3. State MUST BE "${state}"\n` : ''}
-${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least $${minRevenue}` : ''}${minRevenue && maxRevenue ? ' and ' : ''}${maxRevenue ? `no more than $${maxRevenue}` : ''}\n` : ''}
-${nteeDescription ? `5. NTEE category MUST match or be related to "${nteeDescription}"\n` : ''}
-
-For each organization found, provide complete data including organization_name, state, ein, address, city, zip_code, phone, email, website, organization_type, mission, annual_revenue, ntee_code, ntee_description, ruling_date, and data_sources array.
-
-${isMultiSearch ? 'Return ALL organizations found (no limit).' : 'Return array with 1 organization.'}`;
-
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            organizations: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  organization_name: { type: "string" },
-                  state: { type: "string" },
-                  ein: { type: ["string", "null"] },
-                  address: { type: ["string", "null"] },
-                  city: { type: ["string", "null"] },
-                  zip_code: { type: ["string", "null"] },
-                  phone: { type: ["string", "null"] },
-                  email: { type: ["string", "null"] },
-                  website: { type: ["string", "null"] },
-                  organization_type: { type: ["string", "null"] },
-                  mission: { type: ["string", "null"] },
-                  annual_revenue: { type: ["string", "null"] },
-                  ntee_code: { type: ["string", "null"] },
-                  ntee_description: { type: ["string", "null"] },
-                  ruling_date: { type: ["string", "null"] },
-                  data_sources: { type: "array", items: { type: "string" } },
-                }
-              }
-            }
-          },
-        },
-      });
-
-      const orgs = result.organizations || [];
-
-      orgs.forEach(org => {
+      // Enrich NTEE descriptions
+      results.forEach(org => {
         if (org.ntee_code && !org.ntee_description) {
           org.ntee_description = getNTEEDescription(org.ntee_code);
         }
       });
-      
-      if (orgs.length > 0) {
-        setSearchResult(orgs);
+
+      if (results.length > 0) {
+        setSearchResult(results);
       } else {
         setError("No organizations found matching the criteria.");
       }
     } catch (err) {
-      setError("Unable to fetch organization data. Please try again.");
-      console.error('Search error:', err);
+      setError("Unable to fetch organization data from ProPublica. Please try again.");
+      console.error('ProPublica search error:', err);
     } finally {
       setIsSearching(false);
     }
@@ -381,17 +232,6 @@ Return a JSON object with these fields (use null for any field where data is not
         </TabsList>
 
         <TabsContent value="single" className="mt-0">
-          <div className="mb-4 flex items-center gap-2">
-            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={useAISearch}
-                onChange={(e) => setUseAISearch(e.target.checked)}
-                className="rounded border-slate-300"
-              />
-              Use AI-powered search (slower, broader results)
-            </label>
-          </div>
           <SearchForm onSearch={handleSearch} isLoading={isSearching} />
 
           {error && (
@@ -404,9 +244,7 @@ Return a JSON object with these fields (use null for any field where data is not
           {isSearching && (
             <div className="flex flex-col items-center justify-center py-12 mt-4">
               <div className="w-12 h-12 rounded-full border-4 border-blue-100 animate-spin mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
-              <p className="text-slate-600 font-medium">
-                {useAISearch ? 'AI searching public databases...' : 'Searching API databases...'}
-              </p>
+              <p className="text-slate-600 font-medium">Searching ProPublica database...</p>
               <p className="text-sm text-slate-400 mt-1">This may take a few seconds</p>
             </div>
           )}
