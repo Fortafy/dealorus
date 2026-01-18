@@ -241,13 +241,22 @@ export default function Organizations() {
               />
               <ContactSearch organization={selectedOrg} />
             </motion.div>
-          ) : (
+          ) : showSearchPanel ? (
             <SearchPanel
               onSearchComplete={() => {
                 queryClient.invalidateQueries({ queryKey: ["organizations"] });
+                setShowSearchPanel(false);
               }}
               onClose={() => setShowSearchPanel(false)}
             />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center text-slate-400">
+                <Building2 className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p className="text-lg font-medium">Select an organization</p>
+                <p className="text-sm mt-2">Choose from the list or start a new search</p>
+              </div>
+            </div>
           )}
         </div>
       </main>
