@@ -92,7 +92,8 @@ export default function ContactDetailCard({ contact, onEdit, onDelete }) {
                 variant="secondary"
                 size="sm"
                 onClick={() => onEdit(contact)}
-                className="bg-white/90 text-purple-700 hover:bg-white h-8 w-8 p-0"
+                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                style={{ color: 'hsl(217, 91%, 60%)' }}
                 title="Edit"
               >
                 <Pencil className="w-3.5 h-3.5" />
