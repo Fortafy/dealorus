@@ -45,6 +45,7 @@ import {
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { getDataSourceLinks } from "@/components/utils/dataSourceLinks";
 import { normalizeEIN } from "@/components/utils/einFormatter";
@@ -96,6 +97,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [isDataFreshnessOpen, setIsDataFreshnessOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   // Auto-populate NTEE description from code if missing
   const displayData = React.useMemo(() => {
@@ -322,15 +324,22 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
       // Invalidate queries to refresh the organization list
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
 
-      // Call parent delete handler if provided
-      if (onDelete) {
-        onDelete(data.id);
-      }
+      // Show success message
+      toast.success(`${data.organization_name} has been deleted successfully.`);
 
+      // Mark as deleted to show cleared state
+      setIsDeleted(true);
       setShowDeleteConfirm(false);
+
+      // Call parent delete handler if provided (triggers navigation/refresh)
+      if (onDelete) {
+        setTimeout(() => {
+          onDelete(data.id);
+        }, 1500);
+      }
     } catch (err) {
       console.error("Error deleting organization and related records:", err);
-      alert("Failed to delete organization. Please try again.");
+      toast.error("Failed to delete organization. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -394,6 +403,25 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
     };
     return icons[iconName] || Link2;
   };
+
+  if (isDeleted) {
+    return (
+      <motion.div
+        initial={{ opacity: 1, y: 0 }}
+        animate={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
+        className="pointer-events-none"
+      >
+        <Card className="overflow-hidden border-0 shadow-xl shadow-slate-200/50 bg-white">
+          <CardHeader className="text-white p-6" style={{ background: 'linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))' }}>
+            <div className="text-center py-8">
+              <p className="text-lg font-semibold">Organization deleted</p>
+            </div>
+          </CardHeader>
+        </Card>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
