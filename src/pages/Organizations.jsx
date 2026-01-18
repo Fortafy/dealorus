@@ -65,6 +65,7 @@ export default function Organizations() {
 
   // Check for pre-selected organization from URL
   React.useEffect(() => {
+    if (!currentUser?.organization_id) return;
     const urlParams = new URLSearchParams(window.location.search);
     const orgId = urlParams.get("id");
     if (orgId && organizations.length > 0) {
@@ -73,7 +74,7 @@ export default function Organizations() {
         setSelectedOrg(org);
       }
     }
-  }, [organizations]);
+  }, [organizations, currentUser]);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SearchResult.delete(id),
