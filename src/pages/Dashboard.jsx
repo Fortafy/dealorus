@@ -11,6 +11,7 @@ import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSect
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
+import DataSourceConfiguration from "@/components/dashboard/DataSourceConfiguration";
 import { Home, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
@@ -75,6 +76,10 @@ export default function Dashboard() {
       case "subscription":
         return isOrgAdmin(currentUser) ? (
           <SubscriptionDetails organization={organization} />
+        ) : null;
+      case "data-sources":
+        return isOrgAdmin(currentUser) ? (
+          <DataSourceConfiguration organization={organization} />
         ) : null;
       default:
         return null;
