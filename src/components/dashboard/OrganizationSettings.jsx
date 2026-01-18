@@ -110,9 +110,9 @@ export default function OrganizationSettings({ organization }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6"
+      className="max-w-4xl mx-auto px-6 py-6"
     >
-      <div className="max-w-2xl">
+      <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-6">Organization Settings</h2>
 
         {error && (
@@ -216,7 +216,9 @@ export default function OrganizationSettings({ organization }) {
               <Button
                 onClick={handleSave}
                 disabled={updateMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
               >
                 {updateMutation.isPending ? (
                   <>
@@ -308,7 +310,9 @@ export default function OrganizationSettings({ organization }) {
               <Button
                 onClick={handleBrandingSave}
                 disabled={updateBrandingMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
               >
                 {updateBrandingMutation.isPending ? (
                   <>
