@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function EditOrganizationDialog({ organization, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(organization);
@@ -25,24 +26,14 @@ export default function EditOrganizationDialog({ organization, open, onOpenChang
 
     setIsValidating(true);
     try {
-      const response = await fetch(`https://api.charityapi.org/api/ntee_codes/?code=${code.toUpperCase()}`, {
-        headers: {
-          'Authorization': `apikey ${import.meta.env.VITE_CHARITY_API_KEY}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const nteeData = data[0];
-          setNteeValidation({ 
-            status: 'valid', 
-            description: nteeData.description || nteeData.name 
-          });
-          setFormData(prev => ({ ...prev, ntee_description: nteeData.description || nteeData.name }));
-        } else {
-          setNteeValidation({ status: 'invalid', description: null });
-        }
+      const response = await base44.functions.invoke('validateNTEECode', { code });
+      
+      if (response.data.valid) {
+        setNteeValidation({ 
+          status: 'valid', 
+          description: response.data.description 
+        });
+        setFormData(prev => ({ ...prev, ntee_description: response.data.description }));
       } else {
         setNteeValidation({ status: 'invalid', description: null });
       }
