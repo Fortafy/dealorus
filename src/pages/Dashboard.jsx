@@ -93,18 +93,8 @@ export default function Dashboard() {
       {/* Header */}
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
         <div className="px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-3">
-            <img 
-              src={organization?.logo_url || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png"}
-              alt="Organization"
-              className="h-12"
-            />
-            <div>
-              <h1 className="text-lg font-semibold text-slate-900">
-                {organization?.name || "Dashboard"}
-              </h1>
-              <p className="text-xs text-slate-500">{activeSection.replace(/-/g, " ").toUpperCase()}</p>
-            </div>
+          <div>
+            <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
           </div>
         </div>
       </header>
@@ -118,6 +108,8 @@ export default function Dashboard() {
             onSectionChange={setActiveSection}
             isAdmin={isOrgAdmin(currentUser)}
             isBaseAdmin={currentUser?.role === "admin"}
+            organization={organization}
+            currentUser={currentUser}
           />
         </div>
 
