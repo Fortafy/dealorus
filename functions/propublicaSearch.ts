@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       const mapped = {
         organization_name: org.name || null,
         state: org.state || null,
-        ein: org.ein ? org.ein.toString() : null,
+        ein: org.strein ? org.strein.toString() : null,
         address: org.address || null,
         city: org.city || null,
         zip_code: org.zipcode || null,
