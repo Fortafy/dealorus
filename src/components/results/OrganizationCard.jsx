@@ -535,24 +535,33 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
           </div>
 
           {displayData.source_metadata && Object.keys(displayData.source_metadata).length > 0 && (
-            <div className="mt-6 pt-4 border-t border-slate-100">
-              <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                  Data Freshness
-                </h3>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(displayData.source_metadata).map(([source, metadata]) => (
-                  <div key={source} className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                    <span className="text-xs font-medium text-slate-700">{source}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {formatLastChecked(metadata.last_checked)}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Collapsible open={isDataFreshnessOpen} onOpenChange={setIsDataFreshnessOpen} className="mt-6 pt-4 border-t border-slate-100">
+              <CollapsibleTrigger className="flex items-center justify-between w-full group mb-3 hover:opacity-80 transition-opacity">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-slate-500" />
+                  <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                    Data Freshness
+                  </h3>
+                </div>
+                {isDataFreshnessOpen ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(displayData.source_metadata).map(([source, metadata]) => (
+                    <div key={source} className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
+                      <span className="text-xs font-medium text-slate-700">{source}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {formatLastChecked(metadata.last_checked)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {dataSourceLinks.length > 0 && (
