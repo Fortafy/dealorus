@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     }
 
     // Fetch from CharityAPI NTEE codes endpoint
-    const response = await fetch(`https://api.charityapi.org/api/ntee_codes/?code=${code.toUpperCase()}`, {
+    const response = await fetch(`https://api.charityapi.org/api/ntee_codes/${code.toUpperCase()}`, {
       headers: {
         'Authorization': `Bearer ${apiKey}`
       }
@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     
-    if (data && data.length > 0) {
-      const nteeData = data[0];
+    if (data && data.data) {
+      const nteeData = data.data;
       return Response.json({
         valid: true,
         code: nteeData.code,
