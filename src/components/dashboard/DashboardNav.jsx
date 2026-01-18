@@ -8,6 +8,7 @@ import {
   Building2,
   CreditCard,
   Users,
+  Database,
 } from "lucide-react";
 
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
@@ -34,6 +35,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "organization-members",
       label: "Team Members",
       icon: Users,
+    },
+    {
+      id: "data-sources",
+      label: "Data Sources",
+      icon: Database,
     },
     {
       id: "organization-settings",
