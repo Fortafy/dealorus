@@ -57,9 +57,9 @@ export default function SubscriptionDetails({ organization }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6"
+      className="max-w-4xl mx-auto px-6 py-6"
     >
-      <div className="max-w-3xl">
+      <div>
         <h2 className="text-2xl font-bold text-slate-900 mb-6">Subscription & Billing</h2>
 
         <motion.div
