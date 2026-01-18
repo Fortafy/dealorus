@@ -224,8 +224,6 @@ export default function Organizations() {
                           data={stats.typeData}
                           cx="50%"
                           cy="50%"
-                          labelLine={false}
-                          label={({ value }) => `${value}`}
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
@@ -235,7 +233,6 @@ export default function Organizations() {
                           ))}
                         </Pie>
                         <Tooltip />
-                        <Legend />
                       </PieChart>
                     </ResponsiveContainer>
                   ) : (
