@@ -251,8 +251,8 @@ Return a JSON object with these fields (use null for any field where data is not
     <div className="m-6">
       <div className="bg-white rounded-lg shadow-xl shadow-slate-200/50 overflow-hidden">
         <div className="text-white p-6" style={{ background: 'linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))' }}>
-          <h2 className="text-xl font-semibold">Data Enrichment</h2>
-          <p className="text-sm mt-1 opacity-90">Search for organizations and enrich data</p>
+          <h2 className="text-xl font-semibold">Public Data Source</h2>
+          <p className="text-sm mt-1 opacity-90">Search public data sources for organizations</p>
         </div>
 
         <div className="p-6">

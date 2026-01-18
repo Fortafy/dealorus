@@ -213,7 +213,8 @@ export default function SearchForm({ onSearch, isLoading }) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="h-11 px-8 bg-indigo-600 hover:bg-indigo-700 text-white"
+              style={{ backgroundColor: 'hsl(217, 91%, 60%)' }}
+              className="h-11 px-8 hover:opacity-90 text-white"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
@@ -223,7 +224,7 @@ export default function SearchForm({ onSearch, isLoading }) {
               ) : (
                 <div className="flex items-center gap-2">
                   <Search className="w-5 h-5" />
-                  Search & Enrich
+                  Search
                 </div>
               )}
             </Button>
