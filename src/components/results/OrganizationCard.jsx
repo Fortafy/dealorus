@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
 import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
+import DataSourceSettings from "@/components/organizations/DataSourceSettings";
+import SmartEnrichDialog from "@/components/organizations/SmartEnrichDialog";
 import {
   Building2,
   MapPin,
@@ -38,7 +40,8 @@ import {
   Trash2,
   Sparkles,
   AlertTriangle,
-  Database
+  Database,
+  Settings2
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
@@ -88,6 +91,8 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [enrichedData, setEnrichedData] = useState(null);
   const [showComparisonDialog, setShowComparisonDialog] = useState(false);
   const [isDataSourcesOpen, setIsDataSourcesOpen] = useState(true);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [showSmartEnrichDialog, setShowSmartEnrichDialog] = useState(false);
 
   // Auto-populate NTEE description from code if missing
   const displayData = React.useMemo(() => {
@@ -288,6 +293,44 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
     }
   };
 
+  const handleSaveSettings = async (priority) => {
+    const updatedData = {
+      ...data,
+      data_source_priority: priority,
+    };
+
+    if (isSaved && data.id) {
+      await base44.entities.SearchResult.update(data.id, updatedData);
+    }
+
+    if (onEdit) {
+      onEdit(updatedData);
+    }
+  };
+
+  const handleSmartEnrichComplete = (updatedData) => {
+    if (onEdit) {
+      onEdit(updatedData);
+    }
+    setShowSmartEnrichDialog(false);
+  };
+
+  const formatLastChecked = (timestamp) => {
+    if (!timestamp) return null;
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
   const handleApplyEnrichment = async (updates) => {
     // Auto-populate ntee_description if ntee_code is updated but description is missing
     let finalUpdates = { ...updates };
@@ -385,17 +428,24 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={handleAIEnrich}
-                disabled={isEnriching}
+                onClick={() => setShowSmartEnrichDialog(true)}
+                disabled={isEnriching || !isSaved}
                 className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                 style={{ color: 'hsl(217, 91%, 60%)' }}
-                title="AI Enrich"
+                title="Smart Enrich (Multi-Source)"
               >
-                {isEnriching ? (
-                  <div className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: 'hsl(217, 91%, 60%, 0.3)', borderTopColor: 'hsl(217, 91%, 60%)' }} />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5" />
-                )}
+                <Sparkles className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowSettingsDialog(true)}
+                disabled={!isSaved}
+                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                style={{ color: 'hsl(217, 91%, 60%)' }}
+                title="Data Source Settings"
+              >
+                <Settings2 className="w-3.5 h-3.5" />
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -481,6 +531,27 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
               <DataRow icon={Tag} label="Classification" value={displayData.ntee_description && displayData.ntee_code ? `${displayData.ntee_description} (${displayData.ntee_code})` : displayData.ntee_description || displayData.ntee_code || null} />
             </div>
           </div>
+
+          {displayData.source_metadata && Object.keys(displayData.source_metadata).length > 0 && (
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <div className="flex items-center gap-2 mb-3">
+                <Clock className="w-4 h-4 text-slate-500" />
+                <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                  Data Freshness
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.entries(displayData.source_metadata).map(([source, metadata]) => (
+                  <div key={source} className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
+                    <span className="text-xs font-medium text-slate-700">{source}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {formatLastChecked(metadata.last_checked)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {dataSourceLinks.length > 0 && (
             <Collapsible open={isDataSourcesOpen} onOpenChange={setIsDataSourcesOpen} className="mt-6 pt-4 border-t border-slate-100">
@@ -569,6 +640,20 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         enrichedData={enrichedData}
         onApply={handleApplyEnrichment}
       />
-    </motion.div>
-  );
-}
+
+      <DataSourceSettings
+        open={showSettingsDialog}
+        onOpenChange={setShowSettingsDialog}
+        currentPriority={data.data_source_priority}
+        onSave={handleSaveSettings}
+      />
+
+      <SmartEnrichDialog
+        open={showSmartEnrichDialog}
+        onOpenChange={setShowSmartEnrichDialog}
+        organization={data}
+        onComplete={handleSmartEnrichComplete}
+      />
+      </motion.div>
+      );
+      }
