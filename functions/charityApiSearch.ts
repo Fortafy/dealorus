@@ -44,6 +44,17 @@ Deno.serve(async (req) => {
       }, { status: 404 });
     }
 
+    // Convert tax_period (format: YYYYMM) to date (YYYY-MM-01)
+    let source_updated_date = null;
+    if (org.tax_period) {
+      const taxPeriodStr = org.tax_period.toString();
+      if (taxPeriodStr.length === 6) {
+        const year = taxPeriodStr.substring(0, 4);
+        const month = taxPeriodStr.substring(4, 6);
+        source_updated_date = `${year}-${month}-01`;
+      }
+    }
+
     // Map CharityAPI data to our schema
     const mapped = {
       organization_name: org.name || null,
@@ -61,6 +72,8 @@ Deno.serve(async (req) => {
       ntee_code: org.ntee_cd || null,
       ntee_description: null, // Will be populated on frontend
       ruling_date: org.ruling ? `${org.ruling.toString().substring(0, 4)}-${org.ruling.toString().substring(4, 6)}-01` : null,
+      source_subseccd_code: org.subsection ? org.subsection.toString() : null,
+      source_updated_date: source_updated_date,
       data_sources: ['CharityAPI']
     };
 
