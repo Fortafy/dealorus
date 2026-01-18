@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
     // Use ProPublica search endpoint for state/city queries
     if (!state) {
-      return Response.json({ error: 'Either EIN or state is required' }, { status: 400 });
+      return Response.json({ error: 'State is required for organization name searches. ProPublica API requires a state parameter.' }, { status: 400 });
     }
 
     const searchParams = new URLSearchParams();
