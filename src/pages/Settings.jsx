@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { CheckCircle2, AlertCircle, Loader, Settings, Bell, Palette } from "lucide-react";
+import { CheckCircle2, AlertCircle, Loader, Settings as SettingsIcon, Bell, Palette } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Settings() {
@@ -97,7 +97,7 @@ export default function Settings() {
           <div>
             <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                <Settings className="w-6 h-6 text-white" />
+                <SettingsIcon className="w-6 h-6 text-white" />
               </div>
               App Settings
             </h1>
