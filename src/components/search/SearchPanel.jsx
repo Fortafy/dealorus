@@ -303,12 +303,15 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Data Enrichment</h2>
-      </div>
+    <div className="m-6">
+      <div className="bg-white rounded-lg shadow-xl shadow-slate-200/50 overflow-hidden">
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white p-6">
+          <h2 className="text-xl font-semibold">Data Enrichment</h2>
+          <p className="text-indigo-100 text-sm mt-1">Search for organizations and enrich data</p>
+        </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="p-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="single">Single Search</TabsTrigger>
           <TabsTrigger value="bulk">Bulk Upload</TabsTrigger>
@@ -413,7 +416,9 @@ Return a JSON object with these fields (use null for any field where data is not
             </div>
           )}
         </TabsContent>
-      </Tabs>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 }
