@@ -534,6 +534,7 @@ export default function Organizations() {
                 isSaved={true}
                 onDelete={(id) => deleteMutation.mutate(id)}
                 onEdit={handleEdit}
+                isClientOrganization={false}
               />
               <ContactSearch organization={selectedOrg} />
             </motion.div>
