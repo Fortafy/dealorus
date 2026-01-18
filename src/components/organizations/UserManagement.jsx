@@ -25,7 +25,7 @@ import {
 import { Users, Plus, Shield, AlertCircle, Loader, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import InviteUserDialog from "./InviteUserDialog";
-import { isOrgAdmin } from "@/utils/roleChecking";
+import { isOrgAdmin } from "@/components/utils/roleChecking";
 
 export default function UserManagement({ organizationId, currentUser }) {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
