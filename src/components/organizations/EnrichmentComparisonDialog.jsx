@@ -40,6 +40,10 @@ export default function EnrichmentComparisonDialog({
     { key: "annual_revenue", label: "Annual Revenue" },
     { key: "ntee_code", label: "NTEE Code" },
     { key: "ruling_date", label: "Ruling Date" },
+    { key: "source_created_date", label: "Source Created Date" },
+    { key: "source_updated_date", label: "Source Updated Date" },
+    { key: "source_subseccd_code", label: "IRS Subsection Code" },
+    { key: "most_recent_990", label: "Most Recent 990 PDF" },
   ];
 
   const changedFields = fields.filter(field => {
