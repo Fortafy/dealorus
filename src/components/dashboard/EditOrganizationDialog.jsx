@@ -98,6 +98,18 @@ export default function EditOrganizationDialog({ open, onOpenChange, organizatio
             </Alert>
           )}
 
+          {/* Organization ID */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Organization ID
+            </label>
+            <Input
+              value={organization?.id || ""}
+              disabled
+              className="bg-slate-50 cursor-not-allowed font-mono"
+            />
+          </div>
+
           {/* Organization Name */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
