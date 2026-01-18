@@ -9,7 +9,7 @@ import {
   CreditCard,
 } from "lucide-react";
 
-export default function DashboardNav({ activeSection, onSectionChange, isAdmin }) {
+export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin }) {
   const sections = [
     {
       id: "profile",
@@ -23,6 +23,14 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin }
       icon: Settings,
       admin: false,
     },
+    ...(isBaseAdmin ? [
+      {
+        id: "admin-organizations",
+        label: "Manage Organizations",
+        icon: Building2,
+        admin: true,
+      },
+    ] : []),
     ...(isAdmin ? [
       {
         id: "metrics",
@@ -80,9 +88,17 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin }
         })}
       </nav>
 
-      {isAdmin && (
+      {isBaseAdmin && (
+        <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-gradient-to-b from-amber-50 to-transparent">
+          <div className="text-xs text-amber-600 font-medium mb-2">PLATFORM ADMIN</div>
+          <p className="text-xs text-amber-700 leading-relaxed">
+            You have platform administrator access and can manage all organizations.
+          </p>
+        </div>
+      )}
+      {isAdmin && !isBaseAdmin && (
         <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-gradient-to-b from-slate-50 to-transparent">
-          <div className="text-xs text-slate-500 font-medium mb-2">ADMIN SECTION</div>
+          <div className="text-xs text-slate-500 font-medium mb-2">ORG ADMIN</div>
           <p className="text-xs text-slate-600 leading-relaxed">
             You have organization administrator access and can manage all settings and view metrics.
           </p>
