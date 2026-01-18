@@ -11,11 +11,12 @@ import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSect
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
-import { Home } from "lucide-react";
+import { Home, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -101,9 +102,21 @@ export default function Dashboard() {
             alt="Organization"
             className="h-10"
           />
-          <Link to={createPageUrl("Organizations")}>
-            <Home className="w-5 h-5 text-slate-600 hover:text-slate-900 transition-colors" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link to={createPageUrl("Organizations")} title="Home">
+              <Home className="w-5 h-5 text-slate-600 hover:text-slate-900 transition-colors" />
+            </Link>
+            <button title="Support" className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+              <HelpCircle className="w-5 h-5 text-slate-600 hover:text-slate-900" />
+            </button>
+            <Link to={createPageUrl("Dashboard")} title="User Profile">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-blue-600 text-white text-xs font-semibold">
+                  {currentUser?.full_name?.split(" ").map(n => n[0]).join("") || "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
         </div>
       </header>
 
