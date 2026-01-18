@@ -124,10 +124,31 @@ Deno.serve(async (req) => {
 
     const result = await response.json();
     console.log('ProPublica search result:', result);
+    console.log('Total results:', result.total_results, 'Pages:', result.num_pages);
 
-    const organizations = result.organizations || [];
+    let allOrganizations = result.organizations || [];
+    
+    // Fetch all pages if there are multiple pages (limit to reasonable amount)
+    const maxPages = Math.min(result.num_pages || 1, 20); // Limit to 20 pages (500 results) to avoid timeout
+    
+    if (maxPages > 1) {
+      const pagePromises = [];
+      for (let page = 1; page < maxPages; page++) {
+        const pageParams = new URLSearchParams(searchParams);
+        pageParams.append('page', page.toString());
+        pagePromises.push(
+          fetch(`https://projects.propublica.org/nonprofits/api/v2/search.json?${pageParams.toString()}`)
+            .then(r => r.json())
+            .then(data => data.organizations || [])
+        );
+      }
+      
+      const pageResults = await Promise.all(pagePromises);
+      allOrganizations = allOrganizations.concat(...pageResults);
+      console.log('Fetched', allOrganizations.length, 'organizations from', maxPages, 'pages');
+    }
 
-    const mapped = organizations.map(org => ({
+    const mapped = allOrganizations.map(org => ({
       organization_name: org.name || null,
       state: org.state || null,
       ein: org.ein ? org.ein.toString() : null,
