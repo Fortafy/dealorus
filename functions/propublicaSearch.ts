@@ -61,7 +61,9 @@ Deno.serve(async (req) => {
     const searchParams = new URLSearchParams();
     
     if (state) {
+      // ProPublica uses state code (e.g., 'CA', 'NY') directly as the state[id] parameter
       searchParams.append('state%5Bid%5D', state);
+      console.log('State parameter added:', state);
     }
     
     if (orgName) {
