@@ -481,7 +481,7 @@ export default function Organizations() {
         {/* Right Column - Organization Details, Search Panel, or Dashboard */}
         <div className="flex-1 overflow-y-auto">
           {showDashboard ? (
-            <DashboardView organizations={organizations} contacts={contacts} />
+            <DashboardView organizations={organizations} contacts={contacts} onSelectOrg={(org) => { setShowDashboard(false); setSelectedOrg(org); }} />
           ) : selectedOrg ? (
             <motion.div
               key={selectedOrg.id}
