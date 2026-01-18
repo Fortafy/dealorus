@@ -60,11 +60,12 @@ export default function DataSourceConfiguration({ organization }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
+      className="max-w-4xl mx-auto px-6 py-6"
     >
       <Card className="border-0 shadow-xl shadow-slate-200/50">
-        <CardHeader className="text-white p-6" style={{ background: 'linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))' }}>
+        <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b p-6">
           <CardTitle>Data Source Configuration</CardTitle>
-          <p className="text-sm text-white/80 mt-2">Set the default data source priority for all organization users</p>
+          <p className="text-sm text-slate-600 mt-2">Set the default data source priority for all organization users</p>
         </CardHeader>
 
         <CardContent className="p-6 space-y-6">
@@ -149,7 +150,9 @@ export default function DataSourceConfiguration({ organization }) {
               <Button 
                 onClick={handleSave} 
                 disabled={isSaving}
-                style={{ backgroundColor: 'hsl(217, 91%, 60%)' }}
+                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
               >
                 {isSaving ? (
                   <>
