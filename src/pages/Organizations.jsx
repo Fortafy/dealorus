@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
-import SearchDialog from "@/components/search/SearchDialog";
+import SearchPanel from "@/components/search/SearchPanel";
 import { motion } from "framer-motion";
 import { Building2, Search, Trash2, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [filters, setFilters] = useState({
     state: "",
     organization_type: "",
@@ -113,7 +113,10 @@ export default function Organizations() {
             </div>
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => setSearchDialogOpen(true)}
+                onClick={() => {
+                  setShowSearchPanel(true);
+                  setSelectedOrg(null);
+                }}
                 className="bg-indigo-600 hover:bg-indigo-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -215,9 +218,16 @@ export default function Organizations() {
           </div>
         </div>
 
-        {/* Right Column - Organization Details */}
+        {/* Right Column - Organization Details or Search Panel */}
         <div className="flex-1 overflow-y-auto">
-          {selectedOrg ? (
+          {showSearchPanel ? (
+            <SearchPanel
+              onSearchComplete={() => {
+                queryClient.invalidateQueries({ queryKey: ["organizations"] });
+              }}
+              onClose={() => setShowSearchPanel(false)}
+            />
+          ) : selectedOrg ? (
             <motion.div
               key={selectedOrg.id}
               initial={{ opacity: 0, y: 20 }}
@@ -246,14 +256,6 @@ export default function Organizations() {
           )}
         </div>
       </main>
-
-      <SearchDialog
-        open={searchDialogOpen}
-        onOpenChange={setSearchDialogOpen}
-        onSearchComplete={() => {
-          queryClient.invalidateQueries({ queryKey: ["organizations"] });
-        }}
-      />
     </div>
   );
 }
