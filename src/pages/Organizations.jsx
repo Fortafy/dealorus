@@ -7,11 +7,14 @@ import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { Building2, Search, Trash2, X, Plus, Home, Users, FileText } from "lucide-react";
+import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
 
@@ -370,40 +373,34 @@ export default function Organizations() {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex flex-col overflow-hidden">
       <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
-        <div className="px-4 sm:px-6 lg:px-8 py-4">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png" 
+            alt="Dealorus" 
+            className="h-10"
+          />
           <div className="flex items-center gap-3">
-            <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png" 
-              alt="Dealorus" 
-              className="h-12"
-            />
-            <div className="flex-1"></div>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => {
-                  setShowDashboard(true);
-                  setSelectedOrg(null);
-                  setShowSearchPanel(false);
-                }}
-                variant="outline"
-                className="hover:bg-slate-50"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Home
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowSearchPanel(true);
-                  setSelectedOrg(null);
-                  setShowDashboard(false);
-                }}
-                style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
-                className="hover:opacity-90"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                New Search
-              </Button>
-            </div>
+            <button 
+              onClick={() => {
+                setShowDashboard(true);
+                setSelectedOrg(null);
+                setShowSearchPanel(false);
+              }}
+              title="Home"
+              className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              <Home className="w-5 h-5 text-slate-600 hover:text-slate-900" />
+            </button>
+            <button title="Support" className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+              <HelpCircle className="w-5 h-5 text-slate-600 hover:text-slate-900" />
+            </button>
+            <Link to={createPageUrl("Dashboard")} title="User Profile">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-blue-600 text-white text-xs font-semibold">
+                  {currentUser?.full_name?.split(" ").map(n => n[0]).join("") || "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
           </div>
         </div>
       </header>
@@ -413,6 +410,19 @@ export default function Organizations() {
         <div className="w-80 border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden">
           <div className="p-4 flex flex-col h-full overflow-hidden min-h-0">
             <div className="mb-4 space-y-3 flex-shrink-0">
+              <Button
+                onClick={() => {
+                  setShowSearchPanel(true);
+                  setSelectedOrg(null);
+                  setShowDashboard(false);
+                }}
+                style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
+                className="w-full hover:opacity-90"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Search
+              </Button>
+              
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
