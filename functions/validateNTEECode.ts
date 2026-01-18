@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       return Response.json({
         valid: true,
         code: nteeData.code,
-        description: nteeData.description || nteeData.name || null
+        description: nteeData.title || null
       });
     } else {
       return Response.json({
