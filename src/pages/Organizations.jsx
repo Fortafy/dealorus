@@ -238,9 +238,11 @@ export default function Organizations() {
           </div>
         </div>
 
-        {/* Right Column - Organization Details or Search Panel */}
+        {/* Right Column - Organization Details, Search Panel, or Dashboard */}
         <div className="flex-1 overflow-y-auto">
-          {selectedOrg ? (
+          {showDashboard ? (
+            <Dashboard />
+          ) : selectedOrg ? (
             <motion.div
               key={selectedOrg.id}
               initial={{ opacity: 0, y: 20 }}
