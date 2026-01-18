@@ -105,6 +105,14 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
     onClose();
   };
 
+  const handleUpdate = async (id, data) => {
+    await base44.entities.SearchResult.update(id, data);
+    onSearchComplete();
+    setSelectedOrg(null);
+    setSearchResult(null);
+    onClose();
+  };
+
   const handleSaveAll = async () => {
     if (Array.isArray(searchResult)) {
       for (const org of searchResult) {
@@ -288,6 +296,7 @@ Return a JSON object with these fields (use null for any field where data is not
                   <OrganizationCard
                     data={selectedOrg}
                     onSave={handleSave}
+                    onUpdate={handleUpdate}
                     isSaved={false}
                   />
                 </div>
@@ -309,6 +318,7 @@ Return a JSON object with these fields (use null for any field where data is not
                 <OrganizationCard
                   data={Array.isArray(searchResult) ? searchResult[0] : searchResult}
                   onSave={handleSave}
+                  onUpdate={handleUpdate}
                   isSaved={false}
                 />
               )}

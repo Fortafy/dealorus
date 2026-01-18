@@ -79,7 +79,7 @@ function DataRow({ icon: Icon, label, value, isLink }) {
   );
 }
 
-export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEdit }) {
+export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDelete, onEdit }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
   const [enrichingSource, setEnrichingSource] = useState(null);
@@ -137,10 +137,11 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
   };
 
   const handleConfirmUpdate = async () => {
-    await base44.entities.SearchResult.update(existingRecord.id, data);
     setShowUpdateDialog(false);
-    // Don't call onSave as that creates a new record - we just updated existing
-    if (onEdit) {
+    if (onUpdate) {
+      await onUpdate(existingRecord.id, data);
+    } else if (onEdit) {
+      await base44.entities.SearchResult.update(existingRecord.id, data);
       onEdit({ ...data, id: existingRecord.id });
     }
   };
