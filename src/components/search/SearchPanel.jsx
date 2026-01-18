@@ -21,95 +21,157 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
   const [bulkTotal, setBulkTotal] = useState(0);
   const [currentBulkIndex, setCurrentBulkIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("single");
+  const [useAISearch, setUseAISearch] = useState(false);
 
   const handleSearch = async ({ orgName, ein, state, city, minRevenue, maxRevenue, orgType, nteeDescription }) => {
     setIsSearching(true);
     setError(null);
     setSearchResult(null);
 
-    let searchCriteria = [];
-    if (orgName) searchCriteria.push(`organization name "${orgName}"`);
-    if (ein) searchCriteria.push(`EIN "${ein}"`);
-    if (city && state) searchCriteria.push(`located in ${city}, ${state}`);
-    else if (city) searchCriteria.push(`in city "${city}"`);
-    else if (state) searchCriteria.push(`in state ${state}`);
-    if (minRevenue && maxRevenue) searchCriteria.push(`annual revenue between $${minRevenue} and $${maxRevenue}`);
-    else if (minRevenue) searchCriteria.push(`annual revenue of at least $${minRevenue}`);
-    else if (maxRevenue) searchCriteria.push(`annual revenue up to $${maxRevenue}`);
-    if (orgType) {
-      const typeMap = {
-        "501c3": "501(c)(3) Public Charity",
-        "foundation": "Private Foundation",
-        "government": "Government Agency",
-        "other": "Other Nonprofit"
-      };
-      searchCriteria.push(`organization type "${typeMap[orgType]}"`);
-    }
-    if (nteeDescription) searchCriteria.push(`NTEE category "${nteeDescription}"`);
+    try {
+      // Direct API search - try CharityAPI first if we have location info
+      if (!useAISearch && (state || city)) {
+        const results = [];
+        
+        // Try CharityAPI (searches by state and city)
+        try {
+          const charityApiResponse = await base44.functions.invoke('charityApiSearch', { 
+            state: state || undefined,
+            city: city || undefined
+          });
+          
+          if (charityApiResponse.data && Array.isArray(charityApiResponse.data)) {
+            results.push(...charityApiResponse.data);
+          }
+        } catch (err) {
+          console.error('CharityAPI search failed:', err);
+        }
 
+        // Filter results based on search criteria
+        let filteredResults = results;
+        
+        if (orgName) {
+          filteredResults = filteredResults.filter(org => 
+            org.organization_name?.toLowerCase().includes(orgName.toLowerCase())
+          );
+        }
+        
+        if (city) {
+          filteredResults = filteredResults.filter(org => 
+            org.city?.toLowerCase() === city.toLowerCase()
+          );
+        }
+        
+        if (minRevenue || maxRevenue) {
+          filteredResults = filteredResults.filter(org => {
+            if (!org.annual_revenue) return false;
+            const revenue = parseFloat(org.annual_revenue.replace(/[$,]/g, ''));
+            if (minRevenue && revenue < parseFloat(minRevenue)) return false;
+            if (maxRevenue && revenue > parseFloat(maxRevenue)) return false;
+            return true;
+          });
+        }
 
-    const orgTypeText = orgType ? (() => {
-      const typeMap = {
-        "501c3": "501(c)(3) Public Charity",
-        "foundation": "Private Foundation",
-        "government": "Government Agency",
-        "other": "Other Nonprofit"
-      };
-      return typeMap[orgType];
-    })() : null;
+        // Enrich NTEE descriptions
+        filteredResults.forEach(org => {
+          if (org.ntee_code && !org.ntee_description) {
+            org.ntee_description = getNTEEDescription(org.ntee_code);
+          }
+        });
 
-    const isMultiSearch = !orgName && !ein;
+        if (filteredResults.length > 0) {
+          setSearchResult(filteredResults);
+          setIsSearching(false);
+          return;
+        }
+      }
 
-    let prompt = `You are searching databases of nonprofit and government organizations.
+      // If we have an EIN, try direct API lookups
+      if (!useAISearch && ein) {
+        const results = [];
+        
+        // Try all three APIs in parallel
+        const apiCalls = [
+          base44.functions.invoke('charityApiSearch', { ein }).catch(() => null),
+          base44.functions.invoke('propublicaSearch', { ein }).catch(() => null),
+          base44.functions.invoke('nonprofitCheckPlusSearch', { ein }).catch(() => null)
+        ];
+        
+        const responses = await Promise.all(apiCalls);
+        
+        responses.forEach(response => {
+          if (response?.data) {
+            if (Array.isArray(response.data)) {
+              results.push(...response.data);
+            } else {
+              results.push(response.data);
+            }
+          }
+        });
+
+        // Enrich NTEE descriptions
+        results.forEach(org => {
+          if (org.ntee_code && !org.ntee_description) {
+            org.ntee_description = getNTEEDescription(org.ntee_code);
+          }
+        });
+
+        if (results.length > 0) {
+          setSearchResult(results);
+          setIsSearching(false);
+          return;
+        }
+      }
+
+      // Fall back to AI search if no API results or user requested AI
+      let searchCriteria = [];
+      if (orgName) searchCriteria.push(`organization name "${orgName}"`);
+      if (ein) searchCriteria.push(`EIN "${ein}"`);
+      if (city && state) searchCriteria.push(`located in ${city}, ${state}`);
+      else if (city) searchCriteria.push(`in city "${city}"`);
+      else if (state) searchCriteria.push(`in state ${state}`);
+      if (minRevenue && maxRevenue) searchCriteria.push(`annual revenue between $${minRevenue} and $${maxRevenue}`);
+      else if (minRevenue) searchCriteria.push(`annual revenue of at least $${minRevenue}`);
+      else if (maxRevenue) searchCriteria.push(`annual revenue up to $${maxRevenue}`);
+      if (orgType) {
+        const typeMap = {
+          "501c3": "501(c)(3) Public Charity",
+          "foundation": "Private Foundation",
+          "government": "Government Agency",
+          "other": "Other Nonprofit"
+        };
+        searchCriteria.push(`organization type "${typeMap[orgType]}"`);
+      }
+      if (nteeDescription) searchCriteria.push(`NTEE category "${nteeDescription}"`);
+
+      const orgTypeText = orgType ? (() => {
+        const typeMap = {
+          "501c3": "501(c)(3) Public Charity",
+          "foundation": "Private Foundation",
+          "government": "Government Agency",
+          "other": "Other Nonprofit"
+        };
+        return typeMap[orgType];
+      })() : null;
+
+      const isMultiSearch = !orgName && !ein;
+
+      let prompt = `You are searching databases of nonprofit and government organizations.
 
 SEARCH CRITERIA - ALL must be matched:
 ${searchCriteria.join("\n")}
 
 STRICT FILTERING RULES - MUST BE FOLLOWED:
-${orgTypeText ? `1. Organization type MUST BE EXACTLY "${orgTypeText}" - reject any other types including "Government Agency", "Private Foundation", etc. if they don't match\n` : ''}
-${city ? `2. City MUST BE "${city}" - organizations in other cities are NOT acceptable\n` : ''}
+${orgTypeText ? `1. Organization type MUST BE EXACTLY "${orgTypeText}" - reject any other types\n` : ''}
+${city ? `2. City MUST BE "${city}"\n` : ''}
 ${state ? `3. State MUST BE "${state}"\n` : ''}
 ${minRevenue || maxRevenue ? `4. Annual revenue MUST BE ${minRevenue ? `at least $${minRevenue}` : ''}${minRevenue && maxRevenue ? ' and ' : ''}${maxRevenue ? `no more than $${maxRevenue}` : ''}\n` : ''}
 ${nteeDescription ? `5. NTEE category MUST match or be related to "${nteeDescription}"\n` : ''}
 
-${isMultiSearch ? `
-TIERED SEARCH APPROACH - FOLLOW THIS ORDER:
+For each organization found, provide complete data including organization_name, state, ein, address, city, zip_code, phone, email, website, organization_type, mission, annual_revenue, ntee_code, ntee_description, ruling_date, and data_sources array.
 
-TIER 1 - STRUCTURED DATABASES (PRIORITIZE THESE):
-1. CharityAPI.org - Query using the API key for comprehensive 501(c)(3) data
-2. IRS Ezar Database - Official IRS tax-exempt organization search
-3. ProPublica Nonprofit Explorer - Verified nonprofit financial data
-4. GuideStar/Candid - Nonprofit profiles and financials
+${isMultiSearch ? 'Return ALL organizations found (no limit).' : 'Return array with 1 organization.'}`;
 
-TIER 2 - SECONDARY SOURCES (if Tier 1 yields insufficient results):
-5. Charity Navigator - Ratings and profiles
-6. State charity registration databases
-7. Official organization websites and public filings
-
-CRITICAL: Return ALL organizations you find that match the criteria. Do NOT limit the number of results. If you find 100 matching organizations, return all 100.
-` : `Find the specific organization that matches the criteria using structured databases first.`}
-
-For each organization found, provide:
-- organization_name: Official registered name
-- state: State code
-- ein: Employer Identification Number
-- address: Street address
-- city: City name
-- zip_code: ZIP code
-- phone: Phone number
-- email: Contact email if available
-- website: Official website
-- organization_type: EXACTLY as classified (must match filter if specified)
-- mission: Brief mission statement
-- annual_revenue: Most recent annual revenue as "$X,XXX,XXX" format
-- ntee_code: NTEE code (e.g., A03)
-- ntee_description: Full description of the NTEE code (e.g., "Professional Societies & Associations")
-- ruling_date: Tax-exempt status date if applicable
-- data_sources: Array of sources
-
-${isMultiSearch ? 'Return ALL organizations found (no limit). Use structured databases for accurate, comprehensive results.' : 'Return array with 1 organization.'}`;
-
-    try {
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
         add_context_from_internet: true,
@@ -159,6 +221,7 @@ ${isMultiSearch ? 'Return ALL organizations found (no limit). Use structured dat
       }
     } catch (err) {
       setError("Unable to fetch organization data. Please try again.");
+      console.error('Search error:', err);
     } finally {
       setIsSearching(false);
     }
@@ -318,6 +381,17 @@ Return a JSON object with these fields (use null for any field where data is not
         </TabsList>
 
         <TabsContent value="single" className="mt-0">
+          <div className="mb-4 flex items-center gap-2">
+            <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useAISearch}
+                onChange={(e) => setUseAISearch(e.target.checked)}
+                className="rounded border-slate-300"
+              />
+              Use AI-powered search (slower, broader results)
+            </label>
+          </div>
           <SearchForm onSearch={handleSearch} isLoading={isSearching} />
 
           {error && (
@@ -330,7 +404,9 @@ Return a JSON object with these fields (use null for any field where data is not
           {isSearching && (
             <div className="flex flex-col items-center justify-center py-12 mt-4">
               <div className="w-12 h-12 rounded-full border-4 border-blue-100 animate-spin mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
-              <p className="text-slate-600 font-medium">Searching public databases...</p>
+              <p className="text-slate-600 font-medium">
+                {useAISearch ? 'AI searching public databases...' : 'Searching API databases...'}
+              </p>
               <p className="text-sm text-slate-400 mt-1">This may take a few seconds</p>
             </div>
           )}
