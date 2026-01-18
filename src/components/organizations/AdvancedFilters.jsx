@@ -33,7 +33,7 @@ export default function AdvancedFilters({ filters, onFilterChange, onClear }) {
           <Filter className="w-4 h-4 text-slate-600" />
           <span className="font-semibold text-sm text-slate-700">Advanced Filters</span>
           {hasActiveFilters && (
-            <span className="text-xs bg-primary text-white px-2 py-1 rounded-full">
+            <span className="text-xs text-white px-2 py-1 rounded-full" style={{ backgroundColor: 'hsl(217, 91%, 60%)' }}>
               {Object.values(filters).filter(v => v).length}
             </span>
           )}

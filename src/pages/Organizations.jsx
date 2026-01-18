@@ -117,7 +117,8 @@ export default function Organizations() {
                   setShowSearchPanel(true);
                   setSelectedOrg(null);
                 }}
-                className="bg-primary hover:bg-primary/90"
+                style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
+                className="hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Search
@@ -166,7 +167,7 @@ export default function Organizations() {
             <div className="flex-1 overflow-y-auto space-y-2 pr-2 min-h-0">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <div className="w-8 h-8 border-2 border-blue-100 border-t-primary rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
                   </div>
                 ) : filteredOrgs.length === 0 ? (
                   <div className="text-center py-12 text-slate-500">
@@ -185,9 +186,13 @@ export default function Organizations() {
                         onClick={() => setSelectedOrg(org)}
                         className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                           selectedOrg?.id === org.id
-                            ? "border-primary bg-secondary"
+                            ? "bg-white"
                             : "border-slate-100 hover:border-slate-200 bg-white"
                         }`}
+                        style={selectedOrg?.id === org.id ? { 
+                          borderColor: 'hsl(217, 91%, 60%)', 
+                          backgroundColor: 'hsl(214, 95%, 93%)' 
+                        } : {}}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">

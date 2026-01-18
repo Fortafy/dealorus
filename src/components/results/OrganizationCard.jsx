@@ -49,8 +49,8 @@ function DataRow({ icon: Icon, label, value, isLink }) {
 
   return (
     <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-        <Icon className="w-5 h-5 text-primary" />
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'hsl(214, 95%, 93%)' }}>
+        <Icon className="w-5 h-5" style={{ color: 'hsl(217, 91%, 60%)' }} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">
@@ -61,7 +61,8 @@ function DataRow({ icon: Icon, label, value, isLink }) {
             href={value.startsWith("http") ? value : `https://${value}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-primary hover:text-primary/80 hover:underline flex items-center gap-1"
+            className="text-sm hover:underline flex items-center gap-1"
+            style={{ color: 'hsl(217, 91%, 60%)' }}
             >
             {value}
             <ExternalLink className="w-3 h-3" />
@@ -284,7 +285,7 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
       transition={{ duration: 0.4 }}
     >
       <Card className="overflow-hidden border-0 shadow-xl shadow-slate-200/50 bg-white">
-        <CardHeader className="bg-gradient-to-r from-primary to-primary/90 text-white p-6">
+        <CardHeader className="text-white p-6" style={{ background: 'linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))' }}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold mb-2">{data.organization_name}</h2>
@@ -318,7 +319,8 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                 size="sm"
                 onClick={handleSaveClick}
                 disabled={isSaved}
-                className={`flex-shrink-0 h-8 w-8 p-0 ${isSaved ? "bg-green-100 text-green-700" : existingRecord ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-white/90 text-primary hover:bg-white"}`}
+                className={`flex-shrink-0 h-8 w-8 p-0 ${isSaved ? "bg-green-100 text-green-700" : existingRecord ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-white/90 hover:bg-white"}`}
+                style={!isSaved && !existingRecord ? { color: 'hsl(217, 91%, 60%)' } : {}}
                 title={isSaved ? "Saved" : existingRecord ? "Update Existing" : "Save"}
               >
                 {isSaved ? (
@@ -332,11 +334,12 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                 size="sm"
                 onClick={handleAIEnrich}
                 disabled={isEnriching}
-                className="bg-white/90 text-primary hover:bg-white h-8 w-8 p-0"
+                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                style={{ color: 'hsl(217, 91%, 60%)' }}
                 title="AI Enrich"
               >
                 {isEnriching ? (
-                  <div className="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 rounded-full animate-spin" style={{ borderColor: 'hsl(217, 91%, 60%, 0.3)', borderTopColor: 'hsl(217, 91%, 60%)' }} />
                 ) : (
                   <Sparkles className="w-3.5 h-3.5" />
                 )}
@@ -347,7 +350,8 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                     variant="secondary"
                     size="sm"
                     disabled={isEnriching || !data.ein}
-                    className="bg-white/90 text-primary hover:bg-white h-8 w-8 p-0"
+                    className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                    style={{ color: 'hsl(217, 91%, 60%)' }}
                     title="Enrich from data sources"
                   >
                     <Database className="w-3.5 h-3.5" />
@@ -378,7 +382,8 @@ export default function OrganizationCard({ data, onSave, isSaved, onDelete, onEd
                 variant="secondary"
                 size="sm"
                 onClick={() => setEditDialogOpen(true)}
-                className="bg-white/90 text-primary hover:bg-white h-8 w-8 p-0"
+                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                style={{ color: 'hsl(217, 91%, 60%)' }}
                 title="Edit"
               >
                 <Pencil className="w-3.5 h-3.5" />
