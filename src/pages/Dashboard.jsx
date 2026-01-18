@@ -10,6 +10,7 @@ import PersonalProfileSection from "@/components/dashboard/PersonalProfileSectio
 import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSection";
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
+import OrganizationMembers from "@/components/organizations/OrganizationMembers";
 import { Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
@@ -59,6 +60,10 @@ export default function Dashboard() {
       case "metrics":
         return isOrgAdmin(currentUser) ? (
           <DashboardMetrics organization={organization} users={users} />
+        ) : null;
+      case "organization-members":
+        return isOrgAdmin(currentUser) ? (
+          <OrganizationMembers organizationId={currentUser.organization_id} />
         ) : null;
       case "organization-settings":
         return isOrgAdmin(currentUser) ? (

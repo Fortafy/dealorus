@@ -8,6 +8,7 @@ import {
   Building2,
   Palette,
   CreditCard,
+  Users,
 } from "lucide-react";
 
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin }) {
@@ -29,6 +30,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "metrics",
       label: "Dashboard Metrics",
       icon: BarChart3,
+    },
+    {
+      id: "organization-members",
+      label: "Team Members",
+      icon: Users,
     },
     {
       id: "organization-settings",
