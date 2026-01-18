@@ -110,6 +110,21 @@ export default function PersonalProfileSection({ user }) {
               </p>
             </div>
 
+            {/* User ID */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                User ID
+              </label>
+              <Input
+                value={user?.id || ""}
+                disabled
+                className="text-base bg-slate-50 cursor-not-allowed font-mono"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Your unique user identifier
+              </p>
+            </div>
+
             {/* Save Button */}
             <div className="flex justify-end pt-4 border-t border-slate-200">
               <Button
