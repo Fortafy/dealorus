@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Mail, CheckCircle2, AlertCircle, Loader } from "lucide-react";
+import { User, Mail, Building2, CheckCircle2, AlertCircle, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function PersonalProfileSection({ user }) {
@@ -13,6 +13,14 @@ export default function PersonalProfileSection({ user }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  const { data: organization } = useQuery({
+    queryKey: ["user-organization", user?.organization_id],
+    enabled: !!user?.organization_id,
+    queryFn: async () => {
+      return await base44.entities.Organization.get(user.organization_id);
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -122,6 +130,22 @@ export default function PersonalProfileSection({ user }) {
               />
               <p className="text-xs text-slate-500 mt-1">
                 Your unique user identifier
+              </p>
+            </div>
+
+            {/* Organization */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
+                <Building2 className="w-4 h-4" />
+                Organization
+              </label>
+              <Input
+                value={organization?.name || (user?.organization_id ? "Loading..." : "Not assigned")}
+                disabled
+                className="text-base bg-slate-50 cursor-not-allowed"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Managed by your organization administrator
               </p>
             </div>
 
