@@ -34,18 +34,26 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
       if (city) searchParams.city = city;
       if (ein) searchParams.ein = ein;
       
+      console.log('ProPublica search params:', searchParams);
+      
       const response = await base44.functions.invoke('propublicaSearch', searchParams);
+      
+      console.log('ProPublica response:', response);
+      console.log('ProPublica response.data:', response?.data);
       
       let results = [];
       if (response?.data) {
         results = Array.isArray(response.data) ? response.data : [response.data];
       }
 
+      console.log('Results after parsing:', results);
+
       // Filter results based on search criteria
       if (orgName) {
         results = results.filter(org => 
           org.organization_name?.toLowerCase().includes(orgName.toLowerCase())
         );
+        console.log('Results after orgName filter:', results);
       }
       
       if (minRevenue || maxRevenue) {
@@ -56,6 +64,7 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
           if (maxRevenue && revenue > parseFloat(maxRevenue)) return false;
           return true;
         });
+        console.log('Results after revenue filter:', results);
       }
 
       // Enrich NTEE descriptions
@@ -71,8 +80,11 @@ export default function SearchPanel({ onSearchComplete, onClose }) {
         setError("No organizations found matching the criteria.");
       }
     } catch (err) {
-      setError("Unable to fetch organization data from ProPublica. Please try again.");
-      console.error('ProPublica search error:', err);
+      console.error('ProPublica search error - Full error:', err);
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      console.error('Error response:', err.response);
+      setError(`Unable to fetch organization data from ProPublica: ${err.message || 'Unknown error'}`);
     } finally {
       setIsSearching(false);
     }
