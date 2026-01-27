@@ -6,6 +6,7 @@ import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
+import SavedFilters from "@/components/organizations/SavedFilters";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { motion } from "framer-motion";
 import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle, Merge } from "lucide-react";
@@ -469,6 +470,15 @@ export default function Organizations() {
                   max_revenue: "",
                 })}
               />
+
+              {currentUser?.organization_id && (
+                <SavedFilters
+                  currentFilters={filters}
+                  onApplyFilter={setFilters}
+                  clientId={currentUser.organization_id}
+                  userId={currentUser.id}
+                />
+              )}
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-2 min-h-0">
