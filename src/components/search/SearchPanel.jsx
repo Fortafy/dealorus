@@ -227,15 +227,21 @@ Return a JSON object with these fields (use null for any field where data is not
       const extractionResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
         file_url,
         json_schema: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              organization_name: { type: "string" },
-              state: { type: "string" },
+          type: "object",
+          properties: {
+            organizations: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  organization_name: { type: "string" },
+                  state: { type: "string" },
+                },
+                required: ["organization_name", "state"],
+              },
             },
-            required: ["organization_name", "state"],
           },
+          required: ["organizations"],
         },
       });
 
