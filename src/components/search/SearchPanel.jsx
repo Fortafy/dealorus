@@ -251,7 +251,7 @@ Return a JSON object with these fields (use null for any field where data is not
         return;
       }
 
-      const organizations = extractionResult.output || [];
+      const organizations = extractionResult.output?.organizations || [];
       if (organizations.length === 0) {
         setError("No valid organizations found in the CSV file");
         setIsProcessingBulk(false);
