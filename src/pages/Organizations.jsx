@@ -5,9 +5,10 @@ import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
+import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle } from "lucide-react";
+import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle, Merge } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ export default function Organizations() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showDashboard, setShowDashboard] = useState(true);
+  const [showDuplicates, setShowDuplicates] = useState(false);
   const [filters, setFilters] = useState({
     state: "",
     organization_type: "",
@@ -415,12 +417,27 @@ export default function Organizations() {
                   setShowSearchPanel(true);
                   setSelectedOrg(null);
                   setShowDashboard(false);
+                  setShowDuplicates(false);
                 }}
                 style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
                 className="w-full hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Search
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  setShowDuplicates(true);
+                  setSelectedOrg(null);
+                  setShowDashboard(false);
+                  setShowSearchPanel(false);
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                <Merge className="w-4 h-4 mr-2" />
+                Find Duplicates
               </Button>
               
               <div className="relative">
@@ -517,10 +534,22 @@ export default function Organizations() {
           </div>
         </div>
 
-        {/* Right Column - Organization Details, Search Panel, or Dashboard */}
+        {/* Right Column - Organization Details, Search Panel, Dashboard, or Duplicates */}
         <div className="flex-1 overflow-y-auto" ref={rightColumnRef}>
           {showDashboard ? (
             <DashboardView organizations={organizations} contacts={contacts} onSelectOrg={(org) => { setShowDashboard(false); setSelectedOrg(org); }} />
+          ) : showDuplicates ? (
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-6">Duplicate Organizations</h2>
+              <DuplicatesReview
+                clientId={currentUser?.organization_id}
+                onComplete={() => {
+                  queryClient.invalidateQueries({ queryKey: ["organizations"] });
+                  setShowDuplicates(false);
+                  setShowDashboard(true);
+                }}
+              />
+            </div>
           ) : selectedOrg ? (
             <motion.div
               key={selectedOrg.id}
