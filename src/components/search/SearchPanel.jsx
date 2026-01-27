@@ -231,28 +231,19 @@ Return a JSON object with these fields (use null for any field where data is not
         return;
       }
 
-      const extractionResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url: uploadResult.file_url,
-        json_schema: {
-          type: "object",
-          properties: {
-            organization_name: { type: "string" },
-            state: { type: "string" },
-          },
-        },
+      const parseResponse = await base44.functions.invoke('parseCSV', {
+        file_url: uploadResult.file_url
       });
 
-      console.log('Extraction result:', extractionResult);
+      console.log('Parse response:', parseResponse);
 
-      if (extractionResult.status === "error") {
-        setError(extractionResult.details || "Failed to parse CSV file");
+      if (parseResponse.data.status === "error" || parseResponse.data.error) {
+        setError(parseResponse.data.error || "Failed to parse CSV file");
         setIsProcessingBulk(false);
         return;
       }
 
-      const organizations = Array.isArray(extractionResult.output) 
-        ? extractionResult.output 
-        : (extractionResult.output ? [extractionResult.output] : []);
+      const organizations = parseResponse.data.organizations || [];
       if (organizations.length === 0) {
         setError("No valid organizations found in the CSV file");
         setIsProcessingBulk(false);
