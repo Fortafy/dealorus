@@ -222,14 +222,21 @@ Return a JSON object with these fields (use null for any field where data is not
     setActiveTab("bulk");
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const uploadResult = await base44.integrations.Core.UploadFile({ file });
+      console.log('Upload result:', uploadResult);
+      
+      if (!uploadResult || !uploadResult.file_url) {
+        setError("Failed to upload file");
+        setIsProcessingBulk(false);
+        return;
+      }
 
       const extractionResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
+        file_url: uploadResult.file_url,
         json_schema: {
           type: "object",
           properties: {
-            data: {
+            organizations: {
               type: "array",
               items: {
                 type: "object",
@@ -243,15 +250,15 @@ Return a JSON object with these fields (use null for any field where data is not
         },
       });
 
+      console.log('Extraction result:', extractionResult);
+
       if (extractionResult.status === "error") {
         setError(extractionResult.details || "Failed to parse CSV file");
         setIsProcessingBulk(false);
         return;
       }
 
-      const organizations = Array.isArray(extractionResult.output) 
-        ? extractionResult.output 
-        : (extractionResult.output?.data || []);
+      const organizations = extractionResult.output?.organizations || [];
       if (organizations.length === 0) {
         setError("No valid organizations found in the CSV file");
         setIsProcessingBulk(false);
