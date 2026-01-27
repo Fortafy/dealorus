@@ -236,16 +236,8 @@ Return a JSON object with these fields (use null for any field where data is not
         json_schema: {
           type: "object",
           properties: {
-            organizations: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  organization_name: { type: "string" },
-                  state: { type: "string" },
-                },
-              },
-            },
+            organization_name: { type: "string" },
+            state: { type: "string" },
           },
         },
       });
@@ -258,7 +250,9 @@ Return a JSON object with these fields (use null for any field where data is not
         return;
       }
 
-      const organizations = extractionResult.output?.organizations || [];
+      const organizations = Array.isArray(extractionResult.output) 
+        ? extractionResult.output 
+        : (extractionResult.output ? [extractionResult.output] : []);
       if (organizations.length === 0) {
         setError("No valid organizations found in the CSV file");
         setIsProcessingBulk(false);
