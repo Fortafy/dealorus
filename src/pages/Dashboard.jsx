@@ -73,6 +73,10 @@ export default function Dashboard() {
         return isOrgAdmin(currentUser) ? (
           <OrganizationSettings organization={organization} />
         ) : null;
+      case "branding":
+        return isOrgAdmin(currentUser) ? (
+          <BrandingSettings organization={organization} />
+        ) : null;
       case "subscription":
         return isOrgAdmin(currentUser) ? (
           <SubscriptionDetails organization={organization} />

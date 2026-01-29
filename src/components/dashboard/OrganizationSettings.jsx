@@ -17,6 +17,17 @@ export default function OrganizationSettings({ organization }) {
     default_notifications_enabled: true,
     billing_email: "",
   });
+
+  if (!organization) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
+          <p className="text-slate-600">Loading organization...</p>
+        </div>
+      </div>
+    );
+  }
   const [brandingData, setBrandingData] = useState({
     logo_url: "",
     primary_color: "#3b82f6",
@@ -45,7 +56,7 @@ export default function OrganizationSettings({ organization }) {
 
   const updateMutation = useMutation({
     mutationFn: async () => {
-      await base44.entities.Organization.update(organization.id, formData);
+      await base44.entities.Client.update(organization.id, formData);
     },
     onSuccess: () => {
       setSuccess("Organization settings updated successfully");
@@ -60,7 +71,7 @@ export default function OrganizationSettings({ organization }) {
 
   const updateBrandingMutation = useMutation({
     mutationFn: async () => {
-      await base44.entities.Organization.update(organization.id, brandingData);
+      await base44.entities.Client.update(organization.id, brandingData);
     },
     onSuccess: () => {
       setSuccess("Branding settings updated successfully");
