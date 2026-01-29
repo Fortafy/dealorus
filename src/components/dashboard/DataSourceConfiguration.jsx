@@ -26,6 +26,17 @@ export default function DataSourceConfiguration({ organization }) {
     }
   }, [organization?.default_data_source_priority]);
 
+  if (!organization) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
+          <p className="text-slate-600">Loading organization...</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleDragEnd = (result) => {
     if (!result.destination) return;
     const items = Array.from(priority);
