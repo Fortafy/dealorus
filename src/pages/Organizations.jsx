@@ -58,20 +58,20 @@ export default function Organizations() {
   }, [selectedOrg]);
 
   const { data: organizations = [], isLoading } = useQuery({
-    queryKey: ["organizations", currentUser?.organization_id],
-    enabled: !!currentUser?.organization_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.organization_id }, "-created_date"),
+    queryKey: ["organizations", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "-created_date"),
   });
 
   const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts", currentUser?.organization_id],
-    enabled: !!currentUser?.organization_id,
-    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.organization_id }, "-created_date"),
+    queryKey: ["contacts", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.client_id }, "-created_date"),
   });
 
   // Check for pre-selected organization from URL
   React.useEffect(() => {
-    if (!currentUser?.organization_id) return;
+    if (!currentUser?.client_id) return;
     const urlParams = new URLSearchParams(window.location.search);
     const orgId = urlParams.get("id");
     if (orgId && organizations.length > 0) {
@@ -552,7 +552,7 @@ export default function Organizations() {
             <div className="p-6">
               <h2 className="text-2xl font-bold mb-6">Duplicate Organizations</h2>
               <DuplicatesReview
-                clientId={currentUser?.organization_id}
+                clientId={currentUser?.client_id}
                 onComplete={() => {
                   queryClient.invalidateQueries({ queryKey: ["organizations"] });
                   setShowDuplicates(false);
