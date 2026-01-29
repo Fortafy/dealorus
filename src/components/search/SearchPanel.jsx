@@ -30,8 +30,8 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
     const getUser = async () => {
       try {
         const user = await base44.auth.me();
-        if (user?.organization_id) {
-          setCurrentOrganizationId(user.organization_id);
+        if (user?.client_id) {
+          setCurrentOrganizationId(user.client_id);
         }
       } catch (err) {
         console.error('Failed to fetch user:', err);

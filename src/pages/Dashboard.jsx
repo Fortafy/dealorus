@@ -37,17 +37,17 @@ export default function Dashboard() {
   }, []);
 
   const { data: organization } = useQuery({
-    queryKey: ["client", currentUser?.organization_id],
-    enabled: !!currentUser?.organization_id,
-    queryFn: () => base44.entities.Client.filter({ id: currentUser.organization_id }).then(clients => clients[0]),
+    queryKey: ["client", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Client.filter({ id: currentUser.client_id }).then(clients => clients[0]),
   });
 
   const { data: users = [] } = useQuery({
-    queryKey: ["organization-users", currentUser?.organization_id],
-    enabled: !!currentUser?.organization_id && isOrgAdmin(currentUser),
+    queryKey: ["client-users", currentUser?.client_id],
+    enabled: !!currentUser?.client_id && isOrgAdmin(currentUser),
     queryFn: async () => {
       const allUsers = await base44.entities.User.list();
-      return allUsers.filter(u => u.organization_id === currentUser.organization_id);
+      return allUsers.filter(u => u.client_id === currentUser.client_id);
     },
   });
 
@@ -67,7 +67,7 @@ export default function Dashboard() {
         ) : null;
       case "organization-members":
         return isOrgAdmin(currentUser) ? (
-          <OrganizationMembers organizationId={currentUser.organization_id} />
+          <OrganizationMembers organizationId={currentUser.client_id} />
         ) : null;
       case "organization-settings":
         return isOrgAdmin(currentUser) ? (

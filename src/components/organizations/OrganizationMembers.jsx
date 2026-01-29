@@ -60,8 +60,8 @@ function InviteOrganizationUserDialog({ open, onOpenChange, organizationId, orga
       }
 
       return await base44.entities.User.update(invitedUser.id, {
-        organization_id: organizationId,
-        organization_role: "member",
+        client_id: organizationId,
+        client_role: "member",
         is_active: true,
       });
     },
@@ -166,7 +166,7 @@ export default function OrganizationMembers({ organizationId }) {
     queryKey: ["organizationUsers", organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
-      return await base44.entities.User.filter({ organization_id: organizationId }, "-created_date");
+      return await base44.entities.User.filter({ client_id: organizationId }, "-created_date");
     },
     enabled: !!organizationId,
   });
@@ -346,12 +346,12 @@ export default function OrganizationMembers({ organizationId }) {
                         <td className="py-3 px-4">
                           <Badge
                             className={
-                              user.organization_role === "admin"
+                              user.client_role === "admin"
                                 ? "bg-amber-100 text-amber-800"
                                 : "bg-slate-100 text-slate-800"
                             }
                           >
-                            {user.organization_role}
+                            {user.client_role}
                           </Badge>
                         </td>
                         <td className="py-3 px-4">
@@ -375,7 +375,7 @@ export default function OrganizationMembers({ organizationId }) {
                                 ? "h-7 text-green-600 hover:text-green-700 hover:bg-green-50"
                                 : "h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
                             }
-                            disabled={user.organization_role === "admin"}
+                            disabled={user.client_role === "admin"}
                           >
                             {user.is_active === false ? "Activate" : "Deactivate"}
                           </Button>

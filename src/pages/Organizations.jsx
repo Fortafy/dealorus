@@ -471,11 +471,11 @@ export default function Organizations() {
                 })}
               />
 
-              {currentUser?.organization_id && (
+              {currentUser?.client_id && (
                 <SavedFilters
                   currentFilters={filters}
                   onApplyFilter={setFilters}
-                  clientId={currentUser.organization_id}
+                  clientId={currentUser.client_id}
                   userId={currentUser.id}
                 />
               )}

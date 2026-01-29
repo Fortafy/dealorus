@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -20,16 +20,62 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
 
-export default function InviteUserDialog({ open, onOpenChange, organizationId }) {
+export default function InviteUserDialog({ open, onOpenChange, clientId }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
+  const [selectedClientId, setSelectedClientId] = useState(clientId || "");
+  const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+      if (!selectedClientId && user?.client_id) {
+        setSelectedClientId(user.client_id);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ["clients"],
+    queryFn: () => base44.entities.Client.list(),
+    enabled: currentUser?.role === "admin",
+  });
+
+  const isSystemAdmin = currentUser?.role === "admin";
+  const isClientAdmin = currentUser?.client_role === "admin";
+
   const inviteMutation = useMutation({
     mutationFn: async () => {
+      if (!selectedClientId) {
+        throw new Error("Please select a client");
+      }
+      
       // Invite user via base44 SDK
-      await base44.users.inviteUser(email, role);
+      await base44.users.inviteUser(email, "user");
+      
+      // Wait for user to be created and update with client info
+      let invitedUser = null;
+      for (let i = 0; i < 10; i++) {
+        const users = await base44.entities.User.filter({ email });
+        if (users.length > 0) {
+          invitedUser = users[0];
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      if (invitedUser) {
+        await base44.entities.User.update(invitedUser.id, {
+          client_id: selectedClientId,
+          client_role: role,
+          is_active: true,
+        });
+      }
+      
       return { email, role };
     },
     onSuccess: () => {
@@ -64,9 +110,9 @@ export default function InviteUserDialog({ open, onOpenChange, organizationId })
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Invite User to Organization</DialogTitle>
+          <DialogTitle>Invite Team Member</DialogTitle>
           <DialogDescription>
-            Send an invitation to join your organization
+            Send an invitation to join {isSystemAdmin ? "a client organization" : "your organization"}
           </DialogDescription>
         </DialogHeader>
 
@@ -83,6 +129,27 @@ export default function InviteUserDialog({ open, onOpenChange, organizationId })
               <CheckCircle2 className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">{success}</AlertDescription>
             </Alert>
+          )}
+
+          {/* Client Selection (System Admin Only) */}
+          {isSystemAdmin && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Client
+              </label>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId} disabled={inviteMutation.isPending}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
 
           {/* Email Input */}
@@ -107,19 +174,19 @@ export default function InviteUserDialog({ open, onOpenChange, organizationId })
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Role
             </label>
-            <Select value={role} onValueChange={setRole} disabled={inviteMutation.isPending}>
+            <Select value={role} onValueChange={setRole} disabled={inviteMutation.isPending || !isClientAdmin}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="member">Member</SelectItem>
-                <SelectItem value="admin">Administrator</SelectItem>
+                {(isClientAdmin || isSystemAdmin) && <SelectItem value="admin">Client Administrator</SelectItem>}
               </SelectContent>
             </Select>
             <p className="text-xs text-slate-500 mt-2">
               {role === "admin"
-                ? "Administrators can invite users and manage organization settings"
-                : "Members can view and manage organization data"}
+                ? "Client administrators can invite users and manage client settings"
+                : "Members can view and manage data"}
             </p>
           </div>
 
