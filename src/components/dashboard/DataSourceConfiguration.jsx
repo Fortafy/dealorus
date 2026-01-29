@@ -39,7 +39,7 @@ export default function DataSourceConfiguration({ organization }) {
     setSaveStatus(null);
 
     try {
-      await base44.entities.Organization.update(organization.id, {
+      await base44.entities.Client.update(organization.id, {
         default_data_source_priority: priority
       });
       setSaveStatus({ type: "success", message: "Data source settings saved successfully!" });
