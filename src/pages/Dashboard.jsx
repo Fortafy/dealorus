@@ -37,9 +37,9 @@ export default function Dashboard() {
   }, []);
 
   const { data: organization } = useQuery({
-    queryKey: ["organization", currentUser?.organization_id],
+    queryKey: ["client", currentUser?.organization_id],
     enabled: !!currentUser?.organization_id,
-    queryFn: () => base44.entities.Organization.filter({ id: currentUser.organization_id }).then(orgs => orgs[0]),
+    queryFn: () => base44.entities.Client.filter({ id: currentUser.organization_id }).then(clients => clients[0]),
   });
 
   const { data: users = [] } = useQuery({
