@@ -5,15 +5,24 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user) {
+    if (!user || !user.client_id) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get Salesforce access token
-    const accessToken = await base44.asServiceRole.connectors.getAccessToken("salesforce");
+    // Get client's Salesforce credentials
+    const clients = await base44.asServiceRole.entities.Client.filter({ id: user.client_id });
+    if (!clients || clients.length === 0) {
+      return Response.json({ error: 'Client not found' }, { status: 404 });
+    }
 
-    // Get Salesforce instance URL from the token introspection or use a default
-    const instanceUrl = Deno.env.get("SALESFORCE_INSTANCE_URL") || "https://na1.salesforce.com";
+    const client = clients[0];
+    
+    if (!client.salesforce_connected || !client.salesforce_access_token) {
+      return Response.json({ error: 'Salesforce not connected. Please connect in Organization Settings.' }, { status: 400 });
+    }
+
+    const accessToken = client.salesforce_access_token;
+    const instanceUrl = client.salesforce_instance_url || "https://login.salesforce.com";
 
     // Fetch Accounts from Salesforce
     const sfQuery = `SELECT Id, Name, BillingState, Phone, BillingStreet, BillingCity, BillingPostalCode, Website, Industry, AnnualRevenue, Description FROM Account`;

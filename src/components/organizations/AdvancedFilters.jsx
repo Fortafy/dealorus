@@ -165,6 +165,40 @@ export default function AdvancedFilters({ filters, onFilterChange, onClear, clie
               className="h-9 text-sm"
             />
           </div>
+
+          <div>
+            <label className="text-xs font-medium text-slate-600 mb-1 block">Source System</label>
+            <Select value={filters.source_system || ""} onValueChange={(v) => handleChange("source_system", v)}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="All sources" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>All sources</SelectItem>
+                <SelectItem value="Salesforce">Salesforce</SelectItem>
+                <SelectItem value="Manual">Manual</SelectItem>
+                <SelectItem value="AI Search">AI Search</SelectItem>
+                <SelectItem value="CSV Import">CSV Import</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-slate-600 mb-1 block">Lifecycle Stage</label>
+            <Select value={filters.lifecycle_stage || ""} onValueChange={(v) => handleChange("lifecycle_stage", v)}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="All stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>All stages</SelectItem>
+                <SelectItem value="Prospect">Prospect</SelectItem>
+                <SelectItem value="Qualified Lead">Qualified Lead</SelectItem>
+                <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
+                <SelectItem value="Negotiation">Negotiation</SelectItem>
+                <SelectItem value="Client">Client</SelectItem>
+                <SelectItem value="Lost">Lost</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <Separator className="my-2" />

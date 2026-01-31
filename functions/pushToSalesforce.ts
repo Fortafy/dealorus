@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user) {
+    if (!user || !user.client_id) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -28,9 +28,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Organization does not have a Salesforce ID' }, { status: 400 });
     }
 
-    // Get Salesforce access token
-    const accessToken = await base44.asServiceRole.connectors.getAccessToken("salesforce");
-    const instanceUrl = Deno.env.get("SALESFORCE_INSTANCE_URL") || "https://na1.salesforce.com";
+    // Get client's Salesforce credentials
+    const clients = await base44.asServiceRole.entities.Client.filter({ id: user.client_id });
+    if (!clients || clients.length === 0) {
+      return Response.json({ error: 'Client not found' }, { status: 404 });
+    }
+
+    const client = clients[0];
+    
+    if (!client.salesforce_connected || !client.salesforce_access_token) {
+      return Response.json({ error: 'Salesforce not connected. Please connect in Organization Settings.' }, { status: 400 });
+    }
+
+    const accessToken = client.salesforce_access_token;
+    const instanceUrl = client.salesforce_instance_url || "https://login.salesforce.com";
 
     // Map Organization fields to Salesforce Account fields
     const sfAccountData = {

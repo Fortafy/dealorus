@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Loader, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import SalesforceIntegration from "./SalesforceIntegration";
 
 export default function OrganizationSettings({ organization }) {
   const [formData, setFormData] = useState({
@@ -337,6 +338,11 @@ export default function OrganizationSettings({ organization }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Salesforce Integration */}
+        <div className="mt-6">
+          <SalesforceIntegration organization={organization} />
+        </div>
       </div>
     </motion.div>
   );
