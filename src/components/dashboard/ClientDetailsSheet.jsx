@@ -35,9 +35,11 @@ import {
   CheckCircle2,
   Plus,
   X,
+  UserPlus,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import moment from "moment";
+import InviteUserDialog from "../organizations/InviteUserDialog";
 
 export default function ClientDetailsSheet({ client, open, onOpenChange, allUsers }) {
   const [editMode, setEditMode] = useState(false);
@@ -46,6 +48,7 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [newCustomField, setNewCustomField] = useState({ key: "", value: "" });
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: activities = [] } = useQuery({
@@ -194,6 +197,16 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
             <TabsTrigger value="documents">Docs ({documents.length})</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
+
+          <InviteUserDialog
+            open={showInviteDialog}
+            onOpenChange={setShowInviteDialog}
+            clientId={client.id}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["client-users", client.id] });
+              queryClient.invalidateQueries({ queryKey: ["client-activities", client.id] });
+            }}
+          />
 
           <TabsContent value="details" className="space-y-4 mt-4">
             <div className="flex justify-end mb-2">
@@ -483,6 +496,17 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
           </TabsContent>
 
           <TabsContent value="users" className="space-y-3 mt-4">
+            <div className="flex justify-end">
+              <Button 
+                size="sm" 
+                onClick={() => setShowInviteDialog(true)}
+                className="bg-blue-600"
+              >
+                <UserPlus className="w-3 h-3 mr-2" />
+                Invite User
+              </Button>
+            </div>
+
             {users.map((user) => (
               <Card key={user.id}>
                 <CardContent className="pt-4">
