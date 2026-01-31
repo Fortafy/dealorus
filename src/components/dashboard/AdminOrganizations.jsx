@@ -304,16 +304,6 @@ export default function AdminOrganizations() {
         allUsers={allUsers}
       />
 
-      {/* Edit Organization Dialog */}
-      {editingOrg && (
-        <EditOrganizationDialog
-          open={!!editingOrg}
-          onOpenChange={(open) => !open && setEditingOrg(null)}
-          organization={editingOrg}
-          allUsers={allUsers}
-        />
-      )}
-
       {/* Client Details Sheet */}
       <ClientDetailsSheet
         client={selectedClient}
