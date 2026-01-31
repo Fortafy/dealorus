@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
 
-export default function InviteUserDialog({ open, onOpenChange, clientId }) {
+export default function InviteUserDialog({ open, onOpenChange, clientId, onSuccess }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
   const [selectedClientId, setSelectedClientId] = useState(clientId || "");
@@ -32,12 +32,14 @@ export default function InviteUserDialog({ open, onOpenChange, clientId }) {
     const fetchUser = async () => {
       const user = await base44.auth.me();
       setCurrentUser(user);
-      if (!selectedClientId && user?.client_id) {
+      if (clientId) {
+        setSelectedClientId(clientId);
+      } else if (!selectedClientId && user?.client_id) {
         setSelectedClientId(user.client_id);
       }
     };
     fetchUser();
-  }, []);
+  }, [clientId]);
 
   const { data: clients = [] } = useQuery({
     queryKey: ["clients"],
@@ -82,6 +84,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId }) {
       setSuccess(`Invitation sent to ${email}`);
       setEmail("");
       setRole("member");
+      if (onSuccess) onSuccess();
       setTimeout(() => {
         setSuccess(null);
         onOpenChange(false);
@@ -131,8 +134,8 @@ export default function InviteUserDialog({ open, onOpenChange, clientId }) {
             </Alert>
           )}
 
-          {/* Client Selection (System Admin Only) */}
-          {isSystemAdmin && (
+          {/* Client Selection (System Admin Only - when not pre-set) */}
+          {isSystemAdmin && !clientId && (
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Client
