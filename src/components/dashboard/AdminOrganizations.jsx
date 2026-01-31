@@ -27,6 +27,7 @@ import { Search, Plus, Trash2, Edit2, ArrowUpDown, ArrowUp, ArrowDown, Loader, A
 import { motion } from "framer-motion";
 import CreateOrganizationDialog from "./CreateOrganizationDialog";
 import EditOrganizationDialog from "./EditOrganizationDialog";
+import ClientDetailsSheet from "./ClientDetailsSheet";
 
 export default function AdminOrganizations() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +36,7 @@ export default function AdminOrganizations() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingOrg, setEditingOrg] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [selectedClient, setSelectedClient] = useState(null);
   const [error, setError] = useState(null);
   const queryClient = useQueryClient();
 
@@ -168,6 +170,12 @@ export default function AdminOrganizations() {
                           )}
                         </div>
                       </th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-900 text-sm">
+                        Category
+                      </th>
+                      <th className="text-left py-3 px-4 font-semibold text-slate-900 text-sm">
+                        Industry
+                      </th>
                       <th
                         className="text-left py-3 px-4 font-semibold text-slate-900 text-sm cursor-pointer hover:text-slate-700"
                         onClick={() => handleSort("subscription_plan")}
@@ -202,9 +210,6 @@ export default function AdminOrganizations() {
                           )}
                         </div>
                       </th>
-                      <th className="text-left py-3 px-4 font-semibold text-slate-900 text-sm">
-                        Admin
-                      </th>
                       <th className="text-right py-3 px-4 font-semibold text-slate-900 text-sm">
                         Actions
                       </th>
@@ -217,10 +222,26 @@ export default function AdminOrganizations() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: index * 0.05 }}
-                        className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                        className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+                        onClick={() => setSelectedClient(org)}
                       >
                         <td className="py-3 px-4">
                           <p className="font-medium text-slate-900">{org.name}</p>
+                          {org.account_manager && (
+                            <p className="text-xs text-slate-500">AM: {org.account_manager}</p>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          {org.category ? (
+                            <Badge variant="outline" className="capitalize">
+                              {org.category}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <p className="text-sm text-slate-600">{org.industry || "—"}</p>
                         </td>
                         <td className="py-3 px-4">
                           <Badge variant="outline" className="capitalize">
@@ -242,17 +263,15 @@ export default function AdminOrganizations() {
                             {org.subscription_status}
                           </Badge>
                         </td>
-                        <td className="py-3 px-4">
-                          <p className="text-sm text-slate-600">
-                            {getAdminName(org.admin_user_id)}
-                          </p>
-                        </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex gap-2 justify-end">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setEditingOrg(org)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingOrg(org);
+                              }}
                               className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -260,7 +279,10 @@ export default function AdminOrganizations() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setDeleteConfirm(org)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteConfirm(org);
+                              }}
                               className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -293,6 +315,14 @@ export default function AdminOrganizations() {
           allUsers={allUsers}
         />
       )}
+
+      {/* Client Details Sheet */}
+      <ClientDetailsSheet
+        client={selectedClient}
+        open={!!selectedClient}
+        onOpenChange={(open) => !open && setSelectedClient(null)}
+        allUsers={allUsers}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
