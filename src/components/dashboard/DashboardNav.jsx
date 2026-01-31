@@ -55,14 +55,14 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
 
   const adminSections = isBaseAdmin ? [
     {
-      id: "admin-users",
-      label: "Manage Users",
-      icon: User,
-    },
-    {
       id: "admin-organizations",
       label: "Manage Clients",
       icon: Building2,
+    },
+    {
+      id: "admin-users",
+      label: "Manage Users",
+      icon: User,
     },
   ] : [];
 
