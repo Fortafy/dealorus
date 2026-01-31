@@ -145,15 +145,15 @@ export default function CSVUploader({ onUpload, isProcessing }) {
                 className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
               >
                 {isProcessing ? (
-                  <div className="flex items-center gap-2">
+                  <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Processing Organizations...
-                  </div>
+                  </>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <>
                     <Upload className="w-5 h-5" />
                     Process & Enrich
-                  </div>
+                  </>
                 )}
               </Button>
             </motion.div>
