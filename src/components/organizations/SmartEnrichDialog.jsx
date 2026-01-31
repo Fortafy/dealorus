@@ -14,13 +14,34 @@ import { base44 } from "@/api/base44Client";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { Sparkles, CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 
-export default function SmartEnrichDialog({ open, onOpenChange, organization, onComplete, organizationSettings }) {
+export default function SmartEnrichDialog({ open, onOpenChange, organization, onComplete }) {
   const [isEnriching, setIsEnriching] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
+  const [clientSettings, setClientSettings] = useState(null);
 
-  // Use organization's default data source priority from org settings, fallback to default
-  const priority = organizationSettings?.default_data_source_priority || ["CharityAPI", "ProPublica", "NonprofitCheckPlus", "AI"];
+  // Fetch client settings on mount
+  React.useEffect(() => {
+    const fetchClientSettings = async () => {
+      try {
+        const user = await base44.auth.me();
+        if (user?.client_id) {
+          const clients = await base44.entities.Client.filter({ id: user.client_id });
+          if (clients && clients.length > 0) {
+            setClientSettings(clients[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch client settings:", err);
+      }
+    };
+    if (open) {
+      fetchClientSettings();
+    }
+  }, [open]);
+
+  // Use client's default data source priority, fallback to default
+  const priority = clientSettings?.default_data_source_priority || ["CharityAPI", "ProPublica", "NonprofitCheckPlus", "AI"];
 
   const handleEnrich = async () => {
     setIsEnriching(true);
