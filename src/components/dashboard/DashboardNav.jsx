@@ -9,6 +9,7 @@ import {
   CreditCard,
   Users,
   Database,
+  Merge,
 } from "lucide-react";
 
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
@@ -40,6 +41,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "data-sources",
       label: "Data Sources",
       icon: Database,
+    },
+    {
+      id: "find-duplicates",
+      label: "Find Duplicates",
+      icon: Merge,
     },
     {
       id: "organization-settings",

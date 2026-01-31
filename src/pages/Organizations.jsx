@@ -427,20 +427,6 @@ export default function Organizations() {
                 New Search
               </Button>
               
-              <Button
-                onClick={() => {
-                  setShowDuplicates(true);
-                  setSelectedOrg(null);
-                  setShowDashboard(false);
-                  setShowSearchPanel(false);
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                <Merge className="w-4 h-4 mr-2" />
-                Find Duplicates
-              </Button>
-              
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input

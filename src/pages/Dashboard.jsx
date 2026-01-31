@@ -12,7 +12,9 @@ import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
 import DataSourceConfiguration from "@/components/dashboard/DataSourceConfiguration";
+import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import { Home, HelpCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
 import { Link } from "react-router-dom";
@@ -22,6 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeSection, setActiveSection] = useState("profile");
+  const queryClient = useQueryClient();
 
   // Fetch current user
   useEffect(() => {
@@ -84,6 +87,19 @@ export default function Dashboard() {
       case "data-sources":
         return isOrgAdmin(currentUser) ? (
           <DataSourceConfiguration organization={organization} />
+        ) : null;
+      case "find-duplicates":
+        return isOrgAdmin(currentUser) ? (
+          <div className="p-6">
+            <h2 className="text-2xl font-bold mb-6">Duplicate Organizations</h2>
+            <DuplicatesReview
+              clientId={currentUser?.client_id}
+              onComplete={() => {
+                queryClient.invalidateQueries({ queryKey: ["organizations"] });
+                setActiveSection("metrics");
+              }}
+            />
+          </div>
         ) : null;
       default:
         return null;
