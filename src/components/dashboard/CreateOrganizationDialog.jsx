@@ -34,15 +34,15 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!formData.name.trim()) {
-        throw new Error("Organization name is required");
+        throw new Error("Client name is required");
       }
       if (!formData.admin_user_id) {
         throw new Error("Please select an administrator");
       }
-      return await base44.entities.Organization.create(formData);
+      return await base44.entities.Client.create(formData);
     },
     onSuccess: () => {
-      setSuccess("Organization created successfully");
+      setSuccess("Client created successfully");
       queryClient.invalidateQueries({ queryKey: ["admin-organizations"] });
       setTimeout(() => {
         onOpenChange(false);
@@ -56,7 +56,7 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
       }, 1500);
     },
     onError: (err) => {
-      setError(err.message || "Failed to create organization");
+      setError(err.message || "Failed to create client");
     },
   });
 
@@ -72,9 +72,9 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Organization</DialogTitle>
+          <DialogTitle>Create Client</DialogTitle>
           <DialogDescription>
-            Create a new organization and assign an administrator
+            Create a new client organization and assign an administrator
           </DialogDescription>
         </DialogHeader>
 
@@ -93,15 +93,15 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
             </Alert>
           )}
 
-          {/* Organization Name */}
+          {/* Client Name */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Organization Name
+              Client Name
             </label>
             <Input
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
-              placeholder="Organization name"
+              placeholder="Client name"
               disabled={createMutation.isPending}
             />
           </div>
