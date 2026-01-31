@@ -563,7 +563,12 @@ export default function Organizations() {
                 onEdit={handleEdit}
                 isClientOrganization={false}
               />
-              <ContactSearch organization={selectedOrg} />
+              <ContactSearch 
+                organization={selectedOrg}
+                onContactUpdate={(updatedContact) => {
+                  queryClient.invalidateQueries({ queryKey: ["contacts"] });
+                }}
+              />
             </motion.div>
           ) : showSearchPanel ? (
             <SearchPanel
