@@ -131,9 +131,9 @@ export default function ContactSearch({ organization, onContactUpdate }) {
       if (onContactUpdate) {
         onContactUpdate(updatedContact);
       }
-      // Also update selectedContact if it's the same contact
+      // Update selectedContact if it's the same contact
       if (selectedContact?.id === variables.id) {
-        setSelectedContact({ ...selectedContact, starred: variables.starred });
+        setSelectedContact(prev => ({ ...prev, starred: variables.starred }));
       }
     },
   });
