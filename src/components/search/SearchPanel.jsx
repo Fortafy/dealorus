@@ -25,7 +25,7 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
   const [lastSearchParams, setLastSearchParams] = useState(null);
   const [isLLMSearching, setIsLLMSearching] = useState(false);
   const [currentOrganizationId, setCurrentOrganizationId] = useState(null);
-  const [stopBulkProcessing, setStopBulkProcessing] = useState(false);
+  const stopBulkProcessingRef = React.useRef(false);
   const [importLog, setImportLog] = useState([]);
 
   React.useEffect(() => {
@@ -244,11 +244,16 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   const handleBulkUpload = async (file) => {
+    if (!currentOrganizationId) {
+      setError("Unable to determine client organization. Please refresh and try again.");
+      return;
+    }
+
     setIsProcessingBulk(true);
     setError(null);
     setBulkResults([]);
     setImportLog([]);
-    setStopBulkProcessing(false);
+    stopBulkProcessingRef.current = false;
     setActiveTab("bulk");
 
     const log = [];
@@ -311,12 +316,13 @@ Return a JSON object with these fields (use null for any field where data is not
       const user = await base44.auth.me();
 
       for (let i = 0; i < organizations.length; i++) {
-        if (stopBulkProcessing) {
+        if (stopBulkProcessingRef.current) {
           const remainingOrgs = organizations.slice(i);
           remainingOrgs.forEach((org, idx) => {
             log.push({
               row: i + idx + 1,
               organization_name: org.organization_name || 'Unknown',
+              state: org.state || 'Unknown',
               status: 'stopped',
               message: 'Processing stopped by user'
             });
@@ -467,6 +473,7 @@ Return a JSON object with these fields (use null for any field where data is not
     } finally {
       setIsProcessingBulk(false);
       setCurrentBulkIndex(0);
+      stopBulkProcessingRef.current = false;
     }
   };
 
@@ -619,10 +626,11 @@ Return a JSON object with these fields (use null for any field where data is not
               <div className="mt-4 flex justify-center">
                 <Button
                   variant="destructive"
-                  onClick={() => setStopBulkProcessing(true)}
-                  disabled={stopBulkProcessing}
+                  onClick={() => {
+                    stopBulkProcessingRef.current = true;
+                  }}
                 >
-                  {stopBulkProcessing ? 'Stopping...' : 'Stop Import'}
+                  Stop Import
                 </Button>
               </div>
             </div>

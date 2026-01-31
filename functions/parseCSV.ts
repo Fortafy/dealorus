@@ -23,14 +23,41 @@ Deno.serve(async (req) => {
 
     const csvText = await response.text();
     
-    // Parse CSV
-    const lines = csvText.split('\n').filter(line => line.trim());
+    // Parse CSV - handle quoted fields properly
+    const parseCSVLine = (line) => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+        
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            current += '"';
+            i++; // Skip next quote
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    };
+
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim());
     if (lines.length < 2) {
       return Response.json({ error: 'CSV file must have at least a header row and one data row' }, { status: 400 });
     }
 
     // Get headers
-    const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+    const headers = parseCSVLine(lines[0]);
     
     // Find column indices
     const orgNameIndex = headers.findIndex(h => 
@@ -50,7 +77,7 @@ Deno.serve(async (req) => {
     // Parse data rows
     const organizations = [];
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim().replace(/['"]/g, ''));
+      const values = parseCSVLine(lines[i]);
       const orgName = values[orgNameIndex];
       const state = values[stateIndex];
 
