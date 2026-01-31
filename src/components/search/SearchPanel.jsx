@@ -33,14 +33,17 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
     const getUser = async () => {
       try {
         const user = await base44.auth.me();
-        console.log('User fetched:', user);
+        console.log('User fetched in SearchPanel:', user);
         if (user?.client_id) {
           setCurrentOrganizationId(user.client_id);
+          console.log('Set currentOrganizationId to:', user.client_id);
         } else {
-          console.error('User has no client_id:', user);
+          console.error('User has no client_id. Full user object:', JSON.stringify(user));
+          setError('Your user account is not associated with a client organization. Please contact support.');
         }
       } catch (err) {
         console.error('Failed to fetch user:', err);
+        setError('Failed to load user data. Please try refreshing the page.');
       } finally {
         setIsLoadingUser(false);
       }
@@ -626,14 +629,8 @@ Return a JSON object with these fields (use null for any field where data is not
           {isLoadingUser ? (
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              <p className="mt-4 text-sm text-slate-600">Loading user data...</p>
             </div>
-          ) : !currentOrganizationId ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Unable to load user data. Please refresh the page and try again.
-              </AlertDescription>
-            </Alert>
           ) : (
             <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
           )}
