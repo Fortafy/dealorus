@@ -36,6 +36,8 @@ import {
   Plus,
   X,
   UserPlus,
+  Copy,
+  Check,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import moment from "moment";
@@ -49,6 +51,7 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
   const [success, setSuccess] = useState(null);
   const [newCustomField, setNewCustomField] = useState({ key: "", value: "" });
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: activities = [] } = useQuery({
@@ -157,6 +160,12 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
     return user?.full_name || "Unknown User";
   };
 
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(client.id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
+
   React.useEffect(() => {
     if (client) setFormData(client);
   }, [client]);
@@ -172,7 +181,17 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
             {client.name}
           </SheetTitle>
           <SheetDescription>
-            Detailed client information and activity
+            <button
+              onClick={handleCopyId}
+              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors group"
+            >
+              <span>Client Id: {client.id}</span>
+              {copiedId ? (
+                <Check className="w-3 h-3 text-green-600" />
+              ) : (
+                <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              )}
+            </button>
           </SheetDescription>
         </SheetHeader>
 
