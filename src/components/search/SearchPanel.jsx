@@ -244,6 +244,9 @@ Return a JSON object with these fields (use null for any field where data is not
   };
 
   const handleBulkUpload = async (file) => {
+    console.log('handleBulkUpload called with file:', file);
+    console.log('currentOrganizationId:', currentOrganizationId);
+    
     if (!currentOrganizationId) {
       setError("Unable to determine client organization. Please refresh and try again.");
       return;
