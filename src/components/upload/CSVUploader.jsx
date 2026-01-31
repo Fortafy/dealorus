@@ -39,6 +39,7 @@ export default function CSVUploader({ onUpload, isProcessing }) {
   };
 
   const handleUpload = () => {
+    console.log('handleUpload called', file);
     if (file) {
       onUpload(file);
     }
