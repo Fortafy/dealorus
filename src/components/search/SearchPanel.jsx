@@ -258,7 +258,15 @@ Return a JSON object with these fields (use null for any field where data is not
       console.log('Upload result:', uploadResult);
       
       if (!uploadResult || !uploadResult.file_url) {
-        setError("Failed to upload file");
+        const errorMsg = "Failed to upload file";
+        setError(errorMsg);
+        log.push({
+          row: 'N/A',
+          organization_name: 'N/A',
+          status: 'error',
+          message: errorMsg
+        });
+        setImportLog([...log]);
         setIsProcessingBulk(false);
         return;
       }
@@ -270,29 +278,50 @@ Return a JSON object with these fields (use null for any field where data is not
       console.log('Parse response:', parseResponse);
 
       if (parseResponse.data.status === "error" || parseResponse.data.error) {
-        setError(parseResponse.data.error || "Failed to parse CSV file");
+        const errorMsg = parseResponse.data.error || "Failed to parse CSV file";
+        setError(errorMsg);
+        log.push({
+          row: 'N/A',
+          organization_name: 'N/A',
+          status: 'error',
+          message: errorMsg
+        });
+        setImportLog([...log]);
         setIsProcessingBulk(false);
         return;
       }
 
       const organizations = parseResponse.data.organizations || [];
       if (organizations.length === 0) {
-        setError("No valid organizations found in the CSV file");
+        const errorMsg = "No valid organizations found in the CSV file. Ensure CSV has 'organization_name' and 'state' columns.";
+        setError(errorMsg);
+        log.push({
+          row: 'N/A',
+          organization_name: 'N/A',
+          status: 'error',
+          message: errorMsg
+        });
+        setImportLog([...log]);
         setIsProcessingBulk(false);
         return;
       }
 
       setBulkTotal(organizations.length);
       const results = [];
+      const user = await base44.auth.me();
 
       for (let i = 0; i < organizations.length; i++) {
         if (stopBulkProcessing) {
-          log.push({
-            row: i + 1,
-            organization_name: organizations[i].organization_name,
-            status: 'stopped',
-            message: 'Processing stopped by user'
+          const remainingOrgs = organizations.slice(i);
+          remainingOrgs.forEach((org, idx) => {
+            log.push({
+              row: i + idx + 1,
+              organization_name: org.organization_name || 'Unknown',
+              status: 'stopped',
+              message: 'Processing stopped by user'
+            });
           });
+          setImportLog([...log]);
           break;
         }
 
@@ -303,14 +332,15 @@ Return a JSON object with these fields (use null for any field where data is not
           const logEntry = {
             row: i + 1,
             organization_name: org.organization_name || 'Unknown',
+            state: org.state || 'Unknown',
             status: 'error',
-            message: 'Missing organization name or state'
+            message: 'Missing required fields: organization_name and state'
           };
           log.push(logEntry);
           results.push({
             ...org,
             status: "error",
-            error: "Missing organization name or state",
+            error: "Missing required fields",
           });
           setBulkResults([...results]);
           setImportLog([...log]);
@@ -365,7 +395,8 @@ Return a JSON object with these fields (use null for any field where data is not
             const logEntry = {
               row: i + 1,
               organization_name: enrichedData.organization_name,
-              ein: enrichedData.ein,
+              state: enrichedData.state,
+              ein: enrichedData.ein || '',
               status: 'skipped',
               message: `Duplicate found: ${duplicateCheck.reason}`
             };
@@ -380,7 +411,6 @@ Return a JSON object with these fields (use null for any field where data is not
             continue;
           }
 
-          const user = await base44.auth.me();
           await base44.entities.Organization.create({
             ...enrichedData,
             client_id: currentOrganizationId,
@@ -390,9 +420,10 @@ Return a JSON object with these fields (use null for any field where data is not
           const logEntry = {
             row: i + 1,
             organization_name: enrichedData.organization_name,
-            ein: enrichedData.ein,
+            state: enrichedData.state,
+            ein: enrichedData.ein || '',
             status: 'success',
-            message: 'Successfully imported'
+            message: 'Successfully imported and enriched'
           };
           log.push(logEntry);
           results.push({
@@ -400,18 +431,21 @@ Return a JSON object with these fields (use null for any field where data is not
             status: "success",
           });
         } catch (err) {
+          const errorMessage = err.message || 'Failed to enrich data';
           const logEntry = {
             row: i + 1,
             organization_name: org.organization_name,
+            state: org.state,
+            ein: '',
             status: 'error',
-            message: err.message || 'Failed to enrich data'
+            message: errorMessage
           };
           log.push(logEntry);
           results.push({
             organization_name: org.organization_name,
             state: org.state,
             status: "error",
-            error: err.message || "Failed to enrich data",
+            error: errorMessage,
           });
         }
 
@@ -421,36 +455,37 @@ Return a JSON object with these fields (use null for any field where data is not
 
       onSearchComplete();
     } catch (err) {
-      setError(err.message || "Failed to process CSV file");
+      const errorMessage = err.message || "Failed to process CSV file";
+      setError(errorMessage);
       log.push({
         row: 'N/A',
         organization_name: 'N/A',
         status: 'error',
-        message: err.message || 'Failed to process CSV file'
+        message: errorMessage
       });
       setImportLog([...log]);
     } finally {
       setIsProcessingBulk(false);
       setCurrentBulkIndex(0);
-      setStopBulkProcessing(false);
     }
   };
 
   const downloadImportLog = () => {
     const csvContent = [
-      ['Row', 'Organization Name', 'EIN', 'Status', 'Message'].join(','),
+      ['Row', 'Organization Name', 'State', 'EIN', 'Status', 'Message'].join(','),
       ...importLog.map(entry => 
         [
           entry.row,
-          `"${entry.organization_name || ''}"`,
-          `"${entry.ein || ''}"`,
+          `"${(entry.organization_name || '').replace(/"/g, '""')}"`,
+          `"${(entry.state || '').replace(/"/g, '""')}"`,
+          `"${(entry.ein || '').replace(/"/g, '""')}"`,
           entry.status,
-          `"${entry.message || ''}"`
+          `"${(entry.message || '').replace(/"/g, '""')}"`
         ].join(',')
       )
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -593,7 +628,7 @@ Return a JSON object with these fields (use null for any field where data is not
             </div>
           )}
 
-          {bulkResults.length > 0 && !isProcessingBulk && (
+          {(bulkResults.length > 0 || importLog.length > 0) && !isProcessingBulk && (
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-lg p-6 border border-green-100 mt-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
@@ -607,13 +642,14 @@ Return a JSON object with these fields (use null for any field where data is not
                     Successfully imported: {bulkResults.filter(r => r.status === "success").length} | 
                     Skipped (duplicates): {bulkResults.filter(r => r.status === "skipped").length} | 
                     Failed: {bulkResults.filter(r => r.status === "error").length} | 
+                    Stopped: {bulkResults.filter(r => r.status === "stopped").length} | 
                     Total: {bulkResults.length}
                   </p>
                   {bulkResults.filter(r => r.status === "error").length > 0 && (
                     <Alert className="bg-red-50 border-red-200 mb-4">
                       <AlertCircle className="h-4 w-4 text-red-600" />
                       <AlertDescription className="text-sm text-red-800">
-                        {bulkResults.filter(r => r.status === "error").length} organizations failed to process.
+                        {bulkResults.filter(r => r.status === "error").length} organizations failed to process. Check the import log for details.
                       </AlertDescription>
                     </Alert>
                   )}
@@ -631,7 +667,7 @@ Return a JSON object with these fields (use null for any field where data is not
                       variant="outline"
                       className="mt-2"
                     >
-                      Download Import Log
+                      Download Import Log (CSV)
                     </Button>
                   )}
                 </div>
