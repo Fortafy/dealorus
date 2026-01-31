@@ -469,6 +469,8 @@ export default function Organizations() {
                   min_revenue: "",
                   max_revenue: "",
                 })}
+                clientId={currentUser?.client_id}
+                userId={currentUser?.id}
               />
 
               {currentUser?.client_id && (

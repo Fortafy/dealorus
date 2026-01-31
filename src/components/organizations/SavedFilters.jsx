@@ -109,19 +109,6 @@ export default function SavedFilters({ currentFilters, onApplyFilter, clientId, 
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowSaveDialog(true)}
-          disabled={!hasActiveFilters}
-          className="flex-1"
-        >
-          <Bookmark className="w-3 h-3 mr-2" />
-          Save Current Filters
-        </Button>
-      </div>
-
       {savedFilters.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium text-slate-600">Saved Filters:</p>
@@ -174,61 +161,6 @@ export default function SavedFilters({ currentFilters, onApplyFilter, clientId, 
           ))}
         </div>
       )}
-
-      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Save Filter Combination</DialogTitle>
-            <DialogDescription>
-              Give your filter combination a name for quick access later.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Filter Name</label>
-              <Input
-                value={filterName}
-                onChange={(e) => setFilterName(e.target.value)}
-                placeholder="e.g., California 501c3 Nonprofits"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSave();
-                }}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Current Filters:</p>
-              <div className="flex flex-wrap gap-2">
-                {currentFilters.state && <Badge>State: {currentFilters.state}</Badge>}
-                {currentFilters.organization_type && <Badge>Type: {currentFilters.organization_type}</Badge>}
-                {currentFilters.ntee_code && <Badge>NTEE: {currentFilters.ntee_code}</Badge>}
-                {currentFilters.min_revenue && <Badge>Min Revenue: ${currentFilters.min_revenue}</Badge>}
-                {currentFilters.max_revenue && <Badge>Max Revenue: ${currentFilters.max_revenue}</Badge>}
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saveMutation.isPending}
-              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
-            >
-              {saveMutation.isPending ? "Saving..." : "Save Filter"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
