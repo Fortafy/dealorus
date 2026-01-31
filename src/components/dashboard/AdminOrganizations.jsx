@@ -26,7 +26,6 @@ import {
 import { Search, Plus, Trash2, Edit2, ArrowUpDown, ArrowUp, ArrowDown, Loader, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import CreateOrganizationDialog from "./CreateOrganizationDialog";
-import EditOrganizationDialog from "./EditOrganizationDialog";
 import ClientDetailsSheet from "./ClientDetailsSheet";
 
 export default function AdminOrganizations() {
@@ -34,7 +33,6 @@ export default function AdminOrganizations() {
   const [sortField, setSortField] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingOrg, setEditingOrg] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [error, setError] = useState(null);
@@ -270,7 +268,7 @@ export default function AdminOrganizations() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setEditingOrg(org);
+                                setSelectedClient(org);
                               }}
                               className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
