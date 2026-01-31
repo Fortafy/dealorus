@@ -11,7 +11,8 @@ import {
   FileText,
   Pencil,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Star
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -46,7 +47,7 @@ function InfoRow({ icon: Icon, label, value, isLink }) {
   );
 }
 
-export default function ContactDetailCard({ contact, onEdit, onDelete }) {
+export default function ContactDetailCard({ contact, onEdit, onDelete, onToggleStar }) {
   // Parse source in markdown link format: [display text](url)
   const parseSource = (source) => {
     if (!source) return null;
@@ -89,6 +90,16 @@ export default function ContactDetailCard({ contact, onEdit, onDelete }) {
               </div>
             </div>
             <div className="flex gap-1.5">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => onToggleStar && onToggleStar(contact)}
+                className={`h-8 w-8 p-0 ${contact.starred ? 'bg-yellow-100 hover:bg-yellow-200' : 'bg-white/90 hover:bg-white'}`}
+                style={{ color: contact.starred ? 'hsl(39, 100%, 50%)' : 'hsl(217, 91%, 60%)' }}
+                title={contact.starred ? "Unstar" : "Star"}
+              >
+                <Star className={`w-3.5 h-3.5 ${contact.starred ? 'fill-current' : ''}`} />
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"
