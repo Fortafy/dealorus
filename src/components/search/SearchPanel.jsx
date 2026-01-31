@@ -25,6 +25,7 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
   const [lastSearchParams, setLastSearchParams] = useState(null);
   const [isLLMSearching, setIsLLMSearching] = useState(false);
   const [currentOrganizationId, setCurrentOrganizationId] = useState(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const stopBulkProcessingRef = React.useRef(false);
   const [importLog, setImportLog] = useState([]);
 
@@ -32,11 +33,16 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
     const getUser = async () => {
       try {
         const user = await base44.auth.me();
+        console.log('User fetched:', user);
         if (user?.client_id) {
           setCurrentOrganizationId(user.client_id);
+        } else {
+          console.error('User has no client_id:', user);
         }
       } catch (err) {
         console.error('Failed to fetch user:', err);
+      } finally {
+        setIsLoadingUser(false);
       }
     };
     getUser();
@@ -617,7 +623,20 @@ Return a JSON object with these fields (use null for any field where data is not
         </TabsContent>
 
         <TabsContent value="bulk" className="mt-0">
-          <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
+          {isLoadingUser ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+            </div>
+          ) : !currentOrganizationId ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Unable to load user data. Please refresh the page and try again.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
+          )}
 
           {isProcessingBulk && (
             <div>
