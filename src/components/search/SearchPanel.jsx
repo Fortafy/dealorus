@@ -222,21 +222,21 @@ Return a JSON object with these fields (use null for any field where data is not
       client_id: currentOrganizationId 
     });
 
-    // Check for duplicate: Name + EIN or Name + Address
+    // Check for duplicate using same logic as findDuplicates.js:
+    // (1) EIN match OR (2) Name + State + City all match
     for (const existing of existingOrgs) {
       const nameMatch = existing.organization_name?.toLowerCase().trim() === orgData.organization_name?.toLowerCase().trim();
+      const einMatch = orgData.ein && existing.ein && existing.ein.replace(/\D/g, '') === orgData.ein.replace(/\D/g, '');
+      const stateMatch = existing.state?.toLowerCase() === orgData.state?.toLowerCase();
+      const cityMatch = existing.city?.toLowerCase().trim() === orgData.city?.toLowerCase().trim();
       
-      if (nameMatch) {
-        // Check EIN match
-        if (orgData.ein && existing.ein && existing.ein === orgData.ein) {
-          return { isDuplicate: true, reason: 'Name + EIN match' };
-        }
-        
-        // Check Address match
-        if (orgData.address && existing.address && 
-            existing.address?.toLowerCase().trim() === orgData.address?.toLowerCase().trim()) {
-          return { isDuplicate: true, reason: 'Name + Address match' };
-        }
+      // Consider it a duplicate if EIN matches OR (Name + State + City all match)
+      if (einMatch) {
+        return { isDuplicate: true, reason: 'EIN match' };
+      }
+      
+      if (nameMatch && stateMatch && cityMatch && orgData.city) {
+        return { isDuplicate: true, reason: 'Name + State + City match' };
       }
     }
     
