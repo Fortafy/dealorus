@@ -41,7 +41,7 @@ export default function AdminOrganizations() {
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["admin-organizations"],
     queryFn: async () => {
-      return await base44.entities.Organization.list("-created_date");
+      return await base44.entities.Client.list("-created_date");
     },
   });
 
@@ -53,14 +53,14 @@ export default function AdminOrganizations() {
   });
 
   const deleteOrgMutation = useMutation({
-    mutationFn: (orgId) => base44.entities.Organization.delete(orgId),
+    mutationFn: (orgId) => base44.entities.Client.delete(orgId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-organizations"] });
       setDeleteConfirm(null);
       setError(null);
     },
     onError: (err) => {
-      setError(err.message || "Failed to delete organization");
+      setError(err.message || "Failed to delete client");
     },
   });
 
@@ -104,13 +104,13 @@ export default function AdminOrganizations() {
     >
       <div className="max-w-6xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-slate-900">Manage Organizations</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Manage Clients</h2>
           <Button
             onClick={() => setShowCreateDialog(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Create Organization
+            Create Client
           </Button>
         </div>
 
@@ -124,13 +124,13 @@ export default function AdminOrganizations() {
         <Card className="border-0 shadow-lg">
           <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
             <div className="flex items-center justify-between">
-              <CardTitle>Organizations</CardTitle>
+              <CardTitle>Clients</CardTitle>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search organizations..."
+                  placeholder="Search clients..."
                   className="pl-10"
                 />
               </div>
@@ -144,7 +144,7 @@ export default function AdminOrganizations() {
               </div>
             ) : filteredOrgs.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-slate-500">No organizations found</p>
+                <p className="text-slate-500">No clients found</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -298,7 +298,7 @@ export default function AdminOrganizations() {
       <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Organization?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Client?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete <strong>{deleteConfirm?.name}</strong>? This action cannot be undone.
             </AlertDialogDescription>

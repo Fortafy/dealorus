@@ -61,7 +61,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
     },
     {
       id: "admin-organizations",
-      label: "Manage Organizations",
+      label: "Manage Clients",
       icon: Building2,
     },
   ] : [];
