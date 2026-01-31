@@ -593,7 +593,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                     <div key={source} className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
                       <span className="text-xs font-medium text-slate-700">{source}</span>
                       <Badge variant="outline" className="text-xs">
-                        {formatLastChecked(metadata.last_checked)}
+                        {formatLastChecked(metadata?.last_checked)}
                       </Badge>
                     </div>
                   ))}
