@@ -14,11 +14,12 @@ export default function PersonalProfileSection({ user }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  const { data: organization } = useQuery({
-    queryKey: ["user-organization", user?.organization_id],
-    enabled: !!user?.organization_id,
+  const { data: client } = useQuery({
+    queryKey: ["user-client", user?.client_id],
+    enabled: !!user?.client_id,
     queryFn: async () => {
-      return await base44.entities.Organization.get(user.organization_id);
+      const clients = await base44.entities.Client.filter({ id: user.client_id });
+      return clients[0];
     },
   });
 
@@ -140,7 +141,7 @@ export default function PersonalProfileSection({ user }) {
                 Organization
               </label>
               <Input
-                value={organization?.name || (user?.organization_id ? "Loading..." : "Not assigned")}
+                value={client?.name || (user?.client_id ? "Loading..." : "Not assigned")}
                 disabled
                 className="text-base bg-slate-50 cursor-not-allowed"
               />
