@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader, Plus } from "lucide-react";
 
 export default function CreateOrganizationDialog({ open, onOpenChange, allUsers }) {
   const [formData, setFormData] = useState({
@@ -27,9 +27,36 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
     subscription_plan: "basic",
     subscription_status: "trial",
   });
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    full_name: "",
+    email: "",
+  });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const queryClient = useQueryClient();
+
+  const createUserMutation = useMutation({
+    mutationFn: async () => {
+      if (!newUserData.email.trim() || !newUserData.full_name.trim()) {
+        throw new Error("Email and full name are required");
+      }
+      await base44.users.inviteUser(newUserData.email, "admin");
+      const users = await base44.entities.User.list();
+      const newUser = users.find(u => u.email === newUserData.email);
+      return newUser;
+    },
+    onSuccess: (newUser) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+      setFormData(prev => ({ ...prev, admin_user_id: newUser.id }));
+      setShowUserForm(false);
+      setNewUserData({ full_name: "", email: "" });
+      setError(null);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to create user");
+    },
+  });
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -108,25 +135,87 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
 
           {/* Administrator */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Administrator
-            </label>
-            <Select
-              value={formData.admin_user_id}
-              onValueChange={(value) => handleChange("admin_user_id", value)}
-              disabled={createMutation.isPending}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select administrator" />
-              </SelectTrigger>
-              <SelectContent>
-                {allUsers.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.full_name} ({user.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-slate-700">
+                Administrator
+              </label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowUserForm(!showUserForm)}
+                disabled={createMutation.isPending || createUserMutation.isPending}
+                className="h-7 text-xs text-blue-600 hover:text-blue-700"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                New User
+              </Button>
+            </div>
+            
+            {showUserForm ? (
+              <div className="space-y-3 p-3 border border-slate-200 rounded-lg bg-slate-50">
+                <Input
+                  value={newUserData.full_name}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, full_name: e.target.value }))}
+                  placeholder="Full name"
+                  disabled={createUserMutation.isPending}
+                />
+                <Input
+                  value={newUserData.email}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Email address"
+                  type="email"
+                  disabled={createUserMutation.isPending}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => createUserMutation.mutate()}
+                    disabled={createUserMutation.isPending}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  >
+                    {createUserMutation.isPending ? (
+                      <>
+                        <Loader className="w-3 h-3 mr-1 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create & Select"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setShowUserForm(false);
+                      setNewUserData({ full_name: "", email: "" });
+                    }}
+                    disabled={createUserMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Select
+                value={formData.admin_user_id}
+                onValueChange={(value) => handleChange("admin_user_id", value)}
+                disabled={createMutation.isPending}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select administrator" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.full_name} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {/* Subscription Plan */}
