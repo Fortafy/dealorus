@@ -125,15 +125,17 @@ export default function ContactSearch({ organization, onContactUpdate }) {
       });
       return contact;
     },
+    onMutate: async ({ id, starred }) => {
+      // Optimistically update selectedContact immediately
+      if (selectedContact?.id === id) {
+        setSelectedContact(prev => ({ ...prev, starred }));
+      }
+    },
     onSuccess: (updatedContact, variables) => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
       queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
       if (onContactUpdate) {
         onContactUpdate(updatedContact);
-      }
-      // Update selectedContact if it's the same contact
-      if (selectedContact?.id === variables.id) {
-        setSelectedContact(prev => ({ ...prev, starred: variables.starred }));
       }
     },
   });
