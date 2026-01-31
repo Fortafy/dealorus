@@ -25,6 +25,8 @@ export default function SearchPanel({ onSearchComplete, onClose, onSelectOrganiz
   const [lastSearchParams, setLastSearchParams] = useState(null);
   const [isLLMSearching, setIsLLMSearching] = useState(false);
   const [currentOrganizationId, setCurrentOrganizationId] = useState(null);
+  const [stopBulkProcessing, setStopBulkProcessing] = useState(false);
+  const [importLog, setImportLog] = useState([]);
 
   React.useEffect(() => {
     const getUser = async () => {
@@ -215,11 +217,41 @@ Return a JSON object with these fields (use null for any field where data is not
     }
   };
 
+  const checkForDuplicate = async (orgData) => {
+    const existingOrgs = await base44.entities.Organization.filter({ 
+      client_id: currentOrganizationId 
+    });
+
+    // Check for duplicate: Name + EIN or Name + Address
+    for (const existing of existingOrgs) {
+      const nameMatch = existing.organization_name?.toLowerCase().trim() === orgData.organization_name?.toLowerCase().trim();
+      
+      if (nameMatch) {
+        // Check EIN match
+        if (orgData.ein && existing.ein && existing.ein === orgData.ein) {
+          return { isDuplicate: true, reason: 'Name + EIN match' };
+        }
+        
+        // Check Address match
+        if (orgData.address && existing.address && 
+            existing.address?.toLowerCase().trim() === orgData.address?.toLowerCase().trim()) {
+          return { isDuplicate: true, reason: 'Name + Address match' };
+        }
+      }
+    }
+    
+    return { isDuplicate: false };
+  };
+
   const handleBulkUpload = async (file) => {
     setIsProcessingBulk(true);
     setError(null);
     setBulkResults([]);
+    setImportLog([]);
+    setStopBulkProcessing(false);
     setActiveTab("bulk");
+
+    const log = [];
 
     try {
       const uploadResult = await base44.integrations.Core.UploadFile({ file });
@@ -254,16 +286,34 @@ Return a JSON object with these fields (use null for any field where data is not
       const results = [];
 
       for (let i = 0; i < organizations.length; i++) {
+        if (stopBulkProcessing) {
+          log.push({
+            row: i + 1,
+            organization_name: organizations[i].organization_name,
+            status: 'stopped',
+            message: 'Processing stopped by user'
+          });
+          break;
+        }
+
         setCurrentBulkIndex(i);
         const org = organizations[i];
 
         if (!org.organization_name || !org.state) {
+          const logEntry = {
+            row: i + 1,
+            organization_name: org.organization_name || 'Unknown',
+            status: 'error',
+            message: 'Missing organization name or state'
+          };
+          log.push(logEntry);
           results.push({
             ...org,
             status: "error",
             error: "Missing organization name or state",
           });
           setBulkResults([...results]);
+          setImportLog([...log]);
           continue;
         }
 
@@ -308,6 +358,28 @@ Return a JSON object with these fields (use null for any field where data is not
             enrichedData.ein = formatEIN(enrichedData.ein);
           }
 
+          // Check for duplicates
+          const duplicateCheck = await checkForDuplicate(enrichedData);
+          
+          if (duplicateCheck.isDuplicate) {
+            const logEntry = {
+              row: i + 1,
+              organization_name: enrichedData.organization_name,
+              ein: enrichedData.ein,
+              status: 'skipped',
+              message: `Duplicate found: ${duplicateCheck.reason}`
+            };
+            log.push(logEntry);
+            results.push({
+              ...enrichedData,
+              status: "skipped",
+              error: `Duplicate: ${duplicateCheck.reason}`,
+            });
+            setBulkResults([...results]);
+            setImportLog([...log]);
+            continue;
+          }
+
           const user = await base44.auth.me();
           await base44.entities.Organization.create({
             ...enrichedData,
@@ -315,11 +387,26 @@ Return a JSON object with these fields (use null for any field where data is not
             user_id: user.id
           });
 
-           results.push({
-             ...enrichedData,
-             status: "success",
-           });
+          const logEntry = {
+            row: i + 1,
+            organization_name: enrichedData.organization_name,
+            ein: enrichedData.ein,
+            status: 'success',
+            message: 'Successfully imported'
+          };
+          log.push(logEntry);
+          results.push({
+            ...enrichedData,
+            status: "success",
+          });
         } catch (err) {
+          const logEntry = {
+            row: i + 1,
+            organization_name: org.organization_name,
+            status: 'error',
+            message: err.message || 'Failed to enrich data'
+          };
+          log.push(logEntry);
           results.push({
             organization_name: org.organization_name,
             state: org.state,
@@ -329,15 +416,49 @@ Return a JSON object with these fields (use null for any field where data is not
         }
 
         setBulkResults([...results]);
+        setImportLog([...log]);
       }
 
       onSearchComplete();
     } catch (err) {
       setError(err.message || "Failed to process CSV file");
+      log.push({
+        row: 'N/A',
+        organization_name: 'N/A',
+        status: 'error',
+        message: err.message || 'Failed to process CSV file'
+      });
+      setImportLog([...log]);
     } finally {
       setIsProcessingBulk(false);
       setCurrentBulkIndex(0);
+      setStopBulkProcessing(false);
     }
+  };
+
+  const downloadImportLog = () => {
+    const csvContent = [
+      ['Row', 'Organization Name', 'EIN', 'Status', 'Message'].join(','),
+      ...importLog.map(entry => 
+        [
+          entry.row,
+          `"${entry.organization_name || ''}"`,
+          `"${entry.ein || ''}"`,
+          entry.status,
+          `"${entry.message || ''}"`
+        ].join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `import-log-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
   };
 
   return (
@@ -454,11 +575,22 @@ Return a JSON object with these fields (use null for any field where data is not
           <CSVUploader onUpload={handleBulkUpload} isProcessing={isProcessingBulk} />
 
           {isProcessingBulk && (
-            <ProcessingProgress
-              results={bulkResults}
-              total={bulkTotal}
-              currentIndex={currentBulkIndex}
-            />
+            <div>
+              <ProcessingProgress
+                results={bulkResults}
+                total={bulkTotal}
+                currentIndex={currentBulkIndex}
+              />
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="destructive"
+                  onClick={() => setStopBulkProcessing(true)}
+                  disabled={stopBulkProcessing}
+                >
+                  {stopBulkProcessing ? 'Stopping...' : 'Stop Import'}
+                </Button>
+              </div>
+            </div>
           )}
 
           {bulkResults.length > 0 && !isProcessingBulk && (
@@ -472,15 +604,35 @@ Return a JSON object with these fields (use null for any field where data is not
                     Bulk Processing Complete
                   </h3>
                   <p className="text-slate-700 mb-4">
-                    Successfully processed {bulkResults.filter(r => r.status === "success").length} out of {bulkResults.length} organizations.
+                    Successfully imported: {bulkResults.filter(r => r.status === "success").length} | 
+                    Skipped (duplicates): {bulkResults.filter(r => r.status === "skipped").length} | 
+                    Failed: {bulkResults.filter(r => r.status === "error").length} | 
+                    Total: {bulkResults.length}
                   </p>
                   {bulkResults.filter(r => r.status === "error").length > 0 && (
-                    <Alert className="bg-red-50 border-red-200">
+                    <Alert className="bg-red-50 border-red-200 mb-4">
                       <AlertCircle className="h-4 w-4 text-red-600" />
                       <AlertDescription className="text-sm text-red-800">
                         {bulkResults.filter(r => r.status === "error").length} organizations failed to process.
                       </AlertDescription>
                     </Alert>
+                  )}
+                  {bulkResults.filter(r => r.status === "skipped").length > 0 && (
+                    <Alert className="bg-amber-50 border-amber-200 mb-4">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      <AlertDescription className="text-sm text-amber-800">
+                        {bulkResults.filter(r => r.status === "skipped").length} organizations were skipped as duplicates.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {importLog.length > 0 && (
+                    <Button
+                      onClick={downloadImportLog}
+                      variant="outline"
+                      className="mt-2"
+                    >
+                      Download Import Log
+                    </Button>
                   )}
                 </div>
               </div>
