@@ -155,9 +155,10 @@ export default function ContactSearch({ organization, onContactUpdate }) {
         setSelectedContact(prev => ({ ...prev, starred: !variables.starred }));
       }
     },
-    onSuccess: (updatedContact, variables) => {
+    onSettled: (updatedContact, error, variables) => {
+      // Only invalidate activities, not contacts (since we optimistically updated)
       queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
-      if (onContactUpdate) {
+      if (onContactUpdate && updatedContact) {
         onContactUpdate(updatedContact);
       }
     },
