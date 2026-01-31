@@ -15,7 +15,7 @@ import BulkEditDialog from "./BulkEditDialog";
 import EnhancedAISearchDialog from "./EnhancedAISearchDialog";
 import EnrichContactDialog from "./EnrichContactDialog";
 
-export default function ContactSearch({ organization }) {
+export default function ContactSearch({ organization, onContactUpdate }) {
   const [aiContacts, setAiContacts] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -125,9 +125,16 @@ export default function ContactSearch({ organization }) {
       });
       return contact;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (updatedContact, variables) => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
       queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
+      if (onContactUpdate) {
+        onContactUpdate(updatedContact);
+      }
+      // Also update selectedContact if it's the same contact
+      if (selectedContact?.id === variables.id) {
+        setSelectedContact({ ...selectedContact, starred: variables.starred });
+      }
     },
   });
 
@@ -428,6 +435,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
             contact={selectedContact}
             onEdit={handleEdit}
             onDelete={(id) => deleteMutation.mutate(id)}
+            onToggleStar={(contact) => starMutation.mutate({ id: contact.id, starred: !contact.starred })}
           />
         </div>
       ) : (
