@@ -126,13 +126,36 @@ export default function ContactSearch({ organization, onContactUpdate }) {
       return contact;
     },
     onMutate: async ({ id, starred }) => {
-      // Optimistically update selectedContact immediately
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["contacts", organization.id] });
+
+      // Snapshot the previous value
+      const previousContacts = queryClient.getQueryData(["contacts", organization.id]);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(["contacts", organization.id], (old = []) => {
+        return old.map(contact => 
+          contact.id === id ? { ...contact, starred } : contact
+        );
+      });
+
+      // Optimistically update selectedContact
       if (selectedContact?.id === id) {
         setSelectedContact(prev => ({ ...prev, starred }));
       }
+
+      return { previousContacts };
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousContacts) {
+        queryClient.setQueryData(["contacts", organization.id], context.previousContacts);
+      }
+      if (selectedContact?.id === variables.id) {
+        setSelectedContact(prev => ({ ...prev, starred: !variables.starred }));
+      }
     },
     onSuccess: (updatedContact, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
       queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
       if (onContactUpdate) {
         onContactUpdate(updatedContact);
