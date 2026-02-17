@@ -409,25 +409,28 @@ export default function Organizations() {
         </div>
       </header>
 
-      <main className="flex flex-1 overflow-hidden min-h-0">
+      <main className="flex flex-1 overflow-hidden min-h-0 relative">
+        {/* Collapse/Expand Button */}
+        <button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-slate-200 hover:border-blue-400 flex items-center justify-center z-30 transition-all shadow-md"
+          style={{ 
+            left: sidebarCollapsed ? '-3px' : '317px',
+            borderColor: sidebarCollapsed ? 'hsl(217, 91%, 60%)' : undefined 
+          }}
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight className="w-3 h-3 text-slate-600" />
+          ) : (
+            <ChevronLeft className="w-3 h-3 text-slate-600" />
+          )}
+        </button>
+
         {/* Left Column - Organizations List - Collapsible */}
         <div 
-          className="border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 relative"
+          className="border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300"
           style={{ width: sidebarCollapsed ? '0px' : '320px' }}
         >
-          {/* Collapse/Expand Button */}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-slate-200 hover:border-blue-400 flex items-center justify-center z-20 transition-colors shadow-sm"
-            style={{ borderColor: sidebarCollapsed ? 'hsl(217, 91%, 60%)' : undefined }}
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="w-3 h-3 text-slate-600" />
-            ) : (
-              <ChevronLeft className="w-3 h-3 text-slate-600" />
-            )}
-          </button>
-
           <div className={`p-4 flex flex-col h-full overflow-hidden min-h-0 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
             <div className="mb-4 space-y-3 flex-shrink-0">
               <Button
