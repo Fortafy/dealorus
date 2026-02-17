@@ -17,12 +17,55 @@ Deno.serve(async (req) => {
 
     const client = clients[0];
     
-    if (!client.salesforce_connected || !client.salesforce_access_token) {
-      return Response.json({ error: 'Salesforce not connected. Please connect in Organization Settings.' }, { status: 400 });
+    if (!client.salesforce_connected) {
+      return Response.json({ 
+        error: 'Salesforce External Client App not connected. Please connect in Organization Settings.' 
+      }, { status: 400 });
     }
 
-    const accessToken = client.salesforce_access_token;
-    const instanceUrl = client.salesforce_instance_url || "https://login.salesforce.com";
+    // Check if token is expired and refresh if needed
+    let accessToken = client.salesforce_access_token;
+    const tokenExpiry = client.salesforce_token_expiry ? new Date(client.salesforce_token_expiry) : null;
+    const now = new Date();
+
+    if (!accessToken || !tokenExpiry || now >= tokenExpiry) {
+      // Refresh token using client credentials flow
+      const tokenUrl = `${client.salesforce_instance_url}/services/oauth2/token`;
+      const tokenParams = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: client.salesforce_consumer_key,
+        client_secret: client.salesforce_consumer_secret
+      });
+
+      const tokenResponse = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: tokenParams.toString()
+      });
+
+      if (!tokenResponse.ok) {
+        const error = await tokenResponse.text();
+        return Response.json({ 
+          error: `Failed to refresh access token: ${error}. Please reconnect Salesforce.` 
+        }, { status: 401 });
+      }
+
+      const tokenData = await tokenResponse.json();
+      accessToken = tokenData.access_token;
+
+      // Update stored token
+      const newExpiry = new Date();
+      newExpiry.setSeconds(newExpiry.getSeconds() + (tokenData.expires_in || 7200));
+      
+      await base44.asServiceRole.entities.Client.update(client.id, {
+        salesforce_access_token: accessToken,
+        salesforce_token_expiry: newExpiry.toISOString()
+      });
+    }
+
+    const instanceUrl = client.salesforce_instance_url;
 
     // Fetch Accounts from Salesforce
     const sfQuery = `SELECT Id, Name, BillingState, Phone, BillingStreet, BillingCity, BillingPostalCode, Website, Industry, AnnualRevenue, Description FROM Account`;
@@ -80,6 +123,11 @@ Deno.serve(async (req) => {
         syncedOrgs.push(created);
       }
     }
+
+    // Update last sync time
+    await base44.asServiceRole.entities.Client.update(client.id, {
+      salesforce_last_sync: new Date().toISOString()
+    });
 
     return Response.json({
       success: true,
