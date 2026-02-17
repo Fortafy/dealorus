@@ -415,7 +415,7 @@ export default function Organizations() {
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-slate-200 hover:border-blue-400 flex items-center justify-center z-30 transition-all shadow-md"
           style={{ 
-            left: sidebarCollapsed ? '-3px' : '317px',
+            left: sidebarCollapsed ? '-3px' : '314px',
             borderColor: sidebarCollapsed ? 'hsl(217, 91%, 60%)' : undefined 
           }}
         >
