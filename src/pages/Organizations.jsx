@@ -9,7 +9,7 @@ import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import SavedFilters from "@/components/organizations/SavedFilters";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle, Merge } from "lucide-react";
+import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle, Merge, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,7 @@ export default function Organizations() {
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showDashboard, setShowDashboard] = useState(true);
   const [showDuplicates, setShowDuplicates] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filters, setFilters] = useState({
     state: "",
     organization_type: "",
@@ -409,8 +410,25 @@ export default function Organizations() {
       </header>
 
       <main className="flex flex-1 overflow-hidden min-h-0">
-        {/* Left Column - Organizations List - Fixed */}
-        <div className="w-80 border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden">
+        {/* Left Column - Organizations List - Collapsible */}
+        <div 
+          className="border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden transition-all duration-300 relative"
+          style={{ width: sidebarCollapsed ? '0px' : '320px' }}
+        >
+          {/* Collapse/Expand Button */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border-2 border-slate-200 hover:border-blue-400 flex items-center justify-center z-20 transition-colors shadow-sm"
+            style={{ borderColor: sidebarCollapsed ? 'hsl(217, 91%, 60%)' : undefined }}
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="w-3 h-3 text-slate-600" />
+            ) : (
+              <ChevronLeft className="w-3 h-3 text-slate-600" />
+            )}
+          </button>
+
+          <div className={`p-4 flex flex-col h-full overflow-hidden min-h-0 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
           <div className="p-4 flex flex-col h-full overflow-hidden min-h-0">
             <div className="mb-4 space-y-3 flex-shrink-0">
               <Button
@@ -533,7 +551,7 @@ export default function Organizations() {
         </div>
 
         {/* Right Column - Organization Details, Search Panel, Dashboard, or Duplicates */}
-        <div className="flex-1 overflow-y-auto" ref={rightColumnRef}>
+        <div className="flex-1 overflow-y-auto transition-all duration-300" ref={rightColumnRef}>
           {showDashboard ? (
             <DashboardView organizations={organizations} contacts={contacts} onSelectOrg={(org) => { setShowDashboard(false); setSelectedOrg(org); }} />
           ) : showDuplicates ? (
