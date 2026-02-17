@@ -429,7 +429,6 @@ export default function Organizations() {
           </button>
 
           <div className={`p-4 flex flex-col h-full overflow-hidden min-h-0 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-          <div className="p-4 flex flex-col h-full overflow-hidden min-h-0">
             <div className="mb-4 space-y-3 flex-shrink-0">
               <Button
                 onClick={() => {
