@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, Calendar, Users, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { format, differenceInDays } from "date-fns";
+import ApiUsageDashboard from "@/components/dashboard/ApiUsageDashboard";
 
-export default function SubscriptionDetails({ organization }) {
+export default function SubscriptionDetails({ organization, currentUser }) {
   const subscriptionInfo = useMemo(() => {
     if (!organization) return null;
 
@@ -174,6 +175,11 @@ export default function SubscriptionDetails({ organization }) {
               </p>
             </motion.div>
           )}
+
+          {/* API Usage */}
+          <motion.div variants={itemVariants}>
+            <ApiUsageDashboard organization={organization} currentUser={currentUser} />
+          </motion.div>
         </motion.div>
       </div>
     </motion.div>
