@@ -83,7 +83,7 @@ export default function Dashboard() {
         ) : null;
       case "subscription":
         return isOrgAdmin(currentUser) ? (
-          <SubscriptionDetails organization={organization} />
+          <SubscriptionDetails organization={organization} currentUser={currentUser} />
         ) : null;
       case "data-sources":
         return isOrgAdmin(currentUser) ? (
