@@ -10,6 +10,7 @@ import {
   Users,
   Database,
   Merge,
+  KeyRound,
 } from "lucide-react";
 
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
@@ -46,6 +47,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "find-duplicates",
       label: "Find Duplicates",
       icon: Merge,
+    },
+    {
+      id: "api-access",
+      label: "API Access",
+      icon: KeyRound,
     },
     {
       id: "organization-settings",

@@ -13,6 +13,7 @@ import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
 import DataSourceConfiguration from "@/components/dashboard/DataSourceConfiguration";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
+import ApiAccessSection from "@/components/dashboard/ApiAccessSection";
 import { Home, HelpCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -87,6 +88,10 @@ export default function Dashboard() {
       case "data-sources":
         return isOrgAdmin(currentUser) ? (
           <DataSourceConfiguration organization={organization} />
+        ) : null;
+      case "api-access":
+        return isOrgAdmin(currentUser) ? (
+          <ApiAccessSection organization={organization} />
         ) : null;
       case "find-duplicates":
         return isOrgAdmin(currentUser) ? (
