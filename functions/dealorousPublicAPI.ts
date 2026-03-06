@@ -133,7 +133,9 @@ Deno.serve(async (req) => {
     const reqUrl = new URL(req.url);
     // Use the full URL (protocol + host + pathname) as the server base,
     // so Salesforce knows POST calls go to this exact endpoint
-    const baseUrl = `${reqUrl.protocol}//${reqUrl.host}${reqUrl.pathname}`;
+    // Remove trailing slash to avoid double-slash when combined with "/" path
+    const pathname = reqUrl.pathname.endsWith('/') ? reqUrl.pathname.slice(0, -1) : reqUrl.pathname;
+    const baseUrl = `${reqUrl.protocol}//${reqUrl.host}${pathname}`;
     const schema = buildOpenApiSchema(baseUrl);
     return new Response(JSON.stringify(schema, null, 2), {
       status: 200,
