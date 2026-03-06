@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
     servers: [{ url: "https://civic-beacon-acaf302c.base44.app" }],
     paths: {
       "/api/functions/dealorousPublicAPI": {
+
         post: {
           operationId: "searchNonprofits",
           summary: "Search for nonprofit organizations",
