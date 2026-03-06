@@ -17,9 +17,9 @@ Deno.serve(async (req) => {
       version: "1.0.0",
       description: "Search and enrich nonprofit organization data"
     },
-    servers: [{ url: "https://civic-beacon-acaf302c.base44.app/api/functions/dealorousPublicAPI" }],
+    servers: [{ url: "https://civic-beacon-acaf302c.base44.app" }],
     paths: {
-      "/": {
+      "/dealorousPublicAPI": {
 
         post: {
           operationId: "searchNonprofits",
