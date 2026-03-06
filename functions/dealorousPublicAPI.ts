@@ -124,33 +124,21 @@ function buildOpenApiSchema(baseUrl) {
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
+  const jsonHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
+  };
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
-      }
-    });
+    return new Response(null, { status: 204, headers: jsonHeaders });
   }
 
-  // Serve OpenAPI schema for GET requests (Salesforce External Services schema discovery)
   if (req.method === 'GET') {
-    const reqUrl = new URL(req.url);
-    // Use the full URL (protocol + host + pathname) as the server base,
-    // so Salesforce knows POST calls go to this exact endpoint
     const baseUrl = "https://civic-beacon-acaf302c.base44.app";
     const schema = buildOpenApiSchema(baseUrl);
-    return new Response(JSON.stringify(schema, null, 2), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
-      }
-    });
+    return new Response(JSON.stringify(schema), { status: 200, headers: jsonHeaders });
   }
 
   const startTime = Date.now();
