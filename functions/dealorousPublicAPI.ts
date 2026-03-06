@@ -29,7 +29,113 @@ function formatEIN(ein) {
   return ein;
 }
 
+const OPENAPI_SCHEMA = {
+  openapi: "3.0.0",
+  info: {
+    title: "Dealorous Nonprofit API",
+    version: "1.0.0",
+    description: "Search and enrich nonprofit organization data"
+  },
+  servers: [{ url: "/" }],
+  paths: {
+    "/": {
+      post: {
+        operationId: "searchNonprofits",
+        summary: "Search for nonprofit organizations",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  api_key: { type: "string", description: "Your API key" },
+                  orgName: { type: "string", description: "Organization name to search" },
+                  ein: { type: "string", description: "Employer Identification Number" },
+                  state: { type: "string", description: "Two-letter state code (e.g. IL)" },
+                  city: { type: "string", description: "City name" },
+                  orgType: { type: "string", description: "Organization type filter" },
+                  source: { type: "string", description: "Request source label" }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": {
+            description: "Successful search results",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    count: { type: "integer" },
+                    sources_used: { type: "array", items: { type: "string" } },
+                    response_time_ms: { type: "integer" },
+                    results: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          organization_name: { type: "string" },
+                          state: { type: "string" },
+                          ein: { type: "string" },
+                          address: { type: "string" },
+                          city: { type: "string" },
+                          zip_code: { type: "string" },
+                          phone: { type: "string" },
+                          email: { type: "string" },
+                          website: { type: "string" },
+                          organization_type: { type: "string" },
+                          mission: { type: "string" },
+                          annual_revenue: { type: "string" },
+                          ntee_code: { type: "string" },
+                          ntee_description: { type: "string" },
+                          ruling_date: { type: "string" },
+                          data_sources: { type: "array", items: { type: "string" } }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { description: "Bad request - missing required parameters" },
+          "401": { description: "Unauthorized - invalid or missing API key" },
+          "403": { description: "Forbidden - account suspended" },
+          "500": { description: "Internal server error" }
+        }
+      }
+    }
+  }
+};
+
 Deno.serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
+      }
+    });
+  }
+
+  // Serve OpenAPI schema for GET requests (Salesforce External Services schema discovery)
+  if (req.method === 'GET') {
+    return new Response(JSON.stringify(OPENAPI_SCHEMA), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+
   const startTime = Date.now();
   const base44 = createClientFromRequest(req);
 
