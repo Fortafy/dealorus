@@ -39,7 +39,7 @@ function buildOpenApiSchema(baseUrl) {
     },
     servers: [{ url: baseUrl }],
     paths: {
-      "/": {
+      "/dealorousPublicAPI": {
         post: {
           operationId: "searchNonprofits",
           summary: "Search for nonprofit organizations",
