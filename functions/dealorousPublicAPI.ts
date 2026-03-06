@@ -130,7 +130,10 @@ Deno.serve(async (req) => {
 
   // Serve OpenAPI schema for GET requests (Salesforce External Services schema discovery)
   if (req.method === 'GET') {
-    return new Response(JSON.stringify(OPENAPI_SCHEMA), {
+    const reqUrl = new URL(req.url);
+    const baseUrl = `${reqUrl.protocol}//${reqUrl.host}`;
+    const schema = buildOpenApiSchema(baseUrl);
+    return new Response(JSON.stringify(schema), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
