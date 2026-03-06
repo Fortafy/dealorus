@@ -250,7 +250,7 @@ Use null for missing fields.`;
     const responseTime = Date.now() - startTime;
 
     // ── 7. Log the Request ────────────────────────────────────────────────────
-    await base44.entities.ApiRequestLog.create({
+    await base44.asServiceRole.entities.ApiRequestLog.create({
       client_id: clientRecord.id,
       api_key_prefix: apiKeyPrefix,
       request_source: source,
