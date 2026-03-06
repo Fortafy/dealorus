@@ -275,7 +275,7 @@ Use null for missing fields.`;
     const responseTime = Date.now() - startTime;
 
     if (clientRecord) {
-      await base44.asServiceRole.entities.ApiRequestLog.create({
+      await base44.entities.ApiRequestLog.create({
         client_id: clientRecord.id,
         api_key_prefix: apiKeyPrefix,
         request_source: 'External API',
