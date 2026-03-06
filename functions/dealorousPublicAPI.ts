@@ -367,12 +367,15 @@ Use null for missing fields.`;
       response_time_ms: responseTime
     });
 
-    return Response.json({
+    return new Response(JSON.stringify({
       success: true,
       count: results.length,
       sources_used: enrichmentSources,
       results,
       response_time_ms: responseTime
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
 
   } catch (error) {
