@@ -380,7 +380,7 @@ Use null for missing fields.`;
       response_time_ms: responseTime
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: jsonHeaders
     });
 
   } catch (error) {
