@@ -163,26 +163,26 @@ Deno.serve(async (req) => {
     }
 
     if (!apiKey) {
-      return Response.json({ error: 'API key required. Provide X-API-Key header or api_key parameter.' }, { status: 401 });
+      return new Response(JSON.stringify({ error: 'API key required. Provide X-API-Key header or api_key parameter.' }), { status: 401, headers: jsonHeaders });
     }
 
     apiKeyPrefix = apiKey.substring(0, 8);
 
     const clients = await base44.asServiceRole.entities.Client.filter({ api_key: apiKey });
     if (!clients || clients.length === 0) {
-      return Response.json({ error: 'Invalid API key.' }, { status: 401 });
+      return new Response(JSON.stringify({ error: 'Invalid API key.' }), { status: 401, headers: jsonHeaders });
     }
     clientRecord = clients[0];
 
     if (clientRecord.subscription_status === 'canceled' || clientRecord.subscription_status === 'suspended') {
-      return Response.json({ error: 'Account is suspended. Please contact support.' }, { status: 403 });
+      return new Response(JSON.stringify({ error: 'Account is suspended. Please contact support.' }), { status: 403, headers: jsonHeaders });
     }
 
     // ── 2. Parse Search Parameters ────────────────────────────────────────────
     const { orgName, ein, state, city, orgType, nteeCodeId, source = 'External API' } = body;
 
     if (!orgName && !ein && !state) {
-      return Response.json({ error: 'At least one search parameter required: orgName, ein, or state.' }, { status: 400 });
+      return new Response(JSON.stringify({ error: 'At least one search parameter required: orgName, ein, or state.' }), { status: 400, headers: jsonHeaders });
     }
 
     searchParams = { orgName, ein, state, city, orgType, nteeCodeId };
