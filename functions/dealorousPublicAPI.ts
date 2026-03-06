@@ -131,13 +131,17 @@ Deno.serve(async (req) => {
   // Serve OpenAPI schema for GET requests (Salesforce External Services schema discovery)
   if (req.method === 'GET') {
     const reqUrl = new URL(req.url);
-    const baseUrl = `${reqUrl.protocol}//${reqUrl.host}`;
+    // Use the full URL (protocol + host + pathname) as the server base,
+    // so Salesforce knows POST calls go to this exact endpoint
+    const baseUrl = `${reqUrl.protocol}//${reqUrl.host}${reqUrl.pathname}`;
     const schema = buildOpenApiSchema(baseUrl);
-    return new Response(JSON.stringify(schema), {
+    return new Response(JSON.stringify(schema, null, 2), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
       }
     });
   }
