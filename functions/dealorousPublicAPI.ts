@@ -47,19 +47,7 @@ function buildOpenApiSchema(baseUrl) {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    api_key: { type: "string" },
-                    orgName: { type: "string" },
-                    ein: { type: "string" },
-                    state: { type: "string" },
-                    city: { type: "string" },
-                    orgType: { type: "string" },
-                    source: { type: "string" }
-                  },
-                  required: ["api_key"]
-                }
+                schema: { "$ref": "#/components/schemas/SearchRequest" }
               }
             }
           },
@@ -68,39 +56,7 @@ function buildOpenApiSchema(baseUrl) {
               description: "Successful response",
               content: {
                 "application/json": {
-                  schema: {
-                    type: "object",
-                    properties: {
-                      success: { type: "boolean" },
-                      count: { type: "integer" },
-                      sources_used: { type: "array", items: { type: "string" } },
-                      response_time_ms: { type: "integer" },
-                      results: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            organization_name: { type: "string" },
-                            state: { type: "string" },
-                            ein: { type: "string" },
-                            address: { type: "string" },
-                            city: { type: "string" },
-                            zip_code: { type: "string" },
-                            phone: { type: "string" },
-                            email: { type: "string" },
-                            website: { type: "string" },
-                            organization_type: { type: "string" },
-                            mission: { type: "string" },
-                            annual_revenue: { type: "string" },
-                            ntee_code: { type: "string" },
-                            ntee_description: { type: "string" },
-                            ruling_date: { type: "string" },
-                            data_sources: { type: "array", items: { type: "string" } }
-                          }
-                        }
-                      }
-                    }
-                  }
+                  schema: { "$ref": "#/components/schemas/SearchResponse" }
                 }
               }
             },
@@ -108,6 +64,57 @@ function buildOpenApiSchema(baseUrl) {
             "401": { description: "Unauthorized" },
             "403": { description: "Forbidden" },
             "500": { description: "Internal server error" }
+          }
+        }
+      }
+    },
+    components: {
+      schemas: {
+        SearchRequest: {
+          type: "object",
+          required: ["api_key"],
+          properties: {
+            api_key: { type: "string" },
+            orgName: { type: "string" },
+            ein: { type: "string" },
+            state: { type: "string" },
+            city: { type: "string" },
+            orgType: { type: "string" },
+            source: { type: "string" }
+          }
+        },
+        NonprofitResult: {
+          type: "object",
+          properties: {
+            organization_name: { type: "string" },
+            state: { type: "string" },
+            ein: { type: "string" },
+            address: { type: "string" },
+            city: { type: "string" },
+            zip_code: { type: "string" },
+            phone: { type: "string" },
+            email: { type: "string" },
+            website: { type: "string" },
+            organization_type: { type: "string" },
+            mission: { type: "string" },
+            annual_revenue: { type: "string" },
+            ntee_code: { type: "string" },
+            ntee_description: { type: "string" },
+            ruling_date: { type: "string" },
+            data_sources: { type: "array", items: { type: "string" } }
+          }
+        },
+        SearchResponse: {
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            count: { type: "integer" },
+            sources_used: { type: "array", items: { type: "string" } },
+            response_time_ms: { type: "integer" },
+            results: {
+              type: "array",
+              items: { "$ref": "#/components/schemas/NonprofitResult" }
+            }
           }
         }
       }
