@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
 
     apiKeyPrefix = apiKey.substring(0, 8);
 
-    const clients = await base44.asServiceRole.entities.Client.filter({ api_key: apiKey });
+    const clients = await base44.entities.Client.filter({ api_key: apiKey });
     if (!clients || clients.length === 0) {
       return Response.json({ error: 'Invalid API key.' }, { status: 401 });
     }
