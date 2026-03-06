@@ -31,8 +31,7 @@ function formatEIN(ein) {
 
 Deno.serve(async (req) => {
   const startTime = Date.now();
-  // Use a service-role client (no user session required for this public endpoint)
-  const base44 = createClient({ appId: Deno.env.get('BASE44_APP_ID'), serviceRole: true });
+  const base44 = createClientFromRequest(req);
 
   let clientRecord = null;
   let apiKeyPrefix = null;
