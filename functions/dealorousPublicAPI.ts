@@ -215,7 +215,7 @@ Find accurate information from public sources (ProPublica, IRS, Charity Navigato
 Return a JSON object with: organization_name, state, ein, address, city, zip_code, phone, email, website, organization_type, mission, annual_revenue, ntee_code, ruling_date, data_sources (array of strings).
 Use null for missing fields.`;
 
-      const aiResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      const aiResult = await base44.integrations.Core.InvokeLLM({
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
