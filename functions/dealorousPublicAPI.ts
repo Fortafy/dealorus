@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
 
   try {
     // Use service role — initialized inside try, after secret validation
-    const base44 = createClientFromRequest(req).asServiceRole;
+    const base44 = createClient({ appId: Deno.env.get("BASE44_APP_ID") }).asServiceRole;
 
     // ── 1. Authenticate via API Key ────────────────────────────────────────────
     let apiKey = req.headers.get('X-API-Key');
