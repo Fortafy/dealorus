@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
     const { orgName, ein, state, city, orgType, nteeCodeId, source = 'External API' } = body;
 
     if (!orgName && !ein && !state) {
-      return new Response(JSON.stringify({ error: 'At least one search parameter required: orgName, ein, or state.' }), { status: 400, headers: jsonHeaders });
+      return Response.json({ error: 'At least one search parameter required: orgName, ein, or state.' }, { status: 400, headers: jsonHeaders });
     }
 
     searchParams = { orgName, ein, state, city, orgType, nteeCodeId };
