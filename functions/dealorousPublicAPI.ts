@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
   if (req.method === 'GET') {
     const baseUrl = "https://civic-beacon-acaf302c.base44.app";
     const schema = buildOpenApiSchema(baseUrl);
-    return new Response(JSON.stringify(schema), { status: 200, headers: jsonHeaders });
+    return Response.json(schema, { status: 200, headers: jsonHeaders });
   }
 
   const startTime = Date.now();
