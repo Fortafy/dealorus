@@ -540,7 +540,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {isSaved && data.salesforce_id && (
+              {isSaved && (
                 <Button
                   variant="secondary"
                   size="sm"
@@ -548,7 +548,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                   disabled={isPushingToSalesforce}
                   className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                   style={{ color: 'hsl(217, 91%, 60%)' }}
-                  title="Push to Salesforce"
+                  title={data.salesforce_id ? "Update Salesforce Account" : "Create Salesforce Account"}
                 >
                   {isPushingToSalesforce ? (
                     <div className="w-3.5 h-3.5 border border-blue-300 border-t-blue-600 rounded-full animate-spin" />
