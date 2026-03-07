@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
   }
 
   // Use service role — no user session required
-  const base44 = createClientFromRequest(req).asServiceRole;
+  const base44 = createClient({ appId: Deno.env.get('BASE44_APP_ID') }).asServiceRole;
 
   if (req.method === 'GET') {
     const baseUrl = "https://civic-beacon-acaf302c.base44.app";
