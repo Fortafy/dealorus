@@ -10,7 +10,7 @@ import {
   Users,
   Database,
   Merge,
-  KeyRound,
+  ArrowUpFromLine,
 } from "lucide-react";
 
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
