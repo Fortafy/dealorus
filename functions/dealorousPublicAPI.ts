@@ -372,13 +372,13 @@ Use null for missing fields.`;
       response_time_ms: responseTime
     });
 
-    return new Response(JSON.stringify({
+    return Response.json({
       success: true,
       count: results.length,
       sources_used: enrichmentSources,
       results,
       response_time_ms: responseTime
-    }), {
+    }, {
       status: 200,
       headers: jsonHeaders
     });
