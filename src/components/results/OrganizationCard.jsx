@@ -84,7 +84,7 @@ function DataRow({ icon: Icon, label, value, isLink }) {
   );
 }
 
-export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDelete, onEdit }) {
+export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDelete, onEdit, clientInstanceUrl }) {
   const queryClient = useQueryClient();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [isEnriching, setIsEnriching] = useState(false);
