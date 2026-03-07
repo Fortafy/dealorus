@@ -401,6 +401,6 @@ Use null for missing fields.`;
       }).catch(() => {});
     }
 
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: jsonHeaders });
+    return Response.json({ error: error.message }, { status: 500, headers: jsonHeaders });
   }
 });
