@@ -89,9 +89,9 @@ export default function Dashboard() {
         return isOrgAdmin(currentUser) ? (
           <DataSourceConfiguration organization={organization} />
         ) : null;
-      case "api-access":
+      case "sf-field-mapping":
         return isOrgAdmin(currentUser) ? (
-          <ApiAccessSection organization={organization} />
+          <SalesforceFieldMappingSection organization={organization} />
         ) : null;
       case "find-duplicates":
         return isOrgAdmin(currentUser) ? (

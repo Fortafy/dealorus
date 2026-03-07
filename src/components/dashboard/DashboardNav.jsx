@@ -49,9 +49,9 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       icon: Merge,
     },
     {
-      id: "api-access",
-      label: "API Access",
-      icon: KeyRound,
+      id: "sf-field-mapping",
+      label: "Salesforce Field Mapping",
+      icon: ArrowUpFromLine,
     },
     {
       id: "organization-settings",
