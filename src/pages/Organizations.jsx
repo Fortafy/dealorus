@@ -591,6 +591,7 @@ export default function Organizations() {
                 onDelete={(id) => deleteMutation.mutate(id)}
                 onEdit={handleEdit}
                 isClientOrganization={false}
+                clientInstanceUrl={clientData?.salesforce_instance_url}
               />
               <ContactSearch 
                 organization={selectedOrg}
