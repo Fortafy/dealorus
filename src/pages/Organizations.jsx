@@ -70,6 +70,15 @@ export default function Organizations() {
     queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.client_id }, "-created_date"),
   });
 
+  const { data: clientData } = useQuery({
+    queryKey: ["client", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: async () => {
+      const results = await base44.entities.Client.filter({ id: currentUser.client_id });
+      return results[0] || null;
+    },
+  });
+
   // Check for pre-selected organization from URL
   React.useEffect(() => {
     if (!currentUser?.client_id) return;
