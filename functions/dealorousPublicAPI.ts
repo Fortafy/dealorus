@@ -141,9 +141,6 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or missing X-Salesforce-Secret header.' }), { status: 401, headers: jsonHeaders });
   }
 
-  // Use service role — no user session required
-  const base44 = createClient({ appId: Deno.env.get('BASE44_APP_ID') }).asServiceRole;
-
   if (req.method === 'GET') {
     const baseUrl = "https://civic-beacon-acaf302c.base44.app";
     const schema = buildOpenApiSchema(baseUrl);
