@@ -608,6 +608,37 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
               <DataRow icon={DollarSign} label="Annual Revenue" value={displayData.annual_revenue} />
               <DataRow icon={Calendar} label="Tax-Exempt Since" value={displayData.ruling_date} />
               <DataRow icon={Tag} label="Classification" value={displayData.ntee_description && displayData.ntee_code ? `${displayData.ntee_description} (${displayData.ntee_code})` : displayData.ntee_description || displayData.ntee_code || null} />
+              {data.salesforce_id && (
+                <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'hsl(214, 95%, 93%)' }}>
+                    <Upload className="w-5 h-5" style={{ color: 'hsl(217, 91%, 60%)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Salesforce</p>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {clientInstanceUrl ? (
+                        <a
+                          href={`${clientInstanceUrl}/${data.salesforce_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm hover:underline flex items-center gap-1"
+                          style={{ color: 'hsl(217, 91%, 60%)' }}
+                        >
+                          {data.salesforce_id}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <span className="text-sm text-slate-800">{data.salesforce_id}</span>
+                      )}
+                      {data.last_salesforce_sync && (
+                        <span className="text-xs text-slate-400">
+                          (synced {moment(data.last_salesforce_sync).format("MMM D, YYYY h:mm A")})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
