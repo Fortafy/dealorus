@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 Deno.serve(async (req) => {
   try {
@@ -16,39 +16,31 @@ Deno.serve(async (req) => {
     }
 
     // Get organization from database
-    const org = await base44.entities.Organization.filter({ id: organization_id });
-    
-    if (!org || org.length === 0) {
+    const orgs = await base44.entities.Organization.filter({ id: organization_id });
+    if (!orgs || orgs.length === 0) {
       return Response.json({ error: 'Organization not found' }, { status: 404 });
     }
-
-    const organization = org[0];
-
-    if (!organization.salesforce_id) {
-      return Response.json({ error: 'Organization does not have a Salesforce ID' }, { status: 400 });
-    }
+    const organization = orgs[0];
 
     // Get client's Salesforce credentials
     const clients = await base44.asServiceRole.entities.Client.filter({ id: user.client_id });
     if (!clients || clients.length === 0) {
       return Response.json({ error: 'Client not found' }, { status: 404 });
     }
-
     const client = clients[0];
-    
+
     if (!client.salesforce_connected) {
-      return Response.json({ 
-        error: 'Salesforce External Client App not connected. Please connect in Organization Settings.' 
+      return Response.json({
+        error: 'Salesforce External Client App not connected. Please connect in Organization Settings.'
       }, { status: 400 });
     }
 
-    // Check if token is expired and refresh if needed
+    // Check / refresh token
     let accessToken = client.salesforce_access_token;
     const tokenExpiry = client.salesforce_token_expiry ? new Date(client.salesforce_token_expiry) : null;
     const now = new Date();
 
     if (!accessToken || !tokenExpiry || now >= tokenExpiry) {
-      // Refresh token using client credentials flow
       const tokenUrl = `${client.salesforce_instance_url}/services/oauth2/token`;
       const tokenParams = new URLSearchParams({
         grant_type: 'client_credentials',
@@ -58,26 +50,23 @@ Deno.serve(async (req) => {
 
       const tokenResponse = await fetch(tokenUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: tokenParams.toString()
       });
 
       if (!tokenResponse.ok) {
         const error = await tokenResponse.text();
-        return Response.json({ 
-          error: `Failed to refresh access token: ${error}. Please reconnect Salesforce.` 
+        return Response.json({
+          error: `Failed to refresh access token: ${error}. Please reconnect Salesforce.`
         }, { status: 401 });
       }
 
       const tokenData = await tokenResponse.json();
       accessToken = tokenData.access_token;
 
-      // Update stored token
       const newExpiry = new Date();
       newExpiry.setSeconds(newExpiry.getSeconds() + (tokenData.expires_in || 7200));
-      
+
       await base44.asServiceRole.entities.Client.update(client.id, {
         salesforce_access_token: accessToken,
         salesforce_token_expiry: newExpiry.toISOString()
@@ -86,56 +75,93 @@ Deno.serve(async (req) => {
 
     const instanceUrl = client.salesforce_instance_url;
 
-    // Map Organization fields to Salesforce Account fields
-    const sfAccountData = {
-      Name: organization.organization_name,
-      BillingState: organization.state,
-      Phone: organization.phone,
-      BillingStreet: organization.address,
-      BillingCity: organization.city,
-      BillingPostalCode: organization.zip_code,
-      Website: organization.website,
-      Industry: organization.organization_type,
-      Description: organization.mission,
-      AnnualRevenue: organization.annual_revenue ? parseFloat(organization.annual_revenue) : null,
-      // Custom fields for enhanced data
-      Lifecycle_Stage__c: organization.lifecycle_stage,
-      Is_Client__c: organization.is_client,
-      Deal_Value__c: organization.deal_value,
-      Next_Activity_Date__c: organization.next_activity_date,
-      EIN__c: organization.ein,
-      NTEE_Code__c: organization.ntee_code
-    };
-
-    // Update Salesforce Account
-    const updateUrl = `${instanceUrl}/services/data/v58.0/sobjects/Account/${organization.salesforce_id}`;
-    
-    const sfResponse = await fetch(updateUrl, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(sfAccountData)
+    // Load active field mappings for this client
+    const mappings = await base44.asServiceRole.entities.SalesforceFieldMapping.filter({
+      client_id: user.client_id,
+      is_active: true
     });
 
-    if (!sfResponse.ok) {
-      const error = await sfResponse.text();
-      return Response.json({ 
-        error: `Salesforce API error: ${error}`,
-        note: 'Some custom fields may not exist in your Salesforce org. Create them or remove from mapping.'
-      }, { status: sfResponse.status });
+    // Build the Salesforce Account payload from dynamic mappings
+    const sfAccountData = {};
+    for (const mapping of mappings) {
+      const localValue = organization[mapping.dealorous_field];
+      if (localValue === undefined || localValue === null || localValue === '') continue;
+
+      // Type coerce based on Salesforce field type
+      if (mapping.salesforce_field_type === 'double' || mapping.salesforce_field_type === 'currency') {
+        const parsed = parseFloat(localValue);
+        if (!isNaN(parsed)) sfAccountData[mapping.salesforce_field] = parsed;
+      } else if (mapping.salesforce_field_type === 'boolean') {
+        sfAccountData[mapping.salesforce_field] = Boolean(localValue);
+      } else {
+        sfAccountData[mapping.salesforce_field] = String(localValue);
+      }
     }
 
-    // Update last sync time in our database
+    // If no mappings configured, fall back to a sensible default (Name is required)
+    if (Object.keys(sfAccountData).length === 0) {
+      sfAccountData['Name'] = organization.organization_name;
+    }
+
+    // Ensure Name is always included
+    if (!sfAccountData['Name']) {
+      sfAccountData['Name'] = organization.organization_name;
+    }
+
+    let salesforceId = organization.salesforce_id;
+    let isCreate = false;
+
+    if (salesforceId) {
+      // UPDATE existing Account
+      const updateUrl = `${instanceUrl}/services/data/v58.0/sobjects/Account/${salesforceId}`;
+      const sfResponse = await fetch(updateUrl, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sfAccountData)
+      });
+
+      if (!sfResponse.ok) {
+        const error = await sfResponse.text();
+        return Response.json({ error: `Salesforce update error: ${error}` }, { status: sfResponse.status });
+      }
+    } else {
+      // CREATE new Account
+      isCreate = true;
+      const createUrl = `${instanceUrl}/services/data/v58.0/sobjects/Account`;
+      const sfResponse = await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sfAccountData)
+      });
+
+      if (!sfResponse.ok) {
+        const error = await sfResponse.text();
+        return Response.json({ error: `Salesforce create error: ${error}` }, { status: sfResponse.status });
+      }
+
+      const createResult = await sfResponse.json();
+      salesforceId = createResult.id;
+    }
+
+    // Update local organization record with salesforce_id and sync timestamp
     await base44.asServiceRole.entities.Organization.update(organization_id, {
+      salesforce_id: salesforceId,
       last_salesforce_sync: new Date().toISOString()
     });
 
     return Response.json({
       success: true,
-      message: 'Organization successfully pushed to Salesforce',
-      salesforce_id: organization.salesforce_id
+      message: isCreate
+        ? 'Account created in Salesforce successfully'
+        : 'Account updated in Salesforce successfully',
+      salesforce_id: salesforceId,
+      is_create: isCreate
     });
 
   } catch (error) {
