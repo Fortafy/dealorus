@@ -300,6 +300,26 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
     }
   };
 
+  const handlePushToSalesforce = async () => {
+    if (!data.salesforce_id) {
+      toast.error("This organization does not have a Salesforce ID. It must first be synced from Salesforce.");
+      return;
+    }
+    setIsPushingToSalesforce(true);
+    try {
+      const response = await base44.functions.invoke('pushToSalesforce', { organization_id: data.id });
+      if (response.data?.success) {
+        toast.success("Organization successfully pushed to Salesforce!");
+      } else {
+        toast.error(response.data?.error || "Failed to push to Salesforce.");
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to push to Salesforce.");
+    } finally {
+      setIsPushingToSalesforce(false);
+    }
+  };
+
   const handleSmartEnrichComplete = (updatedData) => {
     if (onEdit) {
       onEdit(updatedData);
