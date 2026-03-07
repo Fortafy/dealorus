@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClient } from 'npm:@base44/sdk@0.8.20';
 
 // Simplified NTEE category lookup (inlined - no local imports allowed)
 const NTEE_CATEGORIES = {
@@ -123,28 +123,34 @@ function buildOpenApiSchema(baseUrl) {
 }
 
 Deno.serve(async (req) => {
-  // Use a proper Headers object for full control over Content-Type
   const jsonHeaders = new Headers({
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
+    'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, X-Salesforce-Secret, Authorization'
   });
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: jsonHeaders });
   }
 
+  // ── Salesforce Secret Validation ─────────────────────────────────────────
+  const salesforceSecret = Deno.env.get('SALESFORCE_SECRET');
+  const incomingSecret = req.headers.get('X-Salesforce-Secret');
+  if (!salesforceSecret || incomingSecret !== salesforceSecret) {
+    return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or missing X-Salesforce-Secret header.' }), { status: 401, headers: jsonHeaders });
+  }
+
+  // Use service role client — no user session required
+  const base44 = createClient({ appId: Deno.env.get('BASE44_APP_ID') }).asServiceRole;
+
   if (req.method === 'GET') {
     const baseUrl = "https://civic-beacon-acaf302c.base44.app";
     const schema = buildOpenApiSchema(baseUrl);
-    console.log("GET Outgoing headers:", Object.fromEntries(jsonHeaders.entries()));
     return new Response(JSON.stringify(schema), { status: 200, headers: jsonHeaders });
   }
 
   const startTime = Date.now();
-  const base44 = createClientFromRequest(req);
-
   let clientRecord = null;
   let apiKeyPrefix = null;
   let searchParams = {};
@@ -169,7 +175,7 @@ Deno.serve(async (req) => {
 
     apiKeyPrefix = apiKey.substring(0, 8);
 
-    const clients = await base44.asServiceRole.entities.Client.filter({ api_key: apiKey });
+    const clients = await base44.entities.Client.filter({ api_key: apiKey });
     if (!clients || clients.length === 0) {
       return new Response(JSON.stringify({ error: 'Invalid API key.' }), { status: 401, headers: jsonHeaders });
     }
@@ -326,7 +332,7 @@ Find accurate information from public sources (ProPublica, IRS, Charity Navigato
 Return a JSON object with: organization_name, state, ein, address, city, zip_code, phone, email, website, organization_type, mission, annual_revenue, ntee_code, ruling_date, data_sources (array of strings).
 Use null for missing fields.`;
 
-      const aiResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      const aiResult = await base44.integrations.Core.InvokeLLM({
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
@@ -362,7 +368,7 @@ Use null for missing fields.`;
     const responseTime = Date.now() - startTime;
 
     // ── 7. Log the Request ────────────────────────────────────────────────────
-    await base44.asServiceRole.entities.ApiRequestLog.create({
+    await base44.entities.ApiRequestLog.create({
       client_id: clientRecord.id,
       api_key_prefix: apiKeyPrefix,
       request_source: source,
@@ -373,22 +379,20 @@ Use null for missing fields.`;
       response_time_ms: responseTime
     });
 
-    const responseBody = {
+    return new Response(JSON.stringify({
       success: true,
       count: results.length,
       sources_used: enrichmentSources,
       results,
       response_time_ms: responseTime
-    };
-    console.log("Outgoing headers:", Object.fromEntries(jsonHeaders.entries()));
-    return new Response(JSON.stringify(responseBody), { status: 200, headers: jsonHeaders });
+    }), { status: 200, headers: jsonHeaders });
 
   } catch (error) {
     console.error('Dealorus API error:', error);
     const responseTime = Date.now() - startTime;
 
     if (clientRecord) {
-      await base44.asServiceRole.entities.ApiRequestLog.create({
+      await base44.entities.ApiRequestLog.create({
         client_id: clientRecord.id,
         api_key_prefix: apiKeyPrefix,
         request_source: 'External API',
@@ -401,7 +405,6 @@ Use null for missing fields.`;
       }).catch(() => {});
     }
 
-    console.log("Error outgoing headers:", Object.fromEntries(jsonHeaders.entries()));
     return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: jsonHeaders });
   }
 });
