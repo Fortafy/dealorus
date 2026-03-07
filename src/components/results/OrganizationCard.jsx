@@ -99,6 +99,7 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isPushingToSalesforce, setIsPushingToSalesforce] = useState(false);
 
   // Auto-populate NTEE description from code if missing
   const displayData = React.useMemo(() => {
