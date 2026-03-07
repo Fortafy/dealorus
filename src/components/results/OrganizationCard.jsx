@@ -301,15 +301,14 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
   };
 
   const handlePushToSalesforce = async () => {
-    if (!data.salesforce_id) {
-      toast.error("This organization does not have a Salesforce ID. It must first be synced from Salesforce.");
-      return;
-    }
     setIsPushingToSalesforce(true);
     try {
       const response = await base44.functions.invoke('pushToSalesforce', { organization_id: data.id });
       if (response.data?.success) {
-        toast.success("Organization successfully pushed to Salesforce!");
+        toast.success(response.data.message || "Organization successfully pushed to Salesforce!");
+        if (response.data.salesforce_id && onEdit) {
+          onEdit({ ...data, salesforce_id: response.data.salesforce_id, last_salesforce_sync: new Date().toISOString() });
+        }
       } else {
         toast.error(response.data?.error || "Failed to push to Salesforce.");
       }
