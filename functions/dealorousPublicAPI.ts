@@ -123,13 +123,13 @@ function buildOpenApiSchema(baseUrl) {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
-  const jsonHeaders = {
+  // Use a proper Headers object for full control over Content-Type
+  const jsonHeaders = new Headers({
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization'
-  };
+  });
 
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: jsonHeaders });
@@ -138,7 +138,8 @@ Deno.serve(async (req) => {
   if (req.method === 'GET') {
     const baseUrl = "https://civic-beacon-acaf302c.base44.app";
     const schema = buildOpenApiSchema(baseUrl);
-    return Response.json(schema, { status: 200, headers: jsonHeaders });
+    console.log("GET Outgoing headers:", Object.fromEntries(jsonHeaders.entries()));
+    return new Response(JSON.stringify(schema), { status: 200, headers: jsonHeaders });
   }
 
   const startTime = Date.now();
@@ -163,26 +164,26 @@ Deno.serve(async (req) => {
     }
 
     if (!apiKey) {
-      return Response.json({ error: 'API key required. Provide X-API-Key header or api_key parameter.' }, { status: 401, headers: jsonHeaders });
+      return new Response(JSON.stringify({ error: 'API key required. Provide X-API-Key header or api_key parameter.' }), { status: 401, headers: jsonHeaders });
     }
 
     apiKeyPrefix = apiKey.substring(0, 8);
 
     const clients = await base44.asServiceRole.entities.Client.filter({ api_key: apiKey });
     if (!clients || clients.length === 0) {
-      return Response.json({ error: 'Invalid API key.' }, { status: 401, headers: jsonHeaders });
+      return new Response(JSON.stringify({ error: 'Invalid API key.' }), { status: 401, headers: jsonHeaders });
     }
     clientRecord = clients[0];
 
     if (clientRecord.subscription_status === 'canceled' || clientRecord.subscription_status === 'suspended') {
-      return Response.json({ error: 'Account is suspended. Please contact support.' }, { status: 403, headers: jsonHeaders });
+      return new Response(JSON.stringify({ error: 'Account is suspended. Please contact support.' }), { status: 403, headers: jsonHeaders });
     }
 
     // ── 2. Parse Search Parameters ────────────────────────────────────────────
     const { orgName, ein, state, city, orgType, nteeCodeId, source = 'External API' } = body;
 
     if (!orgName && !ein && !state) {
-      return Response.json({ error: 'At least one search parameter required: orgName, ein, or state.' }, { status: 400, headers: jsonHeaders });
+      return new Response(JSON.stringify({ error: 'At least one search parameter required: orgName, ein, or state.' }), { status: 400, headers: jsonHeaders });
     }
 
     searchParams = { orgName, ein, state, city, orgType, nteeCodeId };
@@ -372,16 +373,15 @@ Use null for missing fields.`;
       response_time_ms: responseTime
     });
 
-    return Response.json({
+    const responseBody = {
       success: true,
       count: results.length,
       sources_used: enrichmentSources,
       results,
       response_time_ms: responseTime
-    }, {
-      status: 200,
-      headers: jsonHeaders
-    });
+    };
+    console.log("Outgoing headers:", Object.fromEntries(jsonHeaders.entries()));
+    return new Response(JSON.stringify(responseBody), { status: 200, headers: jsonHeaders });
 
   } catch (error) {
     console.error('Dealorus API error:', error);
@@ -401,6 +401,7 @@ Use null for missing fields.`;
       }).catch(() => {});
     }
 
-    return Response.json({ error: error.message }, { status: 500, headers: jsonHeaders });
+    console.log("Error outgoing headers:", Object.fromEntries(jsonHeaders.entries()));
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: jsonHeaders });
   }
 });
