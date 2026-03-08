@@ -116,10 +116,13 @@ Deno.serve(async (req) => {
       let soql = null;
 
       if (organization.ein) {
-        // Normalize EIN: digits only, no hyphens
+        // Normalize EIN to digits only, and also produce hyphenated format XX-XXXXXXX
         const einNormalized = organization.ein.replace(/-/g, '');
-        // Match AccountNumber with digits-only value so both '74-6023176' and '746023176' in SF will match
-        soql = `SELECT Id FROM Account WHERE AccountNumber = '${einNormalized}' LIMIT 1`;
+        const einHyphenated = einNormalized.length === 9
+          ? `${einNormalized.slice(0, 2)}-${einNormalized.slice(2)}`
+          : organization.ein;
+        // Search both formats so we match regardless of how Salesforce stores the EIN
+        soql = `SELECT Id FROM Account WHERE AccountNumber = '${einNormalized}' OR AccountNumber = '${einHyphenated}' LIMIT 1`;
       }
 
       // If no EIN or EIN search yields nothing, fall back to name match
