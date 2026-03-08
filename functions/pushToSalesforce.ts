@@ -111,6 +111,51 @@ Deno.serve(async (req) => {
     let salesforceId = organization.salesforce_id;
     let isCreate = false;
 
+    // If no salesforce_id stored locally, search Salesforce for an existing Account by EIN or Name
+    if (!salesforceId) {
+      let soql = null;
+
+      if (organization.ein) {
+        // Normalize EIN: remove dashes for comparison
+        const einNormalized = organization.ein.replace(/-/g, '');
+        // Try matching by EIN stored in a text field — adjust field name if your SF org uses a different field
+        soql = `SELECT Id FROM Account WHERE EIN__c = '${einNormalized}' OR EIN__c = '${organization.ein}' LIMIT 1`;
+      }
+
+      // If no EIN or EIN search yields nothing, fall back to name match
+      if (!soql) {
+        const safeName = organization.organization_name.replace(/'/g, "\\'");
+        soql = `SELECT Id FROM Account WHERE Name = '${safeName}' LIMIT 1`;
+      }
+
+      const queryUrl = `${instanceUrl}/services/data/v58.0/query?q=${encodeURIComponent(soql)}`;
+      const queryResponse = await fetch(queryUrl, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+
+      if (queryResponse.ok) {
+        const queryResult = await queryResponse.json();
+        if (queryResult.records && queryResult.records.length > 0) {
+          salesforceId = queryResult.records[0].Id;
+        }
+      }
+
+      // If still not found by EIN, try name search as fallback
+      if (!salesforceId && organization.ein) {
+        const safeName = organization.organization_name.replace(/'/g, "\\'");
+        const nameQueryUrl = `${instanceUrl}/services/data/v58.0/query?q=${encodeURIComponent(`SELECT Id FROM Account WHERE Name = '${safeName}' LIMIT 1`)}`;
+        const nameQueryResponse = await fetch(nameQueryUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (nameQueryResponse.ok) {
+          const nameQueryResult = await nameQueryResponse.json();
+          if (nameQueryResult.records && nameQueryResult.records.length > 0) {
+            salesforceId = nameQueryResult.records[0].Id;
+          }
+        }
+      }
+    }
+
     if (salesforceId) {
       // UPDATE existing Account
       const updateUrl = `${instanceUrl}/services/data/v58.0/sobjects/Account/${salesforceId}`;
@@ -128,7 +173,7 @@ Deno.serve(async (req) => {
         return Response.json({ error: `Salesforce update error: ${error}` }, { status: sfResponse.status });
       }
     } else {
-      // CREATE new Account
+      // No match found — CREATE new Account
       isCreate = true;
       const createUrl = `${instanceUrl}/services/data/v58.0/sobjects/Account`;
       const sfResponse = await fetch(createUrl, {
