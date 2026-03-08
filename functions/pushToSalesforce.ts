@@ -116,10 +116,10 @@ Deno.serve(async (req) => {
       let soql = null;
 
       if (organization.ein) {
-        // Normalize EIN: remove dashes for comparison
+        // Normalize EIN: digits only, no hyphens
         const einNormalized = organization.ein.replace(/-/g, '');
-        // Try matching by EIN stored in a text field — adjust field name if your SF org uses a different field
-        soql = `SELECT Id FROM Account WHERE EIN__c = '${einNormalized}' OR EIN__c = '${organization.ein}' LIMIT 1`;
+        // Match AccountNumber with digits-only value so both '74-6023176' and '746023176' in SF will match
+        soql = `SELECT Id FROM Account WHERE AccountNumber = '${einNormalized}' LIMIT 1`;
       }
 
       // If no EIN or EIN search yields nothing, fall back to name match
