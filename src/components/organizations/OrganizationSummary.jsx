@@ -18,16 +18,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Sparkles, Database, Upload, CheckCircle2, Save, AlertTriangle, Hash, MapPin, Phone, Mail, Globe, DollarSign, Calendar, FileText, ExternalLink } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Database, Upload, CheckCircle2, Save, AlertTriangle, Hash, MapPin, Phone, Mail, Globe, DollarSign, Calendar, FileText, ExternalLink, ToggleRight, Tag } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
 import SmartEnrichDialog from "@/components/organizations/SmartEnrichDialog";
 import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
-import LifecycleStageSelector from "@/components/organizations/LifecycleStageSelector";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
-import { Tag } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 
@@ -78,7 +76,7 @@ export default function OrganizationSummary({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isPushingToSalesforce, setIsPushingToSalesforce] = useState(false);
-  const [currentLifecycleStage, setCurrentLifecycleStage] = useState(organization.lifecycle_stage);
+  const [clientStatus, setClientStatus] = useState(organization.client_status || "active");
   const [existingRecord, setExistingRecord] = useState(null);
 
   const displayData = React.useMemo(() => {
