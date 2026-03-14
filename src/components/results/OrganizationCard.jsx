@@ -737,9 +737,10 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                 </div>
               </CollapsibleContent>
             </Collapsible>
-          )}
-        </CardContent>
-      </Card>
+            )}
+            </div>
+            </CardContent>
+            </Card>
 
       <EditOrganizationDialog
         organization={data}
