@@ -602,9 +602,13 @@ export default function Organizations() {
             </motion.div>
           ) : showSearchPanel ? (
             <SearchPanel
-              onSearchComplete={() => {
+              onSearchComplete={(savedOrg) => {
                 queryClient.invalidateQueries({ queryKey: ["organizations"] });
                 setShowSearchPanel(false);
+                if (savedOrg?.id) {
+                  setSelectedOrg(savedOrg);
+                  setShowDashboard(false);
+                }
               }}
               onClose={() => setShowSearchPanel(false)}
             />
