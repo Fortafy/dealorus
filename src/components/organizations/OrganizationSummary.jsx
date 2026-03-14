@@ -244,26 +244,28 @@ export default function OrganizationSummary({
                 )}
               </div>
             </div>
-            <div className="flex gap-1.5 flex-wrap">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowSmartEnrichDialog(true)}
-                disabled={isEnriching || !isSaved}
-                className="bg-white/90 hover:bg-white h-8 w-8 p-0"
-                style={{ color: "hsl(217, 91%, 60%)" }}
-                title="Smart Enrich"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                </Button>
-                <div className="h-8 w-px bg-white/30"></div>
-                <div className="flex items-center justify-center h-8 px-1.5">
-                  <Switch
-                    checked={clientStatus === "active"}
-                    onCheckedChange={handleStatusToggle}
-                    className="scale-75"
-                  />
-                </div>
+            <div className="flex gap-1.5 flex-wrap items-center">
+               <div className="flex items-center justify-center h-8 px-2">
+                 <Switch
+                   checked={clientStatus === "active"}
+                   onCheckedChange={handleStatusToggle}
+                   className="scale-125"
+                   style={{
+                     opacity: 1
+                   }}
+                 />
+               </div>
+               <Button
+                 variant="secondary"
+                 size="sm"
+                 onClick={() => setShowSmartEnrichDialog(true)}
+                 disabled={isEnriching || !isSaved}
+                 className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                 style={{ color: "hsl(217, 91%, 60%)" }}
+                 title="Smart Enrich"
+               >
+                 <Sparkles className="w-3.5 h-3.5" />
+               </Button>
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
