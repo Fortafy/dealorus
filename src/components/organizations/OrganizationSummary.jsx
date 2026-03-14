@@ -197,10 +197,11 @@ export default function OrganizationSummary({
     setEnrichedData(null);
   };
 
-  const handleStageChange = (newStageId) => {
-    setCurrentLifecycleStage(newStageId);
+  const handleStatusToggle = () => {
+    const newStatus = clientStatus === "active" ? "inactive" : "active";
+    setClientStatus(newStatus);
     if (onEdit) {
-      onEdit({ ...organization, lifecycle_stage: newStageId });
+      onEdit({ ...organization, client_status: newStatus });
     }
   };
 
@@ -338,17 +339,21 @@ export default function OrganizationSummary({
               <DataRow icon={Phone} label="Phone" value={organization.phone} />
               <DataRow icon={Mail} label="Email" value={organization.email} />
               <div className="flex items-start gap-3 py-3 border-b border-slate-100">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
-                  <Tag className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)" }}>
+                  <ToggleRight className="w-5 h-5" style={{ color: clientStatus === "active" ? "white" : "hsl(215, 16%, 47%)" }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Lifecycle Stage</p>
-                  <LifecycleStageSelector
-                    organizationId={organization.id}
-                    clientId={organization.client_id}
-                    currentStageId={currentLifecycleStage}
-                    onStageChange={handleStageChange}
-                  />
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Client Status</p>
+                  <button
+                    onClick={handleStatusToggle}
+                    className="text-sm font-medium py-1 px-3 rounded-md transition-colors"
+                    style={{
+                      backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)",
+                      color: clientStatus === "active" ? "white" : "hsl(215, 16%, 47%)"
+                    }}
+                  >
+                    {clientStatus === "active" ? "Active" : "Inactive"}
+                  </button>
                 </div>
               </div>
             </div>
