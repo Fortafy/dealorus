@@ -54,7 +54,6 @@ import { normalizeEIN } from "@/components/utils/einFormatter";
 import { Award, FileCheck, Link2, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import LifecycleStageSelector from "@/components/organizations/LifecycleStageSelector";
-import LifecyclePath from "@/components/organizations/LifecyclePath";
 
 function DataRow({ icon: Icon, label, value, isLink }) {
   if (!value || value === "N/A" || value === "Not found") return null;
@@ -595,25 +594,16 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
           </div>
         </CardHeader>
 
-        <CardContent className="p-0">
-          {isSaved && (
-            <LifecyclePath
-              clientId={data.client_id}
-              currentStageId={currentLifecycleStage}
-              organizationId={data.id}
-              onStageChange={handleStageChange}
-            />
-          )}
-          <div className="p-6">
-            {displayData.mission && (
-              <div className="mb-6 p-4 bg-slate-50 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="w-4 h-4 text-slate-500" />
-                  <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Mission</span>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{displayData.mission}</p>
+        <CardContent className="p-6">
+          {displayData.mission && (
+            <div className="mb-6 p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="w-4 h-4 text-slate-500" />
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Mission</span>
               </div>
-            )}
+              <p className="text-sm text-slate-700 leading-relaxed">{displayData.mission}</p>
+            </div>
+          )}
 
           <div className="grid md:grid-cols-2 gap-x-8">
             <div>
@@ -621,6 +611,24 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
               <DataRow icon={MapPin} label="Address" value={formatAddress()} />
               <DataRow icon={Phone} label="Phone" value={displayData.phone} />
               <DataRow icon={Mail} label="Email" value={displayData.email} />
+              {isSaved && (
+                <div className="flex items-start gap-3 py-3 border-b border-slate-100">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'hsl(214, 95%, 93%)' }}>
+                    <Tag className="w-5 h-5" style={{ color: 'hsl(217, 91%, 60%)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">
+                      Lifecycle Stage
+                    </p>
+                    <LifecycleStageSelector
+                      organizationId={data.id}
+                      clientId={data.client_id}
+                      currentStageId={currentLifecycleStage}
+                      onStageChange={handleStageChange}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <DataRow icon={Globe} label="Website" value={displayData.website} isLink />
@@ -737,10 +745,9 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
                 </div>
               </CollapsibleContent>
             </Collapsible>
-            )}
-            </div>
-            </CardContent>
-            </Card>
+          )}
+        </CardContent>
+      </Card>
 
       <EditOrganizationDialog
         organization={data}
