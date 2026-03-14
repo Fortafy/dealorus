@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, Linkedin, Star, Plus, Edit2, Trash2, Users, Search, Sparkles, Filter } from "lucide-react";
+import { Mail, Phone, Linkedin, Star, Plus, Edit2, Trash2, Users, Search, Sparkles, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import ContactForm from "@/components/contacts/ContactForm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,6 +13,7 @@ import EnhancedAISearchDialog from "@/components/contacts/EnhancedAISearchDialog
 import FilterDialog from "@/components/contacts/FilterDialog";
 import EnrichContactDialog from "@/components/contacts/EnrichContactDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function ContactsPanel({ organization, clientId, isCollapsed }) {
   const queryClient = useQueryClient();
@@ -25,6 +26,7 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
   const [enrichingContactId, setEnrichingContactId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [contactToDelete, setContactToDelete] = useState(null);
+  const [isOpen, setIsOpen] = useState(true);
 
   React.useEffect(() => {
     const fetchUser = async () => {
@@ -280,13 +282,17 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Contacts ({filteredContacts.length})
-          </CardTitle>
-          <TooltipProvider>
-            <div className="flex gap-1">
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Contacts ({filteredContacts.length})
+            </CardTitle>
+            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <TooltipProvider>
+              <div className="flex gap-1 mt-3 pt-3 border-t border-slate-100">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -357,12 +363,13 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                 </TooltipTrigger>
                 <TooltipContent>Quick Search</TooltipContent>
               </Tooltip>
-            </div>
-          </TooltipProvider>
-        </div>
+              </div>
+            </TooltipProvider>
+          </CollapsibleContent>
+        </Collapsible>
       </CardHeader>
 
-      <CardContent>
+      {isOpen && <CardContent>
         {isSearching && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -467,9 +474,9 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
             ))}
           </div>
         )}
-      </CardContent>
+        </CardContent>}
 
-      <ContactForm
+        <ContactForm
         contact={editingContact}
         organizationId={organization.id}
         clientId={currentUser?.client_id}
