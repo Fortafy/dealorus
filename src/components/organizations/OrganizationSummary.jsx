@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, Sparkles, Database, Upload, CheckCircle2, Save, AlertTriangle, Hash, MapPin, Phone, Mail, Globe, DollarSign, Calendar, FileText, ExternalLink, ToggleRight, Tag } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -254,8 +255,16 @@ export default function OrganizationSummary({
                 title="Smart Enrich"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-              </Button>
-              <DropdownMenu>
+                </Button>
+                <div className="h-8 w-px bg-white/30"></div>
+                <div className="flex items-center justify-center h-8 px-1.5">
+                  <Switch
+                    checked={clientStatus === "active"}
+                    onCheckedChange={handleStatusToggle}
+                    className="scale-75"
+                  />
+                </div>
+                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="secondary"
@@ -336,24 +345,6 @@ export default function OrganizationSummary({
               <DataRow icon={MapPin} label="Address" value={formatAddress()} />
               <DataRow icon={Phone} label="Phone" value={organization.phone} />
               <DataRow icon={Mail} label="Email" value={organization.email} />
-              <div className="flex items-start gap-3 py-3 border-b border-slate-100">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)" }}>
-                  <ToggleRight className="w-5 h-5" style={{ color: clientStatus === "active" ? "white" : "hsl(215, 16%, 47%)" }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Client Status</p>
-                  <button
-                    onClick={handleStatusToggle}
-                    className="text-sm font-medium py-1 px-3 rounded-md transition-colors"
-                    style={{
-                      backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)",
-                      color: clientStatus === "active" ? "white" : "hsl(215, 16%, 47%)"
-                    }}
-                  >
-                    {clientStatus === "active" ? "Active" : "Inactive"}
-                  </button>
-                </div>
-              </div>
             </div>
             <div>
               <DataRow icon={Globe} label="Website" value={organization.website} isLink />
