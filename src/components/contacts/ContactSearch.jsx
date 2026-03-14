@@ -93,6 +93,7 @@ export default function ContactSearch({ organization, onContactUpdate }) {
 
       await base44.functions.invoke('logContactActivity', {
         contact_id: id,
+        organization_id: organization.id,
         action: 'edit',
         description: 'Contact information updated',
         fields_changed: fieldsChanged
