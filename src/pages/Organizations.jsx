@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import OrganizationCard from "@/components/results/OrganizationCard";
 import ContactSearch from "@/components/contacts/ContactSearch";
+import OrganizationDetailView from "@/components/organizations/OrganizationDetailView";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
@@ -584,23 +585,11 @@ export default function Organizations() {
               animate={{ opacity: 1, y: 0 }}
               className="p-6"
             >
-              <OrganizationCard 
-                data={selectedOrg} 
-                onSave={() => {}} 
-                isSaved={true}
-                onDelete={(id) => {
-                  deleteMutation.mutate(id);
+              <OrganizationDetailView
+                organizationId={selectedOrg.id}
+                onClose={() => {
                   setSelectedOrg(null);
                   setShowDashboard(true);
-                }}
-                onEdit={handleEdit}
-                isClientOrganization={false}
-                clientInstanceUrl={clientData?.salesforce_instance_url}
-              />
-              <ContactSearch 
-                organization={selectedOrg}
-                onContactUpdate={(updatedContact) => {
-                  queryClient.invalidateQueries({ queryKey: ["contacts"] });
                 }}
               />
             </motion.div>
