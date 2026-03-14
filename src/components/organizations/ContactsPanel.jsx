@@ -23,6 +23,7 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
   const [filters, setFilters] = useState({ title: "", department: "", starredOnly: false });
   const [enrichingContactId, setEnrichingContactId] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [contactToDelete, setContactToDelete] = useState(null);
 
   React.useEffect(() => {
     const fetchUser = async () => {
@@ -397,7 +398,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => deleteContactMutation.mutate(contact.id)}
+                      onClick={() => setContactToDelete(contact)}
                       className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -502,6 +503,29 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           onSave={handleEnrichSave}
           />
           )}
+
+          <AlertDialog open={!!contactToDelete} onOpenChange={(open) => !open && setContactToDelete(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete {contactToDelete?.name}? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="flex gap-3 justify-end">
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    deleteContactMutation.mutate(contactToDelete.id);
+                    setContactToDelete(null);
+                  }}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </div>
+            </AlertDialogContent>
+          </AlertDialog>
           </Card>
           );
           }
