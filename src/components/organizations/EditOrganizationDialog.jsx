@@ -8,6 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function EditOrganizationDialog({ organization, open, onOpenChange, onSave }) {
   const [formData, setFormData] = useState(organization);
@@ -15,11 +22,26 @@ export default function EditOrganizationDialog({ organization, open, onOpenChang
   const [isValidating, setIsValidating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [clientStages, setClientStages] = useState([]);
+  const [isLoadingStages, setIsLoadingStages] = useState(false);
 
   useEffect(() => {
     setFormData(organization);
     setNteeValidation({ status: null, description: null });
+    loadClientStages();
   }, [organization, open]);
+
+  const loadClientStages = async () => {
+    try {
+      setIsLoadingStages(true);
+      const client = await base44.entities.Client.get(organization.client_id);
+      setClientStages(client.lifecycle_stages || []);
+    } catch (error) {
+      console.error('Error loading client stages:', error);
+    } finally {
+      setIsLoadingStages(false);
+    }
+  };
 
   const validateNTEECode = async (code) => {
     if (!code || code.trim() === "") {
@@ -228,6 +250,22 @@ export default function EditOrganizationDialog({ organization, open, onOpenChang
                 value={formData.ruling_date || ""}
                 onChange={(e) => handleChange("ruling_date", e.target.value)}
               />
+            </div>
+
+            <div>
+              <Label>Lifecycle Stage</Label>
+              <Select value={formData.lifecycle_stage || ""} onValueChange={(value) => handleChange("lifecycle_stage", value)}>
+                <SelectTrigger disabled={isLoadingStages}>
+                  <SelectValue placeholder="Select a stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientStages.map((stage) => (
+                    <SelectItem key={stage.id} value={stage.id}>
+                      {stage.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="col-span-2">
