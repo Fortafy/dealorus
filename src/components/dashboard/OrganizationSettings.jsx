@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import SalesforceIntegration from "./SalesforceIntegration";
+import LifecycleStageSettings from "./LifecycleStageSettings";
 
 export default function OrganizationSettings({ organization }) {
   const [formData, setFormData] = useState({
