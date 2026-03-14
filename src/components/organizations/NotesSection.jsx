@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Plus, Trash2, X } from "lucide-react";
+import { FileText, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function NotesSection({ organization, clientId, isCollapsed }) {
   const queryClient = useQueryClient();
@@ -15,6 +16,7 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const { data: notes = [] } = useQuery({
     queryKey: ["notes", organization.id],
@@ -59,26 +61,33 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <FileText className="w-4 h-4" />
-            Notes ({notes.length})
-          </CardTitle>
-          {!showNoteForm && (
-            <Button
-              size="sm"
-              onClick={() => setShowNoteForm(true)}
-              style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-              className="text-white hover:opacity-90 h-7 px-2"
-            >
-              <Plus className="w-3 h-3 mr-1" />
-              Add Note
-            </Button>
-          )}
-        </div>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Notes ({notes.length})
+            </CardTitle>
+            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+              {!showNoteForm && (
+                <Button
+                  size="sm"
+                  onClick={() => setShowNoteForm(true)}
+                  style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+                  className="text-white hover:opacity-90 h-7 px-2"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Add Note
+                </Button>
+              )}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardHeader>
 
-      <CardContent>
+      {isOpen && <CardContent>
         {showNoteForm && (
           <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-3">
             <Input
@@ -135,7 +144,7 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
             ))}
           </div>
         )}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }
