@@ -246,14 +246,19 @@ export default function OrganizationSummary({
             </div>
             <div className="flex gap-1.5 flex-wrap items-center">
                <div className="flex items-center justify-center h-8 px-2">
-                 <Switch
-                   checked={clientStatus === "active"}
-                   onCheckedChange={handleStatusToggle}
-                   className="scale-125"
+                 <div
                    style={{
-                     opacity: 1
+                     backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)",
                    }}
-                 />
+                   className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
+                   onClick={handleStatusToggle}
+                 >
+                   <div
+                     className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${
+                       clientStatus === "active" ? "translate-x-5" : "translate-x-0"
+                     }`}
+                   />
+                 </div>
                </div>
                <Button
                  variant="secondary"
