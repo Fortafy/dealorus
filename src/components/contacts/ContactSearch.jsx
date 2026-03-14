@@ -752,7 +752,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         <ContactForm
            contact={editingContact}
            organizationId={organization.id}
-           clientId={currentUser?.organization_id}
+           clientId={currentUser?.client_id}
            open={formOpen}
            onOpenChange={setFormOpen}
            onSave={handleSaveContact}
