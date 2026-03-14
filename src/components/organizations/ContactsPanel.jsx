@@ -452,24 +452,18 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         )}
       </CardContent>
 
-      {showContactForm && (
-        <div className="p-4 border-t border-slate-200 bg-slate-50">
-          <ContactForm
-            contact={editingContact}
-            organization={organization}
-            clientId={clientId}
-            onClose={() => {
-              setShowContactForm(false);
-              setEditingContact(null);
-            }}
-            onSave={() => {
-              queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
-              setShowContactForm(false);
-              setEditingContact(null);
-            }}
-          />
-          </div>
-          )}
+      <ContactForm
+        contact={editingContact}
+        organizationId={organization.id}
+        clientId={currentUser?.client_id}
+        open={showContactForm}
+        onOpenChange={setShowContactForm}
+        onSave={() => {
+          queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+          setShowContactForm(false);
+          setEditingContact(null);
+        }}
+      />
 
           <EnhancedAISearchDialog
           open={showAdvancedSearch}
