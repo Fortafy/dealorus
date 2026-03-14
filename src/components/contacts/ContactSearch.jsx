@@ -340,6 +340,8 @@ VALIDATION: Cross-check found email addresses and phone numbers against the orga
 
 Return ONLY contacts with publicly verified information. Do not make up or guess contact details.`;
 
+    console.log("[ContactSearch] Starting search for:", organization.organization_name, "| client_id:", currentUser?.client_id);
+
     try {
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -367,7 +369,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
       });
 
       const foundContacts = result.contacts || [];
-      
+      console.log("[ContactSearch] LLM returned", foundContacts.length, "contacts:", foundContacts.map(c => c.name));
+
       // Save AI-found contacts to database, checking for duplicates
       for (const contact of foundContacts) {
         // Split name into first and last name for duplicate checking
@@ -391,7 +394,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         
         const contactData = {
              organization_id: organization.id,
-             client_id: currentUser?.organization_id,
+             client_id: currentUser?.client_id,
              name: contact.name,
              title: contact.title,
              email: contact.email,
@@ -402,10 +405,10 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
            };
         
         if (existingContact) {
-          // Update existing contact
+          console.log("[ContactSearch] Updating existing contact:", contact.name);
           await base44.entities.Contact.update(existingContact.id, contactData);
         } else {
-          // Create new contact
+          console.log("[ContactSearch] Creating new contact:", contact.name, "| client_id:", contactData.client_id);
           await base44.entities.Contact.create(contactData);
         }
       }
@@ -414,7 +417,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
       setAiContacts(foundContacts);
       setHasSearched(true);
     } catch (err) {
-      console.error("Failed to search contacts:", err);
+      console.error("[ContactSearch] Search failed:", err);
       setAiContacts([]);
       setHasSearched(true);
     } finally {
