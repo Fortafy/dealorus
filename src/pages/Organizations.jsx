@@ -522,14 +522,14 @@ export default function Organizations() {
                           setShowDashboard(false);
                           setShowSearchPanel(false);
                         }}
-                        className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                        className={`w-full text-left px-3 py-2.5 border-b border-slate-100 transition-all ${
                           selectedOrg?.id === org.id
-                            ? "bg-white"
-                            : "border-slate-100 hover:border-slate-200 bg-white"
+                            ? "bg-blue-50"
+                            : "hover:bg-slate-50 bg-white"
                         }`}
                         style={selectedOrg?.id === org.id ? { 
-                          borderColor: 'hsl(217, 91%, 60%)', 
-                          backgroundColor: 'hsl(214, 95%, 93%)' 
+                          borderLeftColor: 'hsl(217, 91%, 60%)',
+                          borderLeftWidth: '3px'
                         } : {}}
                       >
                         <div className="flex items-start justify-between gap-2">
