@@ -588,7 +588,11 @@ export default function Organizations() {
                 data={selectedOrg} 
                 onSave={() => {}} 
                 isSaved={true}
-                onDelete={(id) => deleteMutation.mutate(id)}
+                onDelete={(id) => {
+                  deleteMutation.mutate(id);
+                  setSelectedOrg(null);
+                  setShowDashboard(true);
+                }}
                 onEdit={handleEdit}
                 isClientOrganization={false}
                 clientInstanceUrl={clientData?.salesforce_instance_url}
