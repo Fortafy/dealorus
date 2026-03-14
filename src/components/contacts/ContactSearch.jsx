@@ -103,6 +103,8 @@ export default function ContactSearch({ organization, onContactUpdate }) {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
       queryClient.invalidateQueries({ queryKey: ["activities", variables.id] });
+      setFormOpen(false);
+      setEditingContact(null);
       setSelectedContact(null);
     },
   });
