@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Sparkles, Database, Upload, CheckCircle2, Save, AlertTriangle } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Database, Upload, CheckCircle2, Save, AlertTriangle, Hash, MapPin, Phone, Mail, Globe, DollarSign, Calendar, FileText, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -29,6 +29,36 @@ import LifecycleStageSelector from "@/components/organizations/LifecycleStageSel
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { Tag } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import moment from "moment";
+
+function DataRow({ icon: Icon, label, value, isLink }) {
+  if (!value || value === "N/A" || value === "Not found") return null;
+
+  return (
+    <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
+        <Icon className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">{label}</p>
+        {isLink ? (
+          <a
+            href={value.startsWith("http") ? value : `https://${value}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm hover:underline flex items-center gap-1"
+            style={{ color: "hsl(217, 91%, 60%)" }}
+          >
+            {value}
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        ) : (
+          <p className="text-sm text-slate-800 break-words">{value}</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function OrganizationSummary({ 
   organization, 
@@ -174,6 +204,11 @@ export default function OrganizationSummary({
     }
   };
 
+  const formatAddress = () => {
+    const parts = [organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean);
+    return parts.length > 0 ? parts.join(", ") : null;
+  };
+
   if (isDeleted) {
     return (
       <motion.div
@@ -286,18 +321,69 @@ export default function OrganizationSummary({
         </CardHeader>
 
         <CardContent className="p-6">
-          <div className="flex items-start gap-3 py-3 border-b border-slate-100">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
-              <Tag className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
+          {organization.mission && (
+            <div className="mb-6 p-4 bg-slate-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="w-4 h-4 text-slate-500" />
+                <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Mission</span>
+              </div>
+              <p className="text-sm text-slate-700 leading-relaxed">{organization.mission}</p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Lifecycle Stage</p>
-              <LifecycleStageSelector
-                organizationId={organization.id}
-                clientId={organization.client_id}
-                currentStageId={currentLifecycleStage}
-                onStageChange={handleStageChange}
-              />
+          )}
+
+          <div className="grid md:grid-cols-2 gap-x-8">
+            <div>
+              <DataRow icon={Hash} label="EIN" value={organization.ein} />
+              <DataRow icon={MapPin} label="Address" value={formatAddress()} />
+              <DataRow icon={Phone} label="Phone" value={organization.phone} />
+              <DataRow icon={Mail} label="Email" value={organization.email} />
+              <div className="flex items-start gap-3 py-3 border-b border-slate-100">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
+                  <Tag className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Lifecycle Stage</p>
+                  <LifecycleStageSelector
+                    organizationId={organization.id}
+                    clientId={organization.client_id}
+                    currentStageId={currentLifecycleStage}
+                    onStageChange={handleStageChange}
+                  />
+                </div>
+              </div>
+            </div>
+            <div>
+              <DataRow icon={Globe} label="Website" value={organization.website} isLink />
+              <DataRow icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} />
+              <DataRow icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} />
+              <DataRow icon={Tag} label="Classification" value={displayData.ntee_description && displayData.ntee_code ? `${displayData.ntee_description} (${displayData.ntee_code})` : displayData.ntee_description || displayData.ntee_code || null} />
+              {organization.salesforce_id && (
+                <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
+                    <Upload className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Salesforce</p>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <a
+                        href={`${clientInstanceUrl}/${organization.salesforce_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm hover:underline flex items-center gap-1"
+                        style={{ color: "hsl(217, 91%, 60%)" }}
+                      >
+                        {organization.salesforce_id}
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                      {organization.last_salesforce_sync && (
+                        <span className="text-xs text-slate-400">
+                          (synced {moment(organization.last_salesforce_sync).format("MMM D, YYYY h:mm A")})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
