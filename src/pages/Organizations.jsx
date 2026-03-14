@@ -498,7 +498,7 @@ export default function Organizations() {
               )}
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2 min-h-0">
+            <div className="flex-1 overflow-y-auto min-h-0">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
