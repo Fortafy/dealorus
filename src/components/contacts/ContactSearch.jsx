@@ -83,7 +83,7 @@ export default function ContactSearch({ organization, onContactUpdate }) {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
       const contact = await base44.entities.Contact.update(id, data);
-      // Log contact update with field changes
+      // Log contact update with field changes (non-blocking)
       const oldContact = savedContacts.find(c => c.id === id);
       const fieldsChanged = Object.keys(data).map(field => ({
         field,
@@ -91,13 +91,14 @@ export default function ContactSearch({ organization, onContactUpdate }) {
         new_value: data[field]
       }));
 
-      await base44.functions.invoke('logContactActivity', {
+      base44.functions.invoke('logContactActivity', {
         contact_id: id,
         organization_id: organization.id,
         action: 'edit',
         description: 'Contact information updated',
         fields_changed: fieldsChanged
-      });
+      }).catch(err => console.error('Failed to log activity:', err));
+      
       return contact;
     },
     onSuccess: (_, variables) => {
