@@ -5,14 +5,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Phone, Linkedin, Star, Plus, Edit2, Trash2, Users } from "lucide-react";
+import { Mail, Phone, Linkedin, Star, Plus, Edit2, Trash2, Users, Search, Sparkles, Filter } from "lucide-react";
 import { toast } from "sonner";
 import ContactForm from "@/components/contacts/ContactForm";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import EnhancedAISearchDialog from "@/components/contacts/EnhancedAISearchDialog";
+import FilterDialog from "@/components/contacts/FilterDialog";
+import EnrichContactDialog from "@/components/contacts/EnrichContactDialog";
 
 export default function ContactsPanel({ organization, clientId, isCollapsed }) {
   const queryClient = useQueryClient();
   const [showContactForm, setShowContactForm] = useState(false);
   const [editingContact, setEditingContact] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [showFilterDialog, setShowFilterDialog] = useState(false);
+  const [filters, setFilters] = useState({ title: "", department: "", starredOnly: false });
+  const [enrichingContactId, setEnrichingContactId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (err) {
+        console.error("Failed to fetch current user:", err);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const { data: contacts = [] } = useQuery({
     queryKey: ["contacts", organization.id],
@@ -71,35 +93,274 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
     queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
   };
 
+  const cleanLinkedInUrl = (url) => {
+    if (!url || url === 'null') return null;
+    try {
+      let cleaned = url.split('?')[0].replace(/\/$/, '');
+      const match = cleaned.match(/(https?:\/\/(?:www\.)?linkedin\.com\/(?:in|company)\/[a-zA-Z0-9-]+)/i);
+      if (!match) return null;
+      const extractedUrl = match[1];
+      const profileSlug = extractedUrl.split('/').pop();
+      if (/[a-z]+-\d{8,}$/i.test(profileSlug)) {
+        return null;
+      }
+      return extractedUrl;
+    } catch {
+      return null;
+    }
+  };
+
+  const searchContacts = async (customCriteria = null) => {
+    setIsSearching(true);
+
+    let searchScope = customCriteria || `key personnel at "${organization.organization_name}" located in ${organization.city ? organization.city + ', ' : ''}${organization.state}`;
+    
+    const prompt = `Find contact information for ${searchScope}.
+
+ORGANIZATION CONTEXT (use this to cross-reference and validate contact information):
+- Website: ${organization.website || 'unknown'}
+- Organization Email: ${organization.email || 'unknown'}
+- Organization Phone: ${organization.phone || 'unknown'}
+- Address: ${organization.address || 'unknown'}
+- EIN: ${organization.ein || 'unknown'}
+
+PRIORITIZED ROLES TO SEARCH FOR:
+1. Executive Leadership: CEO, Executive Director, President, COO, CFO
+2. Development/Fundraising: Director of Development, Fundraising Manager, Grants Manager
+3. Program Management: Program Director, Operations Manager
+4. Communications: Communications Director, Marketing Director
+5. Board Members: Board Chair, Board Members
+
+SEARCH STRATEGY:
+- Use the organization's domain from website/email to find employee email patterns
+- Cross-reference phone numbers and email domains with organization data
+- Look for staff/team pages on the organization's website
+- Search LinkedIn for employees at this specific organization
+- Check ProPublica Nonprofit Explorer, Charity Navigator, GuideStar for leadership
+- Review news articles, press releases, and public filings for names and titles
+
+Find up to 7-10 key contacts. For each contact, provide:
+- name: Full name of the contact
+- title: Their specific job title/position
+- email: Email address if publicly available (cross-reference with org domain if possible)
+- phone: Direct phone number or extension if available
+- linkedin: LinkedIn profile URL ONLY if you have verified it exists. If you cannot find a verified URL, set this to null (leave blank).
+- role_department: Their department or functional area (e.g., "Development", "Programs", "Executive")
+- source: Specific source where this information was found (include URL if possible)
+
+EXTREMELY CRITICAL - LinkedIn URL Rules (READ CAREFULLY):
+- DO NOT create, construct, or generate LinkedIn URLs
+- DO NOT add ANY numbers, suffixes, or identifiers to LinkedIn URLs
+- DO NOT append sequential numbers like -12345678 or -34567890 to URLs
+- ONLY provide a LinkedIn URL if you have ACTUALLY FOUND it from a verified source
+- If you cannot find the exact verified LinkedIn URL, you MUST set linkedin to null (blank/empty)
+- Valid example: https://www.linkedin.com/in/john-smith (NO numbers or suffixes)
+- Invalid examples: https://www.linkedin.com/in/john-smith-12345678 or any URL with appended numbers
+- When in doubt, set linkedin to null - DO NOT GUESS
+
+VALIDATION: Cross-check found email addresses and phone numbers against the organization's known domain/contact info to ensure accuracy.
+
+Return ONLY contacts with publicly verified information. Do not make up or guess contact details.`;
+
+    try {
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            contacts: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  title: { type: "string" },
+                  email: { type: ["string", "null"] },
+                  phone: { type: ["string", "null"] },
+                  linkedin: { type: ["string", "null"] },
+                  role_department: { type: ["string", "null"] },
+                  source: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const foundContacts = result.contacts || [];
+
+      // Save AI-found contacts to database, checking for duplicates
+      for (const contact of foundContacts) {
+        const nameParts = contact.name.trim().split(' ');
+        const firstName = nameParts[0];
+        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+        
+        const existingContact = contacts.find(existing => {
+          const existingNameParts = existing.name.trim().split(' ');
+          const existingFirstName = existingNameParts[0];
+          const existingLastName = existingNameParts.length > 1 ? existingNameParts[existingNameParts.length - 1] : '';
+          
+          const nameMatch = existingFirstName.toLowerCase() === firstName.toLowerCase() && 
+                           existingLastName.toLowerCase() === lastName.toLowerCase();
+          const emailMatch = existing.email && contact.email && 
+                            existing.email.toLowerCase() === contact.email.toLowerCase();
+          
+          return nameMatch && emailMatch;
+        });
+        
+        const contactData = {
+          organization_id: organization.id,
+          client_id: currentUser?.client_id,
+          name: contact.name,
+          title: contact.title,
+          email: contact.email,
+          phone: contact.phone,
+          linkedin: cleanLinkedInUrl(contact.linkedin),
+          role_department: contact.role_department,
+          source: contact.source || "AI-found",
+        };
+        
+        if (existingContact) {
+          await base44.entities.Contact.update(existingContact.id, contactData);
+        } else {
+          await base44.entities.Contact.create(contactData);
+        }
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+      toast.success(`Found and saved ${foundContacts.length} contacts`);
+    } catch (err) {
+      console.error("Search failed:", err);
+      toast.error("Search failed. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleEnrichContact = (contact) => {
+    setEnrichingContactId(contact.id);
+  };
+
+  const handleEnrichSave = async (updates) => {
+    queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+    setEnrichingContactId(null);
+  };
+
+  const filteredContacts = contacts.filter(contact => {
+    if (filters.title && !contact.title?.toLowerCase().includes(filters.title.toLowerCase())) {
+      return false;
+    }
+    if (filters.department && !contact.role_department?.toLowerCase().includes(filters.department.toLowerCase())) {
+      return false;
+    }
+    if (filters.starredOnly && !contact.starred) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Users className="w-4 h-4" />
-            Contacts ({contacts.length})
+            Contacts ({filteredContacts.length})
           </CardTitle>
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditingContact(null);
-              setShowContactForm(true);
-            }}
-            style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-            className="text-white hover:opacity-90 h-7 px-2"
-          >
-            <Plus className="w-3 h-3 mr-1" />
-            Add Contact
-          </Button>
+          <TooltipProvider>
+            <div className="flex gap-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setEditingContact(null);
+                      setShowContactForm(true);
+                    }}
+                    style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+                    className="text-white hover:opacity-90 h-7 px-2"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    Add
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Add Contact</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => setShowFilterDialog(true)}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2"
+                  >
+                    <Filter className="w-3 h-3" />
+                    {Object.values(filters).some(v => v) && <span className="ml-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Filter</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => setShowAdvancedSearch(true)}
+                    disabled={isSearching}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2"
+                  >
+                    {isSearching ? (
+                      <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3 h-3" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Advanced Search</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => searchContacts()}
+                    disabled={isSearching}
+                    size="sm"
+                    className="h-7 px-2 text-white"
+                    style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+                  >
+                    {isSearching ? (
+                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Search className="w-3 h-3" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Quick Search</TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
       </CardHeader>
 
       <CardContent>
-        {contacts.length === 0 ? (
+        {isSearching && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-slate-600 font-medium">Searching public sources...</p>
+              <p className="text-sm text-slate-400 mt-1">This may take 10-15 seconds</p>
+            </div>
+          </div>
+        )}
+
+        {!isSearching && filteredContacts.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-6">No contacts yet</p>
-        ) : (
+        ) : !isSearching && (
           <div className="space-y-3">
-            {contacts.map((contact) => (
+            {filteredContacts.map((contact) => (
               <div key={contact.id} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1">
@@ -175,6 +436,15 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
                   >
                     {contact.is_business_contact ? "✓ Decision Maker" : "Set Decision Maker"}
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    onClick={() => handleEnrichContact(contact)}
+                    className="text-xs"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 mr-1" />
+                    Enrich
+                  </Button>
                 </div>
               </div>
             ))}
@@ -198,8 +468,31 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
               setEditingContact(null);
             }}
           />
-        </div>
-      )}
-    </Card>
-  );
-}
+          </div>
+          )}
+
+          <EnhancedAISearchDialog
+          open={showAdvancedSearch}
+          onOpenChange={setShowAdvancedSearch}
+          onSearch={searchContacts}
+          />
+
+          <FilterDialog
+          open={showFilterDialog}
+          onOpenChange={setShowFilterDialog}
+          onFilterChange={setFilters}
+          currentFilters={filters}
+          />
+
+          {enrichingContactId && (
+          <EnrichContactDialog
+          open={!!enrichingContactId}
+          onOpenChange={(open) => !open && setEnrichingContactId(null)}
+          contact={contacts.find(c => c.id === enrichingContactId)}
+          organization={organization}
+          onSave={handleEnrichSave}
+          />
+          )}
+          </Card>
+          );
+          }
