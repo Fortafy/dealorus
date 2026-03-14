@@ -340,6 +340,11 @@ export default function OrganizationSettings({ organization }) {
           </CardContent>
         </Card>
 
+        {/* Lifecycle Stages Settings */}
+        <div className="mt-6">
+          <LifecycleStageSettings organization={organization} />
+        </div>
+
         {/* Salesforce Integration */}
         <div className="mt-6">
           <SalesforceIntegration organization={organization} />
