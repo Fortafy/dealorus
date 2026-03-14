@@ -43,8 +43,6 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
     })),
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-  if (isCollapsed) return null;
-
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">

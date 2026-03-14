@@ -40,8 +40,6 @@ export default function DataInsightsPanel({ organization, isCollapsed }) {
     return icons[iconName] || Link2;
   };
 
-  if (isCollapsed) return null;
-
   return (
     <div className="space-y-4">
       {organization.source_metadata && Object.keys(organization.source_metadata).length > 0 && (

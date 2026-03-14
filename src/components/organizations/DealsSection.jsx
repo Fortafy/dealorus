@@ -66,8 +66,6 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     setIsSubmitting(false);
   };
 
-  if (isCollapsed) return null;
-
   const getStageLabel = (stageId) => {
     return clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
   };

@@ -56,8 +56,6 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
     setIsSubmitting(false);
   };
 
-  if (isCollapsed) return null;
-
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">

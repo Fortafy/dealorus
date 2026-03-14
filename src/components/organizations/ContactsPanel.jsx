@@ -71,8 +71,6 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
     queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
   };
 
-  if (isCollapsed) return null;
-
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">
