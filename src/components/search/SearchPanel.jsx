@@ -190,12 +190,12 @@ Return a JSON object with these fields (use null for any field where data is not
 
   const handleSave = async (data) => {
     const user = await base44.auth.me();
-    await base44.entities.Organization.create({
+    const savedOrg = await base44.entities.Organization.create({
       ...data,
       client_id: currentOrganizationId,
       user_id: user.id
     });
-    onSearchComplete();
+    onSearchComplete(savedOrg);
     setSelectedOrg(null);
     setSearchResult(null);
     onClose();
