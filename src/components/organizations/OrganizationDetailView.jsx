@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Users, FileText, DollarSign, Activity, Link2 } from "lucide-react";
 import OrganizationSummary from "@/components/organizations/OrganizationSummary";
 import ContactsPanel from "@/components/organizations/ContactsPanel";
 import NotesSection from "@/components/organizations/NotesSection";
@@ -72,18 +72,13 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     );
   }
 
-  const SectionHeader = ({ title, icon: Icon, section }) => (
-    <button
-      onClick={() => toggleSection(section)}
-      className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity"
-    >
-      <div className="flex items-center gap-2">
-        <Icon className="w-4 h-4" />
-        <span className="font-semibold text-sm">{title}</span>
-      </div>
-      {collapsedSections[section] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
-    </button>
-  );
+  const iconMap = {
+    contacts: Users,
+    notes: FileText,
+    deals: DollarSign,
+    activity: Activity,
+    insights: Link2,
+  };
 
   return (
     <motion.div
@@ -105,48 +100,41 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
 
       {/* Collapsible sections */}
       <div className="space-y-4">
-        <section>
-          <div className="mb-3 px-1">
-            <SectionHeader title="Contacts" icon={() => null} section="contacts" />
-          </div>
-          {!collapsedSections.contacts && (
-            <ContactsPanel organization={organization} clientId={currentUser?.client_id} />
-          )}
-        </section>
-
-        <section>
-          <div className="mb-3 px-1">
-            <SectionHeader title="Notes" icon={() => null} section="notes" />
-          </div>
-          {!collapsedSections.notes && <NotesSection organization={organization} clientId={currentUser?.client_id} />}
-        </section>
-
-        <section>
-          <div className="mb-3 px-1">
-            <SectionHeader title="Deals" icon={() => null} section="deals" />
-          </div>
-          {!collapsedSections.deals && (
-            <DealsSection
-              organization={organization}
-              clientId={currentUser?.client_id}
-              clientLifecycleStages={clientData?.lifecycle_stages || []}
-            />
-          )}
-        </section>
-
-        <section>
-          <div className="mb-3 px-1">
-            <SectionHeader title="Activity" icon={() => null} section="activity" />
-          </div>
-          {!collapsedSections.activity && <ActivityTimeline organization={organization} />}
-        </section>
-
-        <section>
-          <div className="mb-3 px-1">
-            <SectionHeader title="Data Insights" icon={() => null} section="insights" />
-          </div>
-          {!collapsedSections.insights && <DataInsightsPanel organization={organization} />}
-        </section>
+        {[
+          { section: "contacts", title: "Contacts", Icon: Users, component: ContactsPanel },
+          { section: "notes", title: "Notes", Icon: FileText, component: NotesSection },
+          { section: "deals", title: "Deals", Icon: DollarSign, component: DealsSection },
+          { section: "activity", title: "Activity", Icon: Activity, component: ActivityTimeline },
+          { section: "insights", title: "Data Insights", Icon: Link2, component: DataInsightsPanel },
+        ].map(({ section, title, Icon, component: Component }) => (
+          <section key={section}>
+            <button
+              onClick={() => toggleSection(section)}
+              className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity mb-3 px-1"
+            >
+              <div className="flex items-center gap-2">
+                <Icon className="w-4 h-4" />
+                <span className="font-semibold text-sm">{title}</span>
+              </div>
+              {collapsedSections[section] ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronUp className="w-4 h-4 text-slate-400" />}
+            </button>
+            {!collapsedSections[section] && (
+              <div>
+                {section === "contacts" && <ContactsPanel organization={organization} clientId={currentUser?.client_id} />}
+                {section === "notes" && <NotesSection organization={organization} clientId={currentUser?.client_id} />}
+                {section === "deals" && (
+                  <DealsSection
+                    organization={organization}
+                    clientId={currentUser?.client_id}
+                    clientLifecycleStages={clientData?.lifecycle_stages || []}
+                  />
+                )}
+                {section === "activity" && <ActivityTimeline organization={organization} />}
+                {section === "insights" && <DataInsightsPanel organization={organization} />}
+              </div>
+            )}
+          </section>
+        ))}
       </div>
     </motion.div>
   );
