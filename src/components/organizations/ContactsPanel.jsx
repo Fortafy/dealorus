@@ -260,6 +260,21 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
     return true;
   });
 
+  const sortedContacts = [...filteredContacts].sort((a, b) => {
+    // Primary contacts first
+    if (a.is_primary_contact && !b.is_primary_contact) return -1;
+    if (!a.is_primary_contact && b.is_primary_contact) return 1;
+    
+    // Decision Makers second
+    if (a.is_business_contact && !b.is_business_contact) return -1;
+    if (!a.is_business_contact && b.is_business_contact) return 1;
+    
+    // Everyone else alphabetically by first name
+    const aFirstName = a.name?.split(' ')[0]?.toLowerCase() || '';
+    const bFirstName = b.name?.split(' ')[0]?.toLowerCase() || '';
+    return aFirstName.localeCompare(bFirstName);
+  });
+
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">
@@ -360,7 +375,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
           <p className="text-sm text-slate-500 text-center py-6">No contacts yet</p>
         ) : !isSearching && (
           <div className="space-y-3">
-            {filteredContacts.map((contact) => (
+            {sortedContacts.map((contact) => (
               <div key={contact.id} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1">
