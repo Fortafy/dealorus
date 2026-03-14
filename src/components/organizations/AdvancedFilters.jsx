@@ -199,12 +199,23 @@ export default function AdvancedFilters({ filters, onFilterChange, onClear, clie
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={null}>All stages</SelectItem>
-                <SelectItem value="Prospect">Prospect</SelectItem>
-                <SelectItem value="Qualified Lead">Qualified Lead</SelectItem>
-                <SelectItem value="Proposal Sent">Proposal Sent</SelectItem>
-                <SelectItem value="Negotiation">Negotiation</SelectItem>
-                <SelectItem value="Client">Client</SelectItem>
-                <SelectItem value="Lost">Lost</SelectItem>
+                {clientData?.lifecycle_stages && clientData.lifecycle_stages.length > 0 ? (
+                  clientData.lifecycle_stages
+                    .sort((a, b) => a.order - b.order)
+                    .map((stage) => (
+                      <SelectItem key={stage.id} value={stage.name}>
+                        {stage.name}
+                      </SelectItem>
+                    ))
+                ) : (
+                  <>
+                    <SelectItem value="Prospect">Prospect</SelectItem>
+                    <SelectItem value="In Conversation">In Conversation</SelectItem>
+                    <SelectItem value="Agreement">Agreement</SelectItem>
+                    <SelectItem value="Closed Won">Closed Won</SelectItem>
+                    <SelectItem value="Closed Lost">Closed Lost</SelectItem>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
