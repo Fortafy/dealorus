@@ -32,6 +32,15 @@ export default function AdvancedFilters({ filters, onFilterChange, onClear, clie
   const [error, setError] = useState(null);
   const queryClient = useQueryClient();
 
+  const { data: clientData } = useQuery({
+    queryKey: ["client", clientId],
+    enabled: !!clientId,
+    queryFn: async () => {
+      const results = await base44.entities.Client.filter({ id: clientId });
+      return results[0] || null;
+    },
+  });
+
   const saveMutation = useMutation({
     mutationFn: (data) => base44.entities.SavedFilter.create(data),
     onSuccess: () => {
