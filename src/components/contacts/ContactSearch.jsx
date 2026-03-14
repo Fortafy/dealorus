@@ -76,7 +76,7 @@ export default function ContactSearch({ organization, onContactUpdate }) {
       setEditingContact(null);
     },
     onError: (error) => {
-      console.error("Failed to create contact:", error);
+      console.error("Failed to create contact:", error.message, "| client_id used:", currentUser?.client_id);
     }
   });
 
@@ -172,10 +172,13 @@ export default function ContactSearch({ organization, onContactUpdate }) {
   };
 
   const handleSaveContact = (contactData) => {
+    // Always inject the latest client_id at save time to avoid RLS failures
+    const dataWithClientId = { ...contactData, client_id: currentUser?.client_id };
     if (editingContact) {
-      updateMutation.mutate({ id: editingContact.id, data: contactData });
+      updateMutation.mutate({ id: editingContact.id, data: dataWithClientId });
     } else {
-      createMutation.mutate(contactData);
+      console.log("[ContactSearch] Manual save | client_id:", dataWithClientId.client_id);
+      createMutation.mutate(dataWithClientId);
     }
     setEditingContact(null);
   };
