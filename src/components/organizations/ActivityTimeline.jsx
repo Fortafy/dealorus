@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Activity } from "lucide-react";
+import { Activity, ChevronDown, ChevronUp } from "lucide-react";
 import moment from "moment";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function ActivityTimeline({ organization, isCollapsed }) {
+  const [isOpen, setIsOpen] = useState(true);
+
   const { data: interactions = [] } = useQuery({
     queryKey: ["interactions", organization.id],
     queryFn: () => base44.entities.Interaction.filter({ organization_id: organization.id }, "-created_date"),
@@ -46,13 +49,18 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Activity className="w-4 h-4" />
-          Activity Timeline ({mergedActivity.length})
-        </CardTitle>
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Activity Timeline ({mergedActivity.length})
+            </CardTitle>
+            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+          </CollapsibleTrigger>
+        </Collapsible>
       </CardHeader>
 
-      <CardContent>
+      {isOpen && <CardContent>
         {mergedActivity.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-6">No activity yet</p>
         ) : (
@@ -80,7 +88,7 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
             ))}
           </div>
         )}
-      </CardContent>
+      </CardContent>}
     </Card>
   );
 }
