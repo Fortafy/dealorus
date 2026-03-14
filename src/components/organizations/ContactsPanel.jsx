@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import EnhancedAISearchDialog from "@/components/contacts/EnhancedAISearchDialog";
 import FilterDialog from "@/components/contacts/FilterDialog";
 import EnrichContactDialog from "@/components/contacts/EnrichContactDialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function ContactsPanel({ organization, clientId, isCollapsed }) {
   const queryClient = useQueryClient();
