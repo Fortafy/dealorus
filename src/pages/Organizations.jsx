@@ -454,7 +454,7 @@ export default function Organizations() {
                 className="w-full hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                New Search
+                New Account
               </Button>
               
               <div className="relative">
