@@ -30,6 +30,26 @@ import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 
+function OrgLogo({ logoUrl, name }) {
+  const [imgError, setImgError] = React.useState(false);
+  const initials = name ? name.charAt(0).toUpperCase() : "?";
+
+  return (
+    <div className="w-16 h-16 rounded-full flex-shrink-0 border-2 border-white/30 overflow-hidden bg-white/20 flex items-center justify-center">
+      {logoUrl && !imgError ? (
+        <img
+          src={logoUrl}
+          alt={name}
+          className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <span className="text-white text-xl font-bold">{initials}</span>
+      )}
+    </div>
+  );
+}
+
 function DataRow({ icon: Icon, label, value, isLink }) {
   if (!value || value === "N/A" || value === "Not found") return null;
 
