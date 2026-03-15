@@ -64,13 +64,13 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
           <p className="text-sm text-slate-500 text-center py-6">No activity yet</p>
         ) : (
           <div className="divide-y divide-slate-200">
-            {mergedActivity.map((item, index) => (
+            {mergedActivity.map((item) => (
               <div key={`${item.type}-${item.id}`} className="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                <div className="text-lg flex-shrink-0 mt-1">{item.icon}</div>
+                <div className="text-lg flex-shrink-0 mt-0.5">{item.icon}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-slate-900">{item.type === "interaction" ? item.subject : item.type === "note" ? item.title : item.name}</p>
-                    <span className="text-xs text-slate-500">{moment(item.timestamp).fromNow()}</span>
+                    <span className="text-xs text-slate-500 flex-shrink-0">{moment(item.timestamp).fromNow()}</span>
                   </div>
                   {item.type === "interaction" && (
                     <Badge className="mt-1 text-xs" variant="outline">
