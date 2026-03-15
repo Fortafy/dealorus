@@ -340,7 +340,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         </Collapsible>
       </CardHeader>
 
-      {isOpen && <CardContent>
+      {isOpen && <CardContent className="pt-3">
         {isSearching && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">

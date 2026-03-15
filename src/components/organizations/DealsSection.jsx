@@ -160,7 +160,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
       </CardHeader>
 
       {isOpen && (
-        <CardContent>
+        <CardContent className="pt-2">
           {showDealForm && (
             <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-4">
               <p className="text-sm font-semibold text-slate-700">Deal Details</p>

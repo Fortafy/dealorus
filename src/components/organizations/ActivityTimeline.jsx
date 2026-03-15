@@ -59,7 +59,7 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
         </Collapsible>
       </CardHeader>
 
-      {isOpen && <CardContent>
+      {isOpen && <CardContent className="pt-3">
         {mergedActivity.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-6">No activity yet</p>
         ) : (

@@ -84,7 +84,7 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
         </Collapsible>
       </CardHeader>
 
-      {isOpen && <CardContent>
+      {isOpen && <CardContent className="pt-2">
         {showNoteForm && (
           <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-3">
             <Input
