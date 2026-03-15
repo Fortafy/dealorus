@@ -737,13 +737,6 @@ export default function OrganizationCard({ data, onSave, onUpdate, isSaved, onDe
         </CardContent>
       </Card>
 
-      <EditOrganizationDialog
-        organization={data}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-        onSave={handleEdit}
-      />
-
       <AlertDialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
