@@ -43,12 +43,11 @@ export default function DataInsightsPanel({ organization, isCollapsed }) {
   return (
     <div className="space-y-4">
       {organization.source_metadata && Object.keys(organization.source_metadata).length > 0 && (
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="pb-3">
+        <Card className="border-0 shadow-lg overflow-hidden">
+          <CardHeader className="pb-3 bg-slate-50 border-b border-slate-200">
             <Collapsible open={isDataFreshnessOpen} onOpenChange={setIsDataFreshnessOpen}>
               <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                <CardTitle className="text-base">
                   Data Freshness
                 </CardTitle>
                 {isDataFreshnessOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}

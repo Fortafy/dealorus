@@ -47,12 +47,11 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="pb-3">
+    <Card className="border-0 shadow-lg overflow-hidden">
+      <CardHeader className="pb-3 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="w-4 h-4" />
+            <CardTitle className="text-base">
               Activity Timeline ({mergedActivity.length})
             </CardTitle>
             {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}

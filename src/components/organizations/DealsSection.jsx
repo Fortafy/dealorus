@@ -134,18 +134,17 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
   const isRetainer = form.contract_type === "monthly_retainer";
 
   return (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="pb-3">
+    <Card className="border-0 shadow-lg overflow-hidden">
+      <CardHeader className="pb-3 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-            <CardTitle className="text-base flex items-center gap-2">
-              <DollarSign className="w-4 h-4" />
+            <CardTitle className="text-base">
               Deals ({deals.length})
             </CardTitle>
             {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
               {!showDealForm && (
                 <Button
                   size="sm"
