@@ -158,214 +158,115 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         </Collapsible>
       </CardHeader>
 
-      {isOpen && (
-        <CardContent className="pt-2">
-          {showDealForm && (
-            <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-4">
-              <p className="text-sm font-semibold text-slate-700">Deal Details</p>
-
-              {/* Core fields */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="text-xs text-slate-500 mb-1 block">Deal Name *</label>
-                  <Input
-                    placeholder="Deal name..."
-                    value={form.name}
-                    onChange={(e) => setField("name", e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Stage *</label>
-                  <select
-                    value={form.stage}
-                    onChange={(e) => setField("stage", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white"
-                  >
-                    <option value="">Select stage...</option>
-                    {clientLifecycleStages.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Contract Type</label>
-                  <select
-                    value={form.contract_type}
-                    onChange={(e) => setField("contract_type", e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white"
-                  >
-                    <option value="">Select type...</option>
-                    {CONTRACT_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Start Date</label>
-                  <Input
-                    type="date"
-                    value={form.start_date}
-                    onChange={(e) => setField("start_date", e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">End Date</label>
-                  <Input
-                    type="date"
-                    value={form.end_date}
-                    onChange={(e) => setField("end_date", e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Expected Close Date</label>
-                  <Input
-                    type="date"
-                    value={form.expected_close_date}
-                    onChange={(e) => setField("expected_close_date", e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Deal Value ($)</label>
-                  <Input
-                    type="number"
-                    placeholder="0.00"
-                    value={form.value}
-                    onChange={(e) => setField("value", e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="text-xs text-slate-500 mb-1 block">Notes</label>
-                  <Textarea
-                    placeholder="Additional notes..."
-                    value={form.description}
-                    onChange={(e) => setField("description", e.target.value)}
-                    className="text-sm h-16"
-                  />
-                </div>
+      <Dialog open={showDealForm} onOpenChange={(open) => { setShowDealForm(open); if (!open) setForm(emptyForm()); }}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>New Deal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-xs text-slate-500 mb-1 block">Deal Name *</label>
+                <Input placeholder="Deal name..." value={form.name} onChange={(e) => setField("name", e.target.value)} className="text-sm" />
               </div>
-
-              {/* Services */}
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-slate-700">Services</p>
-                  <Button size="sm" variant="outline" onClick={addService} className="h-6 px-2 text-xs">
-                    <Plus className="w-3 h-3 mr-1" /> Add Service
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  {form.services.map((svc, idx) => (
-                    <div key={idx} className="p-3 bg-white border border-slate-200 rounded-lg relative">
-                      {form.services.length > 1 && (
-                        <button
-                          onClick={() => removeService(idx)}
-                          className="absolute top-2 right-2 text-slate-400 hover:text-red-500"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="col-span-2">
-                          <label className="text-xs text-slate-500 mb-1 block">Service</label>
-                          <select
-                            value={svc.service_name}
-                            onChange={(e) => setServiceField(idx, "service_name", e.target.value)}
-                            className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white"
-                          >
-                            <option value="">Select service...</option>
-                            {SERVICE_NAMES.map((n) => (
-                              <option key={n} value={n}>{n}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-xs text-slate-500 mb-1 block">Hourly Rate ($)</label>
-                          <Input
-                            type="number"
-                            placeholder="0.00"
-                            value={svc.rate}
-                            onChange={(e) => setServiceField(idx, "rate", e.target.value)}
-                            className="text-sm"
-                          />
-                        </div>
-
-                        {!isProject && (
-                          <div>
-                            <label className="text-xs text-slate-500 mb-1 block">
-                              {isRetainer ? "Hours/Month" : "Max Hours/Month"}
-                            </label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={svc.hours_per_month}
-                              onChange={(e) => setServiceField(idx, "hours_per_month", e.target.value)}
-                              className="text-sm"
-                            />
-                          </div>
-                        )}
-
-                        {isProject && (
-                          <div>
-                            <label className="text-xs text-slate-500 mb-1 block">Total Est. Hours</label>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              value={svc.total_estimated_hours}
-                              onChange={(e) => setServiceField(idx, "total_estimated_hours", e.target.value)}
-                              className="text-sm"
-                            />
-                          </div>
-                        )}
-
-                        {isRetainer && (
-                          <div className="col-span-2">
-                            <label className="text-xs text-slate-500 mb-1 block">Overage Rate ($/hr)</label>
-                            <Input
-                              type="number"
-                              placeholder="0.00"
-                              value={svc.overage_rate}
-                              onChange={(e) => setServiceField(idx, "overage_rate", e.target.value)}
-                              className="text-sm"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <label className="text-xs text-slate-500 mb-1 block">Stage *</label>
+                <select value={form.stage} onChange={(e) => setField("stage", e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white">
+                  <option value="">Select stage...</option>
+                  {clientLifecycleStages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
               </div>
-
-              <div className="flex gap-2 pt-1">
-                <Button
-                  size="sm"
-                  onClick={handleSubmit}
-                  disabled={createDealMutation.isPending}
-                  style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                  className="text-white hover:opacity-90"
-                >
-                  Save Deal
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => { setShowDealForm(false); setForm(emptyForm()); }}>
-                  Cancel
-                </Button>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Contract Type</label>
+                <select value={form.contract_type} onChange={(e) => setField("contract_type", e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white">
+                  <option value="">Select type...</option>
+                  {CONTRACT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Start Date</label>
+                <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">End Date</label>
+                <Input type="date" value={form.end_date} onChange={(e) => setField("end_date", e.target.value)} className="text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Expected Close Date</label>
+                <Input type="date" value={form.expected_close_date} onChange={(e) => setField("expected_close_date", e.target.value)} className="text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Deal Value ($)</label>
+                <Input type="number" placeholder="0.00" value={form.value} onChange={(e) => setField("value", e.target.value)} className="text-sm" />
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs text-slate-500 mb-1 block">Notes</label>
+                <Textarea placeholder="Additional notes..." value={form.description} onChange={(e) => setField("description", e.target.value)} className="text-sm h-16" />
               </div>
             </div>
-          )}
 
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-slate-700">Services</p>
+                <Button size="sm" variant="outline" onClick={addService} className="h-6 px-2 text-xs">
+                  <Plus className="w-3 h-3 mr-1" /> Add Service
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {form.services.map((svc, idx) => (
+                  <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-lg relative">
+                    {form.services.length > 1 && (
+                      <button onClick={() => removeService(idx)} className="absolute top-2 right-2 text-slate-400 hover:text-red-500">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="col-span-2">
+                        <label className="text-xs text-slate-500 mb-1 block">Service</label>
+                        <select value={svc.service_name} onChange={(e) => setServiceField(idx, "service_name", e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white">
+                          <option value="">Select service...</option>
+                          {SERVICE_NAMES.map((n) => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-500 mb-1 block">Hourly Rate ($)</label>
+                        <Input type="number" placeholder="0.00" value={svc.rate} onChange={(e) => setServiceField(idx, "rate", e.target.value)} className="text-sm" />
+                      </div>
+                      {!isProject && (
+                        <div>
+                          <label className="text-xs text-slate-500 mb-1 block">{isRetainer ? "Hours/Month" : "Max Hours/Month"}</label>
+                          <Input type="number" placeholder="0" value={svc.hours_per_month} onChange={(e) => setServiceField(idx, "hours_per_month", e.target.value)} className="text-sm" />
+                        </div>
+                      )}
+                      {isProject && (
+                        <div>
+                          <label className="text-xs text-slate-500 mb-1 block">Total Est. Hours</label>
+                          <Input type="number" placeholder="0" value={svc.total_estimated_hours} onChange={(e) => setServiceField(idx, "total_estimated_hours", e.target.value)} className="text-sm" />
+                        </div>
+                      )}
+                      {isRetainer && (
+                        <div className="col-span-2">
+                          <label className="text-xs text-slate-500 mb-1 block">Overage Rate ($/hr)</label>
+                          <Input type="number" placeholder="0.00" value={svc.overage_rate} onChange={(e) => setServiceField(idx, "overage_rate", e.target.value)} className="text-sm" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button size="sm" variant="outline" onClick={() => { setShowDealForm(false); setForm(emptyForm()); }}>Cancel</Button>
+            <Button size="sm" onClick={handleSubmit} disabled={createDealMutation.isPending} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90">
+              Save Deal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {isOpen && (
+        <CardContent className="pt-2">
           {deals.length === 0 ? (
             <p className="text-sm text-slate-500 text-center py-6">No deals yet</p>
           ) : (
