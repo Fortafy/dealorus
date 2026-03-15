@@ -472,19 +472,31 @@ export default function OrganizationSummary({
           </div>
 
           <div className="grid md:grid-cols-2 gap-x-8">
+            {/* Left column */}
             <div>
-<EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
+              <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
               <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
+              <EditableField icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} onSave={(val) => saveField("annual_revenue", val)} placeholder="e.g. $1,000,000" />
+              <EditableField icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} onSave={(val) => saveField("ruling_date", val)} placeholder="e.g. 1995-01-01" />
+              <EditableNTEEField
+                nteeCode={displayData.ntee_code}
+                nteeDescription={displayData.ntee_description}
+                onSave={saveNTEE}
+              />
+            </div>
+            {/* Right column */}
+            <div>
+              <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
+              <EditableField icon={Mail} label="Email" value={organization.email} onSave={(val) => saveField("email", val)} placeholder="Email address..." />
+              <EditableField icon={Globe} label="Website" value={organization.website} onSave={(val) => saveField("website", val)} isLink placeholder="Website URL..." />
               <EditableField
                 icon={MapPin}
                 label="Address"
                 value={[organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ")}
                 onSave={(val) => {
-                  // Parse "address, city, state zip" or "address, city, state, zip"
                   const parts = val ? val.split(",").map(p => p.trim()) : [];
                   const address = parts[0] || null;
                   const city = parts[1] || null;
-                  // State and zip may be combined like "CA 90210" or separate
                   const stateZip = parts[2] || "";
                   const stateZipParts = stateZip.split(" ").filter(Boolean);
                   const state = stateZipParts[0] || parts[2] || null;
@@ -497,38 +509,10 @@ export default function OrganizationSummary({
                 placeholder="Street, City, State ZIP..."
               />
             </div>
-            <div>
-              <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
-              <EditableField icon={Mail} label="Email" value={organization.email} onSave={(val) => saveField("email", val)} placeholder="Email address..." />
-              <EditableField icon={Globe} label="Website" value={organization.website} onSave={(val) => saveField("website", val)} isLink placeholder="Website URL..." />
-              <EditableField icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} onSave={(val) => saveField("annual_revenue", val)} placeholder="e.g. $1,000,000" />
-              <EditableField icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} onSave={(val) => saveField("ruling_date", val)} placeholder="e.g. 1995-01-01" />
-              <EditableNTEEField
-                nteeCode={displayData.ntee_code}
-                nteeDescription={displayData.ntee_description}
-                onSave={saveNTEE}
-              />
-              {organization.salesforce_id && (
-                <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
-                    <Upload className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Salesforce</p>
-                    <div className="flex items-center gap-1 flex-wrap">
-                      <a href={`${clientInstanceUrl}/${organization.salesforce_id}`} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline flex items-center gap-1" style={{ color: "hsl(217, 91%, 60%)" }}>
-                        {organization.salesforce_id}
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                      {organization.last_salesforce_sync && (
-                        <span className="text-xs text-slate-400">(synced {moment(organization.last_salesforce_sync).format("MMM D, YYYY h:mm A")})</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
+
+          {/* External links row */}
+          <ExternalLinksRow organization={organization} clientInstanceUrl={clientInstanceUrl} />
         </CardContent>
       </Card>
 
