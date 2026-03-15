@@ -83,9 +83,12 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
         </Collapsible>
       </CardHeader>
 
-      {isOpen && <CardContent className="pt-2">
-        {showNoteForm && (
-          <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-3">
+      <Dialog open={showNoteForm} onOpenChange={(open) => { setShowNoteForm(open); if (!open) { setNoteTitle(""); setNoteContent(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Note</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
             <Input
               placeholder="Note title..."
               value={noteTitle}
@@ -96,25 +99,25 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
               placeholder="Write your note here..."
               value={noteContent}
               onChange={(e) => setNoteContent(e.target.value)}
-              className="text-sm h-24"
+              className="text-sm h-32"
             />
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                className="text-white hover:opacity-90"
-              >
-                Save Note
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setShowNoteForm(false)}>
-                Cancel
-              </Button>
-            </div>
           </div>
-        )}
+          <DialogFooter>
+            <Button size="sm" variant="outline" onClick={() => setShowNoteForm(false)}>Cancel</Button>
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              disabled={isSubmitting || createNoteMutation.isPending}
+              style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+              className="text-white hover:opacity-90"
+            >
+              Save Note
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
+      {isOpen && <CardContent className="pt-2">
         {notes.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-6">No notes yet</p>
         ) : (
