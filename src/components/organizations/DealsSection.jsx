@@ -301,9 +301,9 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
           {deals.length === 0 ? (
             <p className="text-sm text-slate-500 text-center py-6">No deals yet</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {deals.map((deal) => (
-                <div key={deal.id} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div key={deal.id} className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm text-slate-900">{deal.name}</h4>
