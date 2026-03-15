@@ -70,17 +70,15 @@ export default function NotesSection({ organization, clientId, isCollapsed }) {
               </CardTitle>
               {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
             </CollapsibleTrigger>
-            {!showNoteForm && (
-              <Button
-                size="sm"
-                onClick={() => setShowNoteForm(true)}
-                style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                className="text-white hover:opacity-90 h-7 px-2"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Add Note
-              </Button>
-            )}
+            <Button
+              size="sm"
+              onClick={() => setShowNoteForm(true)}
+              style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+              className="text-white hover:opacity-90 h-7 px-2"
+            >
+              <Plus className="w-3 h-3 mr-1" />
+              Add Note
+            </Button>
           </div>
         </Collapsible>
       </CardHeader>
