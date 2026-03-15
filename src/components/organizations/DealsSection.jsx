@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, ChevronDown, ChevronUp, X } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Trash2, Pencil, ChevronDown, ChevronUp, X } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const SERVICE_NAMES = [
   "Salesforce Administration",
@@ -28,30 +29,37 @@ const CONTRACT_TYPES = [
   { value: "project", label: "Project" },
 ];
 
-const emptyService = () => ({
-  service_name: "",
-  hours_per_month: "",
-  total_estimated_hours: "",
-  rate: "",
-  overage_rate: "",
-});
+const emptyService = () => ({ service_name: "", hours_per_month: "", total_estimated_hours: "", rate: "", overage_rate: "" });
 
 const emptyForm = () => ({
-  name: "",
-  stage: "",
-  contract_type: "",
-  start_date: "",
-  end_date: "",
-  expected_close_date: "",
-  value: "",
-  description: "",
-  services: [emptyService()],
+  name: "", stage: "", contract_type: "", start_date: "", end_date: "",
+  expected_close_date: "", value: "", description: "", services: [emptyService()],
+});
+
+const dealToForm = (deal) => ({
+  name: deal.name || "",
+  stage: deal.stage || "",
+  contract_type: deal.contract_type || "",
+  start_date: deal.start_date || "",
+  end_date: deal.end_date || "",
+  expected_close_date: deal.expected_close_date || "",
+  value: deal.value != null ? String(deal.value) : "",
+  description: deal.description || "",
+  services: deal.services?.length ? deal.services.map((s) => ({
+    service_name: s.service_name || "",
+    hours_per_month: s.hours_per_month != null ? String(s.hours_per_month) : "",
+    total_estimated_hours: s.total_estimated_hours != null ? String(s.total_estimated_hours) : "",
+    rate: s.rate != null ? String(s.rate) : "",
+    overage_rate: s.overage_rate != null ? String(s.overage_rate) : "",
+  })) : [emptyService()],
 });
 
 export default function DealsSection({ organization, clientId, clientLifecycleStages = [] }) {
   const queryClient = useQueryClient();
   const [showDealForm, setShowDealForm] = useState(false);
+  const [editingDeal, setEditingDeal] = useState(null);
   const [form, setForm] = useState(emptyForm());
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
 
   const { data: deals = [] } = useQuery({
@@ -61,17 +69,20 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
 
   const createDealMutation = useMutation({
     mutationFn: (data) =>
-      base44.entities.Deal.create({
-        ...data,
-        client_id: clientId,
-        organization_id: organization.id,
-        organization_name: organization.organization_name,
-      }),
+      base44.entities.Deal.create({ ...data, client_id: clientId, organization_id: organization.id, organization_name: organization.organization_name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
       toast.success("Deal created");
-      setForm(emptyForm());
-      setShowDealForm(false);
+      closeForm();
+    },
+  });
+
+  const updateDealMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Deal.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
+      toast.success("Deal updated");
+      closeForm();
     },
   });
 
@@ -80,30 +91,24 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
       toast.success("Deal deleted");
+      setDeleteTarget(null);
     },
   });
 
+  const openCreate = () => { setEditingDeal(null); setForm(emptyForm()); setShowDealForm(true); };
+  const openEdit = (deal) => { setEditingDeal(deal); setForm(dealToForm(deal)); setShowDealForm(true); };
+  const closeForm = () => { setShowDealForm(false); setEditingDeal(null); setForm(emptyForm()); };
+
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-
-  const setServiceField = (index, key, value) => {
-    setForm((f) => {
-      const services = [...f.services];
-      services[index] = { ...services[index], [key]: value };
-      return { ...f, services };
-    });
-  };
-
+  const setServiceField = (index, key, value) => setForm((f) => {
+    const services = [...f.services];
+    services[index] = { ...services[index], [key]: value };
+    return { ...f, services };
+  });
   const addService = () => setForm((f) => ({ ...f, services: [...f.services, emptyService()] }));
+  const removeService = (index) => setForm((f) => ({ ...f, services: f.services.filter((_, i) => i !== index) }));
 
-  const removeService = (index) =>
-    setForm((f) => ({ ...f, services: f.services.filter((_, i) => i !== index) }));
-
-  const handleSubmit = () => {
-    if (!form.name.trim() || !form.stage) {
-      toast.error("Please fill in deal name and stage");
-      return;
-    }
-    // Clean up services — remove empty ones, parse numbers
+  const buildPayload = () => {
     const services = form.services
       .filter((s) => s.service_name)
       .map((s) => ({
@@ -113,8 +118,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         ...(s.rate !== "" && { rate: parseFloat(s.rate) }),
         ...(s.overage_rate !== "" && { overage_rate: parseFloat(s.overage_rate) }),
       }));
-
-    createDealMutation.mutate({
+    return {
       name: form.name,
       stage: form.stage,
       contract_type: form.contract_type || null,
@@ -125,14 +129,26 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
       description: form.description || null,
       services,
       is_active: true,
-    });
+    };
   };
 
-  const getStageLabel = (stageId) =>
-    clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
+  const handleSubmit = () => {
+    if (!form.name.trim() || !form.stage) {
+      toast.error("Please fill in deal name and stage");
+      return;
+    }
+    const payload = buildPayload();
+    if (editingDeal) {
+      updateDealMutation.mutate({ id: editingDeal.id, data: payload });
+    } else {
+      createDealMutation.mutate(payload);
+    }
+  };
 
+  const getStageLabel = (stageId) => clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
   const isProject = form.contract_type === "project";
   const isRetainer = form.contract_type === "monthly_retainer";
+  const isPending = createDealMutation.isPending || updateDealMutation.isPending;
 
   return (
     <Card className="border-0 shadow-lg overflow-hidden">
@@ -140,17 +156,10 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
-              <CardTitle className="text-base">
-                Deals ({deals.length})
-              </CardTitle>
+              <CardTitle className="text-base">Deals ({deals.length})</CardTitle>
               {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
             </CollapsibleTrigger>
-            <Button
-              size="sm"
-              onClick={() => setShowDealForm(true)}
-              style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-              className="text-white hover:opacity-90 h-7 px-2"
-            >
+            <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-7 px-2">
               <Plus className="w-3 h-3 mr-1" />
               New Deal
             </Button>
@@ -158,10 +167,11 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         </Collapsible>
       </CardHeader>
 
-      <Dialog open={showDealForm} onOpenChange={(open) => { setShowDealForm(open); if (!open) setForm(emptyForm()); }}>
+      {/* Create / Edit Dialog */}
+      <Dialog open={showDealForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>New Deal</DialogTitle>
+            <DialogTitle>{editingDeal ? "Edit Deal" : "New Deal"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-3">
@@ -257,13 +267,34 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
             </div>
           </div>
           <DialogFooter>
-            <Button size="sm" variant="outline" onClick={() => { setShowDealForm(false); setForm(emptyForm()); }}>Cancel</Button>
-            <Button size="sm" onClick={handleSubmit} disabled={createDealMutation.isPending} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90">
-              Save Deal
+            <Button size="sm" variant="outline" onClick={closeForm}>Cancel</Button>
+            <Button size="sm" onClick={handleSubmit} disabled={isPending} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90">
+              {editingDeal ? "Save Changes" : "Save Deal"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Deal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteDealMutation.mutate(deleteTarget.id)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {isOpen && (
         <CardContent className="pt-2">
@@ -278,14 +309,14 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                       <h4 className="font-semibold text-sm text-slate-900">{deal.name}</h4>
                       <p className="text-xs text-slate-500 mt-0.5">{moment(deal.created_date).format("MMM D, YYYY")}</p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteDealMutation.mutate(deal.id)}
-                      className="h-6 w-6 p-0 text-red-600 hover:text-red-700 flex-shrink-0"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(deal)} className="h-6 w-6 p-0 text-slate-400 hover:text-blue-600 flex-shrink-0">
+                        <Pencil className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setDeleteTarget(deal)} className="h-6 w-6 p-0 text-red-600 hover:text-red-700 flex-shrink-0">
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     {deal.value && (
