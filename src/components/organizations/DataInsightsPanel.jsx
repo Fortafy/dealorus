@@ -71,50 +71,7 @@ export default function DataInsightsPanel({ organization, isCollapsed }) {
         </Card>
       )}
 
-      {dataSourceLinks.length > 0 && (
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="pb-3">
-            <Collapsible open={isDataSourcesOpen} onOpenChange={setIsDataSourcesOpen}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Link2 className="w-4 h-4" />
-                  Public Data Sources ({dataSourceLinks.length})
-                </CardTitle>
-                {isDataSourcesOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent className="pt-4">
-                  <div className="grid md:grid-cols-2 gap-2">
-                    {dataSourceLinks.map((link, index) => {
-                      const IconComponent = getIconComponent(link.icon);
-                      return (
-                        <a
-                          key={index}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50/50 hover:bg-slate-100/50 transition-all group"
-                        >
-                          <div className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
-                            <IconComponent className="w-4 h-4" style={{ color: "hsl(217, 91%, 60%)" }} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1">
-                              <p className="text-sm font-medium text-slate-900 group-hover:underline">{link.name}</p>
-                              <ExternalLink className="w-3 h-3 text-slate-400" />
-                            </div>
-                            <p className="text-xs text-slate-500 mt-0.5">{link.description}</p>
-                          </div>
-                        </a>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </CardHeader>
-        </Card>
-      )}
+
     </div>
   );
 }
