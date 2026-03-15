@@ -340,7 +340,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         </Collapsible>
       </CardHeader>
 
-      {isOpen && <CardContent className="pt-3">
+      {isOpen && <CardContent className="p-0">
         {isSearching && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
@@ -354,9 +354,9 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         {!isSearching && filteredContacts.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-6">No contacts yet</p>
         ) : !isSearching && (
-          <div className="space-y-3">
+          <div className="divide-y divide-slate-200">
             {sortedContacts.map((contact) => (
-              <div key={contact.id} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+              <div key={contact.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex-1">
                     <h4 className="font-semibold text-sm text-slate-900">{contact.name}</h4>

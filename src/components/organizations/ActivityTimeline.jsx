@@ -59,13 +59,13 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
         </Collapsible>
       </CardHeader>
 
-      {isOpen && <CardContent className="pt-3">
+      {isOpen && <CardContent className="p-0">
         {mergedActivity.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-6">No activity yet</p>
         ) : (
-          <div className="space-y-3">
+          <div className="divide-y divide-slate-200">
             {mergedActivity.map((item, index) => (
-              <div key={`${item.type}-${item.id}`} className="flex gap-3 pb-3 border-b border-slate-200 last:border-0">
+              <div key={`${item.type}-${item.id}`} className="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
                 <div className="text-lg flex-shrink-0 mt-1">{item.icon}</div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
