@@ -473,10 +473,27 @@ export default function OrganizationSummary({
             <div>
 <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
               <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
-              <EditableField icon={MapPin} label="Address" value={organization.address} onSave={(val) => saveField("address", val)} placeholder="Street address..." />
-              <EditableField icon={MapPin} label="City" value={organization.city} onSave={(val) => saveField("city", val)} placeholder="City..." />
-              <EditableField icon={MapPin} label="State" value={organization.state} onSave={(val) => saveField("state", val)} placeholder="State..." />
-              <EditableField icon={MapPin} label="ZIP Code" value={organization.zip_code} onSave={(val) => saveField("zip_code", val)} placeholder="ZIP..." />
+              <EditableField
+                icon={MapPin}
+                label="Address"
+                value={[organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ")}
+                onSave={(val) => {
+                  // Parse "address, city, state zip" or "address, city, state, zip"
+                  const parts = val ? val.split(",").map(p => p.trim()) : [];
+                  const address = parts[0] || null;
+                  const city = parts[1] || null;
+                  // State and zip may be combined like "CA 90210" or separate
+                  const stateZip = parts[2] || "";
+                  const stateZipParts = stateZip.split(" ").filter(Boolean);
+                  const state = stateZipParts[0] || parts[2] || null;
+                  const zip_code = stateZipParts[1] || parts[3] || null;
+                  const updatedData = { ...organization, address, city, state, zip_code };
+                  base44.entities.Organization.update(organization.id, updatedData);
+                  if (onEdit) onEdit(updatedData);
+                }}
+                multiline
+                placeholder="Street, City, State ZIP..."
+              />
             </div>
             <div>
               <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
