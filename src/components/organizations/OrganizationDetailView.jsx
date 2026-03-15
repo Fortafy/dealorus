@@ -75,7 +75,8 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
         organization={organization}
         onDelete={onClose}
         onEdit={(updatedOrg) => {
-          // Invalidate and refetch
+          queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
+          queryClient.invalidateQueries({ queryKey: ["organizations"] });
         }}
         isSaved={true}
         clientInstanceUrl={clientData?.salesforce_instance_url}
