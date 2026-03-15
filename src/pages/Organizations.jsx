@@ -6,6 +6,7 @@ import ContactSearch from "@/components/contacts/ContactSearch";
 import OrganizationDetailView from "@/components/organizations/OrganizationDetailView";
 import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
+import NewAccountDialog from "@/components/organizations/NewAccountDialog";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import SavedFilters from "@/components/organizations/SavedFilters";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
