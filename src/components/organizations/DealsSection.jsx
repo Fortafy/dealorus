@@ -301,9 +301,9 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
           {deals.length === 0 ? (
             <p className="text-sm text-slate-500 text-center py-6 px-4">No deals yet</p>
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y divide-slate-200">
               {deals.map((deal) => (
-                <div key={deal.id} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div key={deal.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-sm text-slate-900">{deal.name}</h4>
@@ -318,7 +318,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                       </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     {deal.value && (
                       <Badge variant="outline" className="text-xs">${deal.value.toLocaleString()}</Badge>
                     )}
