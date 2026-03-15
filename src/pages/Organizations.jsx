@@ -446,12 +446,7 @@ export default function Organizations() {
           <div className={`p-4 flex flex-col h-full overflow-hidden min-h-0 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
             <div className="mb-4 space-y-3 flex-shrink-0">
               <Button
-                onClick={() => {
-                  setShowSearchPanel(true);
-                  setSelectedOrg(null);
-                  setShowDashboard(false);
-                  setShowDuplicates(false);
-                }}
+                onClick={() => setShowNewAccountDialog(true)}
                 style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
                 className="w-full hover:opacity-90"
               >
