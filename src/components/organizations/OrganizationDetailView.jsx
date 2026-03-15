@@ -11,6 +11,7 @@ import ActivityTimeline from "@/components/organizations/ActivityTimeline";
 import DataInsightsPanel from "@/components/organizations/DataInsightsPanel";
 
 export default function OrganizationDetailView({ organizationId, onClose }) {
+  const queryClient = useQueryClient();
 
   const { data: organization, isLoading, error } = useQuery({
     queryKey: ["organization", organizationId],
