@@ -90,7 +90,15 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
             const response = await base44.functions.invoke('nonprofitCheckPlusSearch', { ein: organization.ein });
             sourceData = response.data;
           } else if (source === "AI") {
-            const prompt = `Find and verify data for: ${organization.organization_name} in ${organization.state}. EIN: ${organization.ein || 'unknown'}. Return accurate nonprofit data.`;
+            const prompt = `Find and verify data for: ${organization.organization_name} in ${organization.state}. EIN: ${organization.ein || 'unknown'}. 
+
+          IMPORTANT: Also search for and return the organization's logo image URL if you can find it. Look for:
+          - The organization's official website and logo
+          - LinkedIn company page logo
+          - Charity Navigator or GuideStar logos
+          - Any publicly available high-quality logo image
+
+          Return accurate nonprofit data and the logo URL if found.`;
             sourceData = await base44.integrations.Core.InvokeLLM({
               prompt,
               add_context_from_internet: true,
@@ -107,6 +115,7 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
                   mission: { type: ["string", "null"] },
                   annual_revenue: { type: ["string", "null"] },
                   ntee_code: { type: ["string", "null"] },
+                  logo_url: { type: ["string", "null"] },
                 },
               },
             });

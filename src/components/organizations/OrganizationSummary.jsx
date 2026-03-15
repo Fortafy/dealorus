@@ -233,15 +233,25 @@ export default function OrganizationSummary({
       <Card className="overflow-hidden border-0 shadow-xl shadow-slate-200/50 bg-white">
         <CardHeader className="text-white p-6" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold mb-2">{displayData.organization_name}</h2>
-              <div className="flex flex-wrap gap-2">
-                {displayData.organization_type && (
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.organization_type}</Badge>
-                )}
-                {displayData.ntee_description && (
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.ntee_description}</Badge>
-                )}
+            <div className="flex items-start gap-4 flex-1">
+              {displayData.logo_url && (
+                <img 
+                  src={displayData.logo_url} 
+                  alt={displayData.organization_name}
+                  className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-white/30"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              )}
+              <div>
+                <h2 className="text-xl font-semibold mb-2">{displayData.organization_name}</h2>
+                <div className="flex flex-wrap gap-2">
+                  {displayData.organization_type && (
+                    <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.organization_type}</Badge>
+                  )}
+                  {displayData.ntee_description && (
+                    <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.ntee_description}</Badge>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex gap-1.5 flex-wrap items-center">
