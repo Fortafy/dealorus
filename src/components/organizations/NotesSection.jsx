@@ -147,13 +147,13 @@ export default function NotesSection({ organization, clientId }) {
       </AlertDialog>
 
       {isOpen && (
-        <CardContent className="pt-2">
+        <CardContent className="p-0">
           {notes.length === 0 ? (
             <p className="text-sm text-slate-500 text-center py-6">No notes yet</p>
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y divide-slate-200">
               {notes.map((note) => (
-                <div key={note.id} className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div key={note.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1">
                       <h4 className="font-semibold text-sm text-slate-900">{note.title}</h4>
@@ -168,7 +168,7 @@ export default function NotesSection({ organization, clientId }) {
                       </Button>
                     </div>
                   </div>
-                  <p className="text-sm text-slate-700 mt-2 line-clamp-2">{note.content}</p>
+                  <p className="text-sm text-slate-700 mt-1 line-clamp-2">{note.content}</p>
                 </div>
               ))}
             </div>
