@@ -118,19 +118,19 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
            }
 
           if (sourceData) {
-            sourceResult.success = true;
+             sourceResult.success = true;
 
-            // Merge data, only filling in missing fields
-            Object.keys(sourceData).forEach(field => {
-              if (sourceData[field] && 
-                  sourceData[field] !== "N/A" && 
-                  sourceData[field] !== "Not found" &&
-                  !enrichmentResults.merged_data[field]) {
-                enrichmentResults.merged_data[field] = sourceData[field];
-                enrichmentResults.fields_found[field] = source;
-                sourceResult.fields_updated.push(field);
-              }
-            });
+             // Merge data, only filling in missing fields (logo_url always updated if found)
+             Object.keys(sourceData).forEach(field => {
+               if (sourceData[field] && 
+                   sourceData[field] !== "N/A" && 
+                   sourceData[field] !== "Not found" &&
+                   (!enrichmentResults.merged_data[field] || field === "logo_url")) {
+                 enrichmentResults.merged_data[field] = sourceData[field];
+                 enrichmentResults.fields_found[field] = source;
+                 sourceResult.fields_updated.push(field);
+               }
+             });
 
             // Auto-populate NTEE description
             if (enrichmentResults.merged_data.ntee_code && !enrichmentResults.merged_data.ntee_description) {
