@@ -135,29 +135,27 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
 
   return (
     <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="pb-3 bg-slate-50 border-b border-slate-200">
+      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-            <CardTitle className="text-base">
-              Deals ({deals.length})
-            </CardTitle>
-            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
-              {!showDealForm && (
-                <Button
-                  size="sm"
-                  onClick={() => setShowDealForm(true)}
-                  style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                  className="text-white hover:opacity-90 h-7 px-2"
-                >
-                  <Plus className="w-3 h-3 mr-1" />
-                  New Deal
-                </Button>
-              )}
-            </div>
-          </CollapsibleContent>
+          <div className="flex items-center gap-2">
+            <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
+              <CardTitle className="text-base">
+                Deals ({deals.length})
+              </CardTitle>
+              {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </CollapsibleTrigger>
+            {!showDealForm && (
+              <Button
+                size="sm"
+                onClick={() => setShowDealForm(true)}
+                style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+                className="text-white hover:opacity-90 h-7 px-2"
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                New Deal
+              </Button>
+            )}
+          </div>
         </Collapsible>
       </CardHeader>
 

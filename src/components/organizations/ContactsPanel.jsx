@@ -281,90 +281,62 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
   return (
     <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="pb-3 bg-slate-50 border-b border-slate-200">
+      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-            <CardTitle className="text-base">
-              Contacts ({filteredContacts.length})
-            </CardTitle>
-            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </CollapsibleTrigger>
-          <CollapsibleContent>
+          <div className="flex items-center gap-2">
+            <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
+              <CardTitle className="text-base">
+                Contacts ({filteredContacts.length})
+              </CardTitle>
+              {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </CollapsibleTrigger>
             <TooltipProvider>
-              <div className="flex gap-1 mt-3 pt-3 border-t border-slate-200">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setEditingContact(null);
-                      setShowContactForm(true);
-                    }}
-                    style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                    className="text-white hover:opacity-90 h-7 px-2"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Add
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Add Contact</TooltipContent>
-              </Tooltip>
+              <div className="flex gap-1">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      onClick={() => { setEditingContact(null); setShowContactForm(true); }}
+                      style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
+                      className="text-white hover:opacity-90 h-7 px-2"
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Add Contact</TooltipContent>
+                </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setShowFilterDialog(true)}
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2"
-                  >
-                    <Filter className="w-3 h-3" />
-                    {Object.values(filters).some(v => v) && <span className="ml-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Filter</TooltipContent>
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => setShowFilterDialog(true)} variant="outline" size="sm" className="h-7 px-2">
+                      <Filter className="w-3 h-3" />
+                      {Object.values(filters).some(v => v) && <span className="ml-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Filter</TooltipContent>
+                </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setShowAdvancedSearch(true)}
-                    disabled={isSearching}
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2"
-                  >
-                    {isSearching ? (
-                      <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" />
-                    ) : (
-                      <Sparkles className="w-3 h-3" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Advanced Search</TooltipContent>
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => setShowAdvancedSearch(true)} disabled={isSearching} variant="outline" size="sm" className="h-7 px-2">
+                      {isSearching ? <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Advanced Search</TooltipContent>
+                </Tooltip>
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => searchContacts()}
-                    disabled={isSearching}
-                    size="sm"
-                    className="h-7 px-2 text-white"
-                    style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                  >
-                    {isSearching ? (
-                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Search className="w-3 h-3" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Quick Search</TooltipContent>
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => searchContacts()} disabled={isSearching} size="sm" className="h-7 px-2 text-white" style={{ backgroundColor: "hsl(217, 91%, 60%)" }}>
+                      {isSearching ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-3 h-3" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Quick Search</TooltipContent>
+                </Tooltip>
               </div>
             </TooltipProvider>
-          </CollapsibleContent>
+          </div>
         </Collapsible>
       </CardHeader>
 
