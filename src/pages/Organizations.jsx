@@ -26,6 +26,7 @@ export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showNewAccountDialog, setShowNewAccountDialog] = useState(false);
   const [showDashboard, setShowDashboard] = useState(true);
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
