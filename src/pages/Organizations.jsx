@@ -613,6 +613,19 @@ export default function Organizations() {
           )}
         </div>
       </main>
+
+      <NewAccountDialog
+        open={showNewAccountDialog}
+        onOpenChange={setShowNewAccountDialog}
+        onSaved={(org) => {
+          queryClient.invalidateQueries({ queryKey: ["organizations"] });
+          if (org?.id) {
+            setSelectedOrg(org);
+            setShowDashboard(false);
+            setShowSearchPanel(false);
+          }
+        }}
+      />
     </div>
   );
 }
