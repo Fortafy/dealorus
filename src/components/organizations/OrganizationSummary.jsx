@@ -555,6 +555,69 @@ export default function OrganizationSummary({
   );
 }
 
+// Favicon-based circle icon for external data source links
+function SourceIcon({ link }) {
+  const domain = (() => {
+    try { return new URL(link.url).hostname; } catch { return null; }
+  })();
+  const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
+
+  return (
+    <TooltipProvider delayDuration={200}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-8 h-8 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:shadow-md hover:border-slate-300 transition-all overflow-hidden flex-shrink-0"
+          >
+            {faviconUrl
+              ? <img src={faviconUrl} alt={link.name} className="w-5 h-5 object-contain" />
+              : <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+            }
+          </a>
+        </TooltipTrigger>
+        <TooltipContent side="top"><p className="text-xs">{link.name}</p></TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+function ExternalLinksRow({ organization, clientInstanceUrl }) {
+  const dataSourceLinks = getDataSourceLinks(organization);
+  const hasSalesforce = !!organization.salesforce_id;
+  if (!hasSalesforce && dataSourceLinks.length === 0) return null;
+
+  return (
+    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-3 flex-wrap">
+      <span className="text-xs font-medium text-slate-400 uppercase tracking-wide mr-1">External Links</span>
+      {hasSalesforce && (
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a
+                href={`${clientInstanceUrl}/${organization.salesforce_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:shadow-md hover:border-slate-300 transition-all overflow-hidden flex-shrink-0"
+              >
+                <img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" alt="Salesforce" className="w-5 h-5 object-contain" />
+              </a>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="text-xs">Salesforce{organization.last_salesforce_sync ? ` · synced ${moment(organization.last_salesforce_sync).format("MMM D, YYYY")}` : ""}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      {dataSourceLinks.map((link) => (
+        <SourceIcon key={link.name} link={link} />
+      ))}
+    </div>
+  );
+}
+
 // Inline editable header title (white text on gradient)
 function InlineHeaderText({ value, onSave }) {
   const [editing, setEditing] = useState(false);
