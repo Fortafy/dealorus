@@ -471,8 +471,7 @@ export default function OrganizationSummary({
 
           <div className="grid md:grid-cols-2 gap-x-8">
             <div>
-              <EditableField icon={Hash} label="Organization Name" value={organization.organization_name} onSave={(val) => saveField("organization_name", val)} placeholder="Organization name..." />
-              <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
+<EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
               <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
               <EditableField icon={MapPin} label="Address" value={organization.address} onSave={(val) => saveField("address", val)} placeholder="Street address..." />
               <EditableField icon={MapPin} label="City" value={organization.city} onSave={(val) => saveField("city", val)} placeholder="City..." />
