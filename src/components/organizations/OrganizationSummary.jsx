@@ -234,14 +234,7 @@ export default function OrganizationSummary({
         <CardHeader className="text-white p-6" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4 flex-1">
-              {displayData.logo_url && (
-                <img 
-                  src={displayData.logo_url} 
-                  alt={displayData.organization_name}
-                  className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-white/30"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              )}
+              <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
               <div>
                 <h2 className="text-xl font-semibold mb-2">{displayData.organization_name}</h2>
                 <div className="flex flex-wrap gap-2">
