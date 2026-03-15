@@ -90,36 +90,32 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
             const response = await base44.functions.invoke('nonprofitCheckPlusSearch', { ein: organization.ein });
             sourceData = response.data;
           } else if (source === "AI") {
-            const prompt = `Find and verify data for: ${organization.organization_name} in ${organization.state}. EIN: ${organization.ein || 'unknown'}. 
+             const prompt = `Find and verify data for the nonprofit organization: "${organization.organization_name}" in ${organization.state}. EIN: ${organization.ein || 'unknown'}.
 
-          IMPORTANT: Also search for and return the organization's logo image URL if you can find it. Look for:
-          - The organization's official website and logo
-          - LinkedIn company page logo
-          - Charity Navigator or GuideStar logos
-          - Any publicly available high-quality logo image
+          Please search the web and return all available data. Most importantly, find the organization's logo image URL - check their official website, look for a direct link to their logo image file (PNG, JPG, SVG). Return the direct image URL.
 
-          Return accurate nonprofit data and the logo URL if found.`;
-            sourceData = await base44.integrations.Core.InvokeLLM({
-              prompt,
-              add_context_from_internet: true,
-              response_json_schema: {
-                type: "object",
-                properties: {
-                  ein: { type: ["string", "null"] },
-                  address: { type: ["string", "null"] },
-                  city: { type: ["string", "null"] },
-                  zip_code: { type: ["string", "null"] },
-                  phone: { type: ["string", "null"] },
-                  email: { type: ["string", "null"] },
-                  website: { type: ["string", "null"] },
-                  mission: { type: ["string", "null"] },
-                  annual_revenue: { type: ["string", "null"] },
-                  ntee_code: { type: ["string", "null"] },
-                  logo_url: { type: ["string", "null"] },
-                },
-              },
-            });
-          }
+          Return accurate nonprofit data plus the logo URL.`;
+             sourceData = await base44.integrations.Core.InvokeLLM({
+               prompt,
+               add_context_from_internet: true,
+               response_json_schema: {
+                 type: "object",
+                 properties: {
+                   ein: { type: ["string", "null"] },
+                   address: { type: ["string", "null"] },
+                   city: { type: ["string", "null"] },
+                   zip_code: { type: ["string", "null"] },
+                   phone: { type: ["string", "null"] },
+                   email: { type: ["string", "null"] },
+                   website: { type: ["string", "null"] },
+                   mission: { type: ["string", "null"] },
+                   annual_revenue: { type: ["string", "null"] },
+                   ntee_code: { type: ["string", "null"] },
+                   logo_url: { type: ["string", "null"] },
+                 },
+               },
+             });
+           }
 
           if (sourceData) {
             sourceResult.success = true;
