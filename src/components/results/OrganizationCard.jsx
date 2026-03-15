@@ -18,7 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import EditOrganizationDialog from "@/components/organizations/EditOrganizationDialog";
 import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
 import SmartEnrichDialog from "@/components/organizations/SmartEnrichDialog";
 import {
