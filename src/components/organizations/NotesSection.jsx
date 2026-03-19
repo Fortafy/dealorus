@@ -7,11 +7,50 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Pencil, ChevronDown, ChevronUp, CalendarDays } from "lucide-react";
+import { Plus, Trash2, Pencil, ChevronDown, ChevronUp, CalendarDays, X } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import ReminderPicker from "@/components/reminders/ReminderPicker";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+function InlineReminderBadge({ value, isPastDue, onSave }) {
+  const [open, setOpen] = React.useState(false);
+  const [tempValue, setTempValue] = React.useState(value);
+
+  React.useEffect(() => { setTempValue(value); }, [value]);
+
+  const handleChange = (newVal) => {
+    setTempValue(newVal);
+    onSave(newVal);
+    setOpen(false);
+  };
+
+  const handleClear = (e) => {
+    e.stopPropagation();
+    onSave(null);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <span className={`inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 font-medium cursor-pointer transition-colors ${
+          isPastDue ? "border-red-300 text-red-600 bg-white hover:bg-red-50" : "border-slate-300 text-slate-700 bg-white hover:bg-slate-50"
+        }`}>
+          <CalendarDays className={`w-3 h-3 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
+          {moment(value).format("MMM D, h:mm A")}
+          <button type="button" onClick={handleClear} className={`ml-0.5 ${isPastDue ? "text-red-400 hover:text-red-700" : "text-slate-400 hover:text-slate-700"}`}>
+            <X className="w-2.5 h-2.5" />
+          </button>
+        </span>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-3" align="start">
+        <p className="text-xs text-muted-foreground mb-2">Change reminder</p>
+        <ReminderPicker value={tempValue} onChange={handleChange} />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export default function NotesSection({ organization, clientId }) {
   const queryClient = useQueryClient();
