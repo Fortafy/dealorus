@@ -86,9 +86,9 @@ export default function NotesSection({ organization, clientId }) {
       return;
     }
     if (editingNote) {
-      updateNoteMutation.mutate({ id: editingNote.id, data: { title: noteTitle, content: noteContent } });
+      updateNoteMutation.mutate({ id: editingNote.id, data: { title: noteTitle, content: noteContent, remind_at: reminderDate || null } });
     } else {
-      createNoteMutation.mutate({ title: noteTitle, content: noteContent });
+      createNoteMutation.mutate({ title: noteTitle, content: noteContent, remind_at: reminderDate || null });
     }
   };
 
