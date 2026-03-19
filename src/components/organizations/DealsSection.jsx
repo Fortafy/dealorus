@@ -130,6 +130,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
       expected_close_date: form.expected_close_date || null,
       value: form.value ? parseFloat(form.value) : null,
       description: form.description || null,
+      remind_at: form.remind_at || null,
       services,
       is_active: true,
     };
