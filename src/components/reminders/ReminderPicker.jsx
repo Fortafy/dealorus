@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarDays, X } from "lucide-react";
@@ -42,7 +42,6 @@ export default function ReminderPicker({ value, onChange, className = "" }) {
     onChange(null);
   };
 
-  // Determine what label to show for the selected date badge
   const getDateLabel = () => {
     if (!value) return null;
     const d = new Date(value);
@@ -53,24 +52,29 @@ export default function ReminderPicker({ value, onChange, className = "" }) {
 
   const dateLabel = getDateLabel();
   const isCustomDate = dateLabel && dateLabel !== "Today" && dateLabel !== "Tomorrow";
+  const isPastDue = value && new Date(value) < new Date();
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* If a value is set, show the selected badge with clear */}
       {value ? (
-        <div className="flex items-center gap-1.5 border border-slate-300 rounded-full px-3 py-1.5 bg-white text-sm font-medium text-slate-700">
-          {isCustomDate && <CalendarDays className="w-3.5 h-3.5 text-slate-500" />}
+        <div className={`flex items-center gap-1.5 border rounded-full px-3 py-1.5 bg-white text-sm font-medium transition-colors ${
+          isPastDue
+            ? "border-red-300 text-red-600"
+            : "border-slate-300 text-slate-700"
+        }`}>
+          {isCustomDate && (
+            <CalendarDays className={`w-3.5 h-3.5 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
+          )}
           <span>{dateLabel}</span>
           <button
             type="button"
             onClick={handleClear}
-            className="ml-1 text-slate-400 hover:text-slate-700 transition-colors"
+            className={`ml-1 transition-colors ${isPastDue ? "text-red-400 hover:text-red-700" : "text-slate-400 hover:text-slate-700"}`}
           >
             <X className="w-3 h-3" />
           </button>
         </div>
       ) : (
-        /* No value set — show Today, Tomorrow, Calendar picker */
         <>
           <button
             type="button"
