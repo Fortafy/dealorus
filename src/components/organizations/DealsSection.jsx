@@ -306,10 +306,6 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                 <label className="text-xs text-slate-500 mb-1 block">Notes</label>
                 <Textarea placeholder="Additional notes..." value={form.description} onChange={(e) => setField("description", e.target.value)} className="text-sm h-16" />
               </div>
-              <div className="col-span-2">
-                <label className="text-xs text-slate-500 mb-1 block">Reminder</label>
-                <ReminderPickerField value={form.remind_at} onChange={(val) => setField("remind_at", val)} />
-              </div>
             </div>
 
             <div>
