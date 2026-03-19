@@ -47,6 +47,7 @@ const dealToForm = (deal) => ({
   expected_close_date: deal.expected_close_date || "",
   value: deal.value != null ? String(deal.value) : "",
   description: deal.description || "",
+  remind_at: deal.remind_at || null,
   services: deal.services?.length ? deal.services.map((s) => ({
     service_name: s.service_name || "",
     hours_per_month: s.hours_per_month != null ? String(s.hours_per_month) : "",
