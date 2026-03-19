@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus, Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Pencil, ChevronDown, ChevronUp, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
