@@ -359,7 +359,10 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex items-center gap-2">
+            <div className="flex-1">
+              <ReminderPickerField value={form.remind_at} onChange={(val) => setField("remind_at", val)} />
+            </div>
             <Button size="sm" variant="outline" onClick={closeForm}>Cancel</Button>
             <Button size="sm" onClick={handleSubmit} disabled={isPending} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90">
               {editingDeal ? "Save Changes" : "Save Deal"}
