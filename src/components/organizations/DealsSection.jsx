@@ -57,6 +57,95 @@ const dealToForm = (deal) => ({
   })) : [emptyService()],
 });
 
+function InlineDealReminderBadge({ value, onSave }) {
+  const [open, setOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const isPastDue = value && new Date(value) < new Date();
+
+  const at9am = (date) => { const d = new Date(date); d.setHours(9, 0, 0, 0); return d; };
+  const today = new Date();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const handleQuick = (date) => { onSave(at9am(date).toISOString()); setOpen(false); };
+  const handleCalendarSelect = (date) => { if (!date) return; onSave(at9am(date).toISOString()); setCalendarOpen(false); setOpen(false); };
+  const handleClear = (e) => { e.stopPropagation(); onSave(null); };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <span className={`inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 font-medium cursor-pointer transition-colors ${
+          isPastDue ? "border-red-300 text-red-600 bg-white hover:bg-red-50" : "border-slate-300 text-slate-700 bg-white hover:bg-slate-50"
+        }`}>
+          <CalendarDays className={`w-3 h-3 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
+          {moment(value).format("MMM D, h:mm A")}
+          <button type="button" onClick={handleClear} className={`ml-0.5 ${isPastDue ? "text-red-400 hover:text-red-700" : "text-slate-400 hover:text-slate-700"}`}>
+            <X className="w-2.5 h-2.5" />
+          </button>
+        </span>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-3" align="start">
+        <p className="text-xs text-muted-foreground mb-2 font-medium">Change reminder</p>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => handleQuick(today)} className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors">Today</button>
+          <button type="button" onClick={() => handleQuick(tomorrow)} className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors">Tomorrow</button>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button type="button" className="border border-slate-300 rounded-full p-1.5 bg-white hover:bg-slate-50 transition-colors text-slate-700" title="Pick a date">
+                <CalendarDays className="w-4 h-4" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" onSelect={handleCalendarSelect} initialFocus />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function ReminderPickerField({ value, onChange }) {
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const at9am = (date) => { const d = new Date(date); d.setHours(9, 0, 0, 0); return d; };
+  const today = new Date();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const handleQuick = (date) => onChange(at9am(date).toISOString());
+  const handleCalendarSelect = (date) => { if (!date) return; onChange(at9am(date).toISOString()); setCalendarOpen(false); };
+  const handleClear = (e) => { e.stopPropagation(); onChange(null); };
+
+  const isPastDue = value && new Date(value) < new Date();
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      {value ? (
+        <div className={`flex items-center gap-1.5 border rounded-full px-3 py-1.5 bg-white text-sm font-medium transition-colors ${isPastDue ? "border-red-300 text-red-600" : "border-slate-300 text-slate-700"}`}>
+          <CalendarDays className={`w-3.5 h-3.5 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
+          <span>{moment(value).format("MMM D, YYYY")}</span>
+          <button type="button" onClick={handleClear} className={`ml-1 ${isPastDue ? "text-red-400 hover:text-red-700" : "text-slate-400 hover:text-slate-700"}`}>
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ) : (
+        <>
+          <button type="button" onClick={() => handleQuick(today)} className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors">Today</button>
+          <button type="button" onClick={() => handleQuick(tomorrow)} className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors">Tomorrow</button>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button type="button" className="border border-slate-300 rounded-full p-1.5 bg-white hover:bg-slate-50 transition-colors text-slate-700" title="Pick a date">
+                <CalendarDays className="w-4 h-4" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" onSelect={handleCalendarSelect} initialFocus />
+            </PopoverContent>
+          </Popover>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function DealsSection({ organization, clientId, clientLifecycleStages = [] }) {
   const queryClient = useQueryClient();
   const [showDealForm, setShowDealForm] = useState(false);
