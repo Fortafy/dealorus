@@ -19,6 +19,7 @@ export default function NotesSection({ organization, clientId }) {
   const [editingNote, setEditingNote] = useState(null);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
+  const [reminderDate, setReminderDate] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
 
