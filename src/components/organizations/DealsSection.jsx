@@ -35,7 +35,7 @@ const emptyService = () => ({ service_name: "", hours_per_month: "", total_estim
 
 const emptyForm = () => ({
   name: "", stage: "", contract_type: "", start_date: "", end_date: "",
-  expected_close_date: "", value: "", description: "", services: [emptyService()],
+  expected_close_date: "", value: "", description: "", remind_at: null, services: [emptyService()],
 });
 
 const dealToForm = (deal) => ({
