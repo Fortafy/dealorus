@@ -168,11 +168,19 @@ export default function NotesSection({ organization, clientId }) {
                       <h4 className="font-semibold text-sm text-slate-900">{note.title}</h4>
                       <div className="flex items-center gap-2 mt-0.5">
                         <p className="text-xs text-slate-500">{moment(note.created_date).format("MMM D, YYYY h:mm A")}</p>
-                        {note.remind_at && (
-                          <span className="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 rounded px-1.5 py-0.5">
-                            🔔 {moment(note.remind_at).format("MMM D, h:mm A")}
-                          </span>
-                        )}
+                        {note.remind_at && (() => {
+                          const isPastDue = new Date(note.remind_at) < new Date();
+                          return (
+                            <span className={`inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 font-medium ${
+                              isPastDue
+                                ? "border-red-300 text-red-600 bg-white"
+                                : "border-slate-300 text-slate-700 bg-white"
+                            }`}>
+                              <CalendarDays className={`w-3 h-3 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
+                              {moment(note.remind_at).format("MMM D, h:mm A")}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
