@@ -120,6 +120,10 @@ export default function NotesSection({ organization, clientId }) {
           <div className="space-y-3 py-2">
             <Input placeholder="Note title..." value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} className="text-sm" />
             <Textarea placeholder="Write your note here..." value={noteContent} onChange={(e) => setNoteContent(e.target.value)} className="text-sm h-32" />
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-xs text-muted-foreground">Reminder:</span>
+              <ReminderPicker value={reminderDate} onChange={setReminderDate} />
+            </div>
           </div>
           <DialogFooter>
             <Button size="sm" variant="outline" onClick={closeForm}>Cancel</Button>
