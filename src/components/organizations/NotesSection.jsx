@@ -11,6 +11,7 @@ import { Plus, Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
+import ReminderPicker from "@/components/reminders/ReminderPicker";
 
 export default function NotesSection({ organization, clientId }) {
   const queryClient = useQueryClient();
