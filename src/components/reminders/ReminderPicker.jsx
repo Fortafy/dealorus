@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
@@ -17,6 +17,21 @@ export default function ReminderPicker({ value, onChange, className = "" }) {
   const [showCalendar, setShowCalendar] = useState(false);
   const [customDate, setCustomDate] = useState(null);
   const [customTime, setCustomTime] = useState("09:00");
+
+  // Sync internal state when value changes (e.g. when opening edit form)
+  useEffect(() => {
+    if (value) {
+      const d = new Date(value);
+      setCustomDate(d);
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      setCustomTime(`${hh}:${mm}`);
+    } else {
+      setCustomDate(null);
+      setCustomTime("09:00");
+    }
+    setShowCalendar(false);
+  }, [value]);
 
   const at9am = (date) => setMinutes(setHours(startOfDay(date), 9), 0);
 
