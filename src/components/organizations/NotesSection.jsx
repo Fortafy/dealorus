@@ -60,6 +60,7 @@ export default function NotesSection({ organization, clientId }) {
     setEditingNote(null);
     setNoteTitle("");
     setNoteContent("");
+    setReminderDate(null);
     setShowNoteForm(true);
   };
 
@@ -67,6 +68,7 @@ export default function NotesSection({ organization, clientId }) {
     setEditingNote(note);
     setNoteTitle(note.title);
     setNoteContent(note.content);
+    setReminderDate(note.remind_at || null);
     setShowNoteForm(true);
   };
 
@@ -75,6 +77,7 @@ export default function NotesSection({ organization, clientId }) {
     setEditingNote(null);
     setNoteTitle("");
     setNoteContent("");
+    setReminderDate(null);
   };
 
   const handleSubmit = () => {
