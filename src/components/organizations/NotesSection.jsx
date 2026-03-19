@@ -18,7 +18,6 @@ import { Calendar } from "@/components/ui/calendar";
 function InlineReminderBadge({ value, isPastDue, onSave }) {
   const [open, setOpen] = React.useState(false);
   const [calendarOpen, setCalendarOpen] = React.useState(false);
-  const { startOfDay, setHours, setMinutes, addDays } = require ? null : null;
 
   const at9am = (date) => {
     const d = new Date(date);
