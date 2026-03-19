@@ -438,6 +438,15 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                       {moment(deal.start_date).format("MMM D, YYYY")} – {moment(deal.end_date).format("MMM D, YYYY")}
                     </p>
                   )}
+                  {deal.remind_at && (
+                    <div className="mt-1.5">
+                      <InlineDealReminderBadge
+                        value={deal.remind_at}
+                        isPastDue={new Date(deal.remind_at) < new Date()}
+                        onSave={(val) => updateDealMutation.mutate({ id: deal.id, data: { remind_at: val } })}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
