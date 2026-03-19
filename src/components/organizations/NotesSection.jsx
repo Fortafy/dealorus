@@ -166,7 +166,14 @@ export default function NotesSection({ organization, clientId }) {
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1">
                       <h4 className="font-semibold text-sm text-slate-900">{note.title}</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">{moment(note.created_date).format("MMM D, YYYY h:mm A")}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-slate-500">{moment(note.created_date).format("MMM D, YYYY h:mm A")}</p>
+                        {note.remind_at && (
+                          <span className="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 rounded px-1.5 py-0.5">
+                            🔔 {moment(note.remind_at).format("MMM D, h:mm A")}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="sm" onClick={() => openEdit(note)} className="h-6 w-6 p-0 text-slate-400 hover:text-blue-600">
