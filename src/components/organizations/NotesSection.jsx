@@ -171,14 +171,11 @@ export default function NotesSection({ organization, clientId }) {
                         {note.remind_at && (() => {
                           const isPastDue = new Date(note.remind_at) < new Date();
                           return (
-                            <span className={`inline-flex items-center gap-1 text-xs border rounded-full px-2 py-0.5 font-medium ${
-                              isPastDue
-                                ? "border-red-300 text-red-600 bg-white"
-                                : "border-slate-300 text-slate-700 bg-white"
-                            }`}>
-                              <CalendarDays className={`w-3 h-3 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
-                              {moment(note.remind_at).format("MMM D, h:mm A")}
-                            </span>
+                            <InlineReminderBadge
+                              value={note.remind_at}
+                              isPastDue={isPastDue}
+                              onSave={(newVal) => updateNoteMutation.mutate({ id: note.id, data: { remind_at: newVal } })}
+                            />
                           );
                         })()}
                       </div>
