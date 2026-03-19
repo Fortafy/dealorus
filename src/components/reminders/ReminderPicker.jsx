@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect, useRef } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Bell, X, ChevronDown } from "lucide-react";
-import { format, addDays, startOfDay, setHours, setMinutes } from "date-fns";
+import { CalendarDays, X } from "lucide-react";
+import { format, addDays, startOfDay, setHours, setMinutes, isToday, isTomorrow } from "date-fns";
 
 /**
- * ReminderPicker — reusable reminder date/time selector.
+ * ReminderPicker — badge-style reminder selector.
  *
  * Props:
  *   value       — current remind_at ISO string (or null)
@@ -14,157 +13,100 @@ import { format, addDays, startOfDay, setHours, setMinutes } from "date-fns";
  *   className   — optional extra classes
  */
 export default function ReminderPicker({ value, onChange, className = "" }) {
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [customDate, setCustomDate] = useState(null);
-  const [customTime, setCustomTime] = useState("09:00");
-
-  // Sync internal state when value changes (e.g. when opening edit form)
-  useEffect(() => {
-    if (value) {
-      const d = new Date(value);
-      setCustomDate(d);
-      const hh = String(d.getHours()).padStart(2, "0");
-      const mm = String(d.getMinutes()).padStart(2, "0");
-      setCustomTime(`${hh}:${mm}`);
-    } else {
-      setCustomDate(null);
-      setCustomTime("09:00");
-    }
-    setShowCalendar(false);
-  }, [value]);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const at9am = (date) => setMinutes(setHours(startOfDay(date), 9), 0);
 
-  const quickOptions = [
-    {
-      label: "Today",
-      description: format(new Date(), "EEE, MMM d") + " · 9:00 AM",
-      getValue: () => at9am(new Date()),
-    },
-    {
-      label: "Tomorrow",
-      description: format(addDays(new Date(), 1), "EEE, MMM d") + " · 9:00 AM",
-      getValue: () => at9am(addDays(new Date(), 1)),
-    },
-    {
-      label: "Next Week",
-      description: format(addDays(new Date(), 7), "EEE, MMM d") + " · 9:00 AM",
-      getValue: () => at9am(addDays(new Date(), 7)),
-    },
-  ];
+  // Sync internal state when value changes (e.g. opening edit form)
+  useEffect(() => {
+    setSelectedDate(value ? new Date(value) : null);
+  }, [value]);
 
-  const handleQuick = (option) => {
-    onChange(option.getValue().toISOString());
+  const handleToday = () => {
+    onChange(at9am(new Date()).toISOString());
   };
 
-  const handleCustomConfirm = () => {
-    if (!customDate) return;
-    const [hours, minutes] = customTime.split(":").map(Number);
-    const dt = setMinutes(setHours(startOfDay(customDate), hours), minutes);
-    onChange(dt.toISOString());
-    setShowCalendar(false);
+  const handleTomorrow = () => {
+    onChange(at9am(addDays(new Date(), 1)).toISOString());
+  };
+
+  const handleCalendarSelect = (date) => {
+    if (!date) return;
+    onChange(at9am(date).toISOString());
+    setCalendarOpen(false);
   };
 
   const handleClear = (e) => {
     e.stopPropagation();
     onChange(null);
-    setCustomDate(null);
   };
 
-  const displayLabel = value
-    ? format(new Date(value), "MMM d, yyyy · h:mm a")
-    : null;
+  // Determine what label to show for the selected date badge
+  const getDateLabel = () => {
+    if (!value) return null;
+    const d = new Date(value);
+    if (isToday(d)) return "Today";
+    if (isTomorrow(d)) return "Tomorrow";
+    return format(d, "EEE, MMM d");
+  };
+
+  const dateLabel = getDateLabel();
+  const isCustomDate = dateLabel && dateLabel !== "Today" && dateLabel !== "Tomorrow";
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
+      {/* If a value is set, show the selected badge with clear */}
+      {value ? (
+        <div className="flex items-center gap-1.5 border border-slate-300 rounded-full px-3 py-1.5 bg-white text-sm font-medium text-slate-700">
+          {isCustomDate && <CalendarDays className="w-3.5 h-3.5 text-slate-500" />}
+          <span>{dateLabel}</span>
+          <button
             type="button"
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            onClick={handleClear}
+            className="ml-1 text-slate-400 hover:text-slate-700 transition-colors"
           >
-            <Bell className="w-3.5 h-3.5" />
-            {displayLabel ? (
-              <span className="text-foreground font-medium">{displayLabel}</span>
-            ) : (
-              <span>Set Reminder</span>
-            )}
-            <ChevronDown className="w-3 h-3 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-
-        <PopoverContent className="w-72 p-3" align="start">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-            Remind me
-          </p>
-
-          {/* Quick options */}
-          <div className="space-y-1 mb-3">
-            {quickOptions.map((opt) => (
-              <button
-                key={opt.label}
-                type="button"
-                onClick={() => handleQuick(opt)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors text-left"
-              >
-                <span className="font-medium">{opt.label}</span>
-                <span className="text-muted-foreground text-xs">{opt.description}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="border-t pt-3">
-            {!showCalendar ? (
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ) : (
+        /* No value set — show Today, Tomorrow, Calendar picker */
+        <>
+          <button
+            type="button"
+            onClick={handleToday}
+            className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={handleTomorrow}
+            className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+          >
+            Tomorrow
+          </button>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
               <button
                 type="button"
-                onClick={() => setShowCalendar(true)}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm hover:bg-accent transition-colors text-left text-muted-foreground"
+                className="border border-slate-300 rounded-full p-1.5 bg-white hover:bg-slate-50 transition-colors text-slate-700"
+                title="Pick a date"
               >
-                <Bell className="w-3.5 h-3.5" />
-                Pick a date & time
+                <CalendarDays className="w-4 h-4" />
               </button>
-            ) : (
-              <div className="space-y-2">
-                <Calendar
-                  mode="single"
-                  selected={customDate}
-                  onSelect={setCustomDate}
-                  disabled={(date) => date < startOfDay(new Date())}
-                  className="rounded-md border-0 p-0"
-                />
-                <div className="flex items-center gap-2">
-                  <input
-                    type="time"
-                    value={customTime}
-                    onChange={(e) => setCustomTime(e.target.value)}
-                    className="flex-1 h-8 rounded-md border border-input bg-transparent px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={!customDate}
-                    onClick={handleCustomConfirm}
-                  >
-                    Set
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
-
-      {value && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="text-muted-foreground hover:text-destructive transition-colors"
-          title="Clear reminder"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleCalendarSelect}
+                disabled={(date) => date < startOfDay(new Date())}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </>
       )}
     </div>
   );
