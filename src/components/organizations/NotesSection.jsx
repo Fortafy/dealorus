@@ -13,6 +13,7 @@ import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import ReminderPicker from "@/components/reminders/ReminderPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 function InlineReminderBadge({ value, isPastDue, onSave }) {
   const [open, setOpen] = React.useState(false);
