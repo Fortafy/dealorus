@@ -16,13 +16,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 function InlineReminderBadge({ value, isPastDue, onSave }) {
   const [open, setOpen] = React.useState(false);
-  const [tempValue, setTempValue] = React.useState(value);
+  const [calendarOpen, setCalendarOpen] = React.useState(false);
+  const { startOfDay, setHours, setMinutes, addDays } = require ? null : null;
 
-  React.useEffect(() => { setTempValue(value); }, [value]);
+  const at9am = (date) => {
+    const d = new Date(date);
+    d.setHours(9, 0, 0, 0);
+    return d;
+  };
 
-  const handleChange = (newVal) => {
-    setTempValue(newVal);
-    onSave(newVal);
+  const handleQuick = (date) => {
+    onSave(at9am(date).toISOString());
+    setOpen(false);
+  };
+
+  const handleCalendarSelect = (date) => {
+    if (!date) return;
+    onSave(at9am(date).toISOString());
+    setCalendarOpen(false);
     setOpen(false);
   };
 
@@ -30,6 +41,9 @@ function InlineReminderBadge({ value, isPastDue, onSave }) {
     e.stopPropagation();
     onSave(null);
   };
+
+  const today = new Date();
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -45,8 +59,41 @@ function InlineReminderBadge({ value, isPastDue, onSave }) {
         </span>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3" align="start">
-        <p className="text-xs text-muted-foreground mb-2">Change reminder</p>
-        <ReminderPicker value={tempValue} onChange={handleChange} />
+        <p className="text-xs text-muted-foreground mb-2 font-medium">Change reminder</p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleQuick(today)}
+            className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuick(tomorrow)}
+            className="border border-slate-300 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+          >
+            Tomorrow
+          </button>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="border border-slate-300 rounded-full p-1.5 bg-white hover:bg-slate-50 transition-colors text-slate-700"
+                title="Pick a date"
+              >
+                <CalendarDays className="w-4 h-4" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                onSelect={handleCalendarSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </PopoverContent>
     </Popover>
   );
