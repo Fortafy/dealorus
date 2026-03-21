@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-// Card imports removed — OrganizationSummary now renders flat (full-width)
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
