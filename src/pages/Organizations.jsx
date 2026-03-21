@@ -433,8 +433,8 @@ export default function Organizations() {
                     {COLUMNS.map((col, i) => (
                       <td
                         key={col.key}
-                        className="px-3 py-2 truncate border-r border-slate-100 last:border-r-0"
-                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1, background: "inherit" } : {}}
+                        className={`px-3 py-2 truncate border-r border-slate-100 last:border-r-0${i === 0 ? " bg-white group-hover:bg-slate-50" : ""}`}
+                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1 } : {}}
                       >
                         {i === 0 ? (
                           <button
