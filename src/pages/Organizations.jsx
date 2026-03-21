@@ -40,13 +40,6 @@ export default function Organizations() {
     fetchUser();
   }, []);
 
-  // Scroll to top when organization is selected
-  React.useEffect(() => {
-    if (selectedOrg && rightColumnRef.current) {
-      rightColumnRef.current.scrollTop = 0;
-    }
-  }, [selectedOrg]);
-
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["organizations", currentUser?.client_id],
     enabled: !!currentUser?.client_id,
