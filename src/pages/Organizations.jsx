@@ -6,10 +6,11 @@ import SearchPanel from "@/components/search/SearchPanel";
 import NewAccountDialog from "@/components/organizations/NewAccountDialog";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import { motion } from "framer-motion";
-import { Building2, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, ArrowLeft } from "lucide-react";
+import { Building2, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, ArrowLeft, ChevronRight, Home } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import SavedFilterSelector from "@/components/organizations/SavedFilterSelector";
 
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
