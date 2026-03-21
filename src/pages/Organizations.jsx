@@ -198,6 +198,24 @@ export default function Organizations() {
     document.addEventListener("mouseup", onMouseUp);
   }, [colWidths]);
 
+  const renderCell = (key, org) => {
+    const val = org[key];
+    if (val === null || val === undefined || val === "") return <span className="text-slate-400">—</span>;
+    if (key === "created_date" || key === "updated_date") {
+      return <span className="text-slate-500">{format(new Date(val), "MMM d, yyyy")}</span>;
+    }
+    if (key === "created_by") {
+      return <span className="text-slate-600">{val.split("@")[0]}</span>;
+    }
+    if (key === "is_client") {
+      return <span className={`text-xs font-medium ${val ? "text-green-600" : "text-slate-400"}`}>{val ? "Yes" : "No"}</span>;
+    }
+    if (key === "website") {
+      return <a href={val} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate block">{val}</a>;
+    }
+    return <span className="text-slate-600">{String(val)}</span>;
+  };
+
   if (selectedOrg) {
     return (
       <div className="h-full flex flex-col bg-white">
