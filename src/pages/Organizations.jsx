@@ -57,21 +57,9 @@ export default function Organizations() {
     }
   }, [organizations, currentUser]);
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Organization.delete(id),
-    onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["organizations"] });
-      if (selectedOrg && selectedOrg.id === variables) {
-        setSelectedOrg(null);
-      }
-    },
-  });
-
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Organization.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["organizations"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["organizations"] }),
   });
 
   const handleEdit = (updatedData) => {
@@ -79,42 +67,50 @@ export default function Organizations() {
     setSelectedOrg(updatedData);
   };
 
-  const parseRevenue = (revenueStr) => {
-    if (!revenueStr) return 0;
-    const cleaned = revenueStr.replace(/[$,]/g, "");
-    return parseFloat(cleaned) || 0;
+  // Unique states and types for filter dropdowns
+  const uniqueStates = useMemo(() => [...new Set(organizations.map(o => o.state).filter(Boolean))].sort(), [organizations]);
+  const uniqueTypes = useMemo(() => [...new Set(organizations.map(o => o.organization_type).filter(Boolean))].sort(), [organizations]);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
   };
 
-  const filteredOrgs = organizations.filter((org) => {
-    // Multi-field search
+  const filteredAndSorted = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
-    const matchesSearch = !searchQuery || 
-      org.organization_name?.toLowerCase().includes(searchLower) ||
-      org.state?.toLowerCase().includes(searchLower) ||
-      org.city?.toLowerCase().includes(searchLower) ||
-      org.ein?.toLowerCase().includes(searchLower) ||
-      org.organization_type?.toLowerCase().includes(searchLower) ||
-      org.ntee_code?.toLowerCase().includes(searchLower);
+    let result = organizations.filter(org => {
+      const matchesSearch = !searchQuery ||
+        org.organization_name?.toLowerCase().includes(searchLower) ||
+        org.state?.toLowerCase().includes(searchLower) ||
+        org.city?.toLowerCase().includes(searchLower) ||
+        org.phone?.toLowerCase().includes(searchLower) ||
+        org.organization_type?.toLowerCase().includes(searchLower);
+      const matchesState = !filterState || org.state === filterState;
+      const matchesType = !filterType || org.organization_type === filterType;
+      return matchesSearch && matchesState && matchesType;
+    });
 
-    // Filter by state
-    const matchesState = !filters.state || org.state === filters.state;
+    result.sort((a, b) => {
+      let av = a[sortField] ?? "";
+      let bv = b[sortField] ?? "";
+      if (sortField === "created_date") {
+        av = new Date(av);
+        bv = new Date(bv);
+      } else {
+        av = String(av).toLowerCase();
+        bv = String(bv).toLowerCase();
+      }
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
 
-    // Filter by organization type
-    const matchesType = !filters.organization_type || 
-      org.organization_type?.toLowerCase().includes(filters.organization_type.toLowerCase());
-
-    // Filter by NTEE code
-    const matchesNtee = !filters.ntee_code || 
-      org.ntee_code?.toLowerCase().includes(filters.ntee_code.toLowerCase());
-
-    // Filter by revenue range
-    const revenue = parseRevenue(org.annual_revenue);
-    const matchesMinRevenue = !filters.min_revenue || revenue >= parseFloat(filters.min_revenue);
-    const matchesMaxRevenue = !filters.max_revenue || revenue <= parseFloat(filters.max_revenue);
-
-    return matchesSearch && matchesState && matchesType && matchesNtee && 
-           matchesMinRevenue && matchesMaxRevenue;
-  });
+    return result;
+  }, [organizations, searchQuery, filterState, filterType, sortField, sortDir]);
 
   // Dashboard component
   const DashboardView = ({ organizations, contacts, onSelectOrg }) => {
