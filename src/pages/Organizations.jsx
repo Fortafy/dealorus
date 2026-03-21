@@ -21,10 +21,16 @@ export default function Organizations() {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [sortField, setSortField] = useState("organization_name");
   const [sortDir, setSortDir] = useState("asc");
-  const [filterState, setFilterState] = useState("");
-  const [filterType, setFilterType] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [activeFilterId, setActiveFilterId] = useState(null);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const filterButtonRef = useRef(null);
+  const [filters, setFilters] = useState({
+    type: "", state: "", owner: "",
+    createdFrom: "", createdTo: "",
+    updatedFrom: "", updatedTo: "",
+    revenueMin: "", revenueMax: "",
+  });
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
