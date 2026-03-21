@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-import OrganizationSummary from "@/components/organizations/OrganizationSummary";
+import OrganizationSummary, { OrganizationFields } from "@/components/organizations/OrganizationSummary";
 import ContactsPanel from "@/components/organizations/ContactsPanel";
 import NotesSection from "@/components/organizations/NotesSection";
 import DealsSection from "@/components/organizations/DealsSection";
