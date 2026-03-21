@@ -105,7 +105,7 @@ export default function SavedFilterSelector({ currentUser, activeFilter, onSelec
             {filtered.map(f => (
               <button
                 key={f.id}
-                onClick={() => { onSelectFilter(f.id, f.filters); setOpen(false); }}
+                onClick={() => { onSelectFilter(f.id, f.filters, f.fields); setOpen(false); }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 <Building2 className="w-4 h-4 text-slate-400" />
