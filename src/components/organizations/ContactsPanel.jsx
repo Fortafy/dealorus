@@ -280,14 +280,14 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
   });
 
   return (
-    <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
+    <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="py-2.5 px-4 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
-              <CardTitle className="text-base">
+              <span className="text-sm font-semibold text-slate-700">
                 Contacts ({filteredContacts.length})
-              </CardTitle>
+              </span>
               {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
             </CollapsibleTrigger>
             <TooltipProvider>
