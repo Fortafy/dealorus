@@ -555,6 +555,79 @@ function ExternalLinksRow({ organization, clientInstanceUrl }) {
   );
 }
 
+// Standalone fields-only export for use in other columns
+export function OrganizationFields({ organization, onEdit, isSaved = true, clientInstanceUrl }) {
+  const displayData = React.useMemo(() => {
+    if (organization.ntee_code && !organization.ntee_description) {
+      return { ...organization, ntee_description: getNTEEDescription(organization.ntee_code) };
+    }
+    return organization;
+  }, [organization]);
+
+  const saveField = async (field, value) => {
+    if (!isSaved || !organization.id) return;
+    const updatedData = { ...organization, [field]: value };
+    await base44.entities.Organization.update(organization.id, updatedData);
+    if (onEdit) onEdit(updatedData);
+  };
+
+  const saveNTEE = async (code, description) => {
+    if (!isSaved || !organization.id) return;
+    const updatedData = { ...organization, ntee_code: code, ntee_description: description || getNTEEDescription(code) || organization.ntee_description };
+    await base44.entities.Organization.update(organization.id, updatedData);
+    if (onEdit) onEdit(updatedData);
+  };
+
+  return (
+    <div className="px-4 py-3">
+      <div className="mb-2">
+        <EditableField
+          icon={FileText}
+          label="Mission"
+          value={organization.mission}
+          onSave={(val) => saveField("mission", val)}
+          multiline
+          placeholder="Click to add mission statement..."
+        />
+      </div>
+      <div className="grid md:grid-cols-2 gap-x-6">
+        <div>
+          <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
+          <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
+          <EditableField icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} onSave={(val) => saveField("annual_revenue", val)} placeholder="e.g. $1,000,000" />
+          <EditableField icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} onSave={(val) => saveField("ruling_date", val)} placeholder="e.g. 1995-01-01" />
+          <EditableNTEEField nteeCode={displayData.ntee_code} nteeDescription={displayData.ntee_description} onSave={saveNTEE} />
+        </div>
+        <div>
+          <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
+          <EditableField icon={Mail} label="Email" value={organization.email} onSave={(val) => saveField("email", val)} placeholder="Email address..." />
+          <EditableField icon={Globe} label="Website" value={organization.website} onSave={(val) => saveField("website", val)} isLink placeholder="Website URL..." />
+          <EditableField
+            icon={MapPin}
+            label="Address"
+            value={[organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ")}
+            onSave={(val) => {
+              const parts = val ? val.split(",").map(p => p.trim()) : [];
+              const address = parts[0] || null;
+              const city = parts[1] || null;
+              const stateZip = parts[2] || "";
+              const stateZipParts = stateZip.split(" ").filter(Boolean);
+              const state = stateZipParts[0] || parts[2] || null;
+              const zip_code = stateZipParts[1] || parts[3] || null;
+              const updatedData = { ...organization, address, city, state, zip_code };
+              base44.entities.Organization.update(organization.id, updatedData);
+              if (onEdit) onEdit(updatedData);
+            }}
+            multiline
+            placeholder="Street, City, State ZIP..."
+          />
+        </div>
+      </div>
+      <ExternalLinksRow organization={organization} clientInstanceUrl={clientInstanceUrl} />
+    </div>
+  );
+}
+
 // Inline editable header title (white text on gradient)
 function InlineHeaderText({ value, onSave }) {
   const [editing, setEditing] = useState(false);
