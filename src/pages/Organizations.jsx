@@ -148,25 +148,7 @@ export default function Organizations() {
   }
 
   return (
-    <div className="h-screen bg-white flex flex-col overflow-hidden">
-      <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
-        <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png" alt="Dealorus" className="h-10" />
-          <div className="flex items-center gap-3">
-            <button title="Support" className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-              <HelpCircle className="w-5 h-5 text-slate-600 hover:text-slate-900" />
-            </button>
-            <Link to={createPageUrl("Dashboard")} title="User Profile">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-blue-600 text-white text-xs font-semibold">
-                  {currentUser?.full_name?.split(" ").map(n => n[0]).join("") || "U"}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <div className="h-full bg-white flex flex-col overflow-hidden">
       <div className="flex-1 flex flex-col overflow-hidden px-6 py-4">
         {/* Toolbar */}
         <div className="flex items-center gap-3 mb-4 flex-shrink-0 flex-wrap">
