@@ -23,6 +23,7 @@ export default function Organizations() {
   const [filterState, setFilterState] = useState("");
   const [filterType, setFilterType] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [activeFilterId, setActiveFilterId] = useState(null);
   const queryClient = useQueryClient();
 
   React.useEffect(() => {
