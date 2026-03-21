@@ -108,14 +108,41 @@ export default function Organizations() {
   };
 
   const COLUMNS = [
-    { key: "organization_name", label: "Name" },
-    { key: "organization_type", label: "Organization Type" },
-    { key: "created_by", label: "Record Owner" },
-    { key: "city", label: "City" },
-    { key: "state", label: "State" },
-    { key: "phone", label: "Phone" },
-    { key: "created_date", label: "Created Date" },
+    { key: "organization_name", label: "Name", defaultWidth: 220 },
+    { key: "organization_type", label: "Organization Type", defaultWidth: 180 },
+    { key: "city", label: "City", defaultWidth: 130 },
+    { key: "state", label: "State", defaultWidth: 90 },
+    { key: "phone", label: "Phone", defaultWidth: 130 },
+    { key: "created_date", label: "Created Date", defaultWidth: 120 },
+    { key: "created_by", label: "Record Owner", defaultWidth: 130 },
   ];
+
+  const [colWidths, setColWidths] = useState(() =>
+    Object.fromEntries(COLUMNS.map(c => [c.key, c.defaultWidth]))
+  );
+  const resizingRef = useRef(null);
+
+  const startResize = useCallback((e, key) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = colWidths[key];
+    resizingRef.current = { key, startX, startWidth };
+
+    const onMouseMove = (moveEvent) => {
+      const delta = moveEvent.clientX - resizingRef.current.startX;
+      const newWidth = Math.max(60, resizingRef.current.startWidth + delta);
+      setColWidths(prev => ({ ...prev, [resizingRef.current.key]: newWidth }));
+    };
+
+    const onMouseUp = () => {
+      resizingRef.current = null;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [colWidths]);
 
   if (selectedOrg) {
     return (
