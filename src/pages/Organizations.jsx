@@ -294,6 +294,7 @@ export default function Organizations() {
             onSelectFilter={handleSelectFilter}
             currentFilters={{ state: filters.state, type: filters.type, search: searchQuery }}
             currentFields={visibleFields}
+            recordCount={filteredAndSorted.length}
           />
 
           {/* Fields button */}
