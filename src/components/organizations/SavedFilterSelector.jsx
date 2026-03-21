@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Building2, ChevronDown, Check, Plus, Save, X, Search } from "lucide-react";
 
-export default function SavedFilterSelector({ currentUser, activeFilter, onSelectFilter, currentFilters }) {
+export default function SavedFilterSelector({ currentUser, activeFilter, onSelectFilter, currentFilters, currentFields }) {
   const [open, setOpen] = useState(false);
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [saveName, setSaveName] = useState("");
