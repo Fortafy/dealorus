@@ -44,9 +44,9 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-56 flex-shrink-0 h-screen bg-white border-r border-slate-100 flex flex-col">
+    <aside className="w-56 flex-shrink-0 h-screen bg-slate-50 border-r border-slate-200 flex flex-col">
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-slate-100 flex-shrink-0">
+      <div className="px-4 py-5 flex-shrink-0">
         <img
           src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png"
           alt="Dealorus"
@@ -63,10 +63,10 @@ export default function Sidebar() {
             <Link
               key={label}
               to={path}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium mb-0.5 transition-colors ${
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium mb-0.5 transition-colors ${
                 isActive
-                  ? "bg-slate-100 text-slate-900"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-slate-200 text-slate-900"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
