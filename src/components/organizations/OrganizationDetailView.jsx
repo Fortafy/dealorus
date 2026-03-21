@@ -125,7 +125,7 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           </div>
 
           {/* Quick action buttons */}
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 flex-shrink-0">
+          <div className="flex items-center gap-2 px-3 py-3 border-b border-slate-100 flex-shrink-0">
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wide mr-1">Quick Add</span>
             <Button size="sm" variant="outline" className="h-6 px-2 text-xs gap-1" onClick={() => setTriggerNote(n => n + 1)}>
               <StickyNote className="w-3 h-3" />Note
