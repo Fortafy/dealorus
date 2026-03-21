@@ -36,7 +36,7 @@ function OrgLogo({ logoUrl, name }) {
   const [imgError, setImgError] = useState(false);
   const initials = name ? name.charAt(0).toUpperCase() : "?";
   return (
-    <div className="w-16 h-16 rounded-full flex-shrink-0 border-2 border-white/30 overflow-hidden bg-white/20 flex items-center justify-center">
+    <div className="w-12 h-12 rounded-full flex-shrink-0 border-2 border-white/30 overflow-hidden bg-white/20 flex items-center justify-center">
       {logoUrl && !imgError ? (
         <img src={logoUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
       ) : (
@@ -196,12 +196,12 @@ function EditableNTEEField({ nteeCode, nteeDescription, onSave }) {
     : nteeDescription || nteeCode || null;
 
   return (
-    <div className="group flex items-start gap-3 py-3 border-b border-slate-100 last:border-0">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
-        <Tag className="w-5 h-5" style={{ color: "hsl(217, 91%, 60%)" }} />
+    <div className="group flex items-start gap-2 py-2 border-b border-slate-100 last:border-0">
+      <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
+        <Tag className="w-3.5 h-3.5" style={{ color: "hsl(217, 91%, 60%)" }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-0.5">Classification</p>
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">Classification</p>
         {editing ? (
           <div>
             <div className="relative">
@@ -458,9 +458,9 @@ export default function OrganizationSummary({
           </div>
         </CardHeader>
 
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           {/* Mission — full width inline editable */}
-          <div className="mb-6">
+          <div className="mb-3">
             <EditableField
               icon={FileText}
               label="Mission"
@@ -471,7 +471,7 @@ export default function OrganizationSummary({
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-x-8">
+          <div className="grid md:grid-cols-2 gap-x-6">
             {/* Left column */}
             <div>
               <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
