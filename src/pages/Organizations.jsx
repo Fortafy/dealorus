@@ -1,26 +1,18 @@
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import OrganizationCard from "@/components/results/OrganizationCard";
-import ContactSearch from "@/components/contacts/ContactSearch";
 import OrganizationDetailView from "@/components/organizations/OrganizationDetailView";
-import AdvancedFilters from "@/components/organizations/AdvancedFilters";
 import SearchPanel from "@/components/search/SearchPanel";
 import NewAccountDialog from "@/components/organizations/NewAccountDialog";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
-import SavedFilters from "@/components/organizations/SavedFilters";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { motion } from "framer-motion";
-import { Building2, Search, Trash2, X, Plus, Home, Users, FileText, HelpCircle, Merge, ChevronLeft, ChevronRight } from "lucide-react";
+import { Building2, Search, X, Plus, Home, HelpCircle, ChevronUp, ChevronDown, ChevronsUpDown, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+import { format } from "date-fns";
 
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
