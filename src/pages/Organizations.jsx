@@ -109,9 +109,21 @@ export default function Organizations() {
         org.city?.toLowerCase().includes(searchLower) ||
         org.phone?.toLowerCase().includes(searchLower) ||
         org.organization_type?.toLowerCase().includes(searchLower);
-      const matchesState = !filterState || org.state === filterState;
-      const matchesType = !filterType || org.organization_type === filterType;
-      return matchesSearch && matchesState && matchesType;
+      const matchesState = !filters.state || org.state === filters.state;
+      const matchesType = !filters.type || org.organization_type === filters.type;
+      const matchesOwner = !filters.owner || (org.created_by && org.created_by.split("@")[0] === filters.owner);
+      const createdDate = org.created_date ? new Date(org.created_date) : null;
+      const matchesCreatedFrom = !filters.createdFrom || (createdDate && createdDate >= new Date(filters.createdFrom));
+      const matchesCreatedTo = !filters.createdTo || (createdDate && createdDate <= new Date(filters.createdTo + "T23:59:59"));
+      const updatedDate = org.updated_date ? new Date(org.updated_date) : null;
+      const matchesUpdatedFrom = !filters.updatedFrom || (updatedDate && updatedDate >= new Date(filters.updatedFrom));
+      const matchesUpdatedTo = !filters.updatedTo || (updatedDate && updatedDate <= new Date(filters.updatedTo + "T23:59:59"));
+      const revenue = parseFloat(org.annual_revenue) || 0;
+      const matchesRevenueMin = !filters.revenueMin || revenue >= parseFloat(filters.revenueMin);
+      const matchesRevenueMax = !filters.revenueMax || revenue <= parseFloat(filters.revenueMax);
+      return matchesSearch && matchesState && matchesType && matchesOwner &&
+        matchesCreatedFrom && matchesCreatedTo && matchesUpdatedFrom && matchesUpdatedTo &&
+        matchesRevenueMin && matchesRevenueMax;
     });
 
     result.sort((a, b) => {
