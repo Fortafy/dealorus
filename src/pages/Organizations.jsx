@@ -380,7 +380,7 @@ export default function Organizations() {
               <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
             </div>
           ) : (
-            <table className="text-xs" style={{ tableLayout: "fixed", width: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
+            <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
               <colgroup>
                 {COLUMNS.map(col => (
                   <col key={col.key} style={{ width: colWidths[col.key] }} />
