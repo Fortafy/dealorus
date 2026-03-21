@@ -135,8 +135,8 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
             </Button>
           </div>
 
-          {/* Activity Timeline */}
-          <div className="p-3">
+          {/* Activity Timeline — full width */}
+          <div className="border-t border-slate-100">
             <ActivityTimeline organization={organization} />
           </div>
         </div>
