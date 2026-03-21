@@ -57,6 +57,19 @@ export default function Organizations() {
     setSelectedOrg(updatedData);
   };
 
+  const handleSelectFilter = (id, filters) => {
+    setActiveFilterId(id);
+    if (filters) {
+      setFilterState(filters.state || "");
+      setFilterType(filters.type || "");
+      setSearchQuery(filters.search || "");
+    } else {
+      setFilterState("");
+      setFilterType("");
+      setSearchQuery("");
+    }
+  };
+
   // Unique states and types for filter dropdowns
   const uniqueStates = useMemo(() => [...new Set(organizations.map(o => o.state).filter(Boolean))].sort(), [organizations]);
   const uniqueTypes = useMemo(() => [...new Set(organizations.map(o => o.organization_type).filter(Boolean))].sort(), [organizations]);
