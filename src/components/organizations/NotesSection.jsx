@@ -184,12 +184,12 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
   const isPending = createNoteMutation.isPending || updateNoteMutation.isPending;
 
   return (
-    <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="py-2.5 px-3 bg-slate-50 border-b border-slate-200">
+    <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="py-2.5 px-4 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
-              <CardTitle className="text-base">Notes ({notes.length})</CardTitle>
+              <span className="text-sm font-semibold text-slate-700">Notes ({notes.length})</span>
               {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
             </CollapsibleTrigger>
             <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-7 px-2">
@@ -198,7 +198,7 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
             </Button>
           </div>
         </Collapsible>
-      </CardHeader>
+      </div>
 
       {/* Create / Edit Dialog */}
       <Dialog open={showNoteForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
