@@ -131,24 +131,12 @@ export default function Organizations() {
 
   if (selectedOrg) {
     return (
-      <div className="h-screen bg-white flex flex-col overflow-hidden">
-        <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
-          <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={() => setSelectedOrg(null)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 flex items-center gap-1.5 text-sm">
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png" alt="Dealorus" className="h-10" />
-            </div>
-            <Link to={createPageUrl("Dashboard")} title="User Profile">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-blue-600 text-white text-xs font-semibold">
-                  {currentUser?.full_name?.split(" ").map(n => n[0]).join("") || "U"}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </div>
-        </header>
+      <div className="h-full flex flex-col bg-white">
+        <div className="px-6 py-3 border-b border-slate-100 flex-shrink-0">
+          <button onClick={() => setSelectedOrg(null)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 flex items-center gap-1.5 text-sm">
+            <ArrowLeft className="w-4 h-4" /> Back to Organizations
+          </button>
+        </div>
         <div className="flex-1 overflow-y-auto p-6">
           <OrganizationDetailView
             organizationId={selectedOrg.id}
