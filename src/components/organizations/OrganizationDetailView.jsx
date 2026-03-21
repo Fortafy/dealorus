@@ -2,8 +2,11 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Building2, ChevronRight, FileText, Plus, StickyNote, Handshake } from "lucide-react";
+import { Building2, ChevronRight, Plus, StickyNote, Handshake, Sparkles, Database, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 import OrganizationSummary from "@/components/organizations/OrganizationSummary";
 import ContactsPanel from "@/components/organizations/ContactsPanel";

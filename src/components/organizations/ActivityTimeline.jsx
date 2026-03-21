@@ -48,7 +48,7 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
 
   return (
     <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="pb-3 bg-slate-50 border-b border-slate-200">
+      <CardHeader className="py-2.5 px-4 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
             <CardTitle className="text-base">

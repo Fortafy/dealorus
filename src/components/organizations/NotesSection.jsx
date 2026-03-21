@@ -186,7 +186,7 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
 
   return (
     <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
+      <CardHeader className="py-2.5 px-3 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
