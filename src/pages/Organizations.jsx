@@ -164,18 +164,15 @@ export default function Organizations() {
       : <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
   };
 
-  const COLUMNS = [
-    { key: "organization_name", label: "Name", defaultWidth: 220 },
-    { key: "organization_type", label: "Organization Type", defaultWidth: 180 },
-    { key: "city", label: "City", defaultWidth: 130 },
-    { key: "state", label: "State", defaultWidth: 90 },
-    { key: "phone", label: "Phone", defaultWidth: 130 },
-    { key: "created_date", label: "Created Date", defaultWidth: 120 },
-    { key: "created_by", label: "Record Owner", defaultWidth: 130 },
-  ];
-
+  // All column widths stored for every possible column
   const [colWidths, setColWidths] = useState(() =>
-    Object.fromEntries(COLUMNS.map(c => [c.key, c.defaultWidth]))
+    Object.fromEntries(ALL_COLUMNS.map(c => [c.key, c.defaultWidth]))
+  );
+
+  // Active columns derived from visibleFields order
+  const COLUMNS = useMemo(
+    () => visibleFields.map(key => ALL_COLUMNS.find(c => c.key === key)).filter(Boolean),
+    [visibleFields]
   );
   const resizingRef = useRef(null);
 
