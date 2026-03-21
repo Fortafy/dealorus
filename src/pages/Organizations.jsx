@@ -6,7 +6,7 @@ import SearchPanel from "@/components/search/SearchPanel";
 import NewAccountDialog from "@/components/organizations/NewAccountDialog";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import { motion } from "framer-motion";
-import { Building2, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, ArrowLeft, SlidersHorizontal, Upload, Download } from "lucide-react";
+import { Building2, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, SlidersHorizontal, Upload, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
