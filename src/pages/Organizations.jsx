@@ -220,16 +220,34 @@ export default function Organizations() {
               <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
             </div>
           ) : (
-            <table className="w-full text-xs">
+            <table className="text-xs" style={{ tableLayout: "fixed", width: COLUMNS.reduce((sum, c) => sum + colWidths[c.key], 0) }}>
+              <colgroup>
+                {COLUMNS.map(col => (
+                  <col key={col.key} style={{ width: colWidths[col.key] }} />
+                ))}
+              </colgroup>
               <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
                   {COLUMNS.map(col => (
                     <th
                       key={col.key}
-                      onClick={() => handleSort(col.key)}
-                      className="text-left px-3 py-2.5 font-semibold text-slate-600 cursor-pointer hover:text-slate-900 whitespace-nowrap select-none"
+                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group"
+                      style={{ width: colWidths[col.key] }}
                     >
-                      {col.label}<SortIcon field={col.key} />
+                      <span
+                        onClick={() => handleSort(col.key)}
+                        className="cursor-pointer hover:text-slate-900 pl-3 pr-4 block truncate"
+                      >
+                        {col.label}<SortIcon field={col.key} />
+                      </span>
+                      {/* Resize handle */}
+                      <div
+                        onMouseDown={(e) => startResize(e, col.key)}
+                        className="absolute top-0 right-0 h-full w-2 cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100"
+                        style={{ userSelect: "none" }}
+                      >
+                        <div className="w-0.5 h-4 bg-slate-300 rounded-full" />
+                      </div>
                     </th>
                   ))}
                 </tr>
@@ -237,27 +255,27 @@ export default function Organizations() {
               <tbody className="divide-y divide-slate-100">
                 {filteredAndSorted.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-16 text-slate-400">
+                    <td colSpan={COLUMNS.length} className="text-center py-16 text-slate-400">
                       <Building2 className="w-10 h-10 mx-auto mb-2 opacity-20" />
                       <p>No organizations found</p>
                     </td>
                   </tr>
                 ) : filteredAndSorted.map(org => (
                   <tr key={org.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 truncate">
                       <button
                         onClick={() => setSelectedOrg(org)}
-                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
+                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
                       >
                         {org.organization_name || "—"}
                       </button>
                     </td>
-                    <td className="px-3 py-2 text-slate-600">{org.organization_type || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600">{org.created_by || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600">{org.city || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600">{org.state || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600">{org.phone || "—"}</td>
-                    <td className="px-3 py-2 text-slate-500">{org.created_date ? format(new Date(org.created_date), "MMM d, yyyy") : "—"}</td>
+                    <td className="px-3 py-2 text-slate-600 truncate">{org.organization_type || "—"}</td>
+                    <td className="px-3 py-2 text-slate-600 truncate">{org.city || "—"}</td>
+                    <td className="px-3 py-2 text-slate-600 truncate">{org.state || "—"}</td>
+                    <td className="px-3 py-2 text-slate-600 truncate">{org.phone || "—"}</td>
+                    <td className="px-3 py-2 text-slate-500 truncate">{org.created_date ? format(new Date(org.created_date), "MMM d, yyyy") : "—"}</td>
+                    <td className="px-3 py-2 text-slate-600 truncate">{org.created_by ? org.created_by.split("@")[0] : "—"}</td>
                   </tr>
                 ))}
               </tbody>
