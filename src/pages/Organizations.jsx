@@ -255,27 +255,32 @@ export default function Organizations() {
         {/* Page Header Row */}
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
           <div className="flex items-center gap-2">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Home className="w-3.5 h-3.5" />
-              <ChevronRight className="w-3 h-3" />
+            <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: 'hsl(217, 91%, 93%)' }}>
+              <Building2 className="w-4 h-4" style={{ color: 'hsl(217, 91%, 45%)' }} />
             </div>
-            {/* Page title */}
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: 'hsl(217, 91%, 93%)' }}>
-                <Building2 className="w-4 h-4" style={{ color: 'hsl(217, 91%, 45%)' }} />
-              </div>
-              <span className="text-base font-semibold text-slate-800">Organizations</span>
-              <span className="text-xs text-slate-400 font-normal ml-1">{organizations.length}</span>
-            </div>
+            <span className="text-base font-semibold text-slate-800">Organizations</span>
           </div>
-          <Button
-            onClick={() => setShowNewAccountDialog(true)}
-            style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
-            className="hover:opacity-90 h-8 text-xs px-3"
-          >
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> New Account
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/organizations/import"
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" /> Import
+            </Link>
+            <Link
+              to="/organizations/export"
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" /> Export
+            </Link>
+            <Button
+              onClick={() => setShowNewAccountDialog(true)}
+              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
+              className="hover:opacity-90 h-8 text-xs px-3"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> New Account
+            </Button>
+          </div>
         </div>
 
         <div className="border-t border-slate-200 flex-shrink-0" />
