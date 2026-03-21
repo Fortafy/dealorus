@@ -266,10 +266,10 @@ export default function Organizations() {
             <div className="flex items-center">
               <button
                 onClick={() => setShowFilterPanel(p => !p)}
-                className={`flex items-center gap-2 h-8 px-3 text-xs rounded-l-lg border transition-colors ${
+                className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
                   activeFilterCount > 0
-                    ? "border-blue-400 bg-blue-50 text-blue-700 font-medium"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    ? "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium"
+                    : "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
