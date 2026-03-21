@@ -110,8 +110,8 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           className="flex flex-col overflow-y-auto overflow-x-hidden"
           style={{ width: `${leftPct}%` }}
         >
-          {/* Org fields */}
-          <div className="p-3 border-b border-slate-100">
+          {/* Org header — full width */}
+          <div className="border-b border-slate-100">
             <OrganizationSummary
               organization={organization}
               onDelete={onClose}
