@@ -376,145 +376,82 @@ export default function OrganizationSummary({
   if (isDeleted) {
     return (
       <motion.div initial={{ opacity: 1, y: 0 }} animate={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="pointer-events-none">
-        <Card className="overflow-hidden border-0 shadow-xl shadow-slate-200/50 bg-white">
-          <CardHeader className="text-white p-4" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
-            <div className="text-center py-8"><p className="text-lg font-semibold">Organization deleted</p></div>
-          </CardHeader>
-        </Card>
+        <div className="text-white p-4 text-center py-8" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
+          <p className="text-lg font-semibold">Organization deleted</p>
+        </div>
       </motion.div>
     );
   }
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <Card className="overflow-hidden border-0 shadow-xl shadow-slate-200/50 bg-white">
-        {/* Header */}
-        <CardHeader className="text-white p-6" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-start gap-4 flex-1">
-              <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
-              <div className="flex-1">
-                {/* Inline editable name */}
-                <InlineHeaderText
-                  value={displayData.organization_name}
-                  onSave={(val) => saveField("organization_name", val)}
-                />
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {displayData.organization_type && (
-                    <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.organization_type}</Badge>
-                  )}
-                  {displayData.ntee_description && (
-                    <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.ntee_description}</Badge>
-                  )}
-                </div>
+      {/* Header — full width gradient strip */}
+      <div className="text-white px-4 py-3" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 flex-1">
+            <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
+            <div className="flex-1">
+              <InlineHeaderText
+                value={displayData.organization_name}
+                onSave={(val) => saveField("organization_name", val)}
+              />
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {displayData.organization_type && (
+                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.organization_type}</Badge>
+                )}
+                {displayData.ntee_description && (
+                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.ntee_description}</Badge>
+                )}
               </div>
             </div>
-            <div className="flex gap-1.5 flex-wrap items-center">
-              {/* Active/Inactive toggle */}
-              <div className="flex items-center justify-center h-8 px-2">
-                <div
-                  style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)" }}
-                  className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
-                  onClick={handleStatusToggle}
-                >
-                  <div className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${clientStatus === "active" ? "translate-x-5" : "translate-x-0"}`} />
-                </div>
+          </div>
+          <div className="flex gap-1.5 flex-wrap items-center">
+            <div className="flex items-center justify-center h-8 px-2">
+              <div
+                style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)" }}
+                className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
+                onClick={handleStatusToggle}
+              >
+                <div className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${clientStatus === "active" ? "translate-x-5" : "translate-x-0"}`} />
               </div>
-              <Button variant="secondary" size="sm" onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }} title="Smart Enrich">
-                <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <Button variant="secondary" size="sm" onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }} title="Smart Enrich">
+              <Sparkles className="w-3.5 h-3.5" />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="sm" disabled={isEnriching || !isSaved || !organization.ein} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
+                  <Database className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleSourceEnrich("CharityAPI")} disabled={isEnriching}>
+                  {enrichingSource === "CharityAPI" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                  CharityAPI
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSourceEnrich("ProPublica")} disabled={isEnriching}>
+                  {enrichingSource === "ProPublica" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                  ProPublica
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleSourceEnrich("Nonprofit Check Plus")} disabled={isEnriching}>
+                  {enrichingSource === "Nonprofit Check Plus" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                  Nonprofit Check Plus
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {isSaved && (
+              <Button variant="secondary" size="sm" onClick={handlePushToSalesforce} disabled={isPushingToSalesforce} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
+                {isPushingToSalesforce ? <div className="w-3.5 h-3.5 border border-blue-300 border-t-blue-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" size="sm" disabled={isEnriching || !isSaved || !organization.ein} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
-                    <Database className="w-3.5 h-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleSourceEnrich("CharityAPI")} disabled={isEnriching}>
-                    {enrichingSource === "CharityAPI" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                    CharityAPI
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSourceEnrich("ProPublica")} disabled={isEnriching}>
-                    {enrichingSource === "ProPublica" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                    ProPublica
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSourceEnrich("Nonprofit Check Plus")} disabled={isEnriching}>
-                    {enrichingSource === "Nonprofit Check Plus" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                    Nonprofit Check Plus
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {isSaved && (
-                <Button variant="secondary" size="sm" onClick={handlePushToSalesforce} disabled={isPushingToSalesforce} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
-                  {isPushingToSalesforce ? <div className="w-3.5 h-3.5 border border-blue-300 border-t-blue-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                </Button>
-              )}
-              {onDelete && (
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="h-8 w-8 p-0">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
-              )}
-            </div>
+            )}
+            {onDelete && (
+              <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="h-8 w-8 p-0">
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            )}
           </div>
-        </CardHeader>
-
-        <CardContent className="p-4">
-          {/* Mission — full width inline editable */}
-          <div className="mb-3">
-            <EditableField
-              icon={FileText}
-              label="Mission"
-              value={organization.mission}
-              onSave={(val) => saveField("mission", val)}
-              multiline
-              placeholder="Click to add mission statement..."
-            />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-x-6">
-            {/* Left column */}
-            <div>
-              <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
-              <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
-              <EditableField icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} onSave={(val) => saveField("annual_revenue", val)} placeholder="e.g. $1,000,000" />
-              <EditableField icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} onSave={(val) => saveField("ruling_date", val)} placeholder="e.g. 1995-01-01" />
-              <EditableNTEEField
-                nteeCode={displayData.ntee_code}
-                nteeDescription={displayData.ntee_description}
-                onSave={saveNTEE}
-              />
-            </div>
-            {/* Right column */}
-            <div>
-              <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
-              <EditableField icon={Mail} label="Email" value={organization.email} onSave={(val) => saveField("email", val)} placeholder="Email address..." />
-              <EditableField icon={Globe} label="Website" value={organization.website} onSave={(val) => saveField("website", val)} isLink placeholder="Website URL..." />
-              <EditableField
-                icon={MapPin}
-                label="Address"
-                value={[organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ")}
-                onSave={(val) => {
-                  const parts = val ? val.split(",").map(p => p.trim()) : [];
-                  const address = parts[0] || null;
-                  const city = parts[1] || null;
-                  const stateZip = parts[2] || "";
-                  const stateZipParts = stateZip.split(" ").filter(Boolean);
-                  const state = stateZipParts[0] || parts[2] || null;
-                  const zip_code = stateZipParts[1] || parts[3] || null;
-                  const updatedData = { ...organization, address, city, state, zip_code };
-                  base44.entities.Organization.update(organization.id, updatedData);
-                  if (onEdit) onEdit(updatedData);
-                }}
-                multiline
-                placeholder="Street, City, State ZIP..."
-              />
-            </div>
-          </div>
-
-          {/* External links row */}
-          <ExternalLinksRow organization={organization} clientInstanceUrl={clientInstanceUrl} />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <EnrichmentComparisonDialog
         open={showComparisonDialog}
