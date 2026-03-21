@@ -284,10 +284,10 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-xs font-semibold text-slate-700">
                 Contacts ({filteredContacts.length})
               </span>
-              {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+              {isOpen ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
             </CollapsibleTrigger>
             <TooltipProvider>
               <div className="flex gap-1">
@@ -297,9 +297,9 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                       size="sm"
                       onClick={() => { setEditingContact(null); setShowContactForm(true); }}
                       style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                      className="text-white hover:opacity-90 h-7 px-2"
+                      className="text-white hover:opacity-90 h-6 px-2 text-xs"
                     >
-                      <Plus className="w-3 h-3 mr-1" />
+                      <Plus className="w-2.5 h-2.5 mr-1" />
                       Add
                     </Button>
                   </TooltipTrigger>
@@ -308,7 +308,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button onClick={() => setShowFilterDialog(true)} variant="outline" size="sm" className="h-7 px-2">
+                    <Button onClick={() => setShowFilterDialog(true)} variant="outline" size="sm" className="h-6 px-1.5">
                       <Filter className="w-3 h-3" />
                       {Object.values(filters).some(v => v) && <span className="ml-1 w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
                     </Button>
@@ -318,7 +318,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button onClick={() => setShowAdvancedSearch(true)} disabled={isSearching} variant="outline" size="sm" className="h-7 px-2">
+                    <Button onClick={() => setShowAdvancedSearch(true)} disabled={isSearching} variant="outline" size="sm" className="h-6 px-1.5">
                       {isSearching ? <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" /> : <Sparkles className="w-3 h-3" />}
                     </Button>
                   </TooltipTrigger>
@@ -327,7 +327,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button onClick={() => searchContacts()} disabled={isSearching} size="sm" className="h-7 px-2 text-white" style={{ backgroundColor: "hsl(217, 91%, 60%)" }}>
+                    <Button onClick={() => searchContacts()} disabled={isSearching} size="sm" className="h-6 px-1.5 text-white" style={{ backgroundColor: "hsl(217, 91%, 60%)" }}>
                       {isSearching ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-3 h-3" />}
                     </Button>
                   </TooltipTrigger>
@@ -351,15 +351,15 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         )}
 
         {!isSearching && filteredContacts.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-6">No contacts yet</p>
+          <p className="text-xs text-slate-500 text-center py-4">No contacts yet</p>
         ) : !isSearching && (
           <div className="divide-y divide-slate-200">
             {sortedContacts.map((contact) => (
-              <div key={contact.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-slate-900">{contact.name}</h4>
-                    {contact.title && <p className="text-xs text-slate-600">{contact.title}</p>}
+              <div key={contact.id} className="px-4 py-2 hover:bg-slate-50 transition-colors">
+               <div className="flex items-start justify-between gap-2 mb-1">
+                 <div className="flex-1">
+                   <h4 className="font-semibold text-xs text-slate-900">{contact.name}</h4>
+                   {contact.title && <p className="text-[10px] text-slate-600">{contact.title}</p>}
                   </div>
                   <div className="flex gap-1">
                     <Button
@@ -393,7 +393,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-2 text-xs">
+                <div className="flex flex-wrap gap-2 mb-1 text-[10px]">
                   {contact.email && (
                     <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-slate-600 hover:text-blue-600">
                       <Mail className="w-3 h-3" />
