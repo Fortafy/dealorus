@@ -24,17 +24,8 @@ export default function Organizations() {
   const [currentUser, setCurrentUser] = useState(null);
   const queryClient = useQueryClient();
 
-  // Fetch current user
   React.useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const user = await base44.auth.me();
-        setCurrentUser(user);
-      } catch (err) {
-        console.error("Failed to fetch current user:", err);
-      }
-    };
-    fetchUser();
+    base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
   const { data: organizations = [], isLoading } = useQuery({
