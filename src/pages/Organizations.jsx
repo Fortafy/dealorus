@@ -64,22 +64,32 @@ export default function Organizations() {
     setSelectedOrg(updatedData);
   };
 
-  const handleSelectFilter = (id, filters) => {
+  const EMPTY_FILTERS = {
+    type: "", state: "", owner: "",
+    createdFrom: "", createdTo: "",
+    updatedFrom: "", updatedTo: "",
+    revenueMin: "", revenueMax: "",
+  };
+
+  const activeFilterCount = Object.values(filters).filter(v => v !== "").length;
+
+  const clearFilters = () => setFilters(EMPTY_FILTERS);
+
+  const handleSelectFilter = (id, savedFilters) => {
     setActiveFilterId(id);
-    if (filters) {
-      setFilterState(filters.state || "");
-      setFilterType(filters.type || "");
-      setSearchQuery(filters.search || "");
+    if (savedFilters) {
+      setFilters({ ...EMPTY_FILTERS, state: savedFilters.state || "", type: savedFilters.type || "" });
+      setSearchQuery(savedFilters.search || "");
     } else {
-      setFilterState("");
-      setFilterType("");
+      setFilters(EMPTY_FILTERS);
       setSearchQuery("");
     }
   };
 
-  // Unique states and types for filter dropdowns
+  // Unique values for filter dropdowns
   const uniqueStates = useMemo(() => [...new Set(organizations.map(o => o.state).filter(Boolean))].sort(), [organizations]);
   const uniqueTypes = useMemo(() => [...new Set(organizations.map(o => o.organization_type).filter(Boolean))].sort(), [organizations]);
+  const uniqueOwners = useMemo(() => [...new Set(organizations.map(o => o.created_by ? o.created_by.split("@")[0] : null).filter(Boolean))].sort(), [organizations]);
 
   const handleSort = (field) => {
     if (sortField === field) {
