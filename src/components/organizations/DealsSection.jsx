@@ -454,8 +454,8 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
               ))}
             </div>
           )}
-        </CardContent>
+        </div>
       )}
-    </Card>
+    </div>
   );
 }
