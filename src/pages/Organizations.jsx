@@ -19,18 +19,12 @@ export default function Organizations() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showNewAccountDialog, setShowNewAccountDialog] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(true);
   const [showDuplicates, setShowDuplicates] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [filters, setFilters] = useState({
-    state: "",
-    organization_type: "",
-    ntee_code: "",
-    min_revenue: "",
-    max_revenue: "",
-  });
+  const [sortField, setSortField] = useState("organization_name");
+  const [sortDir, setSortDir] = useState("asc");
+  const [filterState, setFilterState] = useState("");
+  const [filterType, setFilterType] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
-  const rightColumnRef = React.useRef(null);
   const queryClient = useQueryClient();
 
   // Fetch current user
