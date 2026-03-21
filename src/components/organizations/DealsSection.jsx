@@ -252,11 +252,11 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
-              <span className="text-sm font-semibold text-slate-700">Deals ({deals.length})</span>
-              {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+              <span className="text-xs font-semibold text-slate-700">Deals ({deals.length})</span>
+              {isOpen ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
             </CollapsibleTrigger>
-            <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-7 px-2">
-              <Plus className="w-3 h-3 mr-1" />
+            <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-6 px-2 text-xs">
+              <Plus className="w-2.5 h-2.5 mr-1" />
               New Deal
             </Button>
           </div>
@@ -398,15 +398,15 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
       {isOpen && (
         <div className="p-0">
           {deals.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-6 px-4">No deals yet</p>
+            <p className="text-xs text-slate-500 text-center py-4 px-4">No deals yet</p>
           ) : (
             <div className="divide-y divide-slate-200">
               {deals.map((deal) => (
-                <div key={deal.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
+                <div key={deal.id} className="px-4 py-2 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm text-slate-900">{deal.name}</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">{moment(deal.created_date).format("MMM D, YYYY")}</p>
+                      <h4 className="font-semibold text-xs text-slate-900">{deal.name}</h4>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{moment(deal.created_date).format("MMM D, YYYY")}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button variant="ghost" size="sm" onClick={() => openEdit(deal)} className="h-6 w-6 p-0 text-slate-400 hover:text-blue-600 flex-shrink-0">
@@ -436,7 +436,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                     )}
                   </div>
                   {deal.start_date && deal.end_date && (
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-[10px] text-slate-400 mt-0.5">
                       {moment(deal.start_date).format("MMM D, YYYY")} – {moment(deal.end_date).format("MMM D, YYYY")}
                     </p>
                   )}

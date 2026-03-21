@@ -189,11 +189,11 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
-              <span className="text-sm font-semibold text-slate-700">Notes ({notes.length})</span>
-              {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+              <span className="text-xs font-semibold text-slate-700">Notes ({notes.length})</span>
+              {isOpen ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
             </CollapsibleTrigger>
-            <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-7 px-2">
-              <Plus className="w-3 h-3 mr-1" />
+            <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-6 px-2 text-xs">
+              <Plus className="w-2.5 h-2.5 mr-1" />
               Add Note
             </Button>
           </div>
@@ -247,16 +247,16 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
       {isOpen && (
         <div className="p-0">
           {notes.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-6">No notes yet</p>
+            <p className="text-xs text-slate-500 text-center py-4">No notes yet</p>
           ) : (
             <div className="divide-y divide-slate-100">
               {notes.map((note) => (
-                <div key={note.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
+                <div key={note.id} className="px-4 py-2 hover:bg-slate-50 transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-sm text-slate-900">{note.title}</h4>
+                      <h4 className="font-semibold text-xs text-slate-900">{note.title}</h4>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-slate-500">{moment(note.created_date).format("MMM D, YYYY h:mm A")}</p>
+                        <p className="text-[10px] text-slate-500">{moment(note.created_date).format("MMM D, YYYY h:mm A")}</p>
                         {note.remind_at && (() => {
                           const isPastDue = new Date(note.remind_at) < new Date();
                           return (
@@ -278,7 +278,7 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
                       </Button>
                     </div>
                   </div>
-                  <p className="text-sm text-slate-700 mt-1 line-clamp-2">{note.content}</p>
+                  <p className="text-xs text-slate-700 mt-0.5 line-clamp-2">{note.content}</p>
                 </div>
               ))}
             </div>
