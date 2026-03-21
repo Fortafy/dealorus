@@ -232,18 +232,11 @@ export default function Organizations() {
 
   if (selectedOrg) {
     return (
-      <div className="h-full flex flex-col bg-white">
-        <div className="px-6 py-3 border-b border-slate-100 flex-shrink-0">
-          <button onClick={() => setSelectedOrg(null)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 flex items-center gap-1.5 text-sm">
-            <ArrowLeft className="w-4 h-4" /> Back to Organizations
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-6">
-          <OrganizationDetailView
-            organizationId={selectedOrg.id}
-            onClose={() => setSelectedOrg(null)}
-          />
-        </div>
+      <div className="h-full flex flex-col bg-white overflow-hidden">
+        <OrganizationDetailView
+          organizationId={selectedOrg.id}
+          onClose={() => setSelectedOrg(null)}
+        />
       </div>
     );
   }
