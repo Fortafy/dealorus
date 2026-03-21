@@ -446,7 +446,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         )}
         </div>}
 
-        <ContactForm
+      <ContactForm
         contact={editingContact}
         organizationId={organization.id}
         clientId={currentUser?.client_id}
@@ -459,51 +459,51 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         }}
       />
 
-          <EnhancedAISearchDialog
-          open={showAdvancedSearch}
-          onOpenChange={setShowAdvancedSearch}
-          onSearch={searchContacts}
-          />
+      <EnhancedAISearchDialog
+        open={showAdvancedSearch}
+        onOpenChange={setShowAdvancedSearch}
+        onSearch={searchContacts}
+      />
 
-          <FilterDialog
-          open={showFilterDialog}
-          onOpenChange={setShowFilterDialog}
-          onFilterChange={setFilters}
-          currentFilters={filters}
-          />
+      <FilterDialog
+        open={showFilterDialog}
+        onOpenChange={setShowFilterDialog}
+        onFilterChange={setFilters}
+        currentFilters={filters}
+      />
 
-          {enrichingContactId && (
-          <EnrichContactDialog
+      {enrichingContactId && (
+        <EnrichContactDialog
           open={!!enrichingContactId}
           onOpenChange={(open) => !open && setEnrichingContactId(null)}
           contact={contacts.find(c => c.id === enrichingContactId)}
           organization={organization}
           onSave={handleEnrichSave}
-          />
-          )}
+        />
+      )}
 
-          <AlertDialog open={!!contactToDelete} onOpenChange={(open) => !open && setContactToDelete(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Contact</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete {contactToDelete?.name}? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="flex gap-3 justify-end">
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    deleteContactMutation.mutate(contactToDelete.id);
-                    setContactToDelete(null);
-                  }}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  Delete
-                </AlertDialogAction>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog>
+      <AlertDialog open={!!contactToDelete} onOpenChange={(open) => !open && setContactToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {contactToDelete?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-3 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                deleteContactMutation.mutate(contactToDelete.id);
+                setContactToDelete(null);
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
           </div>
-          );
-          }
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
