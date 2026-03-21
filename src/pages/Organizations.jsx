@@ -180,8 +180,24 @@ export default function Organizations() {
   return (
     <div className="h-full bg-white flex flex-col overflow-hidden">
       <div className="flex-1 flex flex-col overflow-hidden px-6 py-4">
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 mb-4 flex-shrink-0 flex-wrap">
+
+        {/* Page Header Row */}
+        <div className="flex items-center justify-between mb-3 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <Home className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
+            </div>
+            {/* Page title */}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: 'hsl(217, 91%, 93%)' }}>
+                <Building2 className="w-4 h-4" style={{ color: 'hsl(217, 91%, 45%)' }} />
+              </div>
+              <span className="text-base font-semibold text-slate-800">Organizations</span>
+              <span className="text-xs text-slate-400 font-normal ml-1">{organizations.length}</span>
+            </div>
+          </div>
           <Button
             onClick={() => setShowNewAccountDialog(true)}
             style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
@@ -189,12 +205,23 @@ export default function Organizations() {
           >
             <Plus className="w-3.5 h-3.5 mr-1.5" /> New Account
           </Button>
+        </div>
+
+        {/* Toolbar */}
+        <div className="flex items-center gap-3 mb-4 flex-shrink-0 flex-wrap">
+          {/* Saved filter list selector */}
+          <SavedFilterSelector
+            currentUser={currentUser}
+            activeFilter={activeFilterId}
+            onSelectFilter={handleSelectFilter}
+            currentFilters={{ state: filterState, type: filterType, search: searchQuery }}
+          />
 
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <Input
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
               placeholder="Search..."
               className="pl-8 pr-8 h-8 text-xs w-56"
             />
@@ -207,7 +234,7 @@ export default function Organizations() {
 
           <select
             value={filterState}
-            onChange={e => setFilterState(e.target.value)}
+            onChange={e => { setFilterState(e.target.value); setActiveFilterId(null); }}
             className="h-8 px-2 text-xs border border-slate-200 rounded-md bg-white text-slate-700"
           >
             <option value="">All States</option>
@@ -216,7 +243,7 @@ export default function Organizations() {
 
           <select
             value={filterType}
-            onChange={e => setFilterType(e.target.value)}
+            onChange={e => { setFilterType(e.target.value); setActiveFilterId(null); }}
             className="h-8 px-2 text-xs border border-slate-200 rounded-md bg-white text-slate-700"
           >
             <option value="">All Types</option>
