@@ -40,7 +40,7 @@ function OrgLogo({ logoUrl, name }) {
       {logoUrl && !imgError ? (
         <img src={logoUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
       ) : (
-        <span className="text-white text-xl font-bold">{initials}</span>
+        <span className="text-white text-base font-bold">{initials}</span>
       )}
     </div>
   );
@@ -640,11 +640,11 @@ function InlineHeaderText({ value, onSave }) {
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setEditing(false); setDraft(value); } }}
-      className="text-xl font-semibold bg-white/20 text-white placeholder-white/60 border-b-2 border-white/50 outline-none w-full"
+      className="text-base font-semibold bg-white/20 text-white placeholder-white/60 border-b-2 border-white/50 outline-none w-full"
     />
   ) : (
     <h2
-      className="text-xl font-semibold cursor-pointer hover:bg-white/10 rounded px-1 -mx-1 transition-colors"
+      className="text-base font-semibold cursor-pointer hover:bg-white/10 rounded px-1 -mx-1 transition-colors"
       onClick={() => { setDraft(value); setEditing(true); }}
       title="Click to edit"
     >
