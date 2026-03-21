@@ -338,9 +338,9 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
             </TooltipProvider>
           </div>
         </Collapsible>
-      </CardHeader>
+      </div>
 
-      {isOpen && <CardContent className="p-0">
+      {isOpen && <div className="p-0">
         {isSearching && (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
