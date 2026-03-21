@@ -84,7 +84,7 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
         <Icon className="w-3.5 h-3.5" style={{ color: "hsl(217, 91%, 60%)" }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
+        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
         {editing ? (
           multiline ? (
             <Textarea
@@ -94,7 +94,7 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
               onBlur={commit}
               onKeyDown={handleKeyDown}
               rows={3}
-              className="text-sm mt-1"
+              className="text-xs mt-1"
             />
           ) : (
             <Input
@@ -103,7 +103,7 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
               onChange={(e) => setDraft(e.target.value)}
               onBlur={commit}
               onKeyDown={handleKeyDown}
-              className="text-sm h-8 mt-0.5"
+              className="text-xs h-7 mt-0.5"
             />
           )
         ) : (
@@ -118,7 +118,7 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
                   href={displayValue.startsWith("http") ? displayValue : `https://${displayValue}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm hover:underline flex items-center gap-1"
+                  className="text-xs hover:underline flex items-center gap-1"
                   style={{ color: "hsl(217, 91%, 60%)" }}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -126,10 +126,10 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
                   <ExternalLink className="w-3 h-3" />
                 </a>
               ) : (
-                <p className="text-sm text-slate-800 break-words">{displayValue}</p>
+                <p className="text-xs text-slate-800 break-words">{displayValue}</p>
               )
             ) : (
-              <p className="text-sm text-slate-400 italic">{placeholder}</p>
+              <p className="text-xs text-slate-400 italic">{placeholder}</p>
             )}
             <Pencil className="w-3 h-3 text-slate-300 ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
           </div>
