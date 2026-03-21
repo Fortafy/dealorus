@@ -82,7 +82,12 @@ export default function Organizations() {
 
   const clearFilters = () => setFilters(EMPTY_FILTERS);
 
-  const handleSelectFilter = (id, savedFilters) => {
+  const handleFieldsChange = (fields) => {
+    setVisibleFields(fields);
+    try { localStorage.setItem("org_visible_fields", JSON.stringify(fields)); } catch {}
+  };
+
+  const handleSelectFilter = (id, savedFilters, savedFields) => {
     setActiveFilterId(id);
     if (savedFilters) {
       setFilters({ ...EMPTY_FILTERS, state: savedFilters.state || "", type: savedFilters.type || "" });
