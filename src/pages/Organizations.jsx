@@ -26,6 +26,12 @@ export default function Organizations() {
   const [activeFilterId, setActiveFilterId] = useState(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const filterButtonRef = useRef(null);
+  const [visibleFields, setVisibleFields] = useState(() => {
+    try {
+      const stored = localStorage.getItem("org_visible_fields");
+      return stored ? JSON.parse(stored) : DEFAULT_VISIBLE_FIELDS;
+    } catch { return DEFAULT_VISIBLE_FIELDS; }
+  });
   const [filters, setFilters] = useState({
     type: "", state: "", owner: "",
     createdFrom: "", createdTo: "",
