@@ -146,9 +146,13 @@ function ReminderPickerField({ value, onChange }) {
   );
 }
 
-export default function DealsSection({ organization, clientId, clientLifecycleStages = [] }) {
+export default function DealsSection({ organization, clientId, clientLifecycleStages = [], externalOpenCreate }) {
   const queryClient = useQueryClient();
   const [showDealForm, setShowDealForm] = useState(false);
+
+  useEffect(() => {
+    if (externalOpenCreate > 0) openCreate();
+  }, [externalOpenCreate]);
   const [editingDeal, setEditingDeal] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [deleteTarget, setDeleteTarget] = useState(null);
