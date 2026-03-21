@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import SavedFilterSelector from "@/components/organizations/SavedFilterSelector";
 import FilterPanel from "@/components/organizations/FilterPanel";
+import FieldsPanel, { ALL_COLUMNS, DEFAULT_VISIBLE_FIELDS } from "@/components/organizations/FieldsPanel";
 
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
