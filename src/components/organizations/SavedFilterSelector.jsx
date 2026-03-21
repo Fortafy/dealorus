@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Building2, ChevronDown, Check, Plus, Save, X, Search } from "lucide-react";
 
-export default function SavedFilterSelector({ currentUser, activeFilter, onSelectFilter, currentFilters, currentFields }) {
+export default function SavedFilterSelector({ currentUser, activeFilter, onSelectFilter, currentFilters, currentFields, recordCount }) {
   const [open, setOpen] = useState(false);
   const [showSaveForm, setShowSaveForm] = useState(false);
   const [saveName, setSaveName] = useState("");
@@ -68,8 +68,9 @@ export default function SavedFilterSelector({ currentUser, activeFilter, onSelec
       >
         <Building2 className="w-3.5 h-3.5 text-slate-500" />
         <span>{activeLabel}</span>
-        <span className="text-slate-400 font-normal ml-0.5">·</span>
-        <span className="text-slate-400 font-normal">{activeFilter ? "" : "All"}</span>
+        {recordCount !== undefined && (
+          <span className="text-slate-400 font-normal">{recordCount} record{recordCount !== 1 ? "s" : ""}</span>
+        )}
         <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
       </button>
 
