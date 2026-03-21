@@ -92,6 +92,7 @@ export default function Organizations() {
     if (savedFilters) {
       setFilters({ ...EMPTY_FILTERS, state: savedFilters.state || "", type: savedFilters.type || "" });
       setSearchQuery(savedFilters.search || "");
+      if (savedFields && savedFields.length > 0) handleFieldsChange(savedFields);
     } else {
       setFilters(EMPTY_FILTERS);
       setSearchQuery("");
