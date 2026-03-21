@@ -397,7 +397,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
       </AlertDialog>
 
       {isOpen && (
-        <CardContent className="p-0">
+        <div className="p-0">
           {deals.length === 0 ? (
             <p className="text-sm text-slate-500 text-center py-6 px-4">No deals yet</p>
           ) : (
