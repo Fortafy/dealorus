@@ -123,37 +123,20 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50/30 flex flex-col overflow-hidden">
-      {/* Header */}
-      <header className="border-b border-slate-100 bg-white/70 backdrop-blur-xl z-10 flex-shrink-0">
-        <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <img 
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+      {/* Left Sidebar - Dashboard Nav */}
+      <aside className="w-56 flex-shrink-0 h-screen bg-white border-r border-slate-100 flex flex-col">
+        {/* Logo */}
+        <div className="px-4 py-5 border-b border-slate-100 flex-shrink-0">
+          <img
             src={organization?.logo_url || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png"}
-            alt="Organization"
-            className="h-10"
+            alt="Dealorus"
+            className="h-9"
           />
-          <div className="flex items-center gap-3">
-            <Link to={createPageUrl("Organizations")} title="Home">
-              <Home className="w-5 h-5 text-slate-600 hover:text-slate-900 transition-colors" />
-            </Link>
-            <button title="Support" className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-              <HelpCircle className="w-5 h-5 text-slate-600 hover:text-slate-900" />
-            </button>
-            <Link to={createPageUrl("Dashboard")} title="User Profile">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-white text-xs font-semibold" style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}>
-                  {currentUser?.full_name?.split(" ").map(n => n[0]).join("") || "U"}
-                </AvatarFallback>
-              </Avatar>
-            </Link>
-          </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="flex flex-1 overflow-hidden min-h-0">
-        {/* Left Column - Navigation */}
-        <div className="w-72 border-r border-slate-100 bg-white flex flex-col flex-shrink-0 overflow-hidden">
+        {/* Dashboard Nav */}
+        <div className="flex-1 overflow-y-auto">
           <DashboardNav
             activeSection={activeSection}
             onSectionChange={setActiveSection}
@@ -164,17 +147,28 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Right Column - Content */}
-        <div className="flex-1 overflow-y-auto">
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
+        {/* Back to App */}
+        <div className="border-t border-slate-100 px-3 py-4 flex-shrink-0">
+          <Link
+            to={createPageUrl("Organizations")}
+            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
           >
-            {renderContent()}
-          </motion.div>
+            <Home className="w-4 h-4 flex-shrink-0" />
+            Back to App
+          </Link>
         </div>
+      </aside>
+
+      {/* Right Content Area */}
+      <main className="flex-1 overflow-y-auto">
+        <motion.div
+          key={activeSection}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {renderContent()}
+        </motion.div>
       </main>
     </div>
   );
