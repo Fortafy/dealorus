@@ -69,7 +69,7 @@ export default function SavedFilterSelector({ currentUser, activeFilter, onSelec
         <Building2 className="w-3.5 h-3.5 text-slate-500" />
         <span>{activeLabel}</span>
         {recordCount !== undefined && (
-          <span className="text-slate-400 font-normal">{recordCount} record{recordCount !== 1 ? "s" : ""}</span>
+          <span className="text-slate-400 font-normal">({recordCount})</span>
         )}
         <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
       </button>
