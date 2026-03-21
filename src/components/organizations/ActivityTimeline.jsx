@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Activity, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import moment from "moment";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function ActivityTimeline({ organization, isCollapsed }) {
   const [isOpen, setIsOpen] = useState(true);
@@ -47,47 +45,45 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   return (
-    <Card className="border-0 shadow-lg overflow-hidden">
-      <CardHeader className="py-2.5 px-4 bg-slate-50 border-b border-slate-200">
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="flex items-center justify-between w-full group hover:opacity-80 transition-opacity">
-            <CardTitle className="text-base">
-              Activity Timeline ({mergedActivity.length})
-            </CardTitle>
-            {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </CollapsibleTrigger>
-        </Collapsible>
-      </CardHeader>
+    <div>
+      {/* Header row */}
+      <button
+        className="flex items-center justify-between w-full px-4 py-2.5 bg-slate-50 border-b border-slate-200 hover:opacity-80 transition-opacity"
+        onClick={() => setIsOpen(o => !o)}
+      >
+        <span className="text-sm font-semibold text-slate-700">Activity Timeline ({mergedActivity.length})</span>
+        {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
 
-      {isOpen && <CardContent className="p-0">
-        {mergedActivity.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-6">No activity yet</p>
-        ) : (
-          <div className="divide-y divide-slate-200">
-            {mergedActivity.map((item) => (
-              <div key={`${item.type}-${item.id}`} className="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                <div className="text-lg flex-shrink-0 mt-0.5">{item.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-slate-900">{item.type === "interaction" ? item.subject : item.type === "note" ? item.title : item.name}</p>
-                    <span className="text-xs text-slate-500 flex-shrink-0">{moment(item.timestamp).fromNow()}</span>
-                  </div>
-                  {item.type === "interaction" && (
-                    <Badge className="mt-1 text-xs" variant="outline">
-                      {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                    </Badge>
-                  )}
-                  {item.type === "deal" && (
-                    <div className="flex gap-1 mt-1">
-                      {item.value && <Badge className="text-xs">${item.value.toLocaleString()}</Badge>}
+      {isOpen && (
+        <div>
+          {mergedActivity.length === 0 ? (
+            <p className="text-sm text-slate-500 text-center py-6">No activity yet</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {mergedActivity.map((item) => (
+                <div key={`${item.type}-${item.id}`} className="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                  <div className="text-lg flex-shrink-0 mt-0.5">{item.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-slate-900">{item.type === "interaction" ? item.subject : item.type === "note" ? item.title : item.name}</p>
+                      <span className="text-xs text-slate-500 flex-shrink-0">{moment(item.timestamp).fromNow()}</span>
                     </div>
-                  )}
+                    {item.type === "interaction" && (
+                      <Badge className="mt-1 text-xs" variant="outline">
+                        {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                      </Badge>
+                    )}
+                    {item.type === "deal" && item.value && (
+                      <Badge className="mt-1 text-xs">${item.value.toLocaleString()}</Badge>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>}
-    </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
