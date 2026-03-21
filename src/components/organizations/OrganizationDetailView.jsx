@@ -168,7 +168,7 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
             />
           </div>
 
-          <div className="p-3 space-y-3">
+          <div className="space-y-0 border-t border-slate-100">
             <ContactsPanel
               organization={organization}
               clientId={currentUser?.client_id}

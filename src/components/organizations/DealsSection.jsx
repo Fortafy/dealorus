@@ -247,8 +247,8 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
   const isPending = createDealMutation.isPending || updateDealMutation.isPending;
 
   return (
-    <div className="border border-slate-200 rounded-lg overflow-hidden">
-      <div className="py-2.5 px-4 bg-slate-50 border-b border-slate-200">
+    <div className="border-b border-slate-200 overflow-hidden">
+      <div className="py-2 px-4 bg-slate-50 border-b border-slate-200">
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
           <div className="flex items-center gap-2">
             <CollapsibleTrigger className="flex items-center gap-2 flex-1 group hover:opacity-80 transition-opacity">
