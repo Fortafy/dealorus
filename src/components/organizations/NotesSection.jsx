@@ -99,9 +99,13 @@ function InlineReminderBadge({ value, isPastDue, onSave }) {
   );
 }
 
-export default function NotesSection({ organization, clientId }) {
+export default function NotesSection({ organization, clientId, externalOpenCreate }) {
   const queryClient = useQueryClient();
   const [showNoteForm, setShowNoteForm] = useState(false);
+
+  useEffect(() => {
+    if (externalOpenCreate > 0) openCreate();
+  }, [externalOpenCreate]);
   const [editingNote, setEditingNote] = useState(null);
   const [noteTitle, setNoteTitle] = useState("");
   const [noteContent, setNoteContent] = useState("");
