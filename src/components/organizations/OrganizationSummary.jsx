@@ -377,7 +377,7 @@ export default function OrganizationSummary({
     return (
       <motion.div initial={{ opacity: 1, y: 0 }} animate={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="pointer-events-none">
         <Card className="overflow-hidden border-0 shadow-xl shadow-slate-200/50 bg-white">
-          <CardHeader className="text-white p-6" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
+          <CardHeader className="text-white p-4" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
             <div className="text-center py-8"><p className="text-lg font-semibold">Organization deleted</p></div>
           </CardHeader>
         </Card>
