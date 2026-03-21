@@ -289,9 +289,7 @@ export default function Organizations() {
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
-              {activeFilterCount === 0 && (
-                <div className="w-0 border-r border-slate-200 rounded-r-lg" />
-              )}
+
             </div>
             <FilterPanel
               open={showFilterPanel}
