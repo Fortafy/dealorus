@@ -25,7 +25,9 @@ export default function Organizations() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeFilterId, setActiveFilterId] = useState(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const filterButtonRef = useRef(null);
+  const searchRef = useRef(null);
   const [visibleFields, setVisibleFields] = useState(() => {
     try {
       const stored = localStorage.getItem("org_visible_fields");
