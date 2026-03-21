@@ -243,7 +243,7 @@ export default function Organizations() {
             currentUser={currentUser}
             activeFilter={activeFilterId}
             onSelectFilter={handleSelectFilter}
-            currentFilters={{ state: filterState, type: filterType, search: searchQuery }}
+            currentFilters={{ state: filters.state, type: filters.type, search: searchQuery }}
           />
 
           <div className="relative">
@@ -261,23 +261,48 @@ export default function Organizations() {
             )}
           </div>
 
-          <select
-            value={filterState}
-            onChange={e => { setFilterState(e.target.value); setActiveFilterId(null); }}
-            className="h-8 px-2 text-xs border border-slate-200 rounded-md bg-white text-slate-700"
-          >
-            <option value="">All States</option>
-            {uniqueStates.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-
-          <select
-            value={filterType}
-            onChange={e => { setFilterType(e.target.value); setActiveFilterId(null); }}
-            className="h-8 px-2 text-xs border border-slate-200 rounded-md bg-white text-slate-700"
-          >
-            <option value="">All Types</option>
-            {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+          {/* Filter button */}
+          <div className="relative" ref={filterButtonRef}>
+            <div className="flex items-center">
+              <button
+                onClick={() => setShowFilterPanel(p => !p)}
+                className={`flex items-center gap-2 h-8 px-3 text-xs rounded-l-lg border transition-colors ${
+                  activeFilterCount > 0
+                    ? "border-blue-400 bg-blue-50 text-blue-700 font-medium"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filter</span>
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
+                  title="Clear all filters"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {activeFilterCount === 0 && (
+                <div className="w-0 border-r border-slate-200 rounded-r-lg" />
+              )}
+            </div>
+            <FilterPanel
+              open={showFilterPanel}
+              onClose={() => setShowFilterPanel(false)}
+              filters={filters}
+              onChange={(f) => { setFilters(f); setActiveFilterId(null); }}
+              uniqueStates={uniqueStates}
+              uniqueTypes={uniqueTypes}
+              uniqueOwners={uniqueOwners}
+            />
+          </div>
 
           <span className="text-xs text-slate-400 ml-auto">
             {filteredAndSorted.length} record{filteredAndSorted.length !== 1 ? "s" : ""}
