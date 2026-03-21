@@ -557,6 +557,8 @@ function ExternalLinksRow({ organization, clientInstanceUrl }) {
 
 // Standalone fields-only export for use in other columns
 export function OrganizationFields({ organization, onEdit, isSaved = true, clientInstanceUrl }) {
+  const [isOpen, setIsOpen] = useState(true);
+
   const displayData = React.useMemo(() => {
     if (organization.ntee_code && !organization.ntee_description) {
       return { ...organization, ntee_description: getNTEEDescription(organization.ntee_code) };
@@ -579,51 +581,64 @@ export function OrganizationFields({ organization, onEdit, isSaved = true, clien
   };
 
   return (
-    <div className="px-4 py-3">
-      <div className="mb-2">
-        <EditableField
-          icon={FileText}
-          label="Mission"
-          value={organization.mission}
-          onSave={(val) => saveField("mission", val)}
-          multiline
-          placeholder="Click to add mission statement..."
-        />
-      </div>
-      <div className="grid md:grid-cols-2 gap-x-6">
-        <div>
-          <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
-          <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
-          <EditableField icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} onSave={(val) => saveField("annual_revenue", val)} placeholder="e.g. $1,000,000" />
-          <EditableField icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} onSave={(val) => saveField("ruling_date", val)} placeholder="e.g. 1995-01-01" />
-          <EditableNTEEField nteeCode={displayData.ntee_code} nteeDescription={displayData.ntee_description} onSave={saveNTEE} />
+    <div>
+      {/* Section header — matches ActivityTimeline style */}
+      <button
+        className="flex items-center justify-between w-full px-4 py-2.5 bg-slate-50 border-b border-slate-200 hover:opacity-80 transition-opacity"
+        onClick={() => setIsOpen(o => !o)}
+      >
+        <span className="text-sm font-semibold text-slate-700">Details</span>
+        {isOpen ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+      </button>
+
+      {isOpen && (
+        <div className="px-4 py-3">
+          <div className="mb-2">
+            <EditableField
+              icon={FileText}
+              label="Mission"
+              value={organization.mission}
+              onSave={(val) => saveField("mission", val)}
+              multiline
+              placeholder="Click to add mission statement..."
+            />
+          </div>
+          <div className="grid md:grid-cols-2 gap-x-6">
+            <div>
+              <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
+              <EditableField icon={Hash} label="Organization Type" value={organization.organization_type} onSave={(val) => saveField("organization_type", val)} placeholder="e.g. 501(c)(3)" />
+              <EditableField icon={DollarSign} label="Annual Revenue" value={organization.annual_revenue} onSave={(val) => saveField("annual_revenue", val)} placeholder="e.g. $1,000,000" />
+              <EditableField icon={Calendar} label="Tax-Exempt Since" value={organization.ruling_date} onSave={(val) => saveField("ruling_date", val)} placeholder="e.g. 1995-01-01" />
+              <EditableNTEEField nteeCode={displayData.ntee_code} nteeDescription={displayData.ntee_description} onSave={saveNTEE} />
+            </div>
+            <div>
+              <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
+              <EditableField icon={Mail} label="Email" value={organization.email} onSave={(val) => saveField("email", val)} placeholder="Email address..." />
+              <EditableField icon={Globe} label="Website" value={organization.website} onSave={(val) => saveField("website", val)} isLink placeholder="Website URL..." />
+              <EditableField
+                icon={MapPin}
+                label="Address"
+                value={[organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ")}
+                onSave={(val) => {
+                  const parts = val ? val.split(",").map(p => p.trim()) : [];
+                  const address = parts[0] || null;
+                  const city = parts[1] || null;
+                  const stateZip = parts[2] || "";
+                  const stateZipParts = stateZip.split(" ").filter(Boolean);
+                  const state = stateZipParts[0] || parts[2] || null;
+                  const zip_code = stateZipParts[1] || parts[3] || null;
+                  const updatedData = { ...organization, address, city, state, zip_code };
+                  base44.entities.Organization.update(organization.id, updatedData);
+                  if (onEdit) onEdit(updatedData);
+                }}
+                multiline
+                placeholder="Street, City, State ZIP..."
+              />
+            </div>
+          </div>
+          <ExternalLinksRow organization={organization} clientInstanceUrl={clientInstanceUrl} />
         </div>
-        <div>
-          <EditableField icon={Phone} label="Phone" value={organization.phone} onSave={(val) => saveField("phone", val)} placeholder="Phone number..." />
-          <EditableField icon={Mail} label="Email" value={organization.email} onSave={(val) => saveField("email", val)} placeholder="Email address..." />
-          <EditableField icon={Globe} label="Website" value={organization.website} onSave={(val) => saveField("website", val)} isLink placeholder="Website URL..." />
-          <EditableField
-            icon={MapPin}
-            label="Address"
-            value={[organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ")}
-            onSave={(val) => {
-              const parts = val ? val.split(",").map(p => p.trim()) : [];
-              const address = parts[0] || null;
-              const city = parts[1] || null;
-              const stateZip = parts[2] || "";
-              const stateZipParts = stateZip.split(" ").filter(Boolean);
-              const state = stateZipParts[0] || parts[2] || null;
-              const zip_code = stateZipParts[1] || parts[3] || null;
-              const updatedData = { ...organization, address, city, state, zip_code };
-              base44.entities.Organization.update(organization.id, updatedData);
-              if (onEdit) onEdit(updatedData);
-            }}
-            multiline
-            placeholder="Street, City, State ZIP..."
-          />
-        </div>
-      </div>
-      <ExternalLinksRow organization={organization} clientInstanceUrl={clientInstanceUrl} />
+      )}
     </div>
   );
 }
