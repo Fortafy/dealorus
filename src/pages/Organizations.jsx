@@ -271,6 +271,9 @@ export default function Organizations() {
             )}
           </div>
 
+          {/* Fields button */}
+          <FieldsPanel visibleFields={visibleFields} onChange={handleFieldsChange} />
+
           {/* Filter button */}
           <div className="relative" ref={filterButtonRef}>
             <div className="flex items-center">
