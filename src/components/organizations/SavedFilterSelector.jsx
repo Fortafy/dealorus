@@ -47,6 +47,7 @@ export default function SavedFilterSelector({ currentUser, activeFilter, onSelec
       user_id: currentUser.id,
       name: saveName.trim(),
       filters: currentFilters,
+      fields: currentFields || [],
     });
   };
 
