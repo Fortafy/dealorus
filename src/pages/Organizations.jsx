@@ -254,6 +254,7 @@ export default function Organizations() {
             activeFilter={activeFilterId}
             onSelectFilter={handleSelectFilter}
             currentFilters={{ state: filters.state, type: filters.type, search: searchQuery }}
+            currentFields={visibleFields}
           />
 
           <div className="relative">
