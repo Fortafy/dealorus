@@ -53,9 +53,7 @@ export default function Organizations() {
     const orgId = urlParams.get("id");
     if (orgId && organizations.length > 0) {
       const org = organizations.find(o => o.id === orgId);
-      if (org) {
-        setSelectedOrg(org);
-      }
+      if (org) setSelectedOrg(org);
     }
   }, [organizations, currentUser]);
 
