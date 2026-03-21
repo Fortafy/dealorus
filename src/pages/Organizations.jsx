@@ -46,6 +46,17 @@ export default function Organizations() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
+  React.useEffect(() => {
+    if (!searchExpanded) return;
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        if (!searchQuery) setSearchExpanded(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [searchExpanded, searchQuery]);
+
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["organizations", currentUser?.client_id],
     enabled: !!currentUser?.client_id,
