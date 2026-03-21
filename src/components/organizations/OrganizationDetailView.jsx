@@ -153,21 +153,23 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           <div className="w-0.5 h-8 bg-slate-300 group-hover:bg-blue-400 rounded-full transition-colors" />
         </div>
 
-        {/* Right column — compact org header, contacts, notes, deals */}
+        {/* Right column — org fields, contacts, notes, deals */}
         <div
           className="flex flex-col overflow-y-auto overflow-x-hidden"
           style={{ width: `${100 - leftPct}%` }}
         >
-          {/* Compact org identity header */}
-          <OrgCompactHeader
-            organization={organization}
-            clientData={clientData}
-            onDelete={onClose}
-            onEdit={() => {
-              queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
-              queryClient.invalidateQueries({ queryKey: ["organizations"] });
-            }}
-          />
+          {/* Organization Fields */}
+          <div className="border-b border-slate-100">
+            <OrganizationFields
+              organization={organization}
+              isSaved={true}
+              clientInstanceUrl={clientData?.salesforce_instance_url}
+              onEdit={() => {
+                queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
+                queryClient.invalidateQueries({ queryKey: ["organizations"] });
+              }}
+            />
+          </div>
 
           <div className="p-3 space-y-3">
             <ContactsPanel
