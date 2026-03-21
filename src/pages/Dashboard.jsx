@@ -14,13 +14,13 @@ import OrganizationMembers from "@/components/organizations/OrganizationMembers"
 import DataSourceConfiguration from "@/components/dashboard/DataSourceConfiguration";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import SalesforceFieldMappingSection from "@/components/dashboard/SalesforceFieldMappingSection";
-import { Home, HelpCircle } from "lucide-react";
+import { Home } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
