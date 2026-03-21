@@ -94,7 +94,7 @@ export default function Sidebar() {
                   key={label}
                   to={path}
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
                 >
                   <Icon className="w-4 h-4 text-slate-500" />
                   {label}
