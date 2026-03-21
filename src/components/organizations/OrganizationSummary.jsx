@@ -386,7 +386,7 @@ export default function OrganizationSummary({
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       {/* Header — full width gradient strip */}
-      <div className="text-white px-4 py-3" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
+      <div className="text-white px-5 py-4" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 flex-1">
             <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
@@ -405,23 +405,23 @@ export default function OrganizationSummary({
               </div>
             </div>
           </div>
-          <div className="flex gap-1.5 flex-wrap items-center">
-            <div className="flex items-center justify-center h-8 px-2">
+          <div className="flex gap-1 flex-wrap items-center">
+            <div className="flex items-center justify-center h-7 px-1.5">
               <div
                 style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)" }}
-                className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
+                className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
                 onClick={handleStatusToggle}
               >
-                <div className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${clientStatus === "active" ? "translate-x-5" : "translate-x-0"}`} />
+                <div className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform ${clientStatus === "active" ? "translate-x-4" : "translate-x-0"}`} />
               </div>
             </div>
-            <Button variant="secondary" size="sm" onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }} title="Smart Enrich">
-              <Sparkles className="w-3.5 h-3.5" />
+            <Button variant="secondary" size="sm" onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved} className="bg-white/90 hover:bg-white h-7 w-7 p-0" style={{ color: "hsl(217, 91%, 60%)" }} title="Smart Enrich">
+              <Sparkles className="w-3 h-3" />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="sm" disabled={isEnriching || !isSaved || !organization.ein} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
-                  <Database className="w-3.5 h-3.5" />
+                <Button variant="secondary" size="sm" disabled={isEnriching || !isSaved || !organization.ein} className="bg-white/90 hover:bg-white h-7 w-7 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
+                  <Database className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -440,13 +440,13 @@ export default function OrganizationSummary({
               </DropdownMenuContent>
             </DropdownMenu>
             {isSaved && (
-              <Button variant="secondary" size="sm" onClick={handlePushToSalesforce} disabled={isPushingToSalesforce} className="bg-white/90 hover:bg-white h-8 w-8 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
-                {isPushingToSalesforce ? <div className="w-3.5 h-3.5 border border-blue-300 border-t-blue-600 rounded-full animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+              <Button variant="secondary" size="sm" onClick={handlePushToSalesforce} disabled={isPushingToSalesforce} className="bg-white/90 hover:bg-white h-7 w-7 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
+                {isPushingToSalesforce ? <div className="w-3 h-3 border border-blue-300 border-t-blue-600 rounded-full animate-spin" /> : <Upload className="w-3 h-3" />}
               </Button>
             )}
             {onDelete && (
-              <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="h-8 w-8 p-0">
-                <Trash2 className="w-3.5 h-3.5" />
+              <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="h-7 w-7 p-0">
+                <Trash2 className="w-3 h-3" />
               </Button>
             )}
           </div>
