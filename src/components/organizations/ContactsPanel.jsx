@@ -505,6 +505,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
               </div>
             </AlertDialogContent>
           </AlertDialog>
-          </Card>
+          </div>
           );
           }
