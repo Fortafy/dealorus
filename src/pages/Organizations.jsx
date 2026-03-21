@@ -142,7 +142,7 @@ export default function Organizations() {
     });
 
     return result;
-  }, [organizations, searchQuery, filterState, filterType, sortField, sortDir]);
+  }, [organizations, searchQuery, filters, sortField, sortDir]);
 
   const SortIcon = ({ field }) => {
     if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-400 inline ml-1" />;
