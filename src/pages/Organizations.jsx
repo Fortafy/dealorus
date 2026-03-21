@@ -373,9 +373,7 @@ export default function Organizations() {
             )}
           </div>
 
-          <span className="text-xs text-slate-400 ml-auto">
-            {filteredAndSorted.length} record{filteredAndSorted.length !== 1 ? "s" : ""}
-          </span>
+
         </div>
 
         <div className="border-t border-slate-200 flex-shrink-0" />
