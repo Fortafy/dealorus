@@ -429,12 +429,12 @@ export default function Organizations() {
                     </td>
                   </tr>
                 ) : filteredAndSorted.map(org => (
-                  <tr key={org.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={org.id} className="group hover:bg-slate-50 transition-colors">
                     {COLUMNS.map((col, i) => (
                       <td
                         key={col.key}
                         className="px-3 py-2 truncate border-r border-slate-100 last:border-r-0"
-                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1, background: "white" } : {}}
+                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1, background: "inherit" } : {}}
                       >
                         {i === 0 ? (
                           <button
