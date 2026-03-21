@@ -1,17 +1,44 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { Building2, ChevronRight, FileText, Plus, StickyNote, Handshake } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import OrganizationSummary from "@/components/organizations/OrganizationSummary";
 import ContactsPanel from "@/components/organizations/ContactsPanel";
 import NotesSection from "@/components/organizations/NotesSection";
 import DealsSection from "@/components/organizations/DealsSection";
 import ActivityTimeline from "@/components/organizations/ActivityTimeline";
-import DataInsightsPanel from "@/components/organizations/DataInsightsPanel";
 
 export default function OrganizationDetailView({ organizationId, onClose }) {
   const queryClient = useQueryClient();
+
+  // Resizable panel state — left column width as percentage
+  const [leftPct, setLeftPct] = useState(55);
+  const containerRef = useRef(null);
+  const dragging = useRef(false);
+
+  const handleDividerMouseDown = useCallback((e) => {
+    e.preventDefault();
+    dragging.current = true;
+
+    const onMouseMove = (moveEvent) => {
+      if (!dragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const pct = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      setLeftPct(Math.min(Math.max(pct, 25), 75));
+    };
+
+    const onMouseUp = () => {
+      dragging.current = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, []);
 
   const { data: organization, isLoading, error } = useQuery({
     queryKey: ["organization", organizationId],
@@ -25,11 +52,7 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
-      try {
-        return await base44.auth.me();
-      } catch {
-        return null;
-      }
+      try { return await base44.auth.me(); } catch { return null; }
     },
   });
 
@@ -43,7 +66,9 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     enabled: !!currentUser?.client_id,
   });
 
-
+  // Expose callbacks for quick-add buttons to trigger child components
+  const [triggerNote, setTriggerNote] = useState(0);
+  const [triggerDeal, setTriggerDeal] = useState(0);
 
   if (isLoading) {
     return (
@@ -61,39 +86,135 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     );
   }
 
-
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6 pb-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2 }}
+      className="flex flex-col h-full overflow-hidden"
     >
-      {/* Always visible sections */}
-      <OrganizationSummary
-        organization={organization}
-        onDelete={onClose}
-        onEdit={(updatedOrg) => {
-          queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
-          queryClient.invalidateQueries({ queryKey: ["organizations"] });
-        }}
-        isSaved={true}
-        clientInstanceUrl={clientData?.salesforce_instance_url}
-      />
+      {/* Breadcrumb header */}
+      <div className="flex items-center gap-1.5 px-6 py-3 border-b border-slate-100 flex-shrink-0 text-sm text-slate-500">
+        <button onClick={onClose} className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
+          <Building2 className="w-3.5 h-3.5" />
+          <span>Organizations</span>
+        </button>
+        <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+        <span className="text-slate-800 font-medium truncate">{organization.organization_name}</span>
+      </div>
 
-      {/* Sections */}
-       <div className="space-y-4">
-         <ContactsPanel organization={organization} clientId={currentUser?.client_id} />
-         <NotesSection organization={organization} clientId={currentUser?.client_id} />
-         <DealsSection
-           organization={organization}
-           clientId={currentUser?.client_id}
-           clientLifecycleStages={clientData?.lifecycle_stages || []}
-         />
-         <ActivityTimeline organization={organization} />
-         <DataInsightsPanel organization={organization} />
-       </div>
+      {/* Two-column resizable layout */}
+      <div ref={containerRef} className="flex flex-1 overflow-hidden">
+        {/* Left column */}
+        <div
+          className="flex flex-col overflow-y-auto overflow-x-hidden"
+          style={{ width: `${leftPct}%` }}
+        >
+          {/* Org header + fields */}
+          <div className="p-4 border-b border-slate-100">
+            <OrganizationSummary
+              organization={organization}
+              onDelete={onClose}
+              onEdit={() => {
+                queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
+                queryClient.invalidateQueries({ queryKey: ["organizations"] });
+              }}
+              isSaved={true}
+              clientInstanceUrl={clientData?.salesforce_instance_url}
+            />
+          </div>
+
+          {/* Quick action buttons */}
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 flex-shrink-0">
+            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide mr-1">Quick Add</span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-3 text-xs gap-1.5"
+              onClick={() => setTriggerNote(n => n + 1)}
+            >
+              <StickyNote className="w-3 h-3" />
+              Note
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-3 text-xs gap-1.5"
+              onClick={() => setTriggerDeal(n => n + 1)}
+            >
+              <Handshake className="w-3 h-3" />
+              Deal
+            </Button>
+          </div>
+
+          {/* Activity Timeline */}
+          <div className="p-4">
+            <ActivityTimeline organization={organization} />
+          </div>
+        </div>
+
+        {/* Resizable divider */}
+        <div
+          onMouseDown={handleDividerMouseDown}
+          className="w-1.5 flex-shrink-0 bg-slate-100 hover:bg-blue-200 active:bg-blue-300 cursor-col-resize transition-colors flex items-center justify-center group"
+          title="Drag to resize"
+        >
+          <div className="w-0.5 h-8 bg-slate-300 group-hover:bg-blue-400 rounded-full transition-colors" />
+        </div>
+
+        {/* Right column */}
+        <div
+          className="flex flex-col overflow-y-auto overflow-x-hidden"
+          style={{ width: `${100 - leftPct}%` }}
+        >
+          <div className="p-4 space-y-4">
+            <ContactsPanel
+              organization={organization}
+              clientId={currentUser?.client_id}
+            />
+            <NotesSectionWithTrigger
+              organization={organization}
+              clientId={currentUser?.client_id}
+              externalTrigger={triggerNote}
+            />
+            <DealsSectionWithTrigger
+              organization={organization}
+              clientId={currentUser?.client_id}
+              clientLifecycleStages={clientData?.lifecycle_stages || []}
+              externalTrigger={triggerDeal}
+            />
+          </div>
+        </div>
+      </div>
     </motion.div>
+  );
+}
+
+// Wrapper that opens NotesSection's create form when externalTrigger increments
+function NotesSectionWithTrigger({ organization, clientId, externalTrigger }) {
+  const [openCreate, setOpenCreate] = useState(0);
+
+  React.useEffect(() => {
+    if (externalTrigger > 0) setOpenCreate(n => n + 1);
+  }, [externalTrigger]);
+
+  return <NotesSection organization={organization} clientId={clientId} externalOpenCreate={openCreate} />;
+}
+
+// Wrapper that opens DealsSection's create form when externalTrigger increments
+function DealsSectionWithTrigger({ organization, clientId, clientLifecycleStages, externalTrigger }) {
+  const [openCreate, setOpenCreate] = useState(0);
+
+  React.useEffect(() => {
+    if (externalTrigger > 0) setOpenCreate(n => n + 1);
+  }, [externalTrigger]);
+
+  return (
+    <DealsSection
+      organization={organization}
+      clientId={clientId}
+      clientLifecycleStages={clientLifecycleStages}
+      externalOpenCreate={openCreate}
+    />
   );
 }
