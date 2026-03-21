@@ -393,11 +393,14 @@ export default function Organizations() {
               </colgroup>
               <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
-                  {COLUMNS.map(col => (
+                  {COLUMNS.map((col, i) => (
                     <th
                       key={col.key}
-                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group"
-                      style={{ width: colWidths[col.key] }}
+                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
+                      style={{
+                        width: colWidths[col.key],
+                        ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {}),
+                      }}
                     >
                       <span
                         onClick={() => handleSort(col.key)}
@@ -428,7 +431,11 @@ export default function Organizations() {
                 ) : filteredAndSorted.map(org => (
                   <tr key={org.id} className="hover:bg-slate-50 transition-colors">
                     {COLUMNS.map((col, i) => (
-                      <td key={col.key} className="px-3 py-2 truncate">
+                      <td
+                        key={col.key}
+                        className="px-3 py-2 truncate border-r border-slate-100 last:border-r-0"
+                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1, background: "white" } : {}}
+                      >
                         {i === 0 ? (
                           <button
                             onClick={() => setSelectedOrg(org)}
