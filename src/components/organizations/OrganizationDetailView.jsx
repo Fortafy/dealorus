@@ -97,7 +97,7 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
       className="flex flex-col h-full overflow-hidden"
     >
       {/* Breadcrumb header */}
-      <div className="flex items-center gap-1.5 px-6 py-3 border-b border-slate-100 flex-shrink-0 text-sm text-slate-500">
+      <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 flex-shrink-0 text-sm text-slate-500">
         <button onClick={onClose} className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
           <Building2 className="w-3.5 h-3.5" />
           <span>Organizations</span>
@@ -108,13 +108,13 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
 
       {/* Two-column resizable layout */}
       <div ref={containerRef} className="flex flex-1 overflow-hidden">
-        {/* Left column */}
+        {/* Left column — org fields + quick add + timeline */}
         <div
           className="flex flex-col overflow-y-auto overflow-x-hidden"
           style={{ width: `${leftPct}%` }}
         >
-          {/* Org header + fields */}
-          <div className="p-4 border-b border-slate-100">
+          {/* Org fields */}
+          <div className="p-3 border-b border-slate-100">
             <OrganizationSummary
               organization={organization}
               onDelete={onClose}
@@ -128,30 +128,18 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           </div>
 
           {/* Quick action buttons */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 flex-shrink-0">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-100 flex-shrink-0">
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wide mr-1">Quick Add</span>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-3 text-xs gap-1.5"
-              onClick={() => setTriggerNote(n => n + 1)}
-            >
-              <StickyNote className="w-3 h-3" />
-              Note
+            <Button size="sm" variant="outline" className="h-6 px-2 text-xs gap-1" onClick={() => setTriggerNote(n => n + 1)}>
+              <StickyNote className="w-3 h-3" />Note
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 px-3 text-xs gap-1.5"
-              onClick={() => setTriggerDeal(n => n + 1)}
-            >
-              <Handshake className="w-3 h-3" />
-              Deal
+            <Button size="sm" variant="outline" className="h-6 px-2 text-xs gap-1" onClick={() => setTriggerDeal(n => n + 1)}>
+              <Handshake className="w-3 h-3" />Deal
             </Button>
           </div>
 
           {/* Activity Timeline */}
-          <div className="p-4">
+          <div className="p-3">
             <ActivityTimeline organization={organization} />
           </div>
         </div>
@@ -165,12 +153,23 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           <div className="w-0.5 h-8 bg-slate-300 group-hover:bg-blue-400 rounded-full transition-colors" />
         </div>
 
-        {/* Right column */}
+        {/* Right column — compact org header, contacts, notes, deals */}
         <div
           className="flex flex-col overflow-y-auto overflow-x-hidden"
           style={{ width: `${100 - leftPct}%` }}
         >
-          <div className="p-4 space-y-4">
+          {/* Compact org identity header */}
+          <OrgCompactHeader
+            organization={organization}
+            clientData={clientData}
+            onDelete={onClose}
+            onEdit={() => {
+              queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
+              queryClient.invalidateQueries({ queryKey: ["organizations"] });
+            }}
+          />
+
+          <div className="p-3 space-y-3">
             <ContactsPanel
               organization={organization}
               clientId={currentUser?.client_id}
