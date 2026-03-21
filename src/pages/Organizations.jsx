@@ -249,10 +249,10 @@ export default function Organizations() {
 
   return (
     <div className="h-full bg-white flex flex-col overflow-hidden">
-      <div className="flex-1 flex flex-col overflow-hidden px-6 py-4">
+      <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Page Header Row */}
-        <div className="flex items-center justify-between mb-3 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
           <div className="flex items-center gap-2">
             {/* Breadcrumb */}
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -277,8 +277,10 @@ export default function Organizations() {
           </Button>
         </div>
 
+        <div className="border-t border-slate-200 flex-shrink-0" />
+
         {/* Toolbar */}
-        <div className="flex items-center gap-3 mb-4 flex-shrink-0 flex-wrap">
+        <div className="flex items-center gap-3 px-6 py-3 flex-shrink-0 flex-wrap">
           {/* Saved filter list selector */}
           <SavedFilterSelector
             currentUser={currentUser}
@@ -287,21 +289,6 @@ export default function Organizations() {
             currentFilters={{ state: filters.state, type: filters.type, search: searchQuery }}
             currentFields={visibleFields}
           />
-
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
-              placeholder="Search..."
-              className="pl-8 pr-8 h-8 text-xs w-56"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
 
           {/* Fields button */}
           <FieldsPanel visibleFields={visibleFields} onChange={handleFieldsChange} />
@@ -334,7 +321,6 @@ export default function Organizations() {
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
-
             </div>
             <FilterPanel
               open={showFilterPanel}
@@ -347,13 +333,48 @@ export default function Organizations() {
             />
           </div>
 
+          {/* Search — icon that expands */}
+          <div ref={searchRef} className="flex items-center">
+            {searchExpanded ? (
+              <div className="relative flex items-center">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <Input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
+                  placeholder="Search..."
+                  className="pl-8 pr-8 h-8 text-xs w-52 transition-all"
+                />
+                {searchQuery && (
+                  <button onClick={() => { setSearchQuery(""); }} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setSearchExpanded(true)}
+                className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
+                  searchQuery
+                    ? "border-blue-400 bg-blue-50 text-blue-600"
+                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                }`}
+                title="Search"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
           <span className="text-xs text-slate-400 ml-auto">
             {filteredAndSorted.length} record{filteredAndSorted.length !== 1 ? "s" : ""}
           </span>
         </div>
 
+        <div className="border-t border-slate-200 flex-shrink-0" />
+
         {/* Table */}
-        <div className="flex-1 overflow-auto border border-slate-200 rounded-lg">
+        <div className="flex-1 overflow-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
               <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
