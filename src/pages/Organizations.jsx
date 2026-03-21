@@ -6,12 +6,9 @@ import SearchPanel from "@/components/search/SearchPanel";
 import NewAccountDialog from "@/components/organizations/NewAccountDialog";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import { motion } from "framer-motion";
-import { Building2, Search, X, Plus, Home, HelpCircle, ChevronUp, ChevronDown, ChevronsUpDown, ArrowLeft } from "lucide-react";
+import { Building2, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
 
 export default function Organizations() {
