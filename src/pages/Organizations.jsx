@@ -370,20 +370,18 @@ export default function Organizations() {
                   </tr>
                 ) : filteredAndSorted.map(org => (
                   <tr key={org.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-2 truncate">
-                      <button
-                        onClick={() => setSelectedOrg(org)}
-                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
-                      >
-                        {org.organization_name || "—"}
-                      </button>
-                    </td>
-                    <td className="px-3 py-2 text-slate-600 truncate">{org.organization_type || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600 truncate">{org.city || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600 truncate">{org.state || "—"}</td>
-                    <td className="px-3 py-2 text-slate-600 truncate">{org.phone || "—"}</td>
-                    <td className="px-3 py-2 text-slate-500 truncate">{org.created_date ? format(new Date(org.created_date), "MMM d, yyyy") : "—"}</td>
-                    <td className="px-3 py-2 text-slate-600 truncate">{org.created_by ? org.created_by.split("@")[0] : "—"}</td>
+                    {COLUMNS.map((col, i) => (
+                      <td key={col.key} className="px-3 py-2 truncate">
+                        {i === 0 ? (
+                          <button
+                            onClick={() => setSelectedOrg(org)}
+                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
+                          >
+                            {org[col.key] || "—"}
+                          </button>
+                        ) : renderCell(col.key, org)}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
