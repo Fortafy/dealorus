@@ -201,7 +201,7 @@ function EditableNTEEField({ nteeCode, nteeDescription, onSave }) {
         <Tag className="w-3.5 h-3.5" style={{ color: "hsl(217, 91%, 60%)" }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-0.5">Classification</p>
+        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-0.5">Classification</p>
         {editing ? (
           <div>
             <div className="relative">
@@ -211,7 +211,7 @@ function EditableNTEEField({ nteeCode, nteeDescription, onSave }) {
                 onChange={(e) => handleChange(e.target.value)}
                 onBlur={commit}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } if (e.key === "Escape") cancel(); }}
-                className={`text-sm h-8 mt-0.5 pr-8 ${validation.status === 'invalid' ? 'border-red-400' : validation.status === 'valid' ? 'border-green-400' : ''}`}
+                className={`text-xs h-7 mt-0.5 pr-8 ${validation.status === 'invalid' ? 'border-red-400' : validation.status === 'valid' ? 'border-green-400' : ''}`}
                 placeholder="e.g. B20"
               />
               {validating && <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin text-slate-400" />}
@@ -230,8 +230,8 @@ function EditableNTEEField({ nteeCode, nteeDescription, onSave }) {
             title="Click to edit"
           >
             {displayValue
-              ? <p className="text-sm text-slate-800 break-words">{displayValue}</p>
-              : <p className="text-sm text-slate-400 italic">Click to add...</p>
+              ? <p className="text-xs text-slate-800 break-words">{displayValue}</p>
+              : <p className="text-xs text-slate-400 italic">Click to add...</p>
             }
             <Pencil className="w-3 h-3 text-slate-300 ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
           </div>
