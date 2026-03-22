@@ -392,7 +392,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   )}
                   {contact.phone && (
                     <a href={`tel:${contact.phone}`} className="flex items-center gap-1 text-slate-600 hover:text-blue-600">
-                      <Phone className="w-3 h-3" />
+                      <Phone className="w-3.5 h-3.5" />
                       {contact.phone}
                     </a>
                   )}
