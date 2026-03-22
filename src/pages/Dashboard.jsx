@@ -130,7 +130,7 @@ export default function Dashboard() {
         <div className="px-4 py-5 border-b border-slate-100 flex-shrink-0">
           <div className="h-9 w-full overflow-hidden">
             <img
-              src={organization?.logo_url || "https://media.base44.com/images/public/696a507ebd3734abacaf302c/f8cae25b6_Gemini_Generated_Image_c7byx4c7byx4c7by1.png"}
+              src={organization?.logo_url || "https://media.base44.com/images/public/696a507ebd3734abacaf302c/14d6fec09_Dealorus_transparent.png"}
               alt="Dealorus"
               className="h-full w-full object-cover"
               style={{ objectPosition: "center 42%" }}
