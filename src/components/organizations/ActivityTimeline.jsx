@@ -24,11 +24,15 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
   });
 
   const getIconConfig = (item) => {
-    if (item.type === "note") return { label: "NOTE", bg: "bg-amber-100", text: "text-amber-700" };
     if (item.type === "deal") return { label: "DEAL", bg: "bg-emerald-100", text: "text-emerald-700" };
     if (item.interactionType === "email") return { label: "EMAIL", bg: "bg-blue-100", text: "text-blue-700" };
     if (item.interactionType === "call") return { label: "CALL", bg: "bg-purple-100", text: "text-purple-700" };
     return { label: "MTG", bg: "bg-rose-100", text: "text-rose-700" };
+  };
+
+  const getInitials = (email) => {
+    if (!email) return "?";
+    return email.split("@")[0].slice(0, 2).toUpperCase();
   };
 
   const mergedActivity = [
