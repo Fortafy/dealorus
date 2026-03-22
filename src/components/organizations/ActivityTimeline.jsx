@@ -126,7 +126,9 @@ export default function ActivityTimeline({ organization, isCollapsed, lifecycleS
                         {/* Deal details */}
                         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                           {item.stage && (
-                            <span className="text-xs text-slate-500">{item.stage}</span>
+                            <span className="text-xs text-slate-500">
+                              {lifecycleStages.find(s => s.id === item.stage)?.name || item.stage}
+                            </span>
                           )}
                           {item.value && (
                             <span className="text-xs font-medium text-emerald-700">${item.value.toLocaleString()}</span>
