@@ -316,21 +316,6 @@ export default function OrganizationSummary({
     }
   };
 
-  const handleApplyEnrichment = async (updates) => {
-    let finalUpdates = { ...updates };
-    if (updates.ntee_code && !updates.ntee_description) {
-      const description = getNTEEDescription(updates.ntee_code);
-      if (description) finalUpdates.ntee_description = description;
-    }
-    const updatedData = { ...organization, ...finalUpdates };
-    if (isSaved && organization.id) {
-      await base44.entities.Organization.update(organization.id, updatedData);
-    }
-    if (onEdit) onEdit(updatedData);
-    setShowComparisonDialog(false);
-    setEnrichedData(null);
-  };
-
   const handleStatusToggle = () => {
     const newStatus = clientStatus === "active" ? "inactive" : "active";
     setClientStatus(newStatus);
