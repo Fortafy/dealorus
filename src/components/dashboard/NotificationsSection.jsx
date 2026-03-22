@@ -8,8 +8,8 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  SelectValue } from
+"@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -33,7 +33,7 @@ export default function NotificationsSection({ user }) {
   const settingsMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
     onSuccess: () => showFeedback("success", "Preferences updated successfully"),
-    onError: (err) => showFeedback("error", err.message || "Failed to update preferences"),
+    onError: (err) => showFeedback("error", err.message || "Failed to update preferences")
   });
 
   const handleNotificationsToggle = (checked) => {
@@ -50,24 +50,24 @@ export default function NotificationsSection({ user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="settings-page"
-    >
+      className="settings-page">
+      
       <div className="settings-stack">
-        {feedback && (
-          <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
-            {feedback.type === "error" ? (
-              <AlertCircle className="h-4 w-4" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            )}
+        {feedback &&
+        <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
+            {feedback.type === "error" ?
+          <AlertCircle className="h-4 w-4" /> :
+
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          }
             <AlertDescription className={feedback.type === "error" ? "" : "text-green-800"}>
               {feedback.text}
             </AlertDescription>
           </Alert>
-        )}
+        }
 
         <Card className="settings-card">
-          <CardContent className="settings-card-body space-y-4">
+          <CardContent className="pt-6 pr-6 pb-6 pl-6 settings-card-body space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div className="pr-4">
                 <h3 className="settings-card-title">Notifications</h3>
@@ -76,8 +76,8 @@ export default function NotificationsSection({ user }) {
               <Switch checked={notificationsEnabled} onCheckedChange={handleNotificationsToggle} />
             </div>
 
-            {notificationsEnabled && (
-              <div className="border-t border-slate-200 pt-4">
+            {notificationsEnabled &&
+            <div className="border-t border-slate-200 pt-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <p className="settings-label mb-0">Email Digest Frequency</p>
@@ -97,10 +97,10 @@ export default function NotificationsSection({ user }) {
                   </div>
                 </div>
               </div>
-            )}
+            }
           </CardContent>
         </Card>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
