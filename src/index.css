@@ -101,7 +101,7 @@
   }
 
   .settings-card-body {
-    @apply p-5;
+    @apply p-6;
   }
 
   .settings-card-title {
