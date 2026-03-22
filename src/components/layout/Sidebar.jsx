@@ -6,6 +6,7 @@ import { base44 } from "@/api/base44Client";
 
 const NAV_ITEMS = [
   { label: "Organizations", icon: Building2, path: "/Organizations" },
+  { label: "People", icon: Users, path: "/People" },
 ];
 
 export default function Sidebar() {
