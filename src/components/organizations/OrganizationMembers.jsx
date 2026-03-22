@@ -259,7 +259,7 @@ export default function OrganizationMembers({ organizationId }) {
         </div>
         <Button
           onClick={() => setShowInviteDialog(true)}
-          disabled={isLoadingOrg || currentActiveUsers >= maxUsers}
+          disabled={!organizationId || isLoadingUsers || hasReachedUserLimit}
           style={{ backgroundColor: "hsl(217, 91%, 60%)", color: "white" }}
           className="hover:opacity-90 h-8 text-xs px-3"
         >
