@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Calendar, Users, Zap } from "lucide-react";
+import { CreditCard, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import { format, differenceInDays } from "date-fns";
 import ApiUsageDashboard from "@/components/dashboard/ApiUsageDashboard";
@@ -61,7 +61,6 @@ export default function SubscriptionDetails({ organization, currentUser }) {
       className="settings-page"
     >
       <div>
-        <h2 className="settings-page-title">Subscription & Billing</h2>
 
         <motion.div
           variants={containerVariants}
@@ -69,30 +68,31 @@ export default function SubscriptionDetails({ organization, currentUser }) {
           animate="visible"
           className="space-y-6"
         >
-          {/* Subscription Status */}
+          {/* Current Subscription */}
           <motion.div variants={itemVariants}>
             <Card className="settings-card">
-              <CardHeader className="settings-card-header">
-                <CardTitle className="settings-card-title flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Current Subscription
-                  </span>
-                  <Badge className={statusColors[subscriptionInfo.status]}>
-                    {subscriptionInfo.status.charAt(0).toUpperCase() + subscriptionInfo.status.slice(1)}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="settings-card-body space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent className="settings-card-body pt-6">
+                <div className="settings-section-header">
+                  <div className="settings-row-responsive">
+                    <div className="settings-text-block">
+                      <h3 className="settings-card-title">Current Subscription</h3>
+                      <p className="settings-card-description">Review your current plan, limits, and included features.</p>
+                    </div>
+                    <Badge className={statusColors[subscriptionInfo.status]}>
+                      {subscriptionInfo.status.charAt(0).toUpperCase() + subscriptionInfo.status.slice(1)}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="settings-grid-two">
                   <div>
-                    <p className="settings-value-label">Plan</p>
+                    <label className="settings-label">Plan</label>
                     <p className="settings-value capitalize">
                       {subscriptionInfo.plan}
                     </p>
                   </div>
                   <div>
-                    <p className="settings-value-label">Max Users</p>
+                    <label className="settings-label">Max Users</label>
                     <p className="settings-value">
                       {subscriptionInfo.maxUsers} users
                     </p>
@@ -100,7 +100,7 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                 </div>
 
                 {subscriptionInfo.status === "trial" && subscriptionInfo.daysRemaining !== null && (
-                  <div className="pt-4 border-t border-slate-200">
+                  <div className="settings-card-divider">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-blue-600" />
                       <span className="text-xs font-medium text-slate-700">
@@ -108,34 +108,27 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                       </span>
                     </div>
                     {subscriptionInfo.trialEndsAt && (
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="mt-2 text-xs text-slate-500">
                         {format(new Date(subscriptionInfo.trialEndsAt), "MMMM d, yyyy")}
                       </p>
                     )}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </motion.div>
 
-          {/* Plan Features */}
-          <motion.div variants={itemVariants}>
-            <Card className="settings-card">
-              <CardHeader className="settings-card-header">
-                <CardTitle className="settings-card-title flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Plan Features
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <ul className="space-y-3">
-                  {planFeatures[subscriptionInfo.plan]?.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-blue-600" />
-                      <span className="text-slate-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="settings-card-divider">
+                  <div className="settings-section-header">
+                    <h4 className="settings-section-title">Plan Features</h4>
+                    <p className="settings-card-description">Included with your current subscription plan.</p>
+                  </div>
+                  <ul className="space-y-3">
+                    {planFeatures[subscriptionInfo.plan]?.map((feature, index) => (
+                      <li key={index} className="flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full bg-blue-600" />
+                        <span className="text-slate-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
