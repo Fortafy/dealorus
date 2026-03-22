@@ -65,10 +65,6 @@ export default function Dashboard() {
         return currentUser?.role === "admin" ? <AdminUsers /> : null;
       case "admin-organizations":
         return currentUser?.role === "admin" ? <AdminOrganizations /> : null;
-      case "metrics":
-        return isOrgAdmin(currentUser) ?
-        <DashboardMetrics organization={organization} users={users} /> :
-        null;
       case "organization-members":
         return isOrgAdmin(currentUser) ?
         <OrganizationMembers organizationId={currentUser.client_id} /> :
@@ -85,6 +81,10 @@ export default function Dashboard() {
         return isOrgAdmin(currentUser) ?
         <SubscriptionDetails organization={organization} currentUser={currentUser} /> :
         null;
+      case "integrations":
+        return isOrgAdmin(currentUser) ?
+        <IntegrationsSection organization={organization} /> :
+        null;
       case "data-sources":
         return isOrgAdmin(currentUser) ?
         <DataSourceConfiguration organization={organization} /> :
@@ -93,15 +93,15 @@ export default function Dashboard() {
         return isOrgAdmin(currentUser) ?
         <SalesforceFieldMappingSection organization={organization} /> :
         null;
-      case "find-duplicates":
+      case "data-hygiene":
         return isOrgAdmin(currentUser) ?
         <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Duplicate Organizations</h2>
+            <h2 className="text-2xl font-bold mb-6">Data Hygiene</h2>
             <DuplicatesReview
             clientId={currentUser?.client_id}
             onComplete={() => {
               queryClient.invalidateQueries({ queryKey: ["organizations"] });
-              setActiveSection("metrics");
+              setActiveSection("data-hygiene");
             }} />
           
           </div> :
