@@ -412,7 +412,7 @@ export default function OrganizationSummary({
                 {isSaved && (
                   <DropdownMenuItem onClick={handlePushToSalesforce} disabled={isPushingToSalesforce}>
                     {isPushingToSalesforce ? <div className="w-3.5 h-3.5 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" /> : <Upload className="w-3.5 h-3.5 mr-2" />}
-                    Sync to Salesforce
+                    Sync to CRM
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
@@ -601,7 +601,7 @@ export function OrganizationFields({ organization, onEdit, isSaved = true, clien
               />
             </div>
           </div>
-          <ExternalLinksRow organization={organization} clientInstanceUrl={clientInstanceUrl} />
+
         </div>
       )}
     </div>
