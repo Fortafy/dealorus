@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
@@ -136,22 +136,26 @@ export default function SubscriptionDetails({ organization, currentUser }) {
           {/* Billing Information */}
           <motion.div variants={itemVariants}>
             <Card className="settings-card">
-              <CardHeader className="settings-card-header">
-                <CardTitle className="settings-card-title flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  Billing Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="settings-card-body space-y-4">
-                <div>
-                  <p className="settings-value-label">Billing Email</p>
-                  <p className="settings-value">{organization.billing_email || "Not set"}</p>
+              <CardContent className="settings-card-body pt-6">
+                <div className="settings-section-header">
+                  <div className="settings-text-block">
+                    <h3 className="settings-card-title flex items-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      Billing Information
+                    </h3>
+                    <p className="settings-card-description">Review your billing contact and customer reference details.</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="settings-value-label">Stripe Customer ID</p>
-                  <p className="font-mono text-xs text-slate-600">
-                    {organization.stripe_customer_id || "Not configured"}
-                  </p>
+
+                <div className="settings-grid-two">
+                  <div>
+                    <p className="settings-value-label">Billing Email</p>
+                    <p className="settings-value">{organization.billing_email || "Not set"}</p>
+                  </div>
+                  <div>
+                    <p className="settings-value-label">Stripe Customer ID</p>
+                    <p className="settings-value font-mono">{organization.stripe_customer_id || "Not configured"}</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
