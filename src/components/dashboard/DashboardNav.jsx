@@ -12,6 +12,7 @@ import {
   Database,
   Merge,
   ArrowUpFromLine,
+  Activity,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
