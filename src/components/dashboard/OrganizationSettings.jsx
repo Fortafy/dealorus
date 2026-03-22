@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
-import { Loader, CheckCircle2, AlertCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Loader, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import LifecycleStageSettings from "./LifecycleStageSettings";
 
@@ -189,8 +190,20 @@ export default function OrganizationSettings({ organization }) {
 
             {/* Billing Email */}
             <div>
-              <label className="settings-label">
-                Billing Email
+              <label className="settings-label flex items-center gap-2">
+                <span>Billing Email</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-slate-400 transition-colors hover:text-slate-600" aria-label="Billing email info">
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Billing and invoice emails will be sent to this address</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </label>
               <Input
                 type="email"
@@ -199,9 +212,6 @@ export default function OrganizationSettings({ organization }) {
                 placeholder="billing@example.com"
                 className="settings-input"
               />
-              <p className="settings-helper">
-                Billing and invoice emails will be sent to this address
-              </p>
             </div>
 
             </div>
