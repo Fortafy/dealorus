@@ -40,15 +40,18 @@ export default function Deals() {
     queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.data.client_id }, "organization_name"),
   });
 
-  const { data: clients = [] } = useQuery({
+  const { data: clientRecord } = useQuery({
     queryKey: ["client-data", currentUser?.data?.client_id],
     enabled: !!currentUser?.data?.client_id,
-    queryFn: () => base44.entities.Client.filter({ id: currentUser.data.client_id }),
+    queryFn: async () => {
+      const all = await base44.entities.Client.list();
+      return all.find(c => c.id === currentUser.data.client_id) || null;
+    },
   });
 
   useEffect(() => {
-    if (clients.length > 0) setClient(clients[0]);
-  }, [clients]);
+    if (clientRecord) setClient(clientRecord);
+  }, [clientRecord]);
 
   const lifecycleStages = useMemo(() => client?.lifecycle_stages || [
     { id: "prospect", name: "Prospect", order: 1 },
