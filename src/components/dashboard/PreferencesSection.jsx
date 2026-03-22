@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -94,12 +94,11 @@ export default function PreferencesSection({ user }) {
         )}
 
         <Card className="settings-card">
+          <CardHeader className="settings-card-header">
+            <h3 className="settings-card-title">Personal Information</h3>
+            <p className="settings-card-description">Update your name and review your account details.</p>
+          </CardHeader>
           <CardContent className="settings-card-body">
-            <div className="mb-4">
-              <h3 className="settings-card-title">Personal Information</h3>
-              <p className="settings-card-description">Update your name and review your account details.</p>
-            </div>
-
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="settings-label">Full Name</label>
@@ -147,24 +146,22 @@ export default function PreferencesSection({ user }) {
         </Card>
 
         <Card className="settings-card">
+          <CardHeader className="settings-card-header">
+            <h3 className="settings-card-title">Theme</h3>
+            <p className="settings-card-description">Select or customize your interface color scheme.</p>
+          </CardHeader>
           <CardContent className="settings-card-body">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-xl">
-                <h3 className="settings-card-title">Theme</h3>
-                <p className="settings-card-description">Select or customize your interface color scheme.</p>
-              </div>
-              <div className="w-full md:w-72">
-                <Select value={themePreference} onValueChange={handleThemeChange}>
-                  <SelectTrigger className="settings-select-trigger">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="settings-select-content">
-                    <SelectItem value="light" className="settings-select-item">Light</SelectItem>
-                    <SelectItem value="dark" className="settings-select-item">Dark</SelectItem>
-                    <SelectItem value="system" className="settings-select-item">System</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="w-full md:ml-auto md:w-72">
+              <Select value={themePreference} onValueChange={handleThemeChange}>
+                <SelectTrigger className="settings-select-trigger">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="settings-select-content">
+                  <SelectItem value="light" className="settings-select-item">Light</SelectItem>
+                  <SelectItem value="dark" className="settings-select-item">Dark</SelectItem>
+                  <SelectItem value="system" className="settings-select-item">System</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
