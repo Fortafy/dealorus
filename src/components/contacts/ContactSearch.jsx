@@ -294,10 +294,14 @@ export default function ContactSearch({ organization, onContactUpdate }) {
     }
   };
 
-  const searchContacts = async (customCriteria = null) => {
+  const searchContacts = async (customCriteria = null, usageStatus = null) => {
+    const isAdvancedSearch = !!customCriteria?.trim();
+    if (isAdvancedSearch && usageStatus?.remaining < 1) return;
+
     setIsSearching(true);
     setHasSearched(false);
 
+    const startedAt = Date.now();
     let searchScope = customCriteria || `key personnel at "${organization.organization_name}" located in ${organization.city ? organization.city + ', ' : ''}${organization.state}`;
     
     const prompt = `Find contact information for ${searchScope}.
@@ -421,10 +425,45 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
       }
       
       queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+
+      if (isAdvancedSearch && currentUser?.client_id) {
+        await base44.entities.ApiRequestLog.create({
+          client_id: currentUser.client_id,
+          request_source: "Contact Advanced Search",
+          search_params: {
+            organization_id: organization.id,
+            criteria: customCriteria.slice(0, 160),
+          },
+          result_count: foundContacts.length,
+          enrichment_sources: ["AI"],
+          response_status: foundContacts.length > 0 ? "success" : "no_results",
+          response_time_ms: Date.now() - startedAt,
+        });
+        queryClient.invalidateQueries({ queryKey: ["client-monthly-usage"] });
+      }
+
       setAiContacts(foundContacts);
       setHasSearched(true);
     } catch (err) {
       console.error("[ContactSearch] Search failed:", err);
+
+      if (isAdvancedSearch && currentUser?.client_id) {
+        await base44.entities.ApiRequestLog.create({
+          client_id: currentUser.client_id,
+          request_source: "Contact Advanced Search",
+          search_params: {
+            organization_id: organization.id,
+            criteria: customCriteria.slice(0, 160),
+          },
+          result_count: 0,
+          enrichment_sources: ["AI"],
+          response_status: "error",
+          response_time_ms: Date.now() - startedAt,
+          error_message: err.message || "Advanced search failed",
+        });
+        queryClient.invalidateQueries({ queryKey: ["client-monthly-usage"] });
+      }
+
       setAiContacts([]);
       setHasSearched(true);
     } finally {

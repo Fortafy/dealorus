@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -7,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { base44 } from "@/api/base44Client";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
+import useClientMonthlyUsage from "@/hooks/useClientMonthlyUsage";
+import UsageLimitNotice from "@/components/billing/UsageLimitNotice";
 import { Sparkles, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 const ALL_SOURCES = ["ProPublica", "CharityAPI", "NonprofitCheckPlus", "AI"];
@@ -23,6 +26,13 @@ export default function EnrichDialog({ open, onOpenChange, organization, onCompl
   const [isEnriching, setIsEnriching] = useState(false);
   const [results, setResults] = useState(null);
   const [currentSource, setCurrentSource] = useState(null);
+  const queryClient = useQueryClient();
+  const { data: usage, isLoading: isLoadingUsage } = useClientMonthlyUsage(open);
+
+  const requiredCredits = selectedSources.filter((source) =>
+    organization.ein || !["CharityAPI", "NonprofitCheckPlus"].includes(source)
+  ).length;
+  const isUsageBlocked = !!usage && usage.remaining < requiredCredits;
 
   // Reset state when dialog opens
   useEffect(() => {
@@ -79,7 +89,7 @@ Search the web and return all available data. Find the organization's logo image
   };
 
   const handleEnrich = async () => {
-    if (selectedSources.length === 0) return;
+    if (selectedSources.length === 0 || isUsageBlocked) return;
     setIsEnriching(true);
     setResults(null);
 
@@ -183,6 +193,27 @@ Search the web and return all available data. Find the organization's logo image
       // Activity creation is non-blocking
     }
 
+    const usageLogs = enrichmentResults.sources_checked
+      .filter((result) => result.error !== "EIN required — skipped")
+      .map((result) => ({
+        client_id: organization.client_id,
+        request_source: "Organization Enrich",
+        search_params: {
+          organization_id: organization.id,
+          source: result.source,
+        },
+        result_count: result.fields_updated.length,
+        enrichment_sources: [result.source],
+        response_status: result.success
+          ? (result.fields_updated.length > 0 ? "success" : "no_results")
+          : (result.error ? "error" : "no_results"),
+      }));
+
+    if (usageLogs.length > 0) {
+      await Promise.all(usageLogs.map((log) => base44.entities.ApiRequestLog.create(log)));
+      queryClient.invalidateQueries({ queryKey: ["client-monthly-usage"] });
+    }
+
     setResults(enrichmentResults);
     setIsEnriching(false);
 
@@ -206,6 +237,14 @@ Search the web and return all available data. Find the organization's logo image
 
         {!results ? (
           <div className="space-y-4 py-1">
+            {isLoadingUsage && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                Checking monthly API usage...
+              </div>
+            )}
+
+            <UsageLimitNotice usage={usage} requiredCredits={requiredCredits} actionLabel="This enrichment" />
+
             <div className="space-y-2">
               {ALL_SOURCES.map((source) => {
                 const needsEin = ["CharityAPI", "NonprofitCheckPlus"].includes(source) && !organization.ein;
@@ -293,7 +332,7 @@ Search the web and return all available data. Find the organization's logo image
               <Button
                 size="sm"
                 onClick={handleEnrich}
-                disabled={isEnriching || selectedSources.length === 0}
+                disabled={isEnriching || selectedSources.length === 0 || isLoadingUsage || isUsageBlocked}
                 style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
                 className="text-white hover:opacity-90"
               >

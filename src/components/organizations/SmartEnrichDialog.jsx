@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { base44 } from "@/api/base44Client";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
+import useClientMonthlyUsage from "@/hooks/useClientMonthlyUsage";
+import UsageLimitNotice from "@/components/billing/UsageLimitNotice";
 import { Sparkles, CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 
 export default function SmartEnrichDialog({ open, onOpenChange, organization, onComplete }) {
@@ -19,6 +22,8 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
   const [results, setResults] = useState(null);
   const [error, setError] = useState(null);
   const [clientSettings, setClientSettings] = useState(null);
+  const queryClient = useQueryClient();
+  const { data: usage, isLoading: isLoadingUsage } = useClientMonthlyUsage(open);
 
   // Fetch client settings on mount
   React.useEffect(() => {
@@ -42,8 +47,13 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
 
   // Use client's default data source priority, fallback to default
   const priority = clientSettings?.default_data_source_priority || ["CharityAPI", "ProPublica", "NonprofitCheckPlus", "AI"];
+  const requiredCredits = priority.filter((source) =>
+    organization.ein || !["CharityAPI", "NonprofitCheckPlus"].includes(source)
+  ).length;
+  const isUsageBlocked = !!usage && usage.remaining < requiredCredits;
 
   const handleEnrich = async () => {
+    if (isUsageBlocked) return;
     setIsEnriching(true);
     setError(null);
     setResults(null);
@@ -162,6 +172,27 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
       };
 
       await base44.entities.Organization.update(organization.id, updatedData);
+
+      const usageLogs = enrichmentResults.sources_checked
+        .filter((result) => result.error !== "EIN required")
+        .map((result) => ({
+          client_id: organization.client_id,
+          request_source: "Organization Smart Enrich",
+          search_params: {
+            organization_id: organization.id,
+            source: result.source,
+          },
+          result_count: result.fields_updated.length,
+          enrichment_sources: [result.source],
+          response_status: result.success
+            ? (result.fields_updated.length > 0 ? "success" : "no_results")
+            : (result.error ? "error" : "no_results"),
+        }));
+
+      if (usageLogs.length > 0) {
+        await Promise.all(usageLogs.map((log) => base44.entities.ApiRequestLog.create(log)));
+        queryClient.invalidateQueries({ queryKey: ["client-monthly-usage"] });
+      }
       
       setResults(enrichmentResults);
       
@@ -197,6 +228,14 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
               Only missing fields will be filled. Existing data is preserved.
             </AlertDescription>
           </Alert>
+
+          {isLoadingUsage && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+              Checking monthly API usage...
+            </div>
+          )}
+
+          <UsageLimitNotice usage={usage} requiredCredits={requiredCredits} actionLabel="This enrichment" />
 
           {error && (
             <Alert variant="destructive">
@@ -269,7 +308,7 @@ export default function SmartEnrichDialog({ open, onOpenChange, organization, on
               </Button>
               <Button 
                 onClick={handleEnrich} 
-                disabled={isEnriching}
+                disabled={isEnriching || isLoadingUsage || isUsageBlocked}
                 style={{ backgroundColor: 'hsl(217, 91%, 60%)' }}
               >
                 {isEnriching ? (

@@ -2,18 +2,22 @@ import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import useClientMonthlyUsage from "@/hooks/useClientMonthlyUsage";
+import UsageLimitNotice from "@/components/billing/UsageLimitNotice";
 import { AlertCircle } from "lucide-react";
 
 export default function EnhancedAISearchDialog({ open, onOpenChange, onSearch }) {
   const [criteria, setCriteria] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const { data: usage, isLoading: isLoadingUsage } = useClientMonthlyUsage(open);
+  const isUsageBlocked = !!usage && usage.remaining < 1;
 
   const handleSearch = async () => {
-    if (!criteria.trim()) return;
+    if (!criteria.trim() || isUsageBlocked) return;
     
     setIsSearching(true);
     try {
-      await onSearch(criteria);
+      await onSearch(criteria, usage);
       setCriteria("");
       onOpenChange(false);
     } finally {
@@ -51,6 +55,14 @@ export default function EnhancedAISearchDialog({ open, onOpenChange, onSearch })
               Be specific about roles, departments, or skills you're looking for. The AI will search public sources for matching contacts.
             </p>
           </div>
+
+          {isLoadingUsage && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+              Checking monthly API usage...
+            </div>
+          )}
+
+          <UsageLimitNotice usage={usage} requiredCredits={1} actionLabel="This search" />
         </div>
 
         <DialogFooter>
@@ -63,7 +75,7 @@ export default function EnhancedAISearchDialog({ open, onOpenChange, onSearch })
           </Button>
           <Button
             onClick={handleSearch}
-            disabled={isSearching || !criteria.trim()}
+            disabled={isSearching || !criteria.trim() || isLoadingUsage || isUsageBlocked}
             className="bg-indigo-600 hover:bg-indigo-700"
           >
             {isSearching ? "Searching..." : "Search Contacts"}
