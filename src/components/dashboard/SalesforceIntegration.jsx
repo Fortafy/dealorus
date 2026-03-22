@@ -107,69 +107,6 @@ export default function SalesforceIntegration({ organization }) {
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Button>
-
-            {isConnected ? (
-              <>
-                <Button
-                  onClick={handleSync}
-                  disabled={syncing}
-                  variant="outline"
-                  className="settings-secondary-button"
-                >
-                  {syncing ? (
-                    <>
-                      <Loader className="h-4 w-4 animate-spin" />
-                      Syncing...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4" />
-                      Import from Salesforce
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="settings-secondary-button"
-                  onClick={() => setError("Manual push not yet implemented. Organizations with salesforce_id will auto-sync.")}
-                >
-                  <Upload className="h-4 w-4" />
-                  Push to Salesforce
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  onClick={() => disconnectMutation.mutate()}
-                  disabled={disconnectMutation.isPending}
-                  className="settings-secondary-button"
-                >
-                  {disconnectMutation.isPending ? (
-                    <>
-                      <Loader className="h-4 w-4 animate-spin" />
-                      Disconnecting...
-                    </>
-                  ) : (
-                    "Disconnect"
-                  )}
-                </Button>
-              </>
-            ) : (
-              <Button
-                onClick={() => connectMutation.mutate()}
-                disabled={!instanceUrl || !consumerKey || !consumerSecret || connectMutation.isPending}
-                className="settings-primary-button"
-              >
-                {connectMutation.isPending ? (
-                  <>
-                    <Loader className="h-4 w-4 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  "Connect External Client App"
-                )}
-              </Button>
-            )}
           </div>
         </div>
 
@@ -248,6 +185,23 @@ export default function SalesforceIntegration({ organization }) {
                 </div>
               </div>
 
+              <div className="flex justify-end pt-2">
+                <Button
+                  onClick={() => connectMutation.mutate()}
+                  disabled={!instanceUrl || !consumerKey || !consumerSecret || connectMutation.isPending}
+                  className="settings-primary-button"
+                >
+                  {connectMutation.isPending ? (
+                    <>
+                      <Loader className="h-4 w-4 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    "Connect External Client App"
+                  )}
+                </Button>
+              </div>
+
             </>
           ) : (
             <>
@@ -277,6 +231,52 @@ export default function SalesforceIntegration({ organization }) {
                     <Link to="/Dashboard?section=sf-field-mapping">Salesforce Field Mapping</Link>
                   </Button>
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                <Button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  variant="outline"
+                  className="settings-secondary-button"
+                >
+                  {syncing ? (
+                    <>
+                      <Loader className="h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Import from Salesforce
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="settings-secondary-button"
+                  onClick={() => setError("Manual push not yet implemented. Organizations with salesforce_id will auto-sync.")}
+                >
+                  <Upload className="h-4 w-4" />
+                  Push to Salesforce
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  onClick={() => disconnectMutation.mutate()}
+                  disabled={disconnectMutation.isPending}
+                  className="settings-secondary-button"
+                >
+                  {disconnectMutation.isPending ? (
+                    <>
+                      <Loader className="h-4 w-4 animate-spin" />
+                      Disconnecting...
+                    </>
+                  ) : (
+                    "Disconnect"
+                  )}
+                </Button>
               </div>
             </>
           )}
