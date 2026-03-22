@@ -20,11 +20,11 @@ export default function Deals() {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [filters, setFilters] = useState({ contractType: "", orgId: "" });
-  const filterButtonRef = React.useRef(null);
-  const searchRef = React.useRef(null);
+  const filterButtonRef = useRef(null);
+  const searchRef = useRef(null);
   const queryClient = useQueryClient();
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
@@ -46,7 +46,7 @@ export default function Deals() {
     queryFn: () => base44.entities.Client.filter({ id: currentUser.data.client_id }),
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (clients.length > 0) setClient(clients[0]);
   }, [clients]);
 
