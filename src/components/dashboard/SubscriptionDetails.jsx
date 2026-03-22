@@ -86,13 +86,13 @@ export default function SubscriptionDetails({ organization, currentUser }) {
 
                 <div className="settings-grid-two">
                   <div>
-                    <label className="settings-label">Plan</label>
+                    <p className="settings-value-label">Plan</p>
                     <p className="settings-value capitalize">
                       {subscriptionInfo.plan}
                     </p>
                   </div>
                   <div>
-                    <label className="settings-label">Max Users</label>
+                    <p className="settings-value-label">Max Users</p>
                     <p className="settings-value">
                       {subscriptionInfo.maxUsers} users
                     </p>
@@ -124,7 +124,7 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                     {planFeatures[subscriptionInfo.plan]?.map((feature, index) => (
                       <li key={index} className="flex items-center gap-3">
                         <div className="h-2 w-2 rounded-full bg-blue-600" />
-                        <span className="text-slate-700">{feature}</span>
+                        <span className="settings-value">{feature}</span>
                       </li>
                     ))}
                   </ul>
