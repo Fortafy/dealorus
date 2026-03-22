@@ -297,38 +297,6 @@ export default function OrganizationSummary({
     }
   };
 
-  const handleSourceEnrich = async (source) => {
-    setEnrichingSource(source);
-    setIsEnriching(true);
-    try {
-      if (!organization.ein && ["CharityAPI", "ProPublica", "Nonprofit Check Plus"].includes(source)) {
-        throw new Error("EIN is required for this data source");
-      }
-      let result = null;
-      if (source === "CharityAPI") {
-        const response = await base44.functions.invoke("charityApiSearch", { ein: organization.ein });
-        result = response.data;
-      } else if (source === "ProPublica") {
-        const response = await base44.functions.invoke("propublicaSearch", { ein: organization.ein });
-        result = response.data;
-      } else if (source === "Nonprofit Check Plus") {
-        const response = await base44.functions.invoke("nonprofitCheckPlusSearch", { ein: organization.ein });
-        result = response.data;
-      }
-      if (!result) throw new Error(`No data returned from ${source}`);
-      if (result.ntee_code && !result.ntee_description) {
-        result.ntee_description = getNTEEDescription(result.ntee_code);
-      }
-      setEnrichedData(result);
-      setShowComparisonDialog(true);
-    } catch (err) {
-      toast.error(`Failed to fetch data from ${source}`);
-    } finally {
-      setIsEnriching(false);
-      setEnrichingSource(null);
-    }
-  };
-
   const handlePushToSalesforce = async () => {
     setIsPushingToSalesforce(true);
     try {
