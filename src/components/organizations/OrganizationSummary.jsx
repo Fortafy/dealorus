@@ -427,21 +427,12 @@ export default function OrganizationSummary({
         </div>
       </div>
 
-      <EnrichmentComparisonDialog
-        open={showComparisonDialog}
-        onOpenChange={setShowComparisonDialog}
-        currentData={organization}
-        enrichedData={enrichedData}
-        onApply={handleApplyEnrichment}
-      />
-
-      <SmartEnrichDialog
-        open={showSmartEnrichDialog}
-        onOpenChange={setShowSmartEnrichDialog}
+      <EnrichDialog
+        open={showEnrichDialog}
+        onOpenChange={setShowEnrichDialog}
         organization={organization}
         onComplete={(updatedData) => {
           if (onEdit) onEdit(updatedData);
-          setShowSmartEnrichDialog(false);
         }}
       />
 
