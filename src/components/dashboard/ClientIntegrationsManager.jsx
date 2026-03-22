@@ -14,10 +14,12 @@ export default function ClientIntegrationsManager({ organization }) {
     queryFn: () => base44.auth.me(),
   });
 
+  const isAdmin = user?.role === "admin" || user?.data?.client_role === "admin";
+
   const { data: integrations = [], isLoading: isLoadingIntegrations } = useQuery({
     queryKey: ["client-integrations", organization?.id],
     queryFn: () => base44.entities.ClientIntegration.filter({ client_id: organization.id }, "-updated_date", 20),
-    enabled: Boolean(organization?.id),
+    enabled: Boolean(organization?.id && isAdmin),
     initialData: [],
   });
 
