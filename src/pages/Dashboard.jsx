@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeSection, setActiveSection] = useState("preferences");
   const queryClient = useQueryClient();
+  const clientId = currentUser?.client_id || currentUser?.data?.client_id;
 
   // Fetch current user
   useEffect(() => {
@@ -42,9 +43,9 @@ export default function Dashboard() {
   }, []);
 
   const { data: organization } = useQuery({
-    queryKey: ["client", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Client.filter({ id: currentUser.client_id }).then((clients) => clients[0])
+    queryKey: ["client", clientId],
+    enabled: !!clientId,
+    queryFn: () => base44.entities.Client.filter({ id: clientId }).then((clients) => clients[0])
   });
 
   const renderContent = () => {
@@ -61,7 +62,7 @@ export default function Dashboard() {
         return currentUser?.role === "admin" ? <AdminApiUsageSection organization={organization} currentUser={currentUser} /> : null;
       case "organization-members":
         return isOrgAdmin(currentUser) ?
-        <OrganizationMembers organizationId={currentUser.client_id} /> :
+        <OrganizationMembers organizationId={clientId} /> :
         null;
       case "organization-settings":
         return isOrgAdmin(currentUser) ?
@@ -92,7 +93,7 @@ export default function Dashboard() {
         <div className="p-6">
             <h2 className="text-2xl font-bold mb-6">Data Hygiene</h2>
             <DuplicatesReview
-            clientId={currentUser?.client_id}
+            clientId={clientId}
             onComplete={() => {
               queryClient.invalidateQueries({ queryKey: ["organizations"] });
               setActiveSection("data-hygiene");

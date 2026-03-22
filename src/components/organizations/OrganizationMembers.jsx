@@ -233,7 +233,8 @@ export default function OrganizationMembers({ organizationId }) {
       : <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
   };
 
-  const maxUsers = organization?.max_users || 3;
+  const maxUsers = typeof organization?.max_users === "number" ? organization.max_users : null;
+  const hasReachedUserLimit = maxUsers !== null && currentActiveUsers >= maxUsers;
   const columns = [
     { key: "full_name", label: "Name", width: 220, sortable: true },
     { key: "email", label: "Email", width: 280, sortable: true },
@@ -272,7 +273,7 @@ export default function OrganizationMembers({ organizationId }) {
         <div className="flex items-center gap-2 h-8 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-600">
           <span className="font-medium text-slate-700">Active Members</span>
           <span className="inline-flex items-center justify-center min-w-8 h-5 px-1.5 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-700">
-            {currentActiveUsers}/{maxUsers}
+            {currentActiveUsers}/{maxUsers ?? "—"}
           </span>
         </div>
 
@@ -420,7 +421,7 @@ export default function OrganizationMembers({ organizationId }) {
         organizationId={organizationId}
         organizationName={organization?.name}
         currentUserCount={currentActiveUsers}
-        maxUsers={maxUsers}
+        maxUsers={maxUsers ?? Number.MAX_SAFE_INTEGER}
       />
 
       <MemberEditDialog
