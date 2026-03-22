@@ -25,6 +25,7 @@ import {
 import { Search, Plus, Loader, AlertCircle, CheckCircle2, Users, X, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
+import MemberEditDialog from "@/components/organizations/MemberEditDialog";
 
 function InviteOrganizationUserDialog({ open, onOpenChange, organizationId, organizationName, currentUserCount, maxUsers }) {
   const [email, setEmail] = useState("");
@@ -131,6 +132,7 @@ export default function OrganizationMembers({ organizationId }) {
   const [sortField, setSortField] = useState("full_name");
   const [sortDirection, setSortDirection] = useState("asc");
   const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   const [deactivateConfirm, setDeactivateConfirm] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -149,8 +151,8 @@ export default function OrganizationMembers({ organizationId }) {
   }, [searchExpanded, searchQuery]);
 
   const { data: organization, isLoading: isLoadingOrg } = useQuery({
-    queryKey: ["organization", organizationId],
-    queryFn: async () => base44.entities.Organization.get(organizationId),
+    queryKey: ["client", organizationId],
+    queryFn: async () => base44.entities.Client.get(organizationId),
     enabled: !!organizationId,
   });
 
@@ -163,15 +165,19 @@ export default function OrganizationMembers({ organizationId }) {
     enabled: !!organizationId,
   });
 
-  const deactivateMutation = useMutation({
-    mutationFn: ({ userId, isActive }) => base44.entities.User.update(userId, { is_active: isActive }),
+  const updateMemberMutation = useMutation({
+    mutationFn: async ({ userId, clientRole, isActive }) => {
+      const response = await base44.functions.invoke("updateClientMember", { userId, clientRole, isActive });
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["organizationUsers", organizationId] });
+      setEditingUser(null);
       setDeactivateConfirm(null);
       setActionError(null);
     },
     onError: (err) => {
-      setActionError(err.message || "Failed to change user status");
+      setActionError(err?.response?.data?.error || err.message || "Failed to update team member");
     },
   });
 
@@ -234,7 +240,7 @@ export default function OrganizationMembers({ organizationId }) {
     { key: "client_role", label: "Role", width: 140, sortable: true },
     { key: "is_active", label: "Status", width: 140, sortable: true },
     { key: "created_date", label: "Joined", width: 140, sortable: true },
-    { key: "actions", label: "Actions", width: 140, sortable: false },
+    { key: "actions", label: "Actions", width: 220, sortable: false },
   ];
 
   return (
@@ -381,16 +387,25 @@ export default function OrganizationMembers({ organizationId }) {
                   <td className="px-3 py-2 truncate border-r border-slate-100 text-slate-500">
                     {user.created_date ? format(new Date(user.created_date), "MMM d, yyyy") : "—"}
                   </td>
-                  <td className="px-3 py-2 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDeactivateConfirm(user)}
-                      className={user.is_active === false ? "h-7 text-green-600 hover:text-green-700 hover:bg-green-50" : "h-7 text-red-600 hover:text-red-700 hover:bg-red-50"}
-                      disabled={user.client_role === "admin"}
-                    >
-                      {user.is_active === false ? "Activate" : "Deactivate"}
-                    </Button>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingUser(user)}
+                        className="h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeactivateConfirm(user)}
+                        className={user.is_active === false ? "h-7 text-green-600 hover:text-green-700 hover:bg-green-50" : "h-7 text-red-600 hover:text-red-700 hover:bg-red-50"}
+                      >
+                        {user.is_active === false ? "Activate" : "Deactivate"}
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -408,6 +423,20 @@ export default function OrganizationMembers({ organizationId }) {
         maxUsers={maxUsers}
       />
 
+      <MemberEditDialog
+        member={editingUser}
+        open={!!editingUser}
+        onOpenChange={(open) => !open && setEditingUser(null)}
+        onSave={({ clientRole, isActive }) =>
+          updateMemberMutation.mutate({
+            userId: editingUser.id,
+            clientRole,
+            isActive,
+          })
+        }
+        isSaving={updateMemberMutation.isPending}
+      />
+
       <AlertDialog open={!!deactivateConfirm} onOpenChange={() => setDeactivateConfirm(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -423,14 +452,15 @@ export default function OrganizationMembers({ organizationId }) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
-                deactivateMutation.mutate({
+                updateMemberMutation.mutate({
                   userId: deactivateConfirm.id,
+                  clientRole: deactivateConfirm.client_role,
                   isActive: !deactivateConfirm.is_active,
                 })
               }
               className={deactivateConfirm?.is_active === false ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
             >
-              {deactivateMutation.isPending ? "Updating..." : (deactivateConfirm?.is_active === false ? "Activate" : "Deactivate")}
+              {updateMemberMutation.isPending ? "Updating..." : (deactivateConfirm?.is_active === false ? "Activate" : "Deactivate")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
