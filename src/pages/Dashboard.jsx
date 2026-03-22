@@ -46,15 +46,6 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Client.filter({ id: currentUser.client_id }).then((clients) => clients[0])
   });
 
-  const { data: users = [] } = useQuery({
-    queryKey: ["client-users", currentUser?.client_id],
-    enabled: !!currentUser?.client_id && isOrgAdmin(currentUser),
-    queryFn: async () => {
-      const allUsers = await base44.entities.User.list();
-      return allUsers.filter((u) => u.client_id === currentUser.client_id);
-    }
-  });
-
   const renderContent = () => {
     switch (activeSection) {
       case "preferences":
