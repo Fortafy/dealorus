@@ -112,7 +112,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
             Account
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {userSections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
@@ -144,7 +144,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
               <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
                 Workspace
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {orgSections.map((section) => {
                     const Icon = section.icon;
                     const isActive = activeSection === section.id;
@@ -178,7 +178,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
               <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
                 Administrator
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {adminSections.map((section) => {
                     const Icon = section.icon;
                     const isActive = activeSection === section.id;
