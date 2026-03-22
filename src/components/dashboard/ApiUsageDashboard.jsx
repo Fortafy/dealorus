@@ -5,15 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LineChart, Line
-} from "recharts";
+  PieChart, Pie, Cell, Legend, LineChart, Line } from
+"recharts";
 import { Activity, CheckCircle2, XCircle, Clock, Loader } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 
 const COLORS = {
   success: "#10b981",
   no_results: "#f59e0b",
-  error: "#ef4444",
+  error: "#ef4444"
 };
 
 const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
@@ -35,30 +35,30 @@ export default function ApiUsageDashboard({
         return base44.entities.ApiRequestLog.list("-created_date", 500);
       }
       return base44.entities.ApiRequestLog.filter({ client_id: organization.id }, "-created_date", 500);
-    },
+    }
   });
 
   // For admin: fetch all clients to map names
   const { data: allClients = [] } = useQuery({
     queryKey: ["all-clients-for-api"],
     enabled: isBaseAdmin && isPlatformScope && showClientBreakdown,
-    queryFn: () => base44.entities.Client.list(),
+    queryFn: () => base44.entities.Client.list()
   });
 
   const clientMap = useMemo(() => {
     const map = {};
-    allClients.forEach(c => { map[c.id] = c.name; });
+    allClients.forEach((c) => {map[c.id] = c.name;});
     return map;
   }, [allClients]);
 
   const stats = useMemo(() => {
     const total = logs.length;
-    const success = logs.filter(l => l.response_status === "success").length;
-    const noResults = logs.filter(l => l.response_status === "no_results").length;
-    const errors = logs.filter(l => l.response_status === "error").length;
-    const avgTime = total > 0
-      ? Math.round(logs.reduce((s, l) => s + (l.response_time_ms || 0), 0) / total)
-      : 0;
+    const success = logs.filter((l) => l.response_status === "success").length;
+    const noResults = logs.filter((l) => l.response_status === "no_results").length;
+    const errors = logs.filter((l) => l.response_status === "error").length;
+    const avgTime = total > 0 ?
+    Math.round(logs.reduce((s, l) => s + (l.response_time_ms || 0), 0) / total) :
+    0;
     return { total, success, noResults, errors, avgTime };
   }, [logs]);
 
@@ -68,10 +68,10 @@ export default function ApiUsageDashboard({
       const day = startOfDay(subDays(new Date(), 13 - i));
       return { date: format(day, "MMM d"), dayStr: format(day, "yyyy-MM-dd"), total: 0, success: 0, error: 0 };
     });
-    logs.forEach(log => {
+    logs.forEach((log) => {
       if (!log.created_date) return;
       const dayStr = format(new Date(log.created_date), "yyyy-MM-dd");
-      const found = days.find(d => d.dayStr === dayStr);
+      const found = days.find((d) => d.dayStr === dayStr);
       if (found) {
         found.total++;
         if (log.response_status === "success") found.success++;
@@ -93,8 +93,8 @@ export default function ApiUsageDashboard({
   // Sources used breakdown
   const sourcesData = useMemo(() => {
     const counts = {};
-    logs.forEach(log => {
-      (log.enrichment_sources || []).forEach(src => {
+    logs.forEach((log) => {
+      (log.enrichment_sources || []).forEach((src) => {
         counts[src] = (counts[src] || 0) + 1;
       });
     });
@@ -105,7 +105,7 @@ export default function ApiUsageDashboard({
   const clientData = useMemo(() => {
     if (!isBaseAdmin || !isPlatformScope || !showClientBreakdown) return [];
     const counts = {};
-    logs.forEach(log => {
+    logs.forEach((log) => {
       const name = clientMap[log.client_id] || log.client_id?.substring(0, 8) || "Unknown";
       if (!counts[name]) counts[name] = { name, total: 0, success: 0, error: 0 };
       counts[name].total++;
@@ -118,7 +118,7 @@ export default function ApiUsageDashboard({
   // Request source breakdown
   const sourceRequestData = useMemo(() => {
     const counts = {};
-    logs.forEach(log => {
+    logs.forEach((log) => {
       const src = log.request_source || "Unknown";
       counts[src] = (counts[src] || 0) + 1;
     });
@@ -129,19 +129,19 @@ export default function ApiUsageDashboard({
     return (
       <div className="flex items-center justify-center py-20">
         <Loader className="w-6 h-6 animate-spin text-slate-400" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-bold text-slate-900">API Usage</h3>
-        <p className="text-sm text-slate-500 mt-1">
-          {isPlatformScope
-            ? "Total API activity across all client organizations and team members"
-            : "API activity for your client organization and team members"}
-        </p>
+        
+
+
+
+        
       </div>
 
       {/* Stat Cards */}
@@ -163,7 +163,7 @@ export default function ApiUsageDashboard({
             </div>
             <p className="text-3xl font-bold text-green-600">{stats.success}</p>
             <p className="text-xs text-slate-400 mt-1">
-              {stats.total > 0 ? `${Math.round((stats.success / stats.total) * 100)}% success rate` : "—"}
+              {stats.total > 0 ? `${Math.round(stats.success / stats.total * 100)}% success rate` : "—"}
             </p>
           </CardContent>
         </Card>
@@ -197,10 +197,10 @@ export default function ApiUsageDashboard({
             <CardTitle className="text-sm font-semibold text-slate-700">Requests — Last 14 Days</CardTitle>
           </CardHeader>
           <CardContent>
-            {stats.total === 0 ? (
-              <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No data yet</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={200}>
+            {stats.total === 0 ?
+            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No data yet</div> :
+
+            <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -211,7 +211,7 @@ export default function ApiUsageDashboard({
                   <Legend />
                 </LineChart>
               </ResponsiveContainer>
-            )}
+            }
           </CardContent>
         </Card>
 
@@ -220,21 +220,21 @@ export default function ApiUsageDashboard({
             <CardTitle className="text-sm font-semibold text-slate-700">Response Status</CardTitle>
           </CardHeader>
           <CardContent>
-            {statusData.length === 0 ? (
-              <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No data yet</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={200}>
+            {statusData.length === 0 ?
+            <div className="flex items-center justify-center h-40 text-slate-400 text-sm">No data yet</div> :
+
+            <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
-                    {statusData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
+                    {statusData.map((entry, i) =>
+                  <Cell key={i} fill={entry.color} />
+                  )}
                   </Pie>
                   <Tooltip formatter={(v, name) => [`${v}`, name]} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            )}
+            }
           </CardContent>
         </Card>
       </div>
@@ -247,10 +247,10 @@ export default function ApiUsageDashboard({
             <CardDescription className="text-xs">How many calls touched each data source</CardDescription>
           </CardHeader>
           <CardContent>
-            {sourcesData.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-slate-400 text-sm">No data yet</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={180}>
+            {sourcesData.length === 0 ?
+            <div className="flex items-center justify-center h-32 text-slate-400 text-sm">No data yet</div> :
+
+            <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={sourcesData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
@@ -261,7 +261,7 @@ export default function ApiUsageDashboard({
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            )}
+            }
           </CardContent>
         </Card>
 
@@ -271,26 +271,26 @@ export default function ApiUsageDashboard({
             <CardDescription className="text-xs">Which system initiated each call</CardDescription>
           </CardHeader>
           <CardContent>
-            {sourceRequestData.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-slate-400 text-sm">No data yet</div>
-            ) : (
-              <div className="space-y-2 pt-1">
-                {sourceRequestData.map((src, i) => (
-                  <div key={src.name} className="flex items-center gap-3">
+            {sourceRequestData.length === 0 ?
+            <div className="flex items-center justify-center h-32 text-slate-400 text-sm">No data yet</div> :
+
+            <div className="space-y-2 pt-1">
+                {sourceRequestData.map((src, i) =>
+              <div key={src.name} className="flex items-center gap-3">
                     <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
                     <span className="text-sm text-slate-700 flex-1 truncate">{src.name}</span>
                     <Badge variant="outline" className="text-xs">{src.value}</Badge>
                   </div>
-                ))}
+              )}
               </div>
-            )}
+            }
           </CardContent>
         </Card>
       </div>
 
       {/* Per-Client Breakdown (admin only) */}
-      {clientData.length > 0 && (
-        <Card>
+      {clientData.length > 0 &&
+      <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-slate-700">Usage by Client Organization</CardTitle>
             <CardDescription className="text-xs">Top 10 clients by total API requests (for billing reference)</CardDescription>
@@ -320,20 +320,20 @@ export default function ApiUsageDashboard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {clientData.map(c => (
-                    <tr key={c.name} className="hover:bg-slate-50">
+                  {clientData.map((c) =>
+                <tr key={c.name} className="hover:bg-slate-50">
                       <td className="py-2 pr-4 font-medium text-slate-800">{c.name}</td>
                       <td className="py-2 pr-4 text-center">{c.total}</td>
                       <td className="py-2 pr-4 text-center text-green-700">{c.success}</td>
                       <td className="py-2 text-center text-red-600">{c.error}</td>
                     </tr>
-                  ))}
+                )}
                 </tbody>
               </table>
             </div>
           </CardContent>
         </Card>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
