@@ -19,7 +19,7 @@ export default function ClientIntegrationKeyCard({
   onDelete,
   isSaving,
   isToggling,
-  isDeleting,
+  isDeleting
 }) {
   const [isEditing, setIsEditing] = useState(!integration);
   const [apiKey, setApiKey] = useState("");
@@ -68,22 +68,22 @@ export default function ClientIntegrationKeyCard({
             <Input
               value={integration ? maskKey(integration.api_key) : "No API key saved yet"}
               disabled
-              className="settings-input-disabled settings-input-mono"
-            />
-            <p className="settings-helper">Only client administrators can view and manage these keys.</p>
+              className="settings-input-disabled settings-input-mono" />
+            
+            
           </div>
 
-          {isEditing ? (
-            <>
+          {isEditing ?
+          <>
               <div>
                 <label className="settings-label">{integration ? "Replace API key" : "API key"}</label>
                 <Input
-                  type="password"
-                  value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
-                  placeholder={`Paste your ${service.display_name} key`}
-                  className="settings-input"
-                />
+                type="password"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+                placeholder={`Paste your ${service.display_name} key`}
+                className="settings-input" />
+              
               </div>
 
               <div className="settings-actions">
@@ -97,9 +97,9 @@ export default function ClientIntegrationKeyCard({
 
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="settings-actions">
+            </> :
+
+          <div className="settings-actions">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                 <Button variant="outline" onClick={() => setIsEditing(true)} className="settings-secondary-button">
                   <Pencil className="h-4 w-4" />
@@ -114,9 +114,9 @@ export default function ClientIntegrationKeyCard({
                 </Button>
               </div>
             </div>
-          )}
+          }
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>);
+
 }
