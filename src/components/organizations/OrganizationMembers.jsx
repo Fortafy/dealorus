@@ -41,32 +41,11 @@ function InviteOrganizationUserDialog({ open, onOpenChange, organizationId, orga
         throw new Error(`Cannot invite more users. Your plan allows up to ${maxUsers} users.`);
       }
 
-      // Invite user to platform
-      await base44.users.inviteUser(email, "user");
-
-      // Retry to find the newly created user and update their organization
-      let invitedUser = null;
-      for (let i = 0; i < 10; i++) {
-        const users = await base44.entities.User.filter({ email });
-        if (users.length > 0) {
-          invitedUser = users[0];
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-
-      if (!invitedUser) {
-        throw new Error("Could not find the invited user after creation.");
-      }
-
-      return await base44.entities.User.update(invitedUser.id, {
-        client_id: organizationId,
-        client_role: "member",
-        is_active: true,
-      });
+      const response = await base44.functions.invoke("inviteClientMember", { email, organizationId });
+      return response.data;
     },
     onSuccess: () => {
-      setInviteSuccess("User invited successfully!");
+      setInviteSuccess("Invitation sent successfully!");
       setEmail("");
       queryClient.invalidateQueries({ queryKey: ["organizationUsers", organizationId] });
       setTimeout(() => {
@@ -75,7 +54,7 @@ function InviteOrganizationUserDialog({ open, onOpenChange, organizationId, orga
       }, 1500);
     },
     onError: (err) => {
-      setInviteError(err.message || "Failed to invite user");
+      setInviteError(err?.response?.data?.error || err.message || "Failed to invite user");
     },
   });
 
