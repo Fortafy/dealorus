@@ -222,7 +222,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
           >
             {/* Dealorous Field */}
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-500 mb-1 font-medium">Dealorous Field</p>
+              <p className="settings-label mb-1">Dealorous Field</p>
               <Select
                 value={mapping.dealorous_field}
                 onValueChange={(val) => updateMapping(index, { dealorous_field: val })}
@@ -249,7 +249,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
 
             {/* Salesforce Field */}
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-500 mb-1 font-medium">Salesforce Account Field</p>
+              <p className="settings-label mb-1">Salesforce Account Field</p>
               <Select
                 value={mapping.salesforce_field}
                 onValueChange={(val) => handleSfFieldChange(index, val)}
@@ -264,6 +264,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
                       key={f.name}
                       value={f.name}
                       disabled={usedSfFields.includes(f.name) && mapping.salesforce_field !== f.name}
+                      className="settings-select-item"
                     >
                       <span>{f.label}</span>
                       <span className="ml-2 text-slate-400 text-xs">({f.name})</span>
