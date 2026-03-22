@@ -405,33 +405,10 @@ export default function OrganizationSummary({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuItem onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved}>
+                <DropdownMenuItem onClick={() => setShowEnrichDialog(true)} disabled={!isSaved}>
                   <Sparkles className="w-3.5 h-3.5 mr-2" />
-                  Smart Enrich
+                  Enrich
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={isEnriching || !isSaved || !organization.ein}
-                  className="cursor-default"
-                  onSelect={(e) => e.preventDefault()}
-                >
-                  <Database className="w-3.5 h-3.5 mr-2" />
-                  <span>Enrich</span>
-                  <ChevronDown className="w-3 h-3 ml-auto" />
-                </DropdownMenuItem>
-                <div className="pl-6">
-                  <DropdownMenuItem onClick={() => handleSourceEnrich("CharityAPI")} disabled={isEnriching || !organization.ein} className="text-xs">
-                    {enrichingSource === "CharityAPI" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                    CharityAPI
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSourceEnrich("ProPublica")} disabled={isEnriching || !organization.ein} className="text-xs">
-                    {enrichingSource === "ProPublica" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                    ProPublica
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSourceEnrich("Nonprofit Check Plus")} disabled={isEnriching || !organization.ein} className="text-xs">
-                    {enrichingSource === "Nonprofit Check Plus" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                    Nonprofit Check Plus
-                  </DropdownMenuItem>
-                </div>
                 {isSaved && (
                   <DropdownMenuItem onClick={handlePushToSalesforce} disabled={isPushingToSalesforce}>
                     {isPushingToSalesforce ? <div className="w-3.5 h-3.5 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" /> : <Upload className="w-3.5 h-3.5 mr-2" />}
