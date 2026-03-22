@@ -433,7 +433,12 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         clientId={currentUser?.client_id}
         open={showContactForm}
         onOpenChange={setShowContactForm}
-        onSave={() => {
+        onSave={async (formData) => {
+          if (editingContact) {
+            await base44.entities.Contact.update(editingContact.id, formData);
+          } else {
+            await base44.entities.Contact.create(formData);
+          }
           queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
           setShowContactForm(false);
           setEditingContact(null);
