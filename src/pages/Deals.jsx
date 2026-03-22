@@ -53,8 +53,7 @@ export default function Deals() {
     if (clientRecord) setClient(clientRecord);
   }, [clientRecord]);
 
-  const lifecycleStages = useMemo(() => client?.lifecycle_stages || [], [client]);
-
+  const lifecycleStages = client?.lifecycle_stages || [];
   const sortedStages = useMemo(() => [...lifecycleStages].sort((a, b) => a.order - b.order), [lifecycleStages]);
 
   const updateDealMutation = useMutation({
