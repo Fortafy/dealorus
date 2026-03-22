@@ -50,15 +50,13 @@
 import Dashboard from './pages/Dashboard';
 import Organizations from './pages/Organizations';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
 import ComingSoon from './pages/ComingSoon';
 import Layout from './Layout.jsx';
 
 export const PAGES = {
-    "Dashboard": Dashboard,
     "Organizations": Organizations,
     "Profile": Profile,
-    "Settings": Settings,
+    "Settings": Dashboard,
     "ComingSoon": ComingSoon,
 }
 

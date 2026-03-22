@@ -42,7 +42,7 @@ export default function Sidebar() {
     { label: "Documentation", icon: BookOpen, path: "/ComingSoon" },
     { label: "Changelog", icon: ScrollText, path: "/ComingSoon" },
     { label: "Get Help", icon: HelpCircle, path: "/ComingSoon" },
-    { label: "Settings", icon: Settings, path: "/Dashboard" },
+    { label: "Settings", icon: Settings, path: "/Settings" },
   ];
 
   return (
