@@ -12,47 +12,11 @@ import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DealDialog from "@/components/deals/DealDialog";
 
-const SERVICE_NAMES = [
-  "Salesforce Administration",
-  "Wordpress Administration",
-  "Salesforce Development",
-  "Wordpress Development",
-  "Technical Assessment",
-  "Data Management",
-  "Data Hygiene",
-];
-
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
   { value: "ad_hoc", label: "Ad Hoc" },
   { value: "project", label: "Project" },
 ];
-
-const emptyService = () => ({ service_name: "", hours_per_month: "", total_estimated_hours: "", rate: "", overage_rate: "" });
-
-const emptyForm = () => ({
-  name: "", stage: "", contract_type: "", start_date: "", end_date: "",
-  expected_close_date: "", value: "", description: "", remind_at: null, services: [emptyService()],
-});
-
-const dealToForm = (deal) => ({
-  name: deal.name || "",
-  stage: deal.stage || "",
-  contract_type: deal.contract_type || "",
-  start_date: deal.start_date || "",
-  end_date: deal.end_date || "",
-  expected_close_date: deal.expected_close_date || "",
-  value: deal.value != null ? String(deal.value) : "",
-  description: deal.description || "",
-  remind_at: deal.remind_at || null,
-  services: deal.services?.length ? deal.services.map((s) => ({
-    service_name: s.service_name || "",
-    hours_per_month: s.hours_per_month != null ? String(s.hours_per_month) : "",
-    total_estimated_hours: s.total_estimated_hours != null ? String(s.total_estimated_hours) : "",
-    rate: s.rate != null ? String(s.rate) : "",
-    overage_rate: s.overage_rate != null ? String(s.overage_rate) : "",
-  })) : [emptyService()],
-});
 
 function InlineDealReminderBadge({ value, onSave }) {
   const [open, setOpen] = useState(false);
