@@ -41,7 +41,7 @@ export default function Deals() {
   });
 
   const { data: clientRecord } = useQuery({
-    queryKey: ["client-data", currentUser?.data?.client_id],
+    queryKey: ["client", currentUser?.data?.client_id],
     enabled: !!currentUser?.data?.client_id,
     queryFn: async () => {
       const all = await base44.entities.Client.list();
