@@ -26,7 +26,7 @@ import { getDataSourceLinks } from "@/components/utils/dataSourceLinks";
 import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import SmartEnrichDialog from "@/components/organizations/SmartEnrichDialog";
+import EnrichDialog from "@/components/organizations/EnrichDialog";
 import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 import { useQueryClient } from "@tanstack/react-query";
