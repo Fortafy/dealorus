@@ -7,6 +7,7 @@ import OrganizationSettings from "@/components/dashboard/OrganizationSettings";
 import BrandingSettings from "@/components/dashboard/BrandingSettings";
 import SubscriptionDetails from "@/components/dashboard/SubscriptionDetails";
 import PreferencesSection from "@/components/dashboard/PreferencesSection";
+import NotificationsSection from "@/components/dashboard/NotificationsSection";
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
@@ -58,6 +59,8 @@ export default function Dashboard() {
     switch (activeSection) {
       case "preferences":
         return <PreferencesSection user={currentUser} />;
+      case "notifications":
+        return <NotificationsSection user={currentUser} />;
       case "admin-users":
         return currentUser?.role === "admin" ? <AdminUsers /> : null;
       case "admin-organizations":

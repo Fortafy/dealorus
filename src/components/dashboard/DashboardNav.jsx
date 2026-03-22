@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   User,
   Settings,
+  Bell,
   BarChart3,
   Building2,
   CreditCard,
@@ -21,6 +22,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "preferences",
       label: "Preferences",
       icon: Settings,
+    },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
     },
   ];
 
