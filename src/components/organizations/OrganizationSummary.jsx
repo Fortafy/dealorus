@@ -691,7 +691,7 @@ export function OrganizationFields({ organization, onEdit, isSaved = true, clien
   );
 }
 
-// Inline editable header title (white text on gradient)
+// Inline editable header title
 function InlineHeaderText({ value, onSave }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || "");
@@ -713,11 +713,11 @@ function InlineHeaderText({ value, onSave }) {
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setEditing(false); setDraft(value); } }}
-      className="text-base font-semibold bg-white/20 text-white placeholder-white/60 border-b-2 border-white/50 outline-none w-full"
+      className="text-sm font-semibold bg-slate-100 text-slate-900 border-b-2 border-slate-300 outline-none w-full rounded px-1"
     />
   ) : (
     <h2
-      className="text-base font-semibold cursor-pointer hover:bg-white/10 rounded px-1 -mx-1 transition-colors"
+      className="text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100 rounded px-1 -mx-1 transition-colors truncate"
       onClick={() => { setDraft(value); setEditing(true); }}
       title="Click to edit"
     >
