@@ -88,12 +88,13 @@ export default function ClientIntegrationKeyCard({
 
               <div className="settings-actions">
                 <div className="flex flex-col gap-2 sm:flex-row">
-                  <Button onClick={handleSave} disabled={!apiKey.trim() || isSaving} className="settings-primary-button">
-                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : integration ? "Update Key" : "Save Key"}
-                  </Button>
                   <Button variant="outline" onClick={handleCancel} disabled={isSaving} className="settings-secondary-button">
                     Cancel
                   </Button>
+                  <Button onClick={handleSave} disabled={!apiKey.trim() || isSaving} className="settings-primary-button">
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : integration ? "Update Key" : "Save Key"}
+                  </Button>
+
                 </div>
               </div>
             </>
