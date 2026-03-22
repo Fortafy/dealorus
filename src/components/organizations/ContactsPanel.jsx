@@ -360,7 +360,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                <div className="flex items-start justify-between gap-2 mb-1">
                  <div className="flex-1">
                    <h4 className="font-semibold text-xs text-slate-900">{contact.name}</h4>
-                   {contact.title && <p className="text-[10px] text-slate-600">{contact.title}</p>}
+                   {contact.title && <p className="text-xs text-slate-600">{contact.title}</p>}
                  </div>
                  <DropdownMenu>
                    <DropdownMenuTrigger asChild>
