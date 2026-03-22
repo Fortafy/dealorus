@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, MessageSquare, Handshake } from "lucide-react";
 import moment from "moment";
 
-export default function ActivityTimeline({ organization, isCollapsed }) {
+export default function ActivityTimeline({ organization, isCollapsed, lifecycleStages = [] }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const { data: interactions = [] } = useQuery({
