@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import SalesforceIntegration from "./SalesforceIntegration";
+import ClientIntegrationsManager from "./ClientIntegrationsManager";
 
 export default function IntegrationsSection({ organization }) {
   return (
@@ -12,6 +13,7 @@ export default function IntegrationsSection({ organization }) {
       <div className="settings-stack">
         <h2 className="settings-page-title">Integrations</h2>
         <SalesforceIntegration organization={organization} />
+        <ClientIntegrationsManager organization={organization} />
       </div>
     </motion.div>
   );
