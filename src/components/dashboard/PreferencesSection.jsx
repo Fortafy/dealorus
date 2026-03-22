@@ -111,37 +111,37 @@ export default function PreferencesSection({ user }) {
         <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <CardContent className="p-5">
             <div className="mb-4">
-              <h3 className="text-xl font-semibold text-slate-900">Personal Information</h3>
-              <p className="mt-1 text-sm text-slate-500">Update your name and review your account details.</p>
+              <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
+              <p className="mt-1 text-xs text-slate-500">Update your name and review your account details.</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                <label className="block text-xs font-medium text-slate-700 mb-2">Full Name</label>
                 <Input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="h-11"
+                  className="h-11 text-xs"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
-                <Input value={email} disabled className="h-11 bg-slate-50 cursor-not-allowed" />
+                <label className="block text-xs font-medium text-slate-700 mb-2">Email Address</label>
+                <Input value={email} disabled className="h-11 bg-slate-50 cursor-not-allowed text-xs" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
-                <Input value={user?.id || ""} disabled className="h-11 bg-slate-50 cursor-not-allowed font-mono" />
+                <label className="block text-xs font-medium text-slate-700 mb-2">User ID</label>
+                <Input value={user?.id || ""} disabled className="h-11 bg-slate-50 cursor-not-allowed font-mono text-xs" />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Organization</label>
+                <label className="block text-xs font-medium text-slate-700 mb-2">Organization</label>
                 <Input
                   value={client?.name || (user?.client_id ? "Loading..." : "Not assigned")}
                   disabled
-                  className="h-11 bg-slate-50 cursor-not-allowed"
+                  className="h-11 bg-slate-50 cursor-not-allowed text-xs"
                 />
               </div>
             </div>
@@ -165,12 +165,12 @@ export default function PreferencesSection({ user }) {
           <CardContent className="p-5">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="max-w-xl">
-                <h3 className="text-xl font-semibold text-slate-900">Theme</h3>
-                <p className="mt-1 text-sm text-slate-500">Select or customize your interface color scheme.</p>
+                <h3 className="text-lg font-semibold text-slate-900">Theme</h3>
+                <p className="mt-1 text-xs text-slate-500">Select or customize your interface color scheme.</p>
               </div>
               <div className="w-full md:w-72">
                 <Select value={themePreference} onValueChange={handleThemeChange}>
-                  <SelectTrigger className="h-11 w-full rounded-xl bg-white">
+                  <SelectTrigger className="h-11 w-full rounded-xl bg-white text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -188,8 +188,8 @@ export default function PreferencesSection({ user }) {
           <CardContent className="p-5 space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div className="pr-4">
-                <h3 className="text-xl font-semibold text-slate-900">Notifications</h3>
-                <p className="mt-1 text-sm text-slate-500">Choose whether you want to receive updates and summaries.</p>
+                <h3 className="text-lg font-semibold text-slate-900">Notifications</h3>
+                <p className="mt-1 text-xs text-slate-500">Choose whether you want to receive updates and summaries.</p>
               </div>
               <Switch checked={notificationsEnabled} onCheckedChange={handleNotificationsToggle} />
             </div>
@@ -198,12 +198,12 @@ export default function PreferencesSection({ user }) {
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-700">Email Digest Frequency</p>
-                    <p className="mt-1 text-sm text-slate-500">How often you want to receive email summaries.</p>
+                    <p className="text-xs font-medium text-slate-700">Email Digest Frequency</p>
+                    <p className="mt-1 text-xs text-slate-500">How often you want to receive email summaries.</p>
                   </div>
                   <div className="w-full md:w-72">
                     <Select value={emailDigest} onValueChange={handleEmailDigestChange}>
-                      <SelectTrigger className="h-11 w-full rounded-xl bg-white">
+                      <SelectTrigger className="h-11 w-full rounded-xl bg-white text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
