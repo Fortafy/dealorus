@@ -151,54 +151,15 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     },
   });
 
-  const openCreate = () => { setEditingDeal(null); setForm(emptyForm()); setShowDealForm(true); };
-  const openEdit = (deal) => { setEditingDeal(deal); setForm(dealToForm(deal)); setShowDealForm(true); };
-  const closeForm = () => { setShowDealForm(false); setEditingDeal(null); setForm(emptyForm()); };
+  const openCreate = () => { setEditingDeal(null); setShowDealForm(true); };
+  const openEdit = (deal) => { setEditingDeal(deal); setShowDealForm(true); };
+  const closeForm = () => { setShowDealForm(false); setEditingDeal(null); };
 
-  const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  const setServiceField = (index, key, value) => setForm((f) => {
-    const services = [...f.services];
-    services[index] = { ...services[index], [key]: value };
-    return { ...f, services };
-  });
-  const addService = () => setForm((f) => ({ ...f, services: [...f.services, emptyService()] }));
-  const removeService = (index) => setForm((f) => ({ ...f, services: f.services.filter((_, i) => i !== index) }));
-
-  const buildPayload = () => {
-    const services = form.services
-      .filter((s) => s.service_name)
-      .map((s) => ({
-        service_name: s.service_name,
-        ...(s.hours_per_month !== "" && { hours_per_month: parseFloat(s.hours_per_month) }),
-        ...(s.total_estimated_hours !== "" && { total_estimated_hours: parseFloat(s.total_estimated_hours) }),
-        ...(s.rate !== "" && { rate: parseFloat(s.rate) }),
-        ...(s.overage_rate !== "" && { overage_rate: parseFloat(s.overage_rate) }),
-      }));
-    return {
-      name: form.name,
-      stage: form.stage,
-      contract_type: form.contract_type || null,
-      start_date: form.start_date || null,
-      end_date: form.end_date || null,
-      expected_close_date: form.expected_close_date || null,
-      value: form.value ? parseFloat(form.value) : null,
-      description: form.description || null,
-      remind_at: form.remind_at || null,
-      services,
-      is_active: true,
-    };
-  };
-
-  const handleSubmit = () => {
-    if (!form.name.trim() || !form.stage) {
-      toast.error("Please fill in deal name and stage");
-      return;
-    }
-    const payload = buildPayload();
-    if (editingDeal) {
-      updateDealMutation.mutate({ id: editingDeal.id, data: payload });
+  const handleSubmit = (payload, dealId) => {
+    if (dealId) {
+      updateDealMutation.mutate({ id: dealId, data: { ...payload, is_active: true } });
     } else {
-      createDealMutation.mutate(payload);
+      createDealMutation.mutate({ ...payload, is_active: true });
     }
   };
 
