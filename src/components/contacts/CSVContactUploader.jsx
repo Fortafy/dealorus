@@ -66,6 +66,7 @@ export default function CSVContactUploader({ organizationId, onComplete, iconOnl
       for (const contact of contacts) {
         try {
           await base44.entities.Contact.create({
+            client_id: currentUser?.data?.client_id,
             organization_id: organizationId,
             name: contact.name,
             title: contact.title || null,
