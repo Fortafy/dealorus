@@ -69,7 +69,7 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
             <div className="divide-y divide-slate-100">
               {mergedActivity.map((item) => (
                 <div key={`${item.type}-${item.id}`} className="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                  <div className="text-lg flex-shrink-0 mt-0.5">{item.icon}</div>
+                   {(() => { const ic = getIconConfig(item); return <div className={`flex-shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wide ${ic.bg} ${ic.text}`}>{ic.label}</div>; })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium text-slate-900">{item.type === "interaction" ? item.subject : item.type === "note" ? item.title : item.name}</p>
