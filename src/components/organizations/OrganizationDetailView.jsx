@@ -136,7 +136,7 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
 
           {/* Activity Timeline — full width */}
           <div className="border-t border-slate-100">
-            <ActivityTimeline organization={organization} />
+            <ActivityTimeline organization={organization} lifecycleStages={clientData?.lifecycle_stages || []} />
           </div>
         </div>
 
