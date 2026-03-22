@@ -9,9 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Loader, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 import LifecycleStageSettings from "./LifecycleStageSettings";
 
 export default function OrganizationSettings({ organization }) {
+  const { user } = useAuth();
+  const showBrandingCard = user?.role === "admin";
+
   const [formData, setFormData] = useState({
     name: "",
     website: "",
@@ -254,11 +258,18 @@ export default function OrganizationSettings({ organization }) {
           </CardContent>
         </Card>
 
+        {showBrandingCard &&
         <Card className="settings-card">
           <CardContent className="settings-card-body pt-6">
             <div className="settings-section-header">
-              <h3 className="settings-card-title">Branding & Logo</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="settings-card-title">Branding & Logo</h3>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+                  Platform Admin Only
+                </span>
+              </div>
               <p className="settings-card-description">Manage your logo and brand color.</p>
+              <p className="settings-helper">This is a Platform Admin only feature.</p>
             </div>
 
             <div className="settings-grid-two">
@@ -347,6 +358,7 @@ export default function OrganizationSettings({ organization }) {
             </div>
           </CardContent>
         </Card>
+        }
 
         <LifecycleStageSettings organization={organization} />
 
