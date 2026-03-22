@@ -11,7 +11,7 @@ export default function SubscriptionDetails({ organization, currentUser }) {
     if (!organization) return null;
 
     const status = organization.subscription_status || "trial";
-    const plan = organization.subscription_plan || "basic";
+    const plan = (organization.subscription_plan || "free").toLowerCase();
     const maxUsers = organization.max_users || 1;
     const trialEndsAt = organization.trial_ends_at;
 
@@ -36,10 +36,13 @@ export default function SubscriptionDetails({ organization, currentUser }) {
   };
 
   const planFeatures = {
-    basic: ["Up to 10 users", "Basic reporting", "Email support"],
-    premium: ["Up to 50 users", "Advanced reporting", "Priority support"],
-    enterprise: ["Unlimited users", "Custom features", "Dedicated support"]
+    free: ["1,000 API Calls per month"],
+    paid: ["5,000 API Calls per month", "Priority Support"]
   };
+
+  const normalizedPlan = ["paid", "premium", "enterprise"].includes(subscriptionInfo.plan) ? "paid" : "free";
+  const displayedPlanName = normalizedPlan === "paid" ? "Paid" : "Free";
+  const displayedFeatures = [`Up to ${subscriptionInfo.maxUsers} users`, ...(planFeatures[normalizedPlan] || [])];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -87,8 +90,8 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                 <div className="settings-grid-two">
                   <div>
                     <p className="text-sm font-semibold settings-value-label">Plan</p>
-                    <p className="text-sm capitalize settings-value">
-                      {subscriptionInfo.plan}
+                    <p className="text-sm settings-value">
+                      {displayedPlanName}
                     </p>
                   </div>
                   <div>
@@ -121,7 +124,7 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                     <p className="settings-card-description">Included with your current subscription plan.</p>
                   </div>
                   <ul className="space-y-3">
-                    {planFeatures[subscriptionInfo.plan]?.map((feature, index) =>
+                    {displayedFeatures.map((feature, index) =>
                     <li key={index} className="flex items-center gap-3">
                         <div className="h-2 w-2 rounded-full bg-blue-600" />
                         <span className="text-sm settings-value">{feature}</span>
