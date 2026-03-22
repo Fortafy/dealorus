@@ -23,24 +23,30 @@ export default function ActivityTimeline({ organization, isCollapsed }) {
     queryFn: () => base44.entities.Deal.filter({ organization_id: organization.id }, "-created_date"),
   });
 
+  const getIconConfig = (item) => {
+    if (item.type === "note") return { label: "NOTE", bg: "bg-amber-100", text: "text-amber-700" };
+    if (item.type === "deal") return { label: "DEAL", bg: "bg-emerald-100", text: "text-emerald-700" };
+    if (item.interactionType === "email") return { label: "EMAIL", bg: "bg-blue-100", text: "text-blue-700" };
+    if (item.interactionType === "call") return { label: "CALL", bg: "bg-purple-100", text: "text-purple-700" };
+    return { label: "MTG", bg: "bg-rose-100", text: "text-rose-700" };
+  };
+
   const mergedActivity = [
     ...interactions.map((i) => ({
       ...i,
       type: "interaction",
+      interactionType: i.type,
       timestamp: i.created_date,
-      icon: i.type === "email" ? "📧" : i.type === "call" ? "☎️" : "📅",
     })),
     ...notes.map((n) => ({
       ...n,
       type: "note",
       timestamp: n.created_date,
-      icon: "📝",
     })),
     ...deals.map((d) => ({
       ...d,
       type: "deal",
       timestamp: d.created_date,
-      icon: "💼",
     })),
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
