@@ -172,11 +172,6 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
               organization={organization}
               clientId={currentUser?.client_id}
             />
-            <NotesSectionWithTrigger
-              organization={organization}
-              clientId={currentUser?.client_id}
-              externalTrigger={triggerNote}
-            />
             <DealsSectionWithTrigger
               organization={organization}
               clientId={currentUser?.client_id}
@@ -188,17 +183,6 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
       </div>
     </motion.div>
   );
-}
-
-// Wrapper that opens NotesSection's create form when externalTrigger increments
-function NotesSectionWithTrigger({ organization, clientId, externalTrigger }) {
-  const [openCreate, setOpenCreate] = useState(0);
-
-  React.useEffect(() => {
-    if (externalTrigger > 0) setOpenCreate(n => n + 1);
-  }, [externalTrigger]);
-
-  return <NotesSection organization={organization} clientId={clientId} externalOpenCreate={openCreate} />;
 }
 
 // Wrapper that opens DealsSection's create form when externalTrigger increments
