@@ -94,7 +94,7 @@ export default function PreferencesSection({ user }) {
         }
 
         <Card className="settings-card">
-          <CardContent className="settings-card-body">
+          <CardContent className="settings-card-body pt-6">
             <div className="settings-section-header">
               <h3 className="settings-card-title">Personal Information</h3>
               <p className="settings-card-description">Update your name and review your account details.</p>
