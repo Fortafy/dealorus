@@ -11,7 +11,7 @@ export default function ClientIntegrationsManager({ organization }) {
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ["me"],
-    queryFn: () => base44.auth.me(),
+    queryFn: () => base44.auth.me()
   });
 
   const isAdmin = user?.role === "admin" || user?.data?.client_role === "admin";
@@ -20,7 +20,7 @@ export default function ClientIntegrationsManager({ organization }) {
     queryKey: ["client-integrations", organization?.id],
     queryFn: () => base44.entities.ClientIntegration.filter({ client_id: organization.id }, "-updated_date", 20),
     enabled: Boolean(organization?.id && isAdmin),
-    initialData: [],
+    initialData: []
   });
 
   const saveMutation = useMutation({
@@ -28,7 +28,7 @@ export default function ClientIntegrationsManager({ organization }) {
       if (integration?.id) {
         return base44.entities.ClientIntegration.update(integration.id, {
           api_key: apiKey,
-          is_active: true,
+          is_active: true
         });
       }
 
@@ -37,29 +37,29 @@ export default function ClientIntegrationsManager({ organization }) {
         integration_type: service.integration_type,
         display_name: service.display_name,
         api_key: apiKey,
-        is_active: true,
+        is_active: true
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client-integrations", organization?.id] });
-    },
+    }
   });
 
   const toggleMutation = useMutation({
     mutationFn: (integration) =>
-      base44.entities.ClientIntegration.update(integration.id, {
-        is_active: !integration.is_active,
-      }),
+    base44.entities.ClientIntegration.update(integration.id, {
+      is_active: !integration.is_active
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client-integrations", organization?.id] });
-    },
+    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: (integration) => base44.entities.ClientIntegration.delete(integration.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["client-integrations", organization?.id] });
-    },
+    }
   });
 
   if (!organization?.id) {
@@ -70,8 +70,8 @@ export default function ClientIntegrationsManager({ organization }) {
     return (
       <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-8">
         <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
-      </div>
-    );
+      </div>);
+
   }
 
   if (!isAdmin) {
@@ -79,18 +79,18 @@ export default function ClientIntegrationsManager({ organization }) {
       <Alert>
         <ShieldCheck className="h-4 w-4" />
         <AlertDescription>Only administrators can manage client integration keys.</AlertDescription>
-      </Alert>
-    );
+      </Alert>);
+
   }
 
   return (
     <div className="settings-stack">
-      <Alert>
-        <ShieldCheck className="h-4 w-4" />
-        <AlertDescription>
-          These keys are saved per client and are used for enrichment requests instead of shared app-wide keys.
-        </AlertDescription>
-      </Alert>
+      
+
+
+
+
+      
 
       {CLIENT_INTEGRATION_CATALOG.map((service) => {
         const integration = integrations.find((item) => item.integration_type === service.integration_type);
@@ -101,16 +101,16 @@ export default function ClientIntegrationsManager({ organization }) {
             service={service}
             integration={integration}
             onSave={(selectedService, apiKey, existingIntegration) =>
-              saveMutation.mutateAsync({ service: selectedService, apiKey, integration: existingIntegration })
+            saveMutation.mutateAsync({ service: selectedService, apiKey, integration: existingIntegration })
             }
             onToggle={(selectedIntegration) => toggleMutation.mutate(selectedIntegration)}
             onDelete={(selectedIntegration) => deleteMutation.mutate(selectedIntegration)}
             isSaving={saveMutation.isPending}
             isToggling={toggleMutation.isPending}
-            isDeleting={deleteMutation.isPending}
-          />
-        );
+            isDeleting={deleteMutation.isPending} />);
+
+
       })}
-    </div>
-  );
+    </div>);
+
 }
