@@ -408,15 +408,15 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                     variant="outline"
                     size="xs"
                     onClick={() => handleSetPrimary(contact)}
-                    className={`text-xs ${contact.is_primary_contact ? "bg-blue-50 border-blue-300" : ""}`}
+                    className={`text-xs px-3 py-1 ${contact.is_primary_contact ? "bg-blue-50 border-blue-300" : ""}`}
                   >
-                    {contact.is_primary_contact ? "★ Primary" : "☆ Set Primary"}
+                    {contact.is_primary_contact ? "★ Primary" : "☆ Primary"}
                   </Button>
                   <Button
                     variant="outline"
                     size="xs"
                     onClick={() => handleSetBusiness(contact)}
-                    className={`text-xs ${contact.is_business_contact ? "bg-purple-50 border-purple-300" : ""}`}
+                    className={`text-xs px-3 py-1 ${contact.is_business_contact ? "bg-purple-50 border-purple-300" : ""}`}
                   >
                     Decision Maker
                   </Button>
