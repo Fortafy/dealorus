@@ -58,10 +58,10 @@ export default function SubscriptionDetails({ organization, currentUser }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto px-6 py-6"
+      className="settings-page"
     >
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Subscription & Billing</h2>
+        <h2 className="settings-page-title">Subscription & Billing</h2>
 
         <motion.div
           variants={containerVariants}
@@ -71,9 +71,9 @@ export default function SubscriptionDetails({ organization, currentUser }) {
         >
           {/* Subscription Status */}
           <motion.div variants={itemVariants}>
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-                <CardTitle className="flex items-center justify-between">
+            <Card className="settings-card">
+              <CardHeader className="settings-card-header">
+                <CardTitle className="settings-card-title flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Zap className="w-5 h-5" />
                     Current Subscription
@@ -83,17 +83,17 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 space-y-4">
+              <CardContent className="settings-card-body space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-slate-600">Plan</p>
-                    <p className="text-lg font-semibold text-slate-900 capitalize">
+                    <p className="settings-value-label">Plan</p>
+                    <p className="settings-value capitalize">
                       {subscriptionInfo.plan}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-600">Max Users</p>
-                    <p className="text-lg font-semibold text-slate-900">
+                    <p className="settings-value-label">Max Users</p>
+                    <p className="settings-value">
                       {subscriptionInfo.maxUsers} users
                     </p>
                   </div>
@@ -103,7 +103,7 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                   <div className="pt-4 border-t border-slate-200">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm text-slate-700">
+                      <span className="text-xs font-medium text-slate-700">
                         Trial ends in <strong>{Math.max(0, subscriptionInfo.daysRemaining)} days</strong>
                       </span>
                     </div>
@@ -120,9 +120,9 @@ export default function SubscriptionDetails({ organization, currentUser }) {
 
           {/* Plan Features */}
           <motion.div variants={itemVariants}>
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-                <CardTitle className="flex items-center gap-2">
+            <Card className="settings-card">
+              <CardHeader className="settings-card-header">
+                <CardTitle className="settings-card-title flex items-center gap-2">
                   <Users className="w-5 h-5" />
                   Plan Features
                 </CardTitle>
@@ -142,21 +142,21 @@ export default function SubscriptionDetails({ organization, currentUser }) {
 
           {/* Billing Information */}
           <motion.div variants={itemVariants}>
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-                <CardTitle className="flex items-center gap-2">
+            <Card className="settings-card">
+              <CardHeader className="settings-card-header">
+                <CardTitle className="settings-card-title flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
                   Billing Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 space-y-4">
+              <CardContent className="settings-card-body space-y-4">
                 <div>
-                  <p className="text-sm text-slate-600">Billing Email</p>
-                  <p className="text-slate-900">{organization.billing_email || "Not set"}</p>
+                  <p className="settings-value-label">Billing Email</p>
+                  <p className="settings-value">{organization.billing_email || "Not set"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-600">Stripe Customer ID</p>
-                  <p className="font-mono text-sm text-slate-600">
+                  <p className="settings-value-label">Stripe Customer ID</p>
+                  <p className="font-mono text-xs text-slate-600">
                     {organization.stripe_customer_id || "Not configured"}
                   </p>
                 </div>

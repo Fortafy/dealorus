@@ -80,11 +80,11 @@ export default function SalesforceIntegration({ organization }) {
   };
 
   return (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
+    <Card className="settings-card">
+      <CardHeader className="settings-card-header">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="settings-card-title flex items-center gap-2">
               Salesforce Integration (External Client App)
               {isConnected ? (
                 <Badge className="bg-green-100 text-green-800">Connected</Badge>
@@ -92,14 +92,14 @@ export default function SalesforceIntegration({ organization }) {
                 <Badge variant="outline" className="text-slate-600">Not Connected</Badge>
               )}
             </CardTitle>
-            <CardDescription className="mt-1">
+            <CardDescription className="settings-card-description">
               Sync Salesforce Accounts using External Client Apps (OAuth 2.0 Client Credentials)
             </CardDescription>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-6 space-y-6">
+      <CardContent className="settings-card-body space-y-5">
         {error && (
           <Alert variant="destructive">
             <XCircle className="h-4 w-4" />
@@ -138,32 +138,34 @@ export default function SalesforceIntegration({ organization }) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="settings-label">
                   Salesforce Instance URL
                 </label>
                 <Input
                   value={instanceUrl}
                   onChange={(e) => setInstanceUrl(e.target.value)}
                   placeholder="https://yourinstance.my.salesforce.com"
+                  className="settings-input"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="settings-helper">
                   Your Salesforce instance URL (e.g., https://yourcompany.my.salesforce.com)
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="settings-label">
                   Consumer Key
                 </label>
                 <Input
                   value={consumerKey}
                   onChange={(e) => setConsumerKey(e.target.value)}
                   placeholder="Paste Consumer Key from External Client App"
+                  className="settings-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="settings-label">
                   Consumer Secret
                 </label>
                 <Input
@@ -171,8 +173,9 @@ export default function SalesforceIntegration({ organization }) {
                   value={consumerSecret}
                   onChange={(e) => setConsumerSecret(e.target.value)}
                   placeholder="Paste Consumer Secret from External Client App"
+                  className="settings-input"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="settings-helper">
                   Keep this secret secure - it will be encrypted in storage
                 </p>
               </div>
@@ -181,8 +184,7 @@ export default function SalesforceIntegration({ organization }) {
             <Button
               onClick={() => connectMutation.mutate()}
               disabled={!instanceUrl || !consumerKey || !consumerSecret || connectMutation.isPending}
-              className="w-full"
-              style={{ backgroundColor: 'hsl(217, 91%, 60%)' }}
+              className="settings-primary-button w-full"
             >
               {connectMutation.isPending ? (
                 <>
@@ -235,7 +237,7 @@ export default function SalesforceIntegration({ organization }) {
                 onClick={handleSync}
                 disabled={syncing}
                 variant="outline"
-                className="w-full"
+                className="settings-secondary-button w-full"
               >
                 {syncing ? (
                   <>
@@ -252,7 +254,7 @@ export default function SalesforceIntegration({ organization }) {
 
               <Button
                 variant="outline"
-                className="w-full"
+                className="settings-secondary-button w-full"
                 onClick={() => setError("Manual push not yet implemented. Organizations with salesforce_id will auto-sync.")}
               >
                 <Upload className="w-4 h-4 mr-2" />

@@ -160,11 +160,12 @@ export default function SalesforceFieldMappingSection({ organization }) {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="settings-page">
+      <div className="settings-card p-5 space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Salesforce Field Mapping</h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <h2 className="settings-card-title">Salesforce Field Mapping</h2>
+          <p className="settings-card-description">
             Map Dealorous Organization fields to Salesforce Account fields. These mappings control what data is pushed when syncing.
           </p>
         </div>
@@ -173,7 +174,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
           size="sm"
           onClick={loadSalesforceFields}
           disabled={loadingFields}
-          className="flex items-center gap-2 text-xs"
+          className="settings-secondary-button flex items-center gap-2"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loadingFields ? 'animate-spin' : ''}`} />
           Refresh SF Fields
@@ -226,15 +227,16 @@ export default function SalesforceFieldMappingSection({ organization }) {
                 value={mapping.dealorous_field}
                 onValueChange={(val) => updateMapping(index, { dealorous_field: val })}
               >
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder="Select field..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="settings-select-content">
                   {ORGANIZATION_FIELDS.map(f => (
                     <SelectItem
                       key={f.name}
                       value={f.name}
                       disabled={usedDealorousFields.includes(f.name) && mapping.dealorous_field !== f.name}
+                      className="settings-select-item"
                     >
                       {f.label}
                     </SelectItem>
@@ -253,10 +255,10 @@ export default function SalesforceFieldMappingSection({ organization }) {
                 onValueChange={(val) => handleSfFieldChange(index, val)}
                 disabled={sfFields.length === 0}
               >
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder={sfFields.length === 0 ? "Load SF fields first..." : "Select field..."} />
                 </SelectTrigger>
-                <SelectContent className="max-h-64">
+                <SelectContent className="settings-select-content max-h-64">
                   {sfFields.map(f => (
                     <SelectItem
                       key={f.name}
@@ -299,12 +301,12 @@ export default function SalesforceFieldMappingSection({ organization }) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+      <div className="settings-actions-between pt-2">
         <Button
           variant="outline"
           size="sm"
           onClick={addMapping}
-          className="flex items-center gap-2"
+          className="settings-secondary-button flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Add Mapping
@@ -321,8 +323,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
             onClick={saveAll}
             disabled={saving || mappings.length === 0}
             size="sm"
-            style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
-            className="text-white hover:opacity-90"
+            className="settings-primary-button"
           >
             {saving ? "Saving..." : "Save Mappings"}
           </Button>
@@ -334,6 +335,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
           {mappings.filter(m => m.is_active).length} active mapping{mappings.filter(m => m.is_active).length !== 1 ? 's' : ''} — these will be applied when pushing Organizations to Salesforce.
         </p>
       )}
+      </div>
     </div>
   );
 }

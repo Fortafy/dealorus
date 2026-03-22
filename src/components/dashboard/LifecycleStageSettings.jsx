@@ -103,14 +103,14 @@ export default function LifecycleStageSettings({ organization }) {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-          <CardTitle>Lifecycle Stages</CardTitle>
-          <p className="text-sm text-slate-600 mt-2">
+      <Card className="settings-card">
+        <CardHeader className="settings-card-header">
+          <CardTitle className="settings-card-title">Lifecycle Stages</CardTitle>
+          <p className="settings-card-description">
             Customize the stages your team will use to track organizations through the pipeline
           </p>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="settings-card-body">
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
@@ -144,7 +144,7 @@ export default function LifecycleStageSettings({ organization }) {
                   value={stage.name}
                   onChange={(e) => handleStageName(index, e.target.value)}
                   placeholder="Stage name"
-                  className="flex-1"
+                  className="settings-input flex-1"
                 />
 
                 <div className="flex items-center gap-1">
@@ -183,13 +183,13 @@ export default function LifecycleStageSettings({ organization }) {
           <Button
             variant="outline"
             onClick={handleAddStage}
-            className="w-full mt-4"
+            className="settings-secondary-button w-full mt-4"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Stage
           </Button>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-slate-200 mt-6">
+          <div className="settings-actions gap-3 mt-6">
             <Button
               variant="outline"
               onClick={() => {
@@ -198,15 +198,14 @@ export default function LifecycleStageSettings({ organization }) {
                 }
               }}
               disabled={updateMutation.isPending}
+              className="settings-secondary-button"
             >
               Reset
             </Button>
             <Button
               onClick={handleSave}
               disabled={updateMutation.isPending}
-              style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
+              className="settings-primary-button"
             >
               {updateMutation.isPending ? (
                 <>

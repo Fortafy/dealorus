@@ -71,15 +71,15 @@ export default function DataSourceConfiguration({ organization }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="max-w-4xl mx-auto px-6 py-6"
+      className="settings-page"
     >
-      <Card className="border-0 shadow-xl shadow-slate-200/50">
-        <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b p-6">
-          <CardTitle>Data Source Configuration</CardTitle>
-          <p className="text-sm text-slate-600 mt-2">Set the default data source priority for all organization users</p>
+      <Card className="settings-card">
+        <CardHeader className="settings-card-header">
+          <CardTitle className="settings-card-title">Data Source Configuration</CardTitle>
+          <p className="settings-card-description">Set the default data source priority for all organization users</p>
         </CardHeader>
 
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="settings-card-body space-y-5">
           {saveStatus && (
             <Alert variant={saveStatus.type === "success" ? "default" : "destructive"}>
               <AlertDescription>{saveStatus.message}</AlertDescription>
@@ -88,7 +88,7 @@ export default function DataSourceConfiguration({ organization }) {
 
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertDescription className="text-sm">
+            <AlertDescription className="settings-helper mt-0">
               The order below determines which data sources are checked first during Smart Enrichment. Only missing fields will be filled; existing data is preserved.
             </AlertDescription>
           </Alert>
@@ -100,7 +100,7 @@ export default function DataSourceConfiguration({ organization }) {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 mb-4">Reorder Data Sources</h3>
+            <h3 className="settings-section-title mb-4">Reorder Data Sources</h3>
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="sources">
                 {(provided) => (
@@ -153,17 +153,15 @@ export default function DataSourceConfiguration({ organization }) {
             </DragDropContext>
           </div>
 
-          <div className="flex justify-between pt-4 border-t border-slate-100">
-            <Button variant="outline" onClick={handleReset} disabled={isSaving}>
+          <div className="settings-actions-between">
+            <Button variant="outline" onClick={handleReset} disabled={isSaving} className="settings-secondary-button">
               Reset to Default
             </Button>
             <div className="flex gap-2">
               <Button 
                 onClick={handleSave} 
                 disabled={isSaving}
-                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
+                className="settings-primary-button"
               >
                 {isSaving ? (
                   <>
