@@ -389,7 +389,7 @@ export default function OrganizationSummary({
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       {/* Header — clean white strip */}
-      <div className="bg-white px-4 py-3 border-b border-slate-100">
+      <div className="bg-white px-4 py-5 border-b border-slate-100">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
@@ -405,8 +405,8 @@ export default function OrganizationSummary({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <a href={`${clientInstanceUrl}/${displayData.salesforce_id}`} target="_blank" rel="noopener noreferrer"
-                          className="w-5 h-5 rounded flex items-center justify-center hover:bg-slate-100 transition-colors overflow-hidden flex-shrink-0">
-                          <img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" alt="Salesforce" className="w-4 h-4 object-contain" />
+                          className="w-6 h-6 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:shadow-sm hover:border-slate-300 transition-all overflow-hidden flex-shrink-0">
+                          <img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" alt="Salesforce" className="w-3.5 h-3.5 object-contain" />
                         </a>
                       </TooltipTrigger>
                       <TooltipContent side="bottom"><p className="text-xs">Salesforce</p></TooltipContent>
@@ -421,9 +421,9 @@ export default function OrganizationSummary({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <a href={link.url} target="_blank" rel="noopener noreferrer"
-                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-slate-100 transition-colors overflow-hidden flex-shrink-0">
+                            className="w-6 h-6 rounded-full border border-slate-200 bg-white flex items-center justify-center hover:shadow-sm hover:border-slate-300 transition-all overflow-hidden flex-shrink-0">
                             {faviconUrl
-                              ? <img src={faviconUrl} alt={link.name} className="w-4 h-4 object-contain" />
+                              ? <img src={faviconUrl} alt={link.name} className="w-3.5 h-3.5 object-contain" />
                               : <ExternalLink className="w-3 h-3 text-slate-400" />}
                           </a>
                         </TooltipTrigger>
@@ -713,11 +713,11 @@ function InlineHeaderText({ value, onSave }) {
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") { setEditing(false); setDraft(value); } }}
-      className="text-sm font-semibold bg-slate-100 text-slate-900 border-b-2 border-slate-300 outline-none w-full rounded px-1"
+      className="text-base font-semibold bg-slate-100 text-slate-900 border-b-2 border-slate-300 outline-none w-full rounded px-1"
     />
   ) : (
     <h2
-      className="text-sm font-semibold text-slate-900 cursor-pointer hover:bg-slate-100 rounded px-1 -mx-1 transition-colors truncate"
+      className="text-base font-semibold text-slate-900 cursor-pointer hover:bg-slate-100 rounded px-1 -mx-1 transition-colors truncate"
       onClick={() => { setDraft(value); setEditing(true); }}
       title="Click to edit"
     >
