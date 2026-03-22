@@ -140,7 +140,7 @@ export default function SubscriptionDetails({ organization, currentUser }) {
                 <div className="settings-section-header">
                   <div className="settings-text-block">
                     <h3 className="settings-card-title flex items-center gap-2">
-                      <CreditCard className="w-5 h-5" />
+                      
                       Billing Information
                     </h3>
                     <p className="settings-card-description">Review your billing contact and customer reference details.</p>
@@ -149,12 +149,12 @@ export default function SubscriptionDetails({ organization, currentUser }) {
 
                 <div className="settings-grid-two">
                   <div>
-                    <p className="settings-value-label">Billing Email</p>
-                    <p className="settings-value">{organization.billing_email || "Not set"}</p>
+                    <p className="text-sm font-semibold settings-value-label">Billing Email</p>
+                    <p className="text-sm settings-value">{organization.billing_email || "Not set"}</p>
                   </div>
                   <div>
-                    <p className="settings-value-label">Stripe Customer ID</p>
-                    <p className="settings-value font-mono">{organization.stripe_customer_id || "Not configured"}</p>
+                    <p className="text-sm font-semibold settings-value-label">Stripe Customer ID</p>
+                    <p className="text-sm font-mono settings-value">{organization.stripe_customer_id || "Not configured"}</p>
                   </div>
                 </div>
               </CardContent>
