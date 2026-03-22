@@ -17,7 +17,6 @@ const CONTRACT_TYPES = [
 export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUpdate }) {
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const [form, setForm] = useState({});
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
@@ -38,25 +37,8 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
     },
   });
 
-  const setField = (key, val) => setForm(f => ({ ...f, [key]: val }));
-
-  const handleEdit = () => {
-    setForm(dealToForm(deal));
-    setShowEdit(true);
-  };
-
-  const handleSave = () => {
-    if (!form.name?.trim()) return;
-    updateMutation.mutate({
-      name: form.name,
-      stage: form.stage,
-      contract_type: form.contract_type || null,
-      start_date: form.start_date || null,
-      end_date: form.end_date || null,
-      expected_close_date: form.expected_close_date || null,
-      value: form.value ? parseFloat(form.value) : null,
-      description: form.description || null,
-    });
+  const handleSave = (payload) => {
+    updateMutation.mutate(payload);
   };
 
   const contractLabel = CONTRACT_TYPES.find(t => t.value === deal.contract_type)?.label;
