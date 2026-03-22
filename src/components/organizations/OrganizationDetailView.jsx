@@ -59,8 +59,8 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     queryKey: ["client", currentUser?.data?.client_id],
     queryFn: async () => {
       if (!currentUser?.data?.client_id) return null;
-      const results = await base44.entities.Client.filter({ id: currentUser.data.client_id });
-      return results[0] || null;
+      const all = await base44.entities.Client.list();
+      return all.find(c => c.id === currentUser.data.client_id) || null;
     },
     enabled: !!currentUser?.data?.client_id,
   });
