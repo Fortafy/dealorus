@@ -174,8 +174,8 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
             />
             <DealsSectionWithTrigger
               organization={organization}
-              clientId={currentUser?.client_id}
-              clientLifecycleStages={clientData?.lifecycle_stages || []}
+              clientId={currentUser?.data?.client_id}
+                    clientLifecycleStages={clientData?.lifecycle_stages || []}
               externalTrigger={triggerDeal}
             />
           </div>
