@@ -175,7 +175,12 @@ export default function SubscriptionDetails({ organization, currentUser }) {
 
           {/* API Usage */}
           <motion.div variants={itemVariants}>
-            <ApiUsageDashboard organization={organization} currentUser={currentUser} />
+            <ApiUsageDashboard
+              organization={organization}
+              currentUser={currentUser}
+              scope="client"
+              showClientBreakdown={false}
+            />
           </motion.div>
         </motion.div>
       </div>

@@ -79,6 +79,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       label: "Manage Users",
       icon: User,
     },
+    {
+      id: "admin-api-usage",
+      label: "API Usage",
+      icon: Activity,
+    },
   ] : [];
   const [isPlatformAdminNoticeOpen, setIsPlatformAdminNoticeOpen] = useState(false);
 

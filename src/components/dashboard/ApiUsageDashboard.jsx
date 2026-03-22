@@ -18,15 +18,20 @@ const COLORS = {
 
 const PIE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
-export default function ApiUsageDashboard({ organization, currentUser }) {
+export default function ApiUsageDashboard({
+  organization,
+  currentUser,
+  scope = currentUser?.role === "admin" ? "platform" : "client",
+  showClientBreakdown = scope === "platform"
+}) {
   const isBaseAdmin = currentUser?.role === "admin";
+  const isPlatformScope = scope === "platform";
 
-  // Fetch logs: admins see all, org admins see their client's logs
   const { data: logs = [], isLoading } = useQuery({
-    queryKey: ["api-logs-dashboard", organization?.id, isBaseAdmin],
-    enabled: !!organization?.id || isBaseAdmin,
+    queryKey: ["api-logs-dashboard", organization?.id, isBaseAdmin, scope],
+    enabled: isPlatformScope ? isBaseAdmin : !!organization?.id,
     queryFn: async () => {
-      if (isBaseAdmin) {
+      if (isPlatformScope) {
         return base44.entities.ApiRequestLog.list("-created_date", 500);
       }
       return base44.entities.ApiRequestLog.filter({ client_id: organization.id }, "-created_date", 500);
@@ -36,7 +41,7 @@ export default function ApiUsageDashboard({ organization, currentUser }) {
   // For admin: fetch all clients to map names
   const { data: allClients = [] } = useQuery({
     queryKey: ["all-clients-for-api"],
-    enabled: isBaseAdmin,
+    enabled: isBaseAdmin && isPlatformScope && showClientBreakdown,
     queryFn: () => base44.entities.Client.list(),
   });
 
@@ -98,7 +103,7 @@ export default function ApiUsageDashboard({ organization, currentUser }) {
 
   // Per-client breakdown (admin only)
   const clientData = useMemo(() => {
-    if (!isBaseAdmin) return [];
+    if (!isBaseAdmin || !isPlatformScope || !showClientBreakdown) return [];
     const counts = {};
     logs.forEach(log => {
       const name = clientMap[log.client_id] || log.client_id?.substring(0, 8) || "Unknown";
@@ -108,7 +113,7 @@ export default function ApiUsageDashboard({ organization, currentUser }) {
       if (log.response_status === "error") counts[name].error++;
     });
     return Object.values(counts).sort((a, b) => b.total - a.total).slice(0, 10);
-  }, [logs, clientMap, isBaseAdmin]);
+  }, [logs, clientMap, isBaseAdmin, isPlatformScope, showClientBreakdown]);
 
   // Request source breakdown
   const sourceRequestData = useMemo(() => {
@@ -133,7 +138,9 @@ export default function ApiUsageDashboard({ organization, currentUser }) {
       <div>
         <h3 className="text-xl font-bold text-slate-900">API Usage</h3>
         <p className="text-sm text-slate-500 mt-1">
-          {isBaseAdmin ? "All client API activity across the platform" : "Your organization's API activity"}
+          {isPlatformScope
+            ? "Total API activity across all client organizations and team members"
+            : "API activity for your client organization and team members"}
         </p>
       </div>
 
@@ -282,7 +289,7 @@ export default function ApiUsageDashboard({ organization, currentUser }) {
       </div>
 
       {/* Per-Client Breakdown (admin only) */}
-      {isBaseAdmin && clientData.length > 0 && (
+      {clientData.length > 0 && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-slate-700">Usage by Client Organization</CardTitle>

@@ -10,6 +10,7 @@ import PreferencesSection from "@/components/dashboard/PreferencesSection";
 import NotificationsSection from "@/components/dashboard/NotificationsSection";
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
+import AdminApiUsageSection from "@/components/dashboard/AdminApiUsageSection";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
 import DataSourceConfiguration from "@/components/dashboard/DataSourceConfiguration";
 import DuplicatesReview from "@/components/organizations/DuplicatesReview";
@@ -56,6 +57,8 @@ export default function Dashboard() {
         return currentUser?.role === "admin" ? <AdminUsers /> : null;
       case "admin-organizations":
         return currentUser?.role === "admin" ? <AdminOrganizations /> : null;
+      case "admin-api-usage":
+        return currentUser?.role === "admin" ? <AdminApiUsageSection organization={organization} currentUser={currentUser} /> : null;
       case "organization-members":
         return isOrgAdmin(currentUser) ?
         <OrganizationMembers organizationId={currentUser.client_id} /> :
