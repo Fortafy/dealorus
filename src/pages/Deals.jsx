@@ -109,15 +109,26 @@ export default function Deals() {
     return (dealsByStage[stageId] || []).reduce((sum, d) => sum + (d.value || 0), 0);
   };
 
-  const STAGE_COLORS = {
-    prospect: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400" },
-    in_conversation: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
-    agreement: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
-    closed_won: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-500" },
-    closed_lost: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-400" },
-  };
+  const COLOR_PALETTE = [
+    { bg: "bg-slate-100",  text: "text-slate-600",  dot: "bg-slate-400"  },
+    { bg: "bg-blue-50",    text: "text-blue-700",   dot: "bg-blue-400"   },
+    { bg: "bg-amber-50",   text: "text-amber-700",  dot: "bg-amber-400"  },
+    { bg: "bg-violet-50",  text: "text-violet-700", dot: "bg-violet-400" },
+    { bg: "bg-green-50",   text: "text-green-700",  dot: "bg-green-500"  },
+    { bg: "bg-rose-50",    text: "text-rose-600",   dot: "bg-rose-400"   },
+    { bg: "bg-cyan-50",    text: "text-cyan-700",   dot: "bg-cyan-400"   },
+    { bg: "bg-orange-50",  text: "text-orange-700", dot: "bg-orange-400" },
+  ];
 
-  const getStageColor = (id) => STAGE_COLORS[id] || { bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-400" };
+  const stageColorMap = useMemo(() => {
+    const map = {};
+    sortedStages.forEach((stage, index) => {
+      map[stage.id] = COLOR_PALETTE[index % COLOR_PALETTE.length];
+    });
+    return map;
+  }, [sortedStages]);
+
+  const getStageColor = (id) => stageColorMap[id] || COLOR_PALETTE[0];
 
   return (
     <div className="h-full bg-white flex flex-col overflow-hidden">
