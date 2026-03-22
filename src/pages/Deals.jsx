@@ -48,11 +48,7 @@ export default function Deals() {
     },
   });
 
-  useEffect(() => {
-    if (clientRecord) setClient(clientRecord);
-  }, [clientRecord]);
-
-  const lifecycleStages = client?.lifecycle_stages || [];
+  const lifecycleStages = clientRecord?.lifecycle_stages || [];
   const sortedStages = useMemo(() => [...lifecycleStages].sort((a, b) => a.order - b.order), [lifecycleStages]);
 
   const updateDealMutation = useMutation({
