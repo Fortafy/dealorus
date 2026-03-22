@@ -9,7 +9,7 @@ export default function CSVContactUploader({ organizationId, onComplete, iconOnl
   const [result, setResult] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
