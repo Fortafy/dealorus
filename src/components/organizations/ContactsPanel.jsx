@@ -398,7 +398,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   )}
                   {contact.linkedin && (
                     <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-slate-600 hover:text-blue-600">
-                      <Linkedin className="w-3 h-3" />
+                      <Linkedin className="w-3.5 h-3.5" />
                     </a>
                   )}
                 </div>
