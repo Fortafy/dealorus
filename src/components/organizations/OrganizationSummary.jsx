@@ -36,11 +36,11 @@ function OrgLogo({ logoUrl, name }) {
   const [imgError, setImgError] = useState(false);
   const initials = name ? name.charAt(0).toUpperCase() : "?";
   return (
-    <div className="w-12 h-12 rounded-full flex-shrink-0 border-2 border-white/30 overflow-hidden bg-white/20 flex items-center justify-center">
+    <div className="w-10 h-10 rounded-full flex-shrink-0 border border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center">
       {logoUrl && !imgError ? (
         <img src={logoUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
       ) : (
-        <span className="text-white text-base font-bold">{initials}</span>
+        <span className="text-slate-600 text-sm font-bold">{initials}</span>
       )}
     </div>
   );
