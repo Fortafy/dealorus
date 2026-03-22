@@ -6,8 +6,7 @@ import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
 import OrganizationSettings from "@/components/dashboard/OrganizationSettings";
 import BrandingSettings from "@/components/dashboard/BrandingSettings";
 import SubscriptionDetails from "@/components/dashboard/SubscriptionDetails";
-import PersonalProfileSection from "@/components/dashboard/PersonalProfileSection";
-import PersonalSettingsSection from "@/components/dashboard/PersonalSettingsSection";
+import PreferencesSection from "@/components/dashboard/PreferencesSection";
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
@@ -24,7 +23,7 @@ import { createPageUrl } from "@/utils";
 
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeSection, setActiveSection] = useState("profile");
+  const [activeSection, setActiveSection] = useState("preferences");
   const queryClient = useQueryClient();
 
   // Fetch current user
@@ -57,10 +56,8 @@ export default function Dashboard() {
 
   const renderContent = () => {
     switch (activeSection) {
-      case "profile":
-        return <PersonalProfileSection user={currentUser} />;
-      case "settings":
-        return <PersonalSettingsSection user={currentUser} />;
+      case "preferences":
+        return <PreferencesSection user={currentUser} />;
       case "admin-users":
         return currentUser?.role === "admin" ? <AdminUsers /> : null;
       case "admin-organizations":

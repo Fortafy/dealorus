@@ -18,13 +18,8 @@ import {
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
   const userSections = [
     {
-      id: "profile",
-      label: "Personal Profile",
-      icon: User,
-    },
-    {
-      id: "settings",
-      label: "Personal Settings",
+      id: "preferences",
+      label: "Preferences",
       icon: Settings,
     },
   ];
