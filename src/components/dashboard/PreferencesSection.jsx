@@ -81,26 +81,26 @@ export default function PreferencesSection({ user }) {
       <div className="settings-stack">
 
         {feedback &&
-        <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
+        <Alert className={feedback.type === "error" ? "" : "settings-feedback-success"} variant={feedback.type === "error" ? "destructive" : "default"}>
             {feedback.type === "error" ?
           <AlertCircle className="h-4 w-4" /> :
 
           <CheckCircle2 className="h-4 w-4 text-green-600" />
           }
-            <AlertDescription className={feedback.type === "error" ? "" : "text-green-800"}>
+            <AlertDescription className={feedback.type === "error" ? "" : "settings-feedback-success-text"}>
               {feedback.text}
             </AlertDescription>
           </Alert>
         }
 
         <Card className="settings-card">
-          <CardContent className="pt-6 pr-6 pb-6 pl-6 settings-card-body">
-            <div className="mb-4">
+          <CardContent className="settings-card-body">
+            <div className="settings-section-header">
               <h3 className="settings-card-title">Personal Information</h3>
               <p className="settings-card-description">Update your name and review your account details.</p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="settings-grid-two">
               <div>
                 <label className="settings-label">Full Name</label>
                 <Input
@@ -146,14 +146,14 @@ export default function PreferencesSection({ user }) {
           </CardContent>
         </Card>
 
-        <Card className="bg-card text-card-foreground pt-6 rounded-xl border shadow settings-card">
+        <Card className="settings-card pt-6 bg-card text-card-foreground">
           <CardContent className="settings-card-body">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-xl">
+            <div className="settings-row-responsive">
+              <div className="settings-text-block">
                 <h3 className="settings-card-title">Theme</h3>
                 <p className="settings-card-description">Select or customize your interface color scheme.</p>
               </div>
-              <div className="w-full md:w-72">
+              <div className="settings-select-width">
                 <Select value={themePreference} onValueChange={handleThemeChange}>
                   <SelectTrigger className="settings-select-trigger">
                     <SelectValue />
