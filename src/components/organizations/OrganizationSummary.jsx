@@ -376,79 +376,127 @@ export default function OrganizationSummary({
   if (isDeleted) {
     return (
       <motion.div initial={{ opacity: 1, y: 0 }} animate={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="pointer-events-none">
-        <div className="text-white p-4 text-center py-8" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
-          <p className="text-lg font-semibold">Organization deleted</p>
+        <div className="bg-slate-50 p-4 text-center py-8">
+          <p className="text-lg font-semibold text-slate-500">Organization deleted</p>
         </div>
       </motion.div>
     );
   }
 
+  const dataSourceLinks = getDataSourceLinks(displayData);
+  const hasSalesforce = !!displayData.salesforce_id;
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      {/* Header — full width gradient strip */}
-      <div className="text-white px-5 py-4" style={{ background: "linear-gradient(to right, hsl(217, 91%, 60%), hsl(217, 91%, 55%))" }}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1">
+      {/* Header — clean white strip */}
+      <div className="bg-white px-4 py-3 border-b border-slate-100">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <InlineHeaderText
                 value={displayData.organization_name}
                 onSave={(val) => saveField("organization_name", val)}
               />
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                {displayData.organization_type && (
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.organization_type}</Badge>
+              {/* External link icons */}
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                {hasSalesforce && (
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a href={`${clientInstanceUrl}/${displayData.salesforce_id}`} target="_blank" rel="noopener noreferrer"
+                          className="w-5 h-5 rounded flex items-center justify-center hover:bg-slate-100 transition-colors overflow-hidden flex-shrink-0">
+                          <img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=32" alt="Salesforce" className="w-4 h-4 object-contain" />
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom"><p className="text-xs">Salesforce</p></TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
-                {displayData.ntee_description && (
-                  <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayData.ntee_description}</Badge>
-                )}
+                {dataSourceLinks.map((link) => {
+                  const domain = (() => { try { return new URL(link.url).hostname; } catch { return null; } })();
+                  const faviconUrl = domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=32` : null;
+                  return (
+                    <TooltipProvider key={link.name} delayDuration={200}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a href={link.url} target="_blank" rel="noopener noreferrer"
+                            className="w-5 h-5 rounded flex items-center justify-center hover:bg-slate-100 transition-colors overflow-hidden flex-shrink-0">
+                            {faviconUrl
+                              ? <img src={faviconUrl} alt={link.name} className="w-4 h-4 object-contain" />
+                              : <ExternalLink className="w-3 h-3 text-slate-400" />}
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom"><p className="text-xs">{link.name}</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
               </div>
             </div>
           </div>
-          <div className="flex gap-1 flex-wrap items-center">
-            <div className="flex items-center justify-center h-7 px-1.5">
-              <div
-                style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 96%)" }}
-                className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
-                onClick={handleStatusToggle}
-              >
-                <div className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform ${clientStatus === "active" ? "translate-x-4" : "translate-x-0"}`} />
-              </div>
+
+          {/* Right: status toggle + ellipsis menu */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Active/Inactive toggle */}
+            <div
+              style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 80%)" }}
+              className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors"
+              onClick={handleStatusToggle}
+              title={clientStatus === "active" ? "Active" : "Inactive"}
+            >
+              <div className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform ${clientStatus === "active" ? "translate-x-4" : "translate-x-0"}`} />
             </div>
-            <Button variant="secondary" size="sm" onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved} className="bg-white/90 hover:bg-white h-7 w-7 p-0" style={{ color: "hsl(217, 91%, 60%)" }} title="Smart Enrich">
-              <Sparkles className="w-3 h-3" />
-            </Button>
+
+            {/* Ellipsis actions menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="sm" disabled={isEnriching || !isSaved || !organization.ein} className="bg-white/90 hover:bg-white h-7 w-7 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
-                  <Database className="w-3 h-3" />
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-slate-500 hover:text-slate-800">
+                  <MoreHorizontal className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleSourceEnrich("CharityAPI")} disabled={isEnriching}>
-                  {enrichingSource === "CharityAPI" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                  CharityAPI
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem onClick={() => setShowSmartEnrichDialog(true)} disabled={isEnriching || !isSaved}>
+                  <Sparkles className="w-3.5 h-3.5 mr-2" />
+                  Smart Enrich
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSourceEnrich("ProPublica")} disabled={isEnriching}>
-                  {enrichingSource === "ProPublica" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                  ProPublica
+                <DropdownMenuItem
+                  disabled={isEnriching || !isSaved || !organization.ein}
+                  className="cursor-default"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <Database className="w-3.5 h-3.5 mr-2" />
+                  <span>Enrich</span>
+                  <ChevronDown className="w-3 h-3 ml-auto" />
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSourceEnrich("Nonprofit Check Plus")} disabled={isEnriching}>
-                  {enrichingSource === "Nonprofit Check Plus" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
-                  Nonprofit Check Plus
-                </DropdownMenuItem>
+                <div className="pl-6">
+                  <DropdownMenuItem onClick={() => handleSourceEnrich("CharityAPI")} disabled={isEnriching || !organization.ein} className="text-xs">
+                    {enrichingSource === "CharityAPI" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                    CharityAPI
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSourceEnrich("ProPublica")} disabled={isEnriching || !organization.ein} className="text-xs">
+                    {enrichingSource === "ProPublica" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                    ProPublica
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleSourceEnrich("Nonprofit Check Plus")} disabled={isEnriching || !organization.ein} className="text-xs">
+                    {enrichingSource === "Nonprofit Check Plus" && <div className="w-2 h-2 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" />}
+                    Nonprofit Check Plus
+                  </DropdownMenuItem>
+                </div>
+                {isSaved && (
+                  <DropdownMenuItem onClick={handlePushToSalesforce} disabled={isPushingToSalesforce}>
+                    {isPushingToSalesforce ? <div className="w-3.5 h-3.5 border border-slate-300 border-t-slate-600 rounded-full animate-spin mr-2" /> : <Upload className="w-3.5 h-3.5 mr-2" />}
+                    Sync to Salesforce
+                  </DropdownMenuItem>
+                )}
+                {onDelete && (
+                  <DropdownMenuItem onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="text-red-600 focus:text-red-600">
+                    <Trash2 className="w-3.5 h-3.5 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
-            {isSaved && (
-              <Button variant="secondary" size="sm" onClick={handlePushToSalesforce} disabled={isPushingToSalesforce} className="bg-white/90 hover:bg-white h-7 w-7 p-0" style={{ color: "hsl(217, 91%, 60%)" }}>
-                {isPushingToSalesforce ? <div className="w-3 h-3 border border-blue-300 border-t-blue-600 rounded-full animate-spin" /> : <Upload className="w-3 h-3" />}
-              </Button>
-            )}
-            {onDelete && (
-              <Button variant="destructive" size="sm" onClick={() => setShowDeleteConfirm(true)} disabled={isDeleting} className="h-7 w-7 p-0">
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            )}
           </div>
         </div>
       </div>
