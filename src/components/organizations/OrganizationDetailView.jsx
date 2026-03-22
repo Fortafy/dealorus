@@ -56,13 +56,13 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
   });
 
   const { data: clientData } = useQuery({
-    queryKey: ["client", currentUser?.client_id],
+    queryKey: ["client", currentUser?.data?.client_id],
     queryFn: async () => {
-      if (!currentUser?.client_id) return null;
-      const results = await base44.entities.Client.filter({ id: currentUser.client_id });
+      if (!currentUser?.data?.client_id) return null;
+      const results = await base44.entities.Client.filter({ id: currentUser.data.client_id });
       return results[0] || null;
     },
-    enabled: !!currentUser?.client_id,
+    enabled: !!currentUser?.data?.client_id,
   });
 
   // Expose callbacks for quick-add buttons to trigger child components
@@ -170,7 +170,7 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           <div className="space-y-0 border-t border-slate-100">
             <ContactsPanel
               organization={organization}
-              clientId={currentUser?.client_id}
+              clientId={currentUser?.data?.client_id}
             />
             <DealsSectionWithTrigger
               organization={organization}
