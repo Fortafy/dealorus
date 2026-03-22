@@ -146,8 +146,8 @@ export default function PreferencesSection({ user }) {
           </CardContent>
         </Card>
 
-        <Card className="settings-card pt-6 bg-card text-card-foreground">
-          <CardContent className="settings-card-body">
+        <Card className="bg-card text-card-foreground rounded-xl border shadow settings-card">
+          <CardContent className="px-6 py-6 settings-card-body">
             <div className="settings-row-responsive">
               <div className="settings-text-block">
                 <h3 className="settings-card-title">Theme</h3>
