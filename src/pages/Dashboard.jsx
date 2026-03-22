@@ -126,7 +126,7 @@ export default function Dashboard() {
         {/* Logo */}
         <div className="px-4 py-5 border-b border-slate-100 flex-shrink-0">
           <img
-            src={organization?.logo_url || "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696a507ebd3734abacaf302c/57bc5f9eb_Gemini_Generated_Image_an41ggan41ggan41.png"}
+            src={organization?.logo_url || "https://media.base44.com/images/public/696a507ebd3734abacaf302c/a9ca64da2_Gemini_Generated_Image_c7byx4c7byx4c7by.png"}
             alt="Dealorus"
             className="h-9"
           />
