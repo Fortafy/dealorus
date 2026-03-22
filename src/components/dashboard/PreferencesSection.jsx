@@ -10,13 +10,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  SelectValue } from
+"@/components/ui/select";
 import {
   AlertCircle,
   CheckCircle2,
-  Loader,
-} from "lucide-react";
+  Loader } from
+"lucide-react";
 import { motion } from "framer-motion";
 
 export default function PreferencesSection({ user }) {
@@ -31,7 +31,7 @@ export default function PreferencesSection({ user }) {
     queryFn: async () => {
       const clients = await base44.entities.Client.filter({ id: user.client_id });
       return clients[0];
-    },
+    }
   });
 
   useEffect(() => {
@@ -49,13 +49,13 @@ export default function PreferencesSection({ user }) {
   const profileMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
     onSuccess: () => showFeedback("success", "Preferences updated successfully"),
-    onError: (err) => showFeedback("error", err.message || "Failed to update preferences"),
+    onError: (err) => showFeedback("error", err.message || "Failed to update preferences")
   });
 
   const settingsMutation = useMutation({
     mutationFn: (data) => base44.auth.updateMe(data),
     onSuccess: () => showFeedback("success", "Preferences updated successfully"),
-    onError: (err) => showFeedback("error", err.message || "Failed to update preferences"),
+    onError: (err) => showFeedback("error", err.message || "Failed to update preferences")
   });
 
   const handleProfileSave = () => {
@@ -76,25 +76,25 @@ export default function PreferencesSection({ user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="settings-page"
-    >
+      className="settings-page">
+      
       <div className="settings-stack">
 
-        {feedback && (
-          <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
-            {feedback.type === "error" ? (
-              <AlertCircle className="h-4 w-4" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            )}
+        {feedback &&
+        <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
+            {feedback.type === "error" ?
+          <AlertCircle className="h-4 w-4" /> :
+
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          }
             <AlertDescription className={feedback.type === "error" ? "" : "text-green-800"}>
               {feedback.text}
             </AlertDescription>
           </Alert>
-        )}
+        }
 
         <Card className="settings-card">
-          <CardContent className="settings-card-body">
+          <CardContent className="pt-6 pr-6 pb-6 pl-6 settings-card-body">
             <div className="mb-4">
               <h3 className="settings-card-title">Personal Information</h3>
               <p className="settings-card-description">Update your name and review your account details.</p>
@@ -107,8 +107,8 @@ export default function PreferencesSection({ user }) {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="settings-input"
-                />
+                  className="settings-input" />
+                
               </div>
 
               <div>
@@ -126,27 +126,27 @@ export default function PreferencesSection({ user }) {
                 <Input
                   value={client?.name || (user?.client_id ? "Loading..." : "Not assigned")}
                   disabled
-                  className="settings-input-disabled"
-                />
+                  className="settings-input-disabled" />
+                
               </div>
             </div>
 
             <div className="settings-actions">
               <Button onClick={handleProfileSave} disabled={profileMutation.isPending} className="settings-primary-button">
-                {profileMutation.isPending ? (
-                  <>
+                {profileMutation.isPending ?
+                <>
                     <Loader className="w-4 h-4 mr-2 animate-spin" />
                     Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
+                  </> :
+
+                "Save Changes"
+                }
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="settings-card">
+        <Card className="bg-card text-card-foreground pt-6 rounded-xl border shadow settings-card">
           <CardContent className="settings-card-body">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="max-w-xl">
@@ -169,6 +169,6 @@ export default function PreferencesSection({ user }) {
           </CardContent>
         </Card>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
