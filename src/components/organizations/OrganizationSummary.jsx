@@ -249,11 +249,7 @@ export default function OrganizationSummary({
   clientInstanceUrl
 }) {
   const queryClient = useQueryClient();
-  const [showSmartEnrichDialog, setShowSmartEnrichDialog] = useState(false);
-  const [showComparisonDialog, setShowComparisonDialog] = useState(false);
-  const [enrichedData, setEnrichedData] = useState(null);
-  const [isEnriching, setIsEnriching] = useState(false);
-  const [enrichingSource, setEnrichingSource] = useState(null);
+  const [showEnrichDialog, setShowEnrichDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
