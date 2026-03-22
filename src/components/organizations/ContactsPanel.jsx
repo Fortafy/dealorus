@@ -356,7 +356,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         ) : !isSearching && (
           <div className="divide-y divide-slate-200">
             {sortedContacts.map((contact) => (
-              <div key={contact.id} className="px-4 py-2 hover:bg-slate-50 transition-colors">
+              <div key={contact.id} className="px-4 py-3 hover:bg-slate-50 transition-colors">
                <div className="flex items-start justify-between gap-2 mb-1">
                  <div className="flex-1">
                    <h4 className="font-semibold text-xs text-slate-900">{contact.name}</h4>
