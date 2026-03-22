@@ -43,8 +43,8 @@ export default function Deals() {
     queryKey: ["client", currentUser?.data?.client_id],
     enabled: !!currentUser?.data?.client_id,
     queryFn: async () => {
-      const all = await base44.entities.Client.list();
-      return all.find(c => c.id === currentUser.data.client_id) || null;
+      const results = await base44.entities.Client.filter({ id: currentUser.data.client_id });
+      return results[0] || null;
     },
   });
 
