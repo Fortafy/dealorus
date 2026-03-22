@@ -7,6 +7,11 @@ import { base44 } from "@/api/base44Client";
 export default function CSVContactUploader({ organizationId, onComplete, iconOnly }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  React.useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
 
   const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
