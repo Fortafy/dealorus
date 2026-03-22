@@ -54,22 +54,22 @@ export default function NotificationsSection({ user }) {
       
       <div className="settings-stack">
         {feedback &&
-        <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
+        <Alert className={feedback.type === "error" ? "" : "settings-feedback-success"} variant={feedback.type === "error" ? "destructive" : "default"}>
             {feedback.type === "error" ?
           <AlertCircle className="h-4 w-4" /> :
 
           <CheckCircle2 className="h-4 w-4 text-green-600" />
           }
-            <AlertDescription className={feedback.type === "error" ? "" : "text-green-800"}>
+            <AlertDescription className={feedback.type === "error" ? "" : "settings-feedback-success-text"}>
               {feedback.text}
             </AlertDescription>
           </Alert>
         }
 
         <Card className="settings-card">
-          <CardContent className="pt-6 pr-6 pb-6 pl-6 settings-card-body space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="pr-4">
+          <CardContent className="settings-card-body-stack">
+            <div className="settings-row-between">
+              <div className="settings-text-block">
                 <h3 className="settings-card-title">Notifications</h3>
                 <p className="settings-card-description">Choose whether you want to receive updates and summaries.</p>
               </div>
@@ -77,13 +77,13 @@ export default function NotificationsSection({ user }) {
             </div>
 
             {notificationsEnabled &&
-            <div className="border-t border-slate-200 pt-4">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="settings-card-divider">
+                <div className="settings-row-responsive">
                   <div>
-                    <p className="settings-label mb-0">Email Digest Frequency</p>
+                    <p className="settings-label-compact">Email Digest Frequency</p>
                     <p className="settings-card-description">How often you want to receive email summaries.</p>
                   </div>
-                  <div className="w-full md:w-72">
+                  <div className="settings-select-width">
                     <Select value={emailDigest} onValueChange={handleEmailDigestChange}>
                       <SelectTrigger className="settings-select-trigger">
                         <SelectValue />

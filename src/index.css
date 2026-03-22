@@ -168,6 +168,22 @@
     @apply flex flex-col gap-4 md:flex-row md:items-center md:justify-between;
   }
 
+  .settings-row-between {
+    @apply flex items-center justify-between gap-4;
+  }
+
+  .settings-card-body-stack {
+    @apply p-6 space-y-4;
+  }
+
+  .settings-card-divider {
+    @apply border-t border-slate-200 pt-4;
+  }
+
+  .settings-label-compact {
+    @apply mb-0 block text-xs font-medium text-slate-700;
+  }
+
   .settings-text-block {
     @apply max-w-xl;
   }
