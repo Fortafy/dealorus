@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -124,9 +124,7 @@ export default function OrganizationSettings({ organization }) {
       animate={{ opacity: 1, y: 0 }}
       className="settings-page"
     >
-      <div>
-        <h2 className="settings-page-title">Organization Settings</h2>
-
+      <div className="settings-stack">
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
@@ -135,17 +133,20 @@ export default function OrganizationSettings({ organization }) {
         )}
 
         {success && (
-          <Alert className="mb-4 bg-green-50 border-green-200">
+          <Alert className="settings-feedback-success" variant="default">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">{success}</AlertDescription>
+            <AlertDescription className="settings-feedback-success-text">{success}</AlertDescription>
           </Alert>
         )}
 
         <Card className="settings-card">
-          <CardHeader className="settings-card-header">
-            <CardTitle className="settings-card-title">Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent className="settings-card-body space-y-5">
+          <CardContent className="settings-card-body pt-6">
+            <div className="settings-section-header">
+              <h3 className="settings-card-title">Basic Information</h3>
+              <p className="settings-card-description">Update your organization profile and defaults.</p>
+            </div>
+
+            <div className="settings-grid-two">
             {/* Organization Name */}
             <div>
               <label className="settings-label">
@@ -203,15 +204,16 @@ export default function OrganizationSettings({ organization }) {
               </p>
             </div>
 
-            {/* Default Notifications */}
-            <div className="pt-4 border-t border-slate-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">
+            </div>
+
+            <div className="settings-card-divider">
+              <div className="settings-row-responsive">
+                <div className="settings-text-block">
+                  <label className="settings-section-title">
                     Enable Notifications for New Members
                   </label>
                   <p className="settings-helper">
-                    New members will have notifications enabled by default
+                    New members will have notifications enabled by default.
                   </p>
                 </div>
                 <Switch
@@ -223,7 +225,6 @@ export default function OrganizationSettings({ organization }) {
               </div>
             </div>
 
-            {/* Save Button */}
             <div className="settings-actions">
               <Button
                 onClick={handleSave}
@@ -243,12 +244,14 @@ export default function OrganizationSettings({ organization }) {
           </CardContent>
         </Card>
 
-        {/* Branding Settings */}
-        <Card className="border-0 shadow-lg mt-6">
-          <CardHeader className="settings-card-header">
-            <CardTitle className="settings-card-title">Branding & Logo</CardTitle>
-          </CardHeader>
-          <CardContent className="settings-card-body space-y-5">
+        <Card className="settings-card">
+          <CardContent className="settings-card-body pt-6">
+            <div className="settings-section-header">
+              <h3 className="settings-card-title">Branding & Logo</h3>
+              <p className="settings-card-description">Manage your logo and brand color.</p>
+            </div>
+
+            <div className="settings-grid-two">
             {/* Logo URL */}
             <div>
               <label className="settings-label">
@@ -265,22 +268,6 @@ export default function OrganizationSettings({ organization }) {
                 Enter the full URL to your organization logo
               </p>
             </div>
-
-            {/* Logo Preview */}
-            {logoPreview && (
-              <div className="settings-info-panel">
-                <p className="settings-section-title mb-3">Logo Preview</p>
-                <img
-                  src={logoPreview}
-                  alt="Logo preview"
-                  className="h-16 object-contain"
-                  onError={() => {
-                    setError("Failed to load logo preview. Please check the URL.");
-                    setLogoPreview(null);
-                  }}
-                />
-              </div>
-            )}
 
             {/* Primary Color */}
             <div>
@@ -315,7 +302,23 @@ export default function OrganizationSettings({ organization }) {
               </p>
             </div>
 
-            {/* Save Button */}
+            </div>
+
+            {logoPreview && (
+              <div className="settings-card-divider">
+                <p className="settings-section-title mb-3">Logo Preview</p>
+                <img
+                  src={logoPreview}
+                  alt="Logo preview"
+                  className="h-16 object-contain"
+                  onError={() => {
+                    setError("Failed to load logo preview. Please check the URL.");
+                    setLogoPreview(null);
+                  }}
+                />
+              </div>
+            )}
+
             <div className="settings-actions">
               <Button
                 onClick={handleBrandingSave}
@@ -335,11 +338,7 @@ export default function OrganizationSettings({ organization }) {
           </CardContent>
         </Card>
 
-        {/* Lifecycle Stages Settings */}
-        <div className="mt-6">
-          <LifecycleStageSettings organization={organization} />
-        </div>
-
+        <LifecycleStageSettings organization={organization} />
 
       </div>
     </motion.div>
