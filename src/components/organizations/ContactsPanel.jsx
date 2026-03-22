@@ -383,7 +383,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                  </DropdownMenu>
                </div>
 
-                <div className="flex flex-wrap gap-2 mb-1 text-[10px]">
+                <div className="flex flex-wrap gap-2 mb-1 text-xs">
                   {contact.email && (
                     <a href={`mailto:${contact.email}`} className="flex items-center gap-1 text-slate-600 hover:text-blue-600">
                       <Mail className="w-3 h-3" />
