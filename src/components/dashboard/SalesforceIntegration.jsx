@@ -287,56 +287,10 @@ export default function SalesforceIntegration({ organization }) {
                   </div>
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                 </div>
-              </div>
 
-              <div className="settings-actions">
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                  <Button
-                    onClick={handleSync}
-                    disabled={syncing}
-                    variant="outline"
-                    className="settings-secondary-button"
-                  >
-                    {syncing ? (
-                      <>
-                        <Loader className="h-4 w-4 animate-spin" />
-                        Syncing...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4" />
-                        Import from Salesforce
-                      </>
-                    )}
-                  </Button>
-
+                <div className="mt-4">
                   <Button asChild variant="outline" className="settings-secondary-button">
                     <Link to="/Dashboard?section=sf-field-mapping">Salesforce Field Mapping</Link>
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    className="settings-secondary-button"
-                    onClick={() => setError("Manual push not yet implemented. Organizations with salesforce_id will auto-sync.")}
-                  >
-                    <Upload className="h-4 w-4" />
-                    Push to Salesforce
-                  </Button>
-
-                  <Button
-                    variant="destructive"
-                    onClick={() => disconnectMutation.mutate()}
-                    disabled={disconnectMutation.isPending}
-                    className="settings-secondary-button"
-                  >
-                    {disconnectMutation.isPending ? (
-                      <>
-                        <Loader className="h-4 w-4 animate-spin" />
-                        Disconnecting...
-                      </>
-                    ) : (
-                      "Disconnect"
-                    )}
                   </Button>
                 </div>
               </div>
