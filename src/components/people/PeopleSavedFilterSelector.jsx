@@ -1,0 +1,150 @@
+import React, { useState, useRef, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Users, ChevronDown, Check, Plus, X, Search } from "lucide-react";
+
+export default function PeopleSavedFilterSelector({ currentUser, activeFilter, onSelectFilter, currentFilters, currentFields, recordCount }) {
+  const [open, setOpen] = useState(false);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef(null);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+        setShowSaveForm(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const { data: savedFilters = [] } = useQuery({
+    queryKey: ["saved-contact-filters", currentUser?.id],
+    enabled: !!currentUser?.id,
+    queryFn: () => base44.entities.SavedContactFilter.filter({ user_id: currentUser.id }),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.SavedContactFilter.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-contact-filters"] });
+      setShowSaveForm(false);
+      setSaveName("");
+    },
+  });
+
+  const handleSave = () => {
+    if (!saveName.trim()) return;
+    createMutation.mutate({
+      client_id: currentUser.client_id,
+      user_id: currentUser.id,
+      name: saveName.trim(),
+      filters: currentFilters,
+      fields: currentFields || [],
+    });
+  };
+
+  const activeLabel = activeFilter
+    ? savedFilters.find(f => f.id === activeFilter)?.name || "All People"
+    : "All People";
+
+  const filtered = savedFilters.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+  const hasActiveFilters = Object.values(currentFilters).some(v => v !== "");
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => { setOpen(o => !o); setShowSaveForm(false); setSearch(""); }}
+        className="flex items-center gap-2 h-8 px-3 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+      >
+        <Users className="w-3.5 h-3.5 text-slate-500" />
+        <span>{activeLabel}</span>
+        {recordCount !== undefined && <span className="text-slate-400 font-normal">({recordCount})</span>}
+        <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
+          <div className="p-2 border-b border-slate-100">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search lists..."
+                className="w-full pl-8 pr-3 h-7 text-xs rounded-md border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-400"
+              />
+            </div>
+          </div>
+
+          <div className="py-1 max-h-56 overflow-y-auto">
+            <button
+              onClick={() => { onSelectFilter(null); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <Users className="w-4 h-4 text-slate-400" />
+              <span className="flex-1 text-left">All People</span>
+              {!activeFilter && <Check className="w-3.5 h-3.5 text-blue-500" />}
+            </button>
+
+            {filtered.map(f => (
+              <button
+                key={f.id}
+                onClick={() => { onSelectFilter(f.id, f.filters, f.fields); setOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <Users className="w-4 h-4 text-slate-400" />
+                <span className="flex-1 text-left">{f.name}</span>
+                {activeFilter === f.id && <Check className="w-3.5 h-3.5 text-blue-500" />}
+              </button>
+            ))}
+          </div>
+
+          <div className="border-t border-slate-100">
+            {showSaveForm ? (
+              <div className="p-3 flex flex-col gap-2">
+                <input
+                  autoFocus
+                  value={saveName}
+                  onChange={e => setSaveName(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setShowSaveForm(false); }}
+                  placeholder="List name..."
+                  className="w-full px-3 h-7 text-xs rounded-md border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSave}
+                    disabled={!saveName.trim() || createMutation.isPending}
+                    className="flex-1 h-7 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => { setShowSaveForm(false); setSaveName(""); }}
+                    className="h-7 px-2 text-xs rounded-md border border-slate-200 hover:bg-slate-50 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowSaveForm(true)}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-500 hover:bg-slate-50 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{hasActiveFilters ? "Save current filters as list" : "New list"}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

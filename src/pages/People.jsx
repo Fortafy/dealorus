@@ -1,0 +1,415 @@
+import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Users, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, SlidersHorizontal, Upload, Download, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import PeopleFieldsPanel, { ALL_PEOPLE_COLUMNS, DEFAULT_PEOPLE_VISIBLE_FIELDS } from "@/components/people/PeopleFieldsPanel";
+import PeopleFilterPanel from "@/components/people/PeopleFilterPanel";
+import PeopleSavedFilterSelector from "@/components/people/PeopleSavedFilterSelector";
+import AddContactDialog from "@/components/people/AddContactDialog";
+import ContactDetailPanel from "@/components/people/ContactDetailPanel";
+
+const EMPTY_FILTERS = {
+  organization: "", title: "", department: "", starred: "", owner: "",
+  createdFrom: "", createdTo: "", updatedFrom: "", updatedTo: "",
+};
+
+export default function People() {
+  const [selectedContactId, setSelectedContactId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [sortField, setSortField] = useState("name");
+  const [sortDir, setSortDir] = useState("asc");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [activeFilterId, setActiveFilterId] = useState(null);
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const filterButtonRef = useRef(null);
+  const searchRef = useRef(null);
+  const queryClient = useQueryClient();
+
+  const [visibleFields, setVisibleFields] = useState(() => {
+    try {
+      const stored = localStorage.getItem("people_visible_fields");
+      return stored ? JSON.parse(stored) : DEFAULT_PEOPLE_VISIBLE_FIELDS;
+    } catch { return DEFAULT_PEOPLE_VISIBLE_FIELDS; }
+  });
+
+  useEffect(() => {
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!searchExpanded) return;
+    const handler = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        if (!searchQuery) setSearchExpanded(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [searchExpanded, searchQuery]);
+
+  const { data: contacts = [], isLoading } = useQuery({
+    queryKey: ["people", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.client_id }, "-created_date"),
+  });
+
+  // Fetch all organizations so we can display org names in the table
+  const { data: organizations = [] } = useQuery({
+    queryKey: ["organizations-people-page", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "organization_name"),
+  });
+
+  const orgMap = useMemo(() => {
+    const map = {};
+    organizations.forEach(o => { map[o.id] = o.organization_name; });
+    return map;
+  }, [organizations]);
+
+  // Enrich contacts with org name
+  const enrichedContacts = useMemo(() =>
+    contacts.map(c => ({ ...c, organization_name: c.organization_id ? orgMap[c.organization_id] || "" : "" })),
+    [contacts, orgMap]
+  );
+
+  const uniqueTitles = useMemo(() => [...new Set(enrichedContacts.map(c => c.title).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueDepartments = useMemo(() => [...new Set(enrichedContacts.map(c => c.role_department).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueOrgs = useMemo(() => [...new Set(enrichedContacts.map(c => c.organization_name).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueOwners = useMemo(() => [...new Set(enrichedContacts.map(c => c.created_by ? c.created_by.split("@")[0] : null).filter(Boolean))].sort(), [enrichedContacts]);
+
+  const handleSort = (field) => {
+    if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortField(field); setSortDir("asc"); }
+  };
+
+  const activeFilterCount = Object.values(filters).filter(v => v !== "").length;
+  const clearFilters = () => setFilters(EMPTY_FILTERS);
+
+  const handleFieldsChange = (fields) => {
+    setVisibleFields(fields);
+    try { localStorage.setItem("people_visible_fields", JSON.stringify(fields)); } catch {}
+  };
+
+  const handleSelectFilter = (id, savedFilters, savedFields) => {
+    setActiveFilterId(id);
+    if (savedFilters) {
+      setFilters({ ...EMPTY_FILTERS, ...savedFilters });
+      setSearchQuery(savedFilters.search || "");
+      if (savedFields?.length > 0) handleFieldsChange(savedFields);
+    } else {
+      setFilters(EMPTY_FILTERS);
+      setSearchQuery("");
+    }
+  };
+
+  const filteredAndSorted = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    let result = enrichedContacts.filter(c => {
+      if (q && !(
+        c.name?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        c.title?.toLowerCase().includes(q) ||
+        c.organization_name?.toLowerCase().includes(q) ||
+        c.role_department?.toLowerCase().includes(q) ||
+        c.phone?.toLowerCase().includes(q)
+      )) return false;
+      if (filters.organization) {
+        if (filters.organization === "__none__") { if (c.organization_id) return false; }
+        else { if (c.organization_name !== filters.organization) return false; }
+      }
+      if (filters.title && c.title !== filters.title) return false;
+      if (filters.department && c.role_department !== filters.department) return false;
+      if (filters.starred === "yes" && !c.starred) return false;
+      if (filters.starred === "no" && c.starred) return false;
+      if (filters.owner && (c.created_by?.split("@")[0]) !== filters.owner) return false;
+      const created = c.created_date ? new Date(c.created_date) : null;
+      if (filters.createdFrom && created && created < new Date(filters.createdFrom)) return false;
+      if (filters.createdTo && created && created > new Date(filters.createdTo + "T23:59:59")) return false;
+      const updated = c.updated_date ? new Date(c.updated_date) : null;
+      if (filters.updatedFrom && updated && updated < new Date(filters.updatedFrom)) return false;
+      if (filters.updatedTo && updated && updated > new Date(filters.updatedTo + "T23:59:59")) return false;
+      return true;
+    });
+
+    result.sort((a, b) => {
+      let av = a[sortField] ?? "";
+      let bv = b[sortField] ?? "";
+      if (sortField === "created_date" || sortField === "updated_date") {
+        av = new Date(av); bv = new Date(bv);
+      } else {
+        av = String(av).toLowerCase(); bv = String(bv).toLowerCase();
+      }
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [enrichedContacts, searchQuery, filters, sortField, sortDir]);
+
+  const [colWidths, setColWidths] = useState(() =>
+    Object.fromEntries(ALL_PEOPLE_COLUMNS.map(c => [c.key, c.defaultWidth]))
+  );
+
+  const COLUMNS = useMemo(
+    () => visibleFields.map(key => ALL_PEOPLE_COLUMNS.find(c => c.key === key)).filter(Boolean),
+    [visibleFields]
+  );
+
+  const resizingRef = useRef(null);
+
+  const startResize = useCallback((e, key) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = colWidths[key];
+    resizingRef.current = { key, startX, startWidth };
+    const onMouseMove = (ev) => {
+      const delta = ev.clientX - resizingRef.current.startX;
+      setColWidths(prev => ({ ...prev, [resizingRef.current.key]: Math.max(60, resizingRef.current.startWidth + delta) }));
+    };
+    const onMouseUp = () => {
+      resizingRef.current = null;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [colWidths]);
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-400 inline ml-1" />;
+    return sortDir === "asc"
+      ? <ChevronUp className="w-3 h-3 text-blue-500 inline ml-1" />
+      : <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
+  };
+
+  const renderCell = (key, contact) => {
+    const val = contact[key];
+    if (val === null || val === undefined || val === "") return <span className="text-slate-400">—</span>;
+    if (key === "created_date" || key === "updated_date") return <span className="text-slate-500">{format(new Date(val), "MMM d, yyyy")}</span>;
+    if (key === "created_by") return <span className="text-slate-600">{val.split("@")[0]}</span>;
+    if (key === "starred") return val ? <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> : <span className="text-slate-400">—</span>;
+    if (key === "is_primary_contact" || key === "is_business_contact") return <span className={`text-xs font-medium ${val ? "text-green-600" : "text-slate-400"}`}>{val ? "Yes" : "No"}</span>;
+    if (key === "linkedin") return val ? <a href={val} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate block">{val.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</a> : <span className="text-slate-400">—</span>;
+    if (key === "email") return <a href={`mailto:${val}`} className="text-blue-500 hover:underline truncate block">{val}</a>;
+    return <span className="text-slate-600">{String(val)}</span>;
+  };
+
+  if (selectedContactId) {
+    return (
+      <div className="h-full flex flex-col bg-white overflow-hidden">
+        <ContactDetailPanel contactId={selectedContactId} onClose={() => setSelectedContactId(null)} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full bg-white flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: 'hsl(262, 80%, 93%)' }}>
+              <Users className="w-4 h-4" style={{ color: 'hsl(262, 80%, 45%)' }} />
+            </div>
+            <span className="text-base font-semibold text-slate-800">People</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/people/import"
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" /> Import
+            </Link>
+            <Link
+              to="/people/export"
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" /> Export
+            </Link>
+            <Button
+              onClick={() => setShowAddDialog(true)}
+              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
+              className="hover:opacity-90 h-8 text-xs px-3"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> New Contact
+            </Button>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200 flex-shrink-0" />
+
+        {/* Toolbar */}
+        <div className="flex items-center gap-3 px-6 py-3 flex-shrink-0 flex-wrap">
+          <PeopleSavedFilterSelector
+            currentUser={currentUser}
+            activeFilter={activeFilterId}
+            onSelectFilter={handleSelectFilter}
+            currentFilters={filters}
+            currentFields={visibleFields}
+            recordCount={filteredAndSorted.length}
+          />
+
+          <PeopleFieldsPanel visibleFields={visibleFields} onChange={handleFieldsChange} />
+
+          <div className="relative" ref={filterButtonRef}>
+            <div className="flex items-center">
+              <button
+                onClick={() => setShowFilterPanel(p => !p)}
+                className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
+                  activeFilterCount > 0
+                    ? "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium"
+                    : "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filter</span>
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
+                  title="Clear all filters"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <PeopleFilterPanel
+              open={showFilterPanel}
+              onClose={() => setShowFilterPanel(false)}
+              filters={filters}
+              onChange={(f) => { setFilters(f); setActiveFilterId(null); }}
+              uniqueTitles={uniqueTitles}
+              uniqueDepartments={uniqueDepartments}
+              uniqueOrgs={uniqueOrgs}
+              uniqueOwners={uniqueOwners}
+            />
+          </div>
+
+          {/* Search */}
+          <div ref={searchRef} className="flex items-center">
+            {searchExpanded ? (
+              <div className="relative flex items-center">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                <Input
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
+                  placeholder="Search people..."
+                  className="pl-8 pr-8 h-8 text-xs w-52 transition-all"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setSearchExpanded(true)}
+                className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
+                  searchQuery ? "border-blue-400 bg-blue-50 text-blue-600" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                }`}
+                title="Search"
+              >
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200 flex-shrink-0" />
+
+        {/* Table */}
+        <div className="flex-1 overflow-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-24">
+              <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
+            </div>
+          ) : (
+            <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
+              <colgroup>
+                {COLUMNS.map(col => <col key={col.key} style={{ width: colWidths[col.key] }} />)}
+              </colgroup>
+              <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
+                <tr>
+                  {COLUMNS.map((col, i) => (
+                    <th
+                      key={col.key}
+                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
+                      style={{
+                        width: colWidths[col.key],
+                        ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {}),
+                      }}
+                    >
+                      <span onClick={() => handleSort(col.key)} className="cursor-pointer hover:text-slate-900 pl-3 pr-4 block truncate">
+                        {col.label}<SortIcon field={col.key} />
+                      </span>
+                      <div
+                        onMouseDown={(e) => startResize(e, col.key)}
+                        className="absolute top-0 right-0 h-full w-2 cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100"
+                        style={{ userSelect: "none" }}
+                      >
+                        <div className="w-0.5 h-4 bg-slate-300 rounded-full" />
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredAndSorted.length === 0 ? (
+                  <tr>
+                    <td colSpan={COLUMNS.length} className="text-center py-16 text-slate-400">
+                      <Users className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                      <p>No contacts found</p>
+                    </td>
+                  </tr>
+                ) : filteredAndSorted.map(contact => (
+                  <tr key={contact.id} className="group hover:bg-slate-50 transition-colors">
+                    {COLUMNS.map((col, i) => (
+                      <td
+                        key={col.key}
+                        className={`px-3 py-2 truncate border-r border-slate-100 last:border-r-0${i === 0 ? " bg-white group-hover:bg-slate-50" : ""}`}
+                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1 } : {}}
+                      >
+                        {i === 0 ? (
+                          <button
+                            onClick={() => setSelectedContactId(contact.id)}
+                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
+                          >
+                            {contact[col.key] || "—"}
+                          </button>
+                        ) : renderCell(col.key, contact)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      <AddContactDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        clientId={currentUser?.client_id}
+        onSaved={() => queryClient.invalidateQueries({ queryKey: ["people"] })}
+      />
+    </div>
+  );
+}
