@@ -230,7 +230,7 @@ export default function Deals() {
       <div className="border-t border-slate-200 flex-shrink-0" />
 
       {/* Kanban Board */}
-      {isLoading ? (
+      {(isLoading || isClientLoading || !currentUser) ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: "hsl(217, 91%, 60%)" }} />
         </div>
