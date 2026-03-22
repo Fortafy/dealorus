@@ -166,8 +166,6 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
   };
 
   const getStageLabel = (stageId) => clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
-  const isProject = form.contract_type === "project";
-  const isRetainer = form.contract_type === "monthly_retainer";
   const isPending = createDealMutation.isPending || updateDealMutation.isPending;
 
   return (
