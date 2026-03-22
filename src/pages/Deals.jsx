@@ -40,7 +40,7 @@ export default function Deals() {
     queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.data.client_id }, "organization_name"),
   });
 
-  const { data: clientRecord } = useQuery({
+  const { data: clientRecord, isLoading: isClientLoading } = useQuery({
     queryKey: ["client", currentUser?.data?.client_id],
     enabled: !!currentUser?.data?.client_id,
     queryFn: async () => {
