@@ -87,61 +87,14 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={showEdit} onOpenChange={setShowEdit}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Deal</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <div>
-              <label className="text-xs text-slate-500 mb-1 block">Deal Name *</label>
-              <Input value={form.name || ""} onChange={e => setField("name", e.target.value)} className="text-sm" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-slate-500 mb-1 block">Stage</label>
-                <select value={form.stage || ""} onChange={e => setField("stage", e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white">
-                  <option value="">Select...</option>
-                  {lifecycleStages.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 mb-1 block">Contract Type</label>
-                <select value={form.contract_type || ""} onChange={e => setField("contract_type", e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white">
-                  <option value="">Select...</option>
-                  {CONTRACT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 mb-1 block">Deal Value ($)</label>
-                <Input type="number" value={form.value || ""} onChange={e => setField("value", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 mb-1 block">Expected Close</label>
-                <Input type="date" value={form.expected_close_date || ""} onChange={e => setField("expected_close_date", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 mb-1 block">Start Date</label>
-                <Input type="date" value={form.start_date || ""} onChange={e => setField("start_date", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 mb-1 block">End Date</label>
-                <Input type="date" value={form.end_date || ""} onChange={e => setField("end_date", e.target.value)} className="text-sm" />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-slate-500 mb-1 block">Notes</label>
-              <Textarea value={form.description || ""} onChange={e => setField("description", e.target.value)} className="text-sm h-16" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setShowEdit(false)}>Cancel</Button>
-            <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90">
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DealDialog
+        open={showEdit}
+        onOpenChange={setShowEdit}
+        deal={deal}
+        lifecycleStages={lifecycleStages}
+        onSubmit={handleSave}
+        isPending={updateMutation.isPending}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
