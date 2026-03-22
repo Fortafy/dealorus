@@ -129,7 +129,8 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
       toast.success("Deal created");
-      closeForm();
+      setShowDealForm(false);
+      setEditingDeal(null);
     },
   });
 
@@ -138,7 +139,8 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
       toast.success("Deal updated");
-      closeForm();
+      setShowDealForm(false);
+      setEditingDeal(null);
     },
   });
 
