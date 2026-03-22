@@ -121,7 +121,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                   key={section.id}
                   onClick={() => onSectionChange(section.id)}
                   variant={isActive ? "default" : "ghost"}
-                  className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-sm font-medium ${
+                  className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
                     isActive
                       ? "text-white hover:opacity-90"
                       : "text-slate-700 hover:bg-slate-100"
@@ -153,7 +153,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                         key={section.id}
                         onClick={() => onSectionChange(section.id)}
                         variant={isActive ? "default" : "ghost"}
-                        className={`w-full justify-start text-left ${
+                        className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
                          isActive
                            ? "text-white hover:opacity-90"
                            : "text-slate-700 hover:bg-slate-100"
@@ -187,7 +187,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                         key={section.id}
                         onClick={() => onSectionChange(section.id)}
                         variant={isActive ? "default" : "ghost"}
-                        className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-sm font-medium ${
+                        className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
                          isActive
                            ? "text-white hover:opacity-90"
                            : "text-slate-700 hover:bg-slate-100"
