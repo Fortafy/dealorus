@@ -49,11 +49,14 @@ export default function Sidebar() {
     <aside className="w-56 flex-shrink-0 h-screen bg-slate-50 border-r border-slate-200 flex flex-col">
       {/* Logo */}
       <div className="px-4 py-5 flex-shrink-0">
-        <img
-          src="https://media.base44.com/images/public/696a507ebd3734abacaf302c/a9ca64da2_Gemini_Generated_Image_c7byx4c7byx4c7by.png"
-          alt="Dealorus"
-          className="h-9"
-        />
+        <div className="h-9 w-full overflow-hidden">
+          <img
+            src="https://media.base44.com/images/public/696a507ebd3734abacaf302c/f8cae25b6_Gemini_Generated_Image_c7byx4c7byx4c7by1.png"
+            alt="Dealorus"
+            className="h-full w-full object-cover"
+            style={{ objectPosition: "center 42%" }}
+          />
+        </div>
       </div>
 
       {/* Navigation */}
