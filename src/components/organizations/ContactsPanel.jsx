@@ -418,16 +418,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                     onClick={() => handleSetBusiness(contact)}
                     className={`text-xs ${contact.is_business_contact ? "bg-purple-50 border-purple-300" : ""}`}
                   >
-                    {contact.is_business_contact ? "✓ Decision Maker" : "Set Decision Maker"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={() => handleEnrichContact(contact)}
-                    className="text-xs"
-                  >
-                    <Sparkles className="w-2.5 h-2.5 mr-1" />
-                    Enrich
+                    Decision Maker
                   </Button>
                 </div>
               </div>
