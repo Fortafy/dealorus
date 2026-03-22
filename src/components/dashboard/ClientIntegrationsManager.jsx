@@ -74,8 +74,6 @@ export default function ClientIntegrationsManager({ organization }) {
     );
   }
 
-  const isAdmin = user?.role === "admin" || user?.data?.client_role === "admin";
-
   if (!isAdmin) {
     return (
       <Alert>
