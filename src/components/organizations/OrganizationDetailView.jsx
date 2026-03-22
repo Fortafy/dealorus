@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 
 import OrganizationSummary, { OrganizationFields } from "@/components/organizations/OrganizationSummary";
 import ContactsPanel from "@/components/organizations/ContactsPanel";
-import NotesSection from "@/components/organizations/NotesSection";
 import DealsSection from "@/components/organizations/DealsSection";
 import ActivityTimeline from "@/components/organizations/ActivityTimeline";
 
