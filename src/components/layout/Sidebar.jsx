@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Building2, Users, LayoutDashboard, Settings, BookOpen, ScrollText, HelpCircle, LogOut, ChevronUp } from "lucide-react";
+import { Building2, Users, Briefcase, Settings, BookOpen, ScrollText, HelpCircle, LogOut, ChevronUp } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { base44 } from "@/api/base44Client";
 
 const NAV_ITEMS = [
   { label: "Organizations", icon: Building2, path: "/Organizations" },
   { label: "People", icon: Users, path: "/People" },
+  { label: "Deals", icon: Briefcase, path: "/Deals" },
 ];
 
 export default function Sidebar() {
