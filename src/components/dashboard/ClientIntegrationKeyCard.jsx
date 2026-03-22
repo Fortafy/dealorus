@@ -47,7 +47,6 @@ export default function ClientIntegrationKeyCard({
         <div className="settings-row-responsive">
           <div className="settings-text-block">
             <div className="flex flex-wrap items-center gap-2">
-              <KeyRound className="h-4 w-4 text-slate-700" />
               <h3 className="settings-card-title">{service.display_name}</h3>
               <Badge variant={integration?.is_active ? "default" : "outline"}>{statusLabel}</Badge>
             </div>
@@ -62,7 +61,7 @@ export default function ClientIntegrationKeyCard({
           </Button>
         </div>
 
-        <div className="settings-card-divider space-y-4">
+        <div className="space-y-4 pt-4">
           <div>
             <label className="settings-label">Key Status</label>
             <Input
@@ -76,7 +75,10 @@ export default function ClientIntegrationKeyCard({
           {isEditing ?
           <>
               <div>
-                <label className="settings-label">{integration ? "Replace API key" : "API key"}</label>
+                <label className="settings-label flex items-center gap-2">
+                  <KeyRound className="h-4 w-4 text-slate-700" />
+                  <span>{integration ? "Replace API key" : "API key"}</span>
+                </label>
                 <Input
                 type="password"
                 value={apiKey}
