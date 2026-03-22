@@ -14,7 +14,6 @@ import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [client, setClient] = useState(null);
   const [showNewDeal, setShowNewDeal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchExpanded, setSearchExpanded] = useState(false);
