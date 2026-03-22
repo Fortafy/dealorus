@@ -19,7 +19,7 @@ import { Home } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 
@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeSection, setActiveSection] = useState("preferences");
   const queryClient = useQueryClient();
+  const location = useLocation();
   const clientId = currentUser?.client_id || currentUser?.data?.client_id;
 
   // Fetch current user
@@ -41,6 +42,14 @@ export default function Dashboard() {
     };
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const section = urlParams.get("section");
+    if (section) {
+      setActiveSection(section);
+    }
+  }, [location.search]);
 
   const { data: organization } = useQuery({
     queryKey: ["client", clientId],

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, Loader, Upload, Download, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function SalesforceIntegration({ organization }) {
   const [instanceUrl, setInstanceUrl] = useState("");
@@ -242,6 +243,10 @@ export default function SalesforceIntegration({ organization }) {
                         Import from Salesforce
                       </>
                     )}
+                  </Button>
+
+                  <Button asChild variant="outline" className="settings-secondary-button">
+                    <Link to="/Dashboard?section=sf-field-mapping">Salesforce Field Mapping</Link>
                   </Button>
 
                   <Button

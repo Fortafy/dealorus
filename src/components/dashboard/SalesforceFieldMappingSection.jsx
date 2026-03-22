@@ -192,7 +192,7 @@ export default function SalesforceFieldMappingSection({ organization }) {
         <Alert>
           <AlertTriangle className="w-4 h-4" />
           <AlertDescription>
-            Salesforce is not connected. Connect it in <strong>Organization Settings</strong> first, then return here to configure field mappings.
+            Salesforce is not connected. Connect it in <strong>Integrations</strong> first, then return here to configure field mappings.
           </AlertDescription>
         </Alert>
       )}
