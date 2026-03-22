@@ -43,7 +43,7 @@ export default function Dashboard() {
   const { data: organization } = useQuery({
     queryKey: ["client", currentUser?.client_id],
     enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Client.filter({ id: currentUser.client_id }).then(clients => clients[0]),
+    queryFn: () => base44.entities.Client.filter({ id: currentUser.client_id }).then((clients) => clients[0])
   });
 
   const { data: users = [] } = useQuery({
@@ -51,8 +51,8 @@ export default function Dashboard() {
     enabled: !!currentUser?.client_id && isOrgAdmin(currentUser),
     queryFn: async () => {
       const allUsers = await base44.entities.User.list();
-      return allUsers.filter(u => u.client_id === currentUser.client_id);
-    },
+      return allUsers.filter((u) => u.client_id === currentUser.client_id);
+    }
   });
 
   const renderContent = () => {
@@ -66,46 +66,46 @@ export default function Dashboard() {
       case "admin-organizations":
         return currentUser?.role === "admin" ? <AdminOrganizations /> : null;
       case "metrics":
-        return isOrgAdmin(currentUser) ? (
-          <DashboardMetrics organization={organization} users={users} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <DashboardMetrics organization={organization} users={users} /> :
+        null;
       case "organization-members":
-        return isOrgAdmin(currentUser) ? (
-          <OrganizationMembers organizationId={currentUser.client_id} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <OrganizationMembers organizationId={currentUser.client_id} /> :
+        null;
       case "organization-settings":
-        return isOrgAdmin(currentUser) ? (
-          <OrganizationSettings organization={organization} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <OrganizationSettings organization={organization} /> :
+        null;
       case "branding":
-        return isOrgAdmin(currentUser) ? (
-          <BrandingSettings organization={organization} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <BrandingSettings organization={organization} /> :
+        null;
       case "subscription":
-        return isOrgAdmin(currentUser) ? (
-          <SubscriptionDetails organization={organization} currentUser={currentUser} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <SubscriptionDetails organization={organization} currentUser={currentUser} /> :
+        null;
       case "data-sources":
-        return isOrgAdmin(currentUser) ? (
-          <DataSourceConfiguration organization={organization} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <DataSourceConfiguration organization={organization} /> :
+        null;
       case "sf-field-mapping":
-        return isOrgAdmin(currentUser) ? (
-          <SalesforceFieldMappingSection organization={organization} />
-        ) : null;
+        return isOrgAdmin(currentUser) ?
+        <SalesforceFieldMappingSection organization={organization} /> :
+        null;
       case "find-duplicates":
-        return isOrgAdmin(currentUser) ? (
-          <div className="p-6">
+        return isOrgAdmin(currentUser) ?
+        <div className="p-6">
             <h2 className="text-2xl font-bold mb-6">Duplicate Organizations</h2>
             <DuplicatesReview
-              clientId={currentUser?.client_id}
-              onComplete={() => {
-                queryClient.invalidateQueries({ queryKey: ["organizations"] });
-                setActiveSection("metrics");
-              }}
-            />
-          </div>
-        ) : null;
+            clientId={currentUser?.client_id}
+            onComplete={() => {
+              queryClient.invalidateQueries({ queryKey: ["organizations"] });
+              setActiveSection("metrics");
+            }} />
+          
+          </div> :
+        null;
       default:
         return null;
     }
@@ -118,8 +118,8 @@ export default function Dashboard() {
           <div className="w-12 h-12 border-4 border-orange-100 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: 'hsl(39, 100%, 50%)' }} />
           <p className="text-slate-600">Loading dashboard...</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -131,10 +131,10 @@ export default function Dashboard() {
           <div className="h-9 w-full overflow-hidden">
             <img
               src={organization?.logo_url || "https://media.base44.com/images/public/696a507ebd3734abacaf302c/14d6fec09_Dealorus_transparent.png"}
-              alt="Dealorus"
-              className="h-full w-full object-cover"
-              style={{ objectPosition: "center 42%" }}
-            />
+              alt="Dealorus" className="px-6 h-full w-full object-cover"
+
+              style={{ objectPosition: "center 42%" }} />
+            
           </div>
         </div>
 
@@ -146,16 +146,16 @@ export default function Dashboard() {
             isAdmin={isOrgAdmin(currentUser)}
             isBaseAdmin={currentUser?.role === "admin"}
             organization={organization}
-            currentUser={currentUser}
-          />
+            currentUser={currentUser} />
+          
         </div>
 
         {/* Back to App */}
         <div className="border-t border-slate-100 py-4 flex-shrink-0">
           <Link
             to={createPageUrl("Organizations")}
-            className="flex w-full items-center gap-2.5 px-4 py-3 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-          >
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+            
             <Home className="w-4 h-4 flex-shrink-0" />
             Back to App
           </Link>
@@ -168,11 +168,11 @@ export default function Dashboard() {
           key={activeSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-        >
+          transition={{ duration: 0.2 }}>
+          
           {renderContent()}
         </motion.div>
       </main>
-    </div>
-  );
+    </div>);
+
 }
