@@ -248,22 +248,6 @@ export default function SalesforceIntegration({ organization }) {
                 </div>
               </div>
 
-              <div className="settings-actions">
-                <Button
-                  onClick={() => connectMutation.mutate()}
-                  disabled={!instanceUrl || !consumerKey || !consumerSecret || connectMutation.isPending}
-                  className="settings-primary-button"
-                >
-                  {connectMutation.isPending ? (
-                    <>
-                      <Loader className="h-4 w-4 animate-spin" />
-                      Connecting...
-                    </>
-                  ) : (
-                    "Connect External Client App"
-                  )}
-                </Button>
-              </div>
             </>
           ) : (
             <>
