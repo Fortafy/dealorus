@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,14 +15,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
   AlertCircle,
-  Bell,
-  Building2,
   CheckCircle2,
   Loader,
-  Mail,
-  Palette,
-  Settings,
-  User,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -99,11 +93,7 @@ export default function PreferencesSection({ user }) {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto px-6 py-6"
     >
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Preferences</h2>
-          <p className="mt-1 text-sm text-slate-500">Manage your profile and personal app settings in one place.</p>
-        </div>
+      <div className="space-y-4">
 
         {feedback && (
           <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
@@ -118,55 +108,46 @@ export default function PreferencesSection({ user }) {
           </Alert>
         )}
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Personal Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Your full name"
-                className="text-base"
-              />
-              <p className="text-xs text-slate-500 mt-1">This is the name displayed throughout the app.</p>
+        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <CardContent className="p-5">
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold text-slate-900">Personal Information</h3>
+              <p className="mt-1 text-sm text-slate-500">Update your name and review your account details.</p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Email Address
-              </label>
-              <Input value={email} disabled className="text-base bg-slate-50 cursor-not-allowed" />
-              <p className="text-xs text-slate-500 mt-1">Email address cannot be changed directly.</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Full Name</label>
+                <Input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Your full name"
+                  className="h-11"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                <Input value={email} disabled className="h-11 bg-slate-50 cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
+                <Input value={user?.id || ""} disabled className="h-11 bg-slate-50 cursor-not-allowed font-mono" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Organization</label>
+                <Input
+                  value={client?.name || (user?.client_id ? "Loading..." : "Not assigned")}
+                  disabled
+                  className="h-11 bg-slate-50 cursor-not-allowed"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">User ID</label>
-              <Input value={user?.id || ""} disabled className="text-base bg-slate-50 cursor-not-allowed font-mono" />
-              <p className="text-xs text-slate-500 mt-1">Your unique user identifier.</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
-                <Building2 className="w-4 h-4" />
-                Organization
-              </label>
-              <Input
-                value={client?.name || (user?.client_id ? "Loading..." : "Not assigned")}
-                disabled
-                className="text-base bg-slate-50 cursor-not-allowed"
-              />
-              <p className="text-xs text-slate-500 mt-1">Managed by your organization administrator.</p>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-slate-200">
-              <Button onClick={handleProfileSave} disabled={profileMutation.isPending}>
+            <div className="mt-4 flex justify-end border-t border-slate-200 pt-4">
+              <Button onClick={handleProfileSave} disabled={profileMutation.isPending} className="h-10 px-4">
                 {profileMutation.isPending ? (
                   <>
                     <Loader className="w-4 h-4 mr-2 animate-spin" />
@@ -180,59 +161,59 @@ export default function PreferencesSection({ user }) {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="w-5 h-5" />
-              Appearance
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <label className="block text-sm font-medium text-slate-700 mb-3">Theme Preference</label>
-            <Select value={themePreference} onValueChange={handleThemeChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-slate-500 mt-2">Choose how you prefer the app to look.</p>
+        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="max-w-xl">
+                <h3 className="text-xl font-semibold text-slate-900">Theme</h3>
+                <p className="mt-1 text-sm text-slate-500">Select or customize your interface color scheme.</p>
+              </div>
+              <div className="w-full md:w-72">
+                <Select value={themePreference} onValueChange={handleThemeChange}>
+                  <SelectTrigger className="h-11 w-full rounded-xl bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <CardContent className="p-5 space-y-4">
             <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-medium text-slate-900">Enable Notifications</p>
-                <p className="text-sm text-slate-500 mt-1">Receive updates about your activities and organization.</p>
+              <div className="pr-4">
+                <h3 className="text-xl font-semibold text-slate-900">Notifications</h3>
+                <p className="mt-1 text-sm text-slate-500">Choose whether you want to receive updates and summaries.</p>
               </div>
               <Switch checked={notificationsEnabled} onCheckedChange={handleNotificationsToggle} />
             </div>
 
             {notificationsEnabled && (
-              <div className="pt-4 border-t border-slate-200">
-                <label className="block text-sm font-medium text-slate-700 mb-3">Email Digest Frequency</label>
-                <Select value={emailDigest} onValueChange={handleEmailDigestChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="never">Never</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-slate-500 mt-2">How often you want to receive email summaries.</p>
+              <div className="border-t border-slate-200 pt-4">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">Email Digest Frequency</p>
+                    <p className="mt-1 text-sm text-slate-500">How often you want to receive email summaries.</p>
+                  </div>
+                  <div className="w-full md:w-72">
+                    <Select value={emailDigest} onValueChange={handleEmailDigestChange}>
+                      <SelectTrigger className="h-11 w-full rounded-xl bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="never">Never</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>
