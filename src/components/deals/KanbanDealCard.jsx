@@ -2,34 +2,17 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash2, Building2, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
-import { Link } from "react-router-dom";
+import DealDialog from "@/components/deals/DealDialog";
 
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
   { value: "ad_hoc", label: "Ad Hoc" },
   { value: "project", label: "Project" },
 ];
-
-const emptyService = () => ({ service_name: "", hours_per_month: "", rate: "" });
-
-const dealToForm = (deal) => ({
-  name: deal.name || "",
-  stage: deal.stage || "",
-  contract_type: deal.contract_type || "",
-  start_date: deal.start_date || "",
-  end_date: deal.end_date || "",
-  expected_close_date: deal.expected_close_date || "",
-  value: deal.value != null ? String(deal.value) : "",
-  description: deal.description || "",
-});
 
 export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUpdate }) {
   const [showEdit, setShowEdit] = useState(false);
