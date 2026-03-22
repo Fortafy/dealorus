@@ -123,10 +123,10 @@ export default function OrganizationSettings({ organization }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto px-6 py-6"
+      className="settings-page"
     >
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Organization Settings</h2>
+        <h2 className="settings-page-title">Organization Settings</h2>
 
         {error && (
           <Alert variant="destructive" className="mb-4">
@@ -142,27 +142,27 @@ export default function OrganizationSettings({ organization }) {
           </Alert>
         )}
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-            <CardTitle>Basic Information</CardTitle>
+        <Card className="settings-card">
+          <CardHeader className="settings-card-header">
+            <CardTitle className="settings-card-title">Basic Information</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="settings-card-body space-y-5">
             {/* Organization Name */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Organization Name
               </label>
               <Input
                 value={formData.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 placeholder="Your organization name"
-                className="text-base"
+                className="settings-input"
               />
             </div>
 
             {/* Website */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Website
               </label>
               <Input
@@ -170,26 +170,26 @@ export default function OrganizationSettings({ organization }) {
                 value={formData.website}
                 onChange={(e) => handleChange("website", e.target.value)}
                 placeholder="https://example.com"
-                className="text-base"
+                className="settings-input"
               />
             </div>
 
             {/* Industry */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Industry / Sector
               </label>
               <Input
                 value={formData.industry}
                 onChange={(e) => handleChange("industry", e.target.value)}
                 placeholder="e.g., Technology, Healthcare, Non-Profit"
-                className="text-base"
+                className="settings-input"
               />
             </div>
 
             {/* Billing Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Billing Email
               </label>
               <Input
@@ -197,9 +197,9 @@ export default function OrganizationSettings({ organization }) {
                 value={formData.billing_email}
                 onChange={(e) => handleChange("billing_email", e.target.value)}
                 placeholder="billing@example.com"
-                className="text-base"
+                className="settings-input"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="settings-helper">
                 Billing and invoice emails will be sent to this address
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function OrganizationSettings({ organization }) {
                   <label className="block text-sm font-medium text-slate-700">
                     Enable Notifications for New Members
                   </label>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="settings-helper">
                     New members will have notifications enabled by default
                   </p>
                 </div>
@@ -225,13 +225,11 @@ export default function OrganizationSettings({ organization }) {
             </div>
 
             {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-slate-200">
+            <div className="settings-actions">
               <Button
                 onClick={handleSave}
                 disabled={updateMutation.isPending}
-                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
+                className="settings-primary-button"
               >
                 {updateMutation.isPending ? (
                   <>
@@ -248,13 +246,13 @@ export default function OrganizationSettings({ organization }) {
 
         {/* Branding Settings */}
         <Card className="border-0 shadow-lg mt-6">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-            <CardTitle>Branding & Logo</CardTitle>
+          <CardHeader className="settings-card-header">
+            <CardTitle className="settings-card-title">Branding & Logo</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="settings-card-body space-y-5">
             {/* Logo URL */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Logo URL
               </label>
               <Input
@@ -262,17 +260,17 @@ export default function OrganizationSettings({ organization }) {
                 value={brandingData.logo_url}
                 onChange={(e) => handleLogoUrlChange(e.target.value)}
                 placeholder="https://example.com/logo.png"
-                className="text-base"
+                className="settings-input"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="settings-helper">
                 Enter the full URL to your organization logo
               </p>
             </div>
 
             {/* Logo Preview */}
             {logoPreview && (
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <p className="text-sm font-medium text-slate-700 mb-3">Logo Preview</p>
+              <div className="settings-info-panel">
+                <p className="settings-section-title mb-3">Logo Preview</p>
                 <img
                   src={logoPreview}
                   alt="Logo preview"
@@ -287,7 +285,7 @@ export default function OrganizationSettings({ organization }) {
 
             {/* Primary Color */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Primary Brand Color
               </label>
               <div className="flex items-center gap-4">
@@ -297,7 +295,7 @@ export default function OrganizationSettings({ organization }) {
                     value={brandingData.primary_color}
                     onChange={(e) => handleBrandingChange("primary_color", e.target.value)}
                     placeholder="#3b82f6"
-                    className="text-base font-mono"
+                    className="settings-input settings-input-mono"
                   />
                 </div>
                 <div
@@ -313,19 +311,17 @@ export default function OrganizationSettings({ organization }) {
                   title="Click to open color picker"
                 />
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="settings-helper">
                 Use hex format (e.g., #3b82f6)
               </p>
             </div>
 
             {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-slate-200">
+            <div className="settings-actions">
               <Button
                 onClick={handleBrandingSave}
                 disabled={updateBrandingMutation.isPending}
-                style={{ backgroundColor: 'hsl(39, 100%, 50%)' }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 45%)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'hsl(39, 100%, 50%)'}
+                className="settings-primary-button"
               >
                 {updateBrandingMutation.isPending ? (
                   <>

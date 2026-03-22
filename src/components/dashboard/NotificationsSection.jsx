@@ -50,9 +50,9 @@ export default function NotificationsSection({ user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto px-6 py-6"
+      className="settings-page"
     >
-      <div className="space-y-4">
+      <div className="settings-stack">
         {feedback && (
           <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
             {feedback.type === "error" ? (
@@ -66,12 +66,12 @@ export default function NotificationsSection({ user }) {
           </Alert>
         )}
 
-        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <CardContent className="p-5 space-y-4">
+        <Card className="settings-card">
+          <CardContent className="settings-card-body space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div className="pr-4">
-                <h3 className="text-lg font-semibold text-slate-900">Notifications</h3>
-                <p className="mt-1 text-xs text-slate-500">Choose whether you want to receive updates and summaries.</p>
+                <h3 className="settings-card-title">Notifications</h3>
+                <p className="settings-card-description">Choose whether you want to receive updates and summaries.</p>
               </div>
               <Switch checked={notificationsEnabled} onCheckedChange={handleNotificationsToggle} />
             </div>
@@ -80,18 +80,18 @@ export default function NotificationsSection({ user }) {
               <div className="border-t border-slate-200 pt-4">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <p className="text-xs font-medium text-slate-700">Email Digest Frequency</p>
-                    <p className="mt-1 text-xs text-slate-500">How often you want to receive email summaries.</p>
+                    <p className="settings-label mb-0">Email Digest Frequency</p>
+                    <p className="settings-card-description">How often you want to receive email summaries.</p>
                   </div>
                   <div className="w-full md:w-72">
                     <Select value={emailDigest} onValueChange={handleEmailDigestChange}>
-                      <SelectTrigger className="h-11 w-full rounded-xl bg-white text-xs">
+                      <SelectTrigger className="settings-select-trigger">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="never">Never</SelectItem>
+                      <SelectContent className="settings-select-content">
+                        <SelectItem value="daily" className="settings-select-item">Daily</SelectItem>
+                        <SelectItem value="weekly" className="settings-select-item">Weekly</SelectItem>
+                        <SelectItem value="never" className="settings-select-item">Never</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

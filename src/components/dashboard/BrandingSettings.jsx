@@ -79,10 +79,10 @@ export default function BrandingSettings({ organization }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6"
+      className="settings-page--narrow"
     >
-      <div className="max-w-2xl">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Branding & Organization Logo</h2>
+      <div>
+        <h2 className="settings-page-title">Branding & Organization Logo</h2>
 
         {error && (
           <Alert variant="destructive" className="mb-4">
@@ -98,14 +98,14 @@ export default function BrandingSettings({ organization }) {
           </Alert>
         )}
 
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 border-b">
-            <CardTitle>Branding Settings</CardTitle>
+        <Card className="settings-card">
+          <CardHeader className="settings-card-header">
+            <CardTitle className="settings-card-title">Branding Settings</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6 space-y-6">
+          <CardContent className="settings-card-body space-y-5">
             {/* Logo URL */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Logo URL
               </label>
               <Input
@@ -113,17 +113,17 @@ export default function BrandingSettings({ organization }) {
                 value={formData.logo_url}
                 onChange={(e) => handleLogoUrlChange(e.target.value)}
                 placeholder="https://example.com/logo.png"
-                className="text-base"
+                className="settings-input"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="settings-helper">
                 Enter the full URL to your organization logo
               </p>
             </div>
 
             {/* Logo Preview */}
             {logoPreview && (
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <p className="text-sm font-medium text-slate-700 mb-3">Logo Preview</p>
+              <div className="settings-info-panel">
+                <p className="settings-section-title mb-3">Logo Preview</p>
                 <img
                   src={logoPreview}
                   alt="Logo preview"
@@ -138,7 +138,7 @@ export default function BrandingSettings({ organization }) {
 
             {/* Primary Color */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="settings-label">
                 Primary Brand Color
               </label>
               <div className="flex items-center gap-4">
@@ -148,7 +148,7 @@ export default function BrandingSettings({ organization }) {
                     value={formData.primary_color}
                     onChange={(e) => handleColorChange(e.target.value)}
                     placeholder="#3b82f6"
-                    className="text-base font-mono"
+                    className="settings-input settings-input-mono"
                   />
                 </div>
                 <div
@@ -165,17 +165,17 @@ export default function BrandingSettings({ organization }) {
                   title="Click to open color picker"
                 />
               </div>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="settings-helper">
                 Use hex format (e.g., #3b82f6)
               </p>
             </div>
 
             {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-slate-200">
+            <div className="settings-actions">
               <Button
                 onClick={handleSave}
                 disabled={updateMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="settings-primary-button"
               >
                 {updateMutation.isPending ? (
                   <>

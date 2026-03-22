@@ -76,9 +76,9 @@ export default function PreferencesSection({ user }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto px-6 py-6"
+      className="settings-page"
     >
-      <div className="space-y-4">
+      <div className="settings-stack">
 
         {feedback && (
           <Alert className={feedback.type === "error" ? "" : "bg-green-50 border-green-200"} variant={feedback.type === "error" ? "destructive" : "default"}>
@@ -93,46 +93,46 @@ export default function PreferencesSection({ user }) {
           </Alert>
         )}
 
-        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <CardContent className="p-5">
+        <Card className="settings-card">
+          <CardContent className="settings-card-body">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
-              <p className="mt-1 text-xs text-slate-500">Update your name and review your account details.</p>
+              <h3 className="settings-card-title">Personal Information</h3>
+              <p className="settings-card-description">Update your name and review your account details.</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">Full Name</label>
+                <label className="settings-label">Full Name</label>
                 <Input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Your full name"
-                  className="h-11 text-xs"
+                  className="settings-input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">Email Address</label>
-                <Input value={email} disabled className="h-11 bg-slate-50 cursor-not-allowed text-xs" />
+                <label className="settings-label">Email Address</label>
+                <Input value={email} disabled className="settings-input-disabled" />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">User ID</label>
-                <Input value={user?.id || ""} disabled className="h-11 bg-slate-50 cursor-not-allowed font-mono text-xs" />
+                <label className="settings-label">User ID</label>
+                <Input value={user?.id || ""} disabled className="settings-input-disabled settings-input-mono" />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">Organization</label>
+                <label className="settings-label">Organization</label>
                 <Input
                   value={client?.name || (user?.client_id ? "Loading..." : "Not assigned")}
                   disabled
-                  className="h-11 bg-slate-50 cursor-not-allowed text-xs"
+                  className="settings-input-disabled"
                 />
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end border-t border-slate-200 pt-4">
-              <Button onClick={handleProfileSave} disabled={profileMutation.isPending} className="h-9 px-3.5 text-xs">
+            <div className="settings-actions">
+              <Button onClick={handleProfileSave} disabled={profileMutation.isPending} className="settings-primary-button">
                 {profileMutation.isPending ? (
                   <>
                     <Loader className="w-4 h-4 mr-2 animate-spin" />
@@ -146,22 +146,22 @@ export default function PreferencesSection({ user }) {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <CardContent className="p-5">
+        <Card className="settings-card">
+          <CardContent className="settings-card-body">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="max-w-xl">
-                <h3 className="text-lg font-semibold text-slate-900">Theme</h3>
-                <p className="mt-1 text-xs text-slate-500">Select or customize your interface color scheme.</p>
+                <h3 className="settings-card-title">Theme</h3>
+                <p className="settings-card-description">Select or customize your interface color scheme.</p>
               </div>
               <div className="w-full md:w-72">
                 <Select value={themePreference} onValueChange={handleThemeChange}>
-                  <SelectTrigger className="h-11 w-full rounded-xl bg-white text-xs">
+                  <SelectTrigger className="settings-select-trigger">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light" className="text-xs">Light</SelectItem>
-                    <SelectItem value="dark" className="text-xs">Dark</SelectItem>
-                    <SelectItem value="system" className="text-xs">System</SelectItem>
+                  <SelectContent className="settings-select-content">
+                    <SelectItem value="light" className="settings-select-item">Light</SelectItem>
+                    <SelectItem value="dark" className="settings-select-item">Dark</SelectItem>
+                    <SelectItem value="system" className="settings-select-item">System</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
