@@ -106,10 +106,10 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           </div>
         </div>
       )}
-      <nav className="flex-1 overflow-y-auto py-4 space-y-4">
+      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-4">
         {/* User Section */}
         <div>
-          <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
+          <h3 className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             Account
           </h3>
           <div className="space-y-1">
@@ -120,15 +120,15 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                 <Button
                   key={section.id}
                   onClick={() => onSectionChange(section.id)}
-                  variant={isActive ? "default" : "ghost"}
-                  className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
+                  variant="ghost"
+                  className={`mb-0.5 h-auto w-full justify-start gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium ${
                     isActive
-                      ? "text-white hover:opacity-90"
-                      : "text-slate-700 hover:bg-slate-100"
+                      ? "bg-slate-200 text-slate-900 hover:bg-slate-200 hover:text-slate-900"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                   }`}
-                  style={isActive ? { backgroundColor: 'hsl(39, 100%, 50%)' } : {}}
+                  
                 >
-                  <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">{section.label}</span>
                 </Button>
               );
@@ -141,7 +141,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           <>
             <Separator />
             <div>
-              <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
+              <h3 className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                 Workspace
               </h3>
               <div className="space-y-1">
@@ -152,15 +152,15 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                       <Button
                         key={section.id}
                         onClick={() => onSectionChange(section.id)}
-                        variant={isActive ? "default" : "ghost"}
+                        variant="ghost"
                         className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
                          isActive
                            ? "text-white hover:opacity-90"
                            : "text-slate-700 hover:bg-slate-100"
                        }`}
-                       style={isActive ? { backgroundColor: 'hsl(39, 100%, 50%)' } : {}}
+                       
                     >
-                      <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                      <Icon className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">{section.label}</span>
                     </Button>
                   );
@@ -175,7 +175,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           <>
             <Separator />
             <div>
-              <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
+              <h3 className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                 Administrator
               </h3>
               <div className="space-y-1">
@@ -186,15 +186,15 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                       <Button
                         key={section.id}
                         onClick={() => onSectionChange(section.id)}
-                        variant={isActive ? "default" : "ghost"}
+                        variant="ghost"
                         className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
                          isActive
                            ? "text-white hover:opacity-90"
                            : "text-slate-700 hover:bg-slate-100"
                        }`}
-                       style={isActive ? { backgroundColor: 'hsl(39, 100%, 50%)' } : {}}
+                       
                     >
-                      <Icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                      <Icon className="w-4 h-4 flex-shrink-0" />
                       <span className="truncate">{section.label}</span>
                     </Button>
                   );
