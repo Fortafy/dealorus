@@ -230,7 +230,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
         <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-gradient-to-b from-slate-50 to-transparent">
           <div className="text-[10px] text-slate-500 font-medium tracking-wider mb-2">WORKSPACE ADMIN</div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            You have workspace administrator access and can manage all settings and view metrics.
+            You have workspace administrator access and can manage all workspace settings.
           </p>
         </div>
       )}
