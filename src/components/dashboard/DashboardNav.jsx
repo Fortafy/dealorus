@@ -153,10 +153,10 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                         key={section.id}
                         onClick={() => onSectionChange(section.id)}
                         variant="ghost"
-                        className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
+                        className={`mb-0.5 h-auto w-full justify-start gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium ${
                          isActive
-                           ? "text-white hover:opacity-90"
-                           : "text-slate-700 hover:bg-slate-100"
+                           ? "bg-slate-200 text-slate-900 hover:bg-slate-200 hover:text-slate-900"
+                           : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                        }`}
                        
                     >
@@ -187,10 +187,10 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                         key={section.id}
                         onClick={() => onSectionChange(section.id)}
                         variant="ghost"
-                        className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
+                        className={`mb-0.5 h-auto w-full justify-start gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium ${
                          isActive
-                           ? "text-white hover:opacity-90"
-                           : "text-slate-700 hover:bg-slate-100"
+                           ? "bg-slate-200 text-slate-900 hover:bg-slate-200 hover:text-slate-900"
+                           : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                        }`}
                        
                     >
