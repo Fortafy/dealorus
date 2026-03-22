@@ -25,22 +25,22 @@ export default function Deals() {
   const queryClient = useQueryClient();
 
   const { data: deals = [], isLoading } = useQuery({
-    queryKey: ["deals-board", currentUser?.data?.client_id],
-    enabled: !!currentUser?.data?.client_id,
-    queryFn: () => base44.entities.Deal.filter({ client_id: currentUser.data.client_id }, "-created_date"),
+    queryKey: ["deals-board", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Deal.filter({ client_id: currentUser.client_id }, "-created_date"),
   });
 
   const { data: organizations = [] } = useQuery({
-    queryKey: ["organizations-list", currentUser?.data?.client_id],
-    enabled: !!currentUser?.data?.client_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.data.client_id }, "organization_name"),
+    queryKey: ["organizations-list", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
+    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "organization_name"),
   });
 
   const { data: clientRecord, isLoading: isClientLoading } = useQuery({
-    queryKey: ["client", currentUser?.data?.client_id],
-    enabled: !!currentUser?.data?.client_id,
+    queryKey: ["client", currentUser?.client_id],
+    enabled: !!currentUser?.client_id,
     queryFn: async () => {
-      const results = await base44.entities.Client.filter({ id: currentUser.data.client_id });
+      const results = await base44.entities.Client.filter({ id: currentUser.client_id });
       return results[0] || null;
     },
   });

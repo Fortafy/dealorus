@@ -18,7 +18,7 @@ export default function NewDealDialog({ open, onOpenChange, currentUser, organiz
     const org = organizations.find(o => o.id === payload.organization_id);
     createMutation.mutate({
       ...payload,
-      client_id: currentUser?.data?.client_id,
+      client_id: currentUser?.client_id,
       organization_name: org?.organization_name || "",
       is_active: true,
     });
