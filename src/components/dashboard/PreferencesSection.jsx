@@ -132,7 +132,7 @@ export default function PreferencesSection({ user }) {
             </div>
 
             <div className="mt-4 flex justify-end border-t border-slate-200 pt-4">
-              <Button onClick={handleProfileSave} disabled={profileMutation.isPending} className="h-10 px-4">
+              <Button onClick={handleProfileSave} disabled={profileMutation.isPending} className="h-9 px-3.5 text-xs">
                 {profileMutation.isPending ? (
                   <>
                     <Loader className="w-4 h-4 mr-2 animate-spin" />
@@ -159,9 +159,9 @@ export default function PreferencesSection({ user }) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    <SelectItem value="light" className="text-xs">Light</SelectItem>
+                    <SelectItem value="dark" className="text-xs">Dark</SelectItem>
+                    <SelectItem value="system" className="text-xs">System</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
