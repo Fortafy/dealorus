@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -11,6 +11,8 @@ import {
   Database,
   Merge,
   ArrowUpFromLine,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export default function DashboardNav({ activeSection, onSectionChange, isAdmin, isBaseAdmin, organization, currentUser }) {
@@ -77,6 +79,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       icon: User,
     },
   ] : [];
+  const [isPlatformAdminNoticeOpen, setIsPlatformAdminNoticeOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -85,7 +88,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
         <div className="p-4 text-white flex-shrink-0 border-b" style={{ backgroundColor: 'hsl(39, 100%, 50%)', borderColor: 'hsl(39, 100%, 45%)' }}>
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide mb-1 opacity-90">Organization</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-1 opacity-90">Workspace</p>
               <h3 className="text-lg font-bold text-white truncate">{organization.name}</h3>
             </div>
             <div className="space-y-1 pt-2 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.3)' }}>
@@ -103,11 +106,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           </div>
         </div>
       )}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-4">
+      <nav className="flex-1 overflow-y-auto py-4 space-y-4">
         {/* User Section */}
         <div>
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2">
-            User
+          <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
+            Account
           </h3>
           <div className="space-y-2">
             {userSections.map((section) => {
@@ -118,7 +121,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
                   key={section.id}
                   onClick={() => onSectionChange(section.id)}
                   variant={isActive ? "default" : "ghost"}
-                  className={`w-full justify-start text-left ${
+                  className={`h-auto w-full justify-start rounded-none px-4 py-3 text-left text-xs font-medium ${
                     isActive
                       ? "text-white hover:opacity-90"
                       : "text-slate-700 hover:bg-slate-100"
@@ -138,8 +141,8 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           <>
             <Separator />
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2">
-                Organization
+              <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
+                Workspace
               </h3>
               <div className="space-y-2">
                 {orgSections.map((section) => {
@@ -172,7 +175,7 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
           <>
             <Separator />
             <div>
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide px-2 mb-2">
+              <h3 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider px-4 mb-2">
                 Administrator
               </h3>
               <div className="space-y-2">
@@ -203,18 +206,30 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       </nav>
 
       {isBaseAdmin && (
-        <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-gradient-to-b from-amber-50 to-transparent">
-          <div className="text-xs text-amber-600 font-medium mb-2">PLATFORM ADMIN</div>
-          <p className="text-xs text-amber-700 leading-relaxed">
-            You have platform administrator access and can manage all organizations.
-          </p>
+        <div className="border-t border-slate-100 flex-shrink-0 bg-gradient-to-b from-amber-50 to-transparent">
+          <button
+            onClick={() => setIsPlatformAdminNoticeOpen((open) => !open)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left"
+          >
+            <span className="text-[10px] font-semibold tracking-wider text-amber-600">PLATFORM ADMIN</span>
+            {isPlatformAdminNoticeOpen ? (
+              <ChevronUp className="h-4 w-4 text-amber-600" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-amber-600" />
+            )}
+          </button>
+          {isPlatformAdminNoticeOpen && (
+            <p className="px-4 pb-4 text-xs leading-relaxed text-amber-700">
+              You have platform administrator access and can manage all organizations.
+            </p>
+          )}
         </div>
       )}
       {isAdmin && !isBaseAdmin && (
         <div className="p-4 border-t border-slate-100 flex-shrink-0 bg-gradient-to-b from-slate-50 to-transparent">
-          <div className="text-xs text-slate-500 font-medium mb-2">ORG ADMIN</div>
+          <div className="text-[10px] text-slate-500 font-medium tracking-wider mb-2">WORKSPACE ADMIN</div>
           <p className="text-xs text-slate-600 leading-relaxed">
-            You have organization administrator access and can manage all settings and view metrics.
+            You have workspace administrator access and can manage all settings and view metrics.
           </p>
         </div>
       )}

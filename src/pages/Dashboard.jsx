@@ -148,10 +148,10 @@ export default function Dashboard() {
         </div>
 
         {/* Back to App */}
-        <div className="border-t border-slate-100 px-3 py-4 flex-shrink-0">
+        <div className="border-t border-slate-100 py-4 flex-shrink-0">
           <Link
             to={createPageUrl("Organizations")}
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            className="flex w-full items-center gap-2.5 px-4 py-3 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
           >
             <Home className="w-4 h-4 flex-shrink-0" />
             Back to App
