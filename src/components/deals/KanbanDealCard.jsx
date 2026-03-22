@@ -37,6 +37,8 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
     },
   });
 
+  const handleEdit = () => setShowEdit(true);
+
   const handleSave = (payload) => {
     updateMutation.mutate(payload);
   };
