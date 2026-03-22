@@ -14,7 +14,7 @@ import NewDealDialog from "@/components/deals/NewDealDialog";
 import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user: currentUser } = useAuth();
   const [showNewDeal, setShowNewDeal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -23,10 +23,6 @@ export default function Deals() {
   const filterButtonRef = useRef(null);
   const searchRef = useRef(null);
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
-  }, []);
 
   const { data: deals = [], isLoading } = useQuery({
     queryKey: ["deals-board", currentUser?.data?.client_id],
