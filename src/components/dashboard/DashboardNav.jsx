@@ -32,9 +32,9 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
 
   const orgSections = isAdmin ? [
     {
-      id: "metrics",
-      label: "Dashboard Metrics",
-      icon: BarChart3,
+      id: "subscription",
+      label: "Subscription & Billing",
+      icon: CreditCard,
     },
     {
       id: "organization-members",
@@ -47,9 +47,14 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       icon: Database,
     },
     {
-      id: "find-duplicates",
-      label: "Find Duplicates",
+      id: "data-hygiene",
+      label: "Data Hygiene",
       icon: Merge,
+    },
+    {
+      id: "integrations",
+      label: "Integrations",
+      icon: BarChart3,
     },
     {
       id: "sf-field-mapping",
@@ -60,11 +65,6 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       id: "organization-settings",
       label: "Organization Settings",
       icon: Building2,
-    },
-    {
-      id: "subscription",
-      label: "Subscription & Billing",
-      icon: CreditCard,
     },
   ] : [];
 
