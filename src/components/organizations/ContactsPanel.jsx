@@ -361,38 +361,27 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                  <div className="flex-1">
                    <h4 className="font-semibold text-xs text-slate-900">{contact.name}</h4>
                    {contact.title && <p className="text-[10px] text-slate-600">{contact.title}</p>}
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditingContact(contact);
-                        setShowContactForm(true);
-                      }}
-                      className="h-6 w-6 p-0"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setContactToDelete(contact)}
-                      className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {contact.is_primary_contact && (
-                    <Badge className="bg-blue-100 text-blue-800 text-xs">Primary</Badge>
-                  )}
-                  {contact.is_business_contact && (
-                    <Badge className="bg-purple-100 text-purple-800 text-xs">Decision Maker</Badge>
-                  )}
-                </div>
+                 </div>
+                 <DropdownMenu>
+                   <DropdownMenuTrigger asChild>
+                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                       <MoreHorizontal className="w-3.5 h-3.5" />
+                     </Button>
+                   </DropdownMenuTrigger>
+                   <DropdownMenuContent align="end" className="w-36">
+                     <DropdownMenuItem onClick={() => handleEnrichContact(contact)}>
+                       <Sparkles className="w-3.5 h-3.5 mr-2" />
+                       Enrich
+                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => { setEditingContact(contact); setShowContactForm(true); }}>
+                       Edit
+                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => setContactToDelete(contact)} className="text-red-600 focus:text-red-600">
+                       Delete
+                     </DropdownMenuItem>
+                   </DropdownMenuContent>
+                 </DropdownMenu>
+               </div>
 
                 <div className="flex flex-wrap gap-2 mb-1 text-[10px]">
                   {contact.email && (
