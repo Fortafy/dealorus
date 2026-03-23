@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Users, ChevronRight, StickyNote, Handshake } from "lucide-react";
+import { Users, ChevronRight, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -16,10 +16,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import ContactHeaderSummary from "@/components/people/ContactHeaderSummary";
 import ContactDetailsSection from "@/components/people/ContactDetailsSection";
-import ContactOrganizationsList from "@/components/people/ContactOrganizationsList";
 import ContactActivityTimelineSection from "@/components/people/ContactActivityTimelineSection";
 import ContactQuickAddNoteDialog from "@/components/people/ContactQuickAddNoteDialog";
-import DealsSection from "@/components/organizations/DealsSection";
 import EnrichContactDialog from "@/components/contacts/EnrichContactDialog";
 
 export default function ContactDetailPanel({ contactId, onClose }) {
@@ -28,7 +26,6 @@ export default function ContactDetailPanel({ contactId, onClose }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [triggerDeal, setTriggerDeal] = useState(0);
 
   const { data: contact, isLoading } = useQuery({
     queryKey: ["contact-detail", contactId],
@@ -60,15 +57,6 @@ export default function ContactDetailPanel({ contactId, onClose }) {
   });
 
   const clientId = currentUser?.client_id || currentUser?.data?.client_id;
-
-  const { data: clientData } = useQuery({
-    queryKey: ["client-for-contact-panel", clientId],
-    enabled: !!clientId,
-    queryFn: async () => {
-      const results = await base44.entities.Client.filter({ id: clientId });
-      return results[0] || null;
-    },
-  });
 
   const refreshContact = () => {
     queryClient.invalidateQueries({ queryKey: ["contact-detail", contactId] });
@@ -133,9 +121,6 @@ export default function ContactDetailPanel({ contactId, onClose }) {
               <Button size="sm" variant="outline" className="h-6 gap-1 px-2 text-xs" onClick={() => setShowNoteDialog(true)} disabled={!organization || !clientId}>
                 <StickyNote className="h-3 w-3" />Note
               </Button>
-              <Button size="sm" variant="outline" className="h-6 gap-1 px-2 text-xs" onClick={() => setTriggerDeal((current) => current + 1)} disabled={!organization || !clientId}>
-                <Handshake className="h-3 w-3" />Deal
-              </Button>
             </div>
 
             <ContactActivityTimelineSection contactId={contactId} />
@@ -143,17 +128,6 @@ export default function ContactDetailPanel({ contactId, onClose }) {
 
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <ContactDetailsSection contact={contact} onSaved={refreshContact} />
-            <ContactOrganizationsList organization={organization} />
-            {organization ? (
-              <DealsSection
-                organization={organization}
-                clientId={clientId}
-                clientLifecycleStages={clientData?.lifecycle_stages || []}
-                externalOpenCreate={triggerDeal}
-              />
-            ) : (
-              <div className="px-4 py-4 text-sm text-slate-500">No linked organization, so there are no related deals to show.</div>
-            )}
           </div>
         </div>
       </div>
