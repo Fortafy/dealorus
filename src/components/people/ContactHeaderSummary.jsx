@@ -1,5 +1,4 @@
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Sparkles, Star, Trash2, Upload } from "lucide-react";
+import { Linkedin, Mail, MoreHorizontal, Sparkles, Star, Trash2, Upload } from "lucide-react";
 
 export default function ContactHeaderSummary({
   contact,
@@ -24,6 +23,10 @@ export default function ContactHeaderSummary({
     .slice(0, 2)
     .toUpperCase() || "?";
 
+  const linkedInUrl = contact.linkedin
+    ? (contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}`)
+    : null;
+
   return (
     <div className="border-b border-slate-100 bg-white px-4 py-5">
       <div className="flex items-center justify-between gap-3">
@@ -36,13 +39,37 @@ export default function ContactHeaderSummary({
               <h2 className="truncate text-base font-semibold text-slate-900">{contact.name}</h2>
               {contact.starred && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              {contact.title && <Badge variant="secondary">{contact.title}</Badge>}
-              {contact.role_department && <Badge variant="outline">{contact.role_department}</Badge>}
-              {organization?.organization_name && (
-                <span className="text-sm text-blue-600">{organization.organization_name}</span>
-              )}
+
+            {contact.title ? (
+              <p className="mt-1 truncate text-[11px] font-medium text-slate-500">{contact.title}</p>
+            ) : null}
+
+            <div className="mt-2 flex items-center gap-2">
+              {contact.email ? (
+                <a
+                  href={`mailto:${contact.email}`}
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
+                  title="Email"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                </a>
+              ) : null}
+              {linkedInUrl ? (
+                <a
+                  href={linkedInUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
+                  title="LinkedIn"
+                >
+                  <Linkedin className="h-3.5 w-3.5" />
+                </a>
+              ) : null}
             </div>
+
+            {organization?.organization_name ? (
+              <p className="mt-2 truncate text-xs text-blue-600">{organization.organization_name}</p>
+            ) : null}
           </div>
         </div>
 
