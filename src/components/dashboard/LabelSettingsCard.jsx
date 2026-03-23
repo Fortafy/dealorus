@@ -133,13 +133,33 @@ export default function LabelSettingsCard({ clientId }) {
               };
 
               return (
-                <div key={label.id} className="rounded-2xl border border-slate-200 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                <div key={label.id} className="rounded-2xl border border-slate-200 p-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     <LabelBadge label={{ name: draft.name || label.name, color: draft.color || label.color }} />
-                    <div className="flex items-center gap-2">
+                    <Input
+                      value={draft.name}
+                      onChange={(event) => setDrafts((current) => ({ ...current, [label.id]: { ...draft, name: event.target.value } }))}
+                      className="h-8 min-w-[160px] flex-1 text-xs"
+                    />
+                    <Input
+                      type="color"
+                      value={draft.color}
+                      onChange={(event) => setDrafts((current) => ({ ...current, [label.id]: { ...draft, color: event.target.value } }))}
+                      className="h-8 w-10 cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
+                      aria-label="Label color"
+                    />
+                    <CompactLabelScopeSelector
+                      value={draft.applicable_objects}
+                      onChange={(applicableObjects) => setDrafts((current) => ({
+                        ...current,
+                        [label.id]: { ...draft, applicable_objects: applicableObjects },
+                      }))}
+                      className="flex-1"
+                    />
+                    <div className="ml-auto flex items-center gap-1">
                       <Button
-                        variant="outline"
-                        size="sm"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => updateLabelMutation.mutate({
                           id: label.id,
                           data: {
@@ -149,44 +169,22 @@ export default function LabelSettingsCard({ clientId }) {
                           },
                         })}
                         disabled={!draft.name.trim() || draft.applicable_objects.length === 0 || updateLabelMutation.isPending}
+                        className="h-8 w-8 text-slate-600"
+                        title="Save label"
                       >
-                        Save
+                        <Check className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600 hover:text-red-600"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-red-600 hover:text-red-600"
                         onClick={() => deleteLabelMutation.mutate(label.id)}
                         disabled={deleteLabelMutation.isPending}
+                        title="Delete label"
                       >
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-
-                  <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_120px]">
-                    <Input
-                      value={draft.name}
-                      onChange={(event) => setDrafts((current) => ({ ...current, [label.id]: { ...draft, name: event.target.value } }))}
-                      className="settings-input"
-                    />
-                    <Input
-                      type="color"
-                      value={draft.color}
-                      onChange={(event) => setDrafts((current) => ({ ...current, [label.id]: { ...draft, color: event.target.value } }))}
-                      className="h-11 w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-1"
-                    />
-                  </div>
-
-                  <div className="mt-3">
-                    <label className="settings-label">Use with</label>
-                    <LabelObjectScopeSelector
-                      value={draft.applicable_objects}
-                      onChange={(applicableObjects) => setDrafts((current) => ({
-                        ...current,
-                        [label.id]: { ...draft, applicable_objects: applicableObjects },
-                      }))}
-                    />
                   </div>
                 </div>
               );
