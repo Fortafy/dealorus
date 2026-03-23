@@ -193,7 +193,12 @@ export default function ContactDetailPanel({ contactId, onClose }) {
         </div>
 
         <div className="flex flex-col overflow-y-auto overflow-x-hidden" style={{ width: `${100 - leftPct}%` }}>
-          <ContactDetailsSection contact={contact} organizations={relatedOrganizations} onSaved={refreshContact} />
+          <ContactDetailsSection
+            contact={contact}
+            organizations={relatedOrganizations}
+            onSaved={refreshContact}
+            onOrganizationSaved={refreshOrganizations}
+          />
         </div>
       </div>
 

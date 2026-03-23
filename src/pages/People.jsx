@@ -35,7 +35,10 @@ export default function People() {
   const [visibleFields, setVisibleFields] = useState(() => {
     try {
       const stored = localStorage.getItem("people_visible_fields");
-      return stored ? JSON.parse(stored) : DEFAULT_PEOPLE_VISIBLE_FIELDS;
+      if (!stored) return DEFAULT_PEOPLE_VISIBLE_FIELDS;
+      const allowedKeys = ALL_PEOPLE_COLUMNS.map((column) => column.key);
+      const parsed = JSON.parse(stored).filter((key) => allowedKeys.includes(key));
+      return parsed.length ? parsed : DEFAULT_PEOPLE_VISIBLE_FIELDS;
     } catch { return DEFAULT_PEOPLE_VISIBLE_FIELDS; }
   });
 
