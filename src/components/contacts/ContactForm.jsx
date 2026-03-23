@@ -14,9 +14,12 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
     name: "",
     title: "",
     email: "",
+    email_addresses: [],
     phone: "",
+    phone_numbers: [],
     linkedin: "",
     role_department: "",
+    description: "",
     source: "Manual",
   });
 
@@ -30,9 +33,12 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
         name: "",
         title: "",
         email: "",
+        email_addresses: [],
         phone: "",
+        phone_numbers: [],
         linkedin: "",
         role_department: "",
+        description: "",
         source: "Manual",
       });
     }
@@ -58,8 +64,20 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
     if (!formData.name?.trim()) {
       return;
     }
+    const emailAddresses = Array.isArray(formData.email_addresses) && formData.email_addresses.length
+      ? formData.email_addresses.filter(Boolean)
+      : (formData.email ? [formData.email] : []);
+    const phoneNumbers = Array.isArray(formData.phone_numbers) && formData.phone_numbers.length
+      ? formData.phone_numbers.filter(Boolean)
+      : (formData.phone ? [formData.phone] : []);
+
     onSave({
       ...formData,
+      email: emailAddresses[0] || "",
+      email_addresses: emailAddresses,
+      phone: phoneNumbers[0] || "",
+      phone_numbers: phoneNumbers,
+      description: formData.description || "",
       last_modified: new Date().toISOString()
     });
     onOpenChange(false);

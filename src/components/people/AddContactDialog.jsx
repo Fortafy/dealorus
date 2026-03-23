@@ -34,6 +34,9 @@ export default function AddContactDialog({ open, onOpenChange, clientId, onSaved
       ...form,
       client_id: clientId,
       organization_id: form.organization_id || null,
+      email_addresses: form.email ? [form.email] : [],
+      phone_numbers: form.phone ? [form.phone] : [],
+      description: "",
       source: "Manual",
       last_modified: new Date().toISOString(),
     });
