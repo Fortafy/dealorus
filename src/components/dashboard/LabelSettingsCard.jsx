@@ -25,7 +25,13 @@ export default function LabelSettingsCard({ clientId }) {
   useEffect(() => {
     setDrafts(
       Object.fromEntries(
-        labels.map((label) => [label.id, { name: label.name || "", color: label.color || DEFAULT_COLOR }])
+        labels.map((label) => [label.id, {
+          name: label.name || "",
+          color: label.color || DEFAULT_COLOR,
+          applicable_objects: Array.isArray(label.applicable_objects) && label.applicable_objects.length
+            ? label.applicable_objects
+            : ALL_LABEL_OBJECTS,
+        }])
       )
     );
   }, [labels]);
