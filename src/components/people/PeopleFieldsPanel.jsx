@@ -10,8 +10,6 @@ export const ALL_PEOPLE_COLUMNS = [
   { key: "role_department", label: "Department", defaultWidth: 140 },
   { key: "linkedin", label: "LinkedIn", defaultWidth: 160 },
   { key: "starred", label: "Starred", defaultWidth: 80 },
-  { key: "is_primary_contact", label: "Primary Contact", defaultWidth: 120 },
-  { key: "is_business_contact", label: "Business Contact", defaultWidth: 120 },
   { key: "notes", label: "Notes", defaultWidth: 200 },
   { key: "created_date", label: "Created Date", defaultWidth: 120 },
   { key: "updated_date", label: "Updated Date", defaultWidth: 120 },

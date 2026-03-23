@@ -196,7 +196,6 @@ export default function People() {
     if (key === "created_date" || key === "updated_date") return <span className="text-slate-500">{format(new Date(val), "MMM d, yyyy")}</span>;
     if (key === "created_by") return <span className="text-slate-600">{val.split("@")[0]}</span>;
     if (key === "starred") return val ? <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> : <span className="text-slate-400">—</span>;
-    if (key === "is_primary_contact" || key === "is_business_contact") return <span className={`text-xs font-medium ${val ? "text-green-600" : "text-slate-400"}`}>{val ? "Yes" : "No"}</span>;
     if (key === "linkedin") return val ? <a href={val} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate block">{val.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</a> : <span className="text-slate-400">—</span>;
     if (key === "email") return <a href={`mailto:${val}`} className="text-blue-500 hover:underline truncate block">{val}</a>;
     return <span className="text-slate-600">{String(val)}</span>;

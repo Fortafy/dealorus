@@ -11,10 +11,12 @@ import { Loader, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthContext";
 import LifecycleStageSettings from "./LifecycleStageSettings";
+import LabelSettingsCard from "./LabelSettingsCard";
 
 export default function OrganizationSettings({ organization }) {
   const { user } = useAuth();
   const showBrandingCard = user?.role === "admin";
+  const canManageLabels = user?.role === "admin" || user?.client_role === "admin" || user?.data?.client_role === "admin";
 
   const [formData, setFormData] = useState({
     name: "",
@@ -257,6 +259,8 @@ export default function OrganizationSettings({ organization }) {
             </div>
           </CardContent>
         </Card>
+
+        {canManageLabels ? <LabelSettingsCard clientId={organization.id} /> : null}
 
         {showBrandingCard &&
         <Card className="settings-card">
