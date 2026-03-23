@@ -103,7 +103,9 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
 
               <InfoRow icon={FileText} label="Notes" value={contact.notes} multiline placeholder="Click to add notes..." />
 
-              <ContactOrganizationsList organizations={organizations} />
+              <div className="-mx-4 mt-3">
+                <ContactOrganizationsList organizations={organizations} />
+              </div>
 
               <div className="border-t border-slate-100 pt-3 text-xs text-slate-400">
                 Created {contact.created_date ? format(new Date(contact.created_date), "MMM d, yyyy") : "—"}
