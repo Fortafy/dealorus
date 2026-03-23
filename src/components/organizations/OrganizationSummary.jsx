@@ -37,6 +37,11 @@ import OrganizationDetailsSection from "@/components/organizations/OrganizationD
 function OrgLogo({ logoUrl, name }) {
   const [imgError, setImgError] = useState(false);
   const initials = name ? name.charAt(0).toUpperCase() : "?";
+
+  useEffect(() => {
+    setImgError(false);
+  }, [logoUrl]);
+
   return (
     <div className="w-10 h-10 rounded-full flex-shrink-0 border border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center">
       {logoUrl && !imgError ? (

@@ -114,7 +114,10 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
             <OrganizationSummary
               organization={organization}
               onDelete={onClose}
-              onEdit={() => {
+              onEdit={(updatedOrganization) => {
+                if (updatedOrganization) {
+                  queryClient.setQueryData(["organization", organizationId], updatedOrganization);
+                }
                 queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
                 queryClient.invalidateQueries({ queryKey: ["organizations"] });
               }}
@@ -160,7 +163,10 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
               organization={organization}
               isSaved={true}
               clientInstanceUrl={clientData?.salesforce_instance_url}
-              onEdit={() => {
+              onEdit={(updatedOrganization) => {
+                if (updatedOrganization) {
+                  queryClient.setQueryData(["organization", organizationId], updatedOrganization);
+                }
                 queryClient.invalidateQueries({ queryKey: ["organization", organizationId] });
                 queryClient.invalidateQueries({ queryKey: ["organizations"] });
               }}
