@@ -7,13 +7,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   getActivityTimelineAccentClass,
   getActivityTimelineAppearance,
-  getActivityTimelineNodeClass,
-} from "@/lib/activityTimelineTheme";
+  getActivityTimelineNodeClass } from
+"@/lib/activityTimelineTheme";
 
-const formatFieldName = (field) => field
-  .split("_")
-  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-  .join(" ");
+const formatFieldName = (field) => field.
+split("_").
+map((part) => part.charAt(0).toUpperCase() + part.slice(1)).
+join(" ");
 
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 const toSafeDate = (value) => {
@@ -30,33 +30,33 @@ export default function ActivityFeed({ contactId, contact }) {
     queryKey: ["activities", contactId, contact?.created_date],
     queryFn: async () => {
       const [activities, notes] = await Promise.all([
-        base44.entities.Activity.filter({ contact_id: contactId }),
-        base44.entities.Note.filter({ contact_id: contactId }),
-      ]);
+      base44.entities.Activity.filter({ contact_id: contactId }),
+      base44.entities.Note.filter({ contact_id: contactId })]
+      );
 
       const hasCreateActivity = activities.some((activity) => activity.action === "create");
-      const createdItem = contact?.created_date && !hasCreateActivity
-        ? [{ id: `contact-created-${contactId}`, itemType: "create", timestamp: contact.created_date }]
-        : [];
+      const createdItem = contact?.created_date && !hasCreateActivity ?
+      [{ id: `contact-created-${contactId}`, itemType: "create", timestamp: contact.created_date }] :
+      [];
 
       return [
-        ...createdItem,
-        ...activities.map((activity) => ({
-          ...activity,
-          itemType: activity.action || "edit",
-          timestamp: activity.created_date || activity.updated_date || null,
-        })),
-        ...notes.map((note) => ({
-          ...note,
-          itemType: "note",
-          timestamp: note.created_date || note.updated_date || null,
-        })),
-      ].sort((a, b) => {
+      ...createdItem,
+      ...activities.map((activity) => ({
+        ...activity,
+        itemType: activity.action || "edit",
+        timestamp: activity.created_date || activity.updated_date || null
+      })),
+      ...notes.map((note) => ({
+        ...note,
+        itemType: "note",
+        timestamp: note.created_date || note.updated_date || null
+      }))].
+      sort((a, b) => {
         const first = toSafeDate(a.timestamp)?.getTime() || 0;
         const second = toSafeDate(b.timestamp)?.getTime() || 0;
         return second - first;
       });
-    },
+    }
   });
 
   if (isLoading) {
@@ -66,8 +66,8 @@ export default function ActivityFeed({ contactId, contact }) {
           <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
           <p className="text-sm text-slate-500">Loading activity history...</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (error) {
@@ -75,16 +75,16 @@ export default function ActivityFeed({ contactId, contact }) {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>Failed to load activity history</AlertDescription>
-      </Alert>
-    );
+      </Alert>);
+
   }
 
   if (items.length === 0) {
     return (
       <div className="py-8 text-center">
         <p className="text-sm text-slate-500">No activity recorded yet</p>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -105,35 +105,35 @@ export default function ActivityFeed({ contactId, contact }) {
 
                 <div className="activity-timeline-card">
                   <div className="activity-timeline-card-header">
-                    <p className="activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
+                    <p className="text-xs activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
                     <span className="activity-timeline-card-timestamp">{formatTimestamp(item.timestamp)}</span>
                   </div>
 
-                  {item.itemType === "note" ? (
-                    stripHtml(item.content) ? <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div> : null
-                  ) : (
-                    item.fields_changed?.length ? (
-                      <div className="activity-timeline-card-body">
-                        {item.fields_changed.map((change, idx) => (
-                          <div key={idx} className="activity-timeline-detail-box">
+                  {item.itemType === "note" ?
+                  stripHtml(item.content) ? <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div> : null :
+
+                  item.fields_changed?.length ?
+                  <div className="activity-timeline-card-body">
+                        {item.fields_changed.map((change, idx) =>
+                    <div key={idx} className="activity-timeline-detail-box">
                             <span className="activity-timeline-detail-label">{formatFieldName(change.field)}:</span>
-                            {change.old_value ? (
-                              <span className="mx-1 line-through text-slate-400">{change.old_value}</span>
-                            ) : (
-                              <span className="mx-1 text-slate-400">empty</span>
-                            )}
+                            {change.old_value ?
+                      <span className="mx-1 line-through text-slate-400">{change.old_value}</span> :
+
+                      <span className="mx-1 text-slate-400">empty</span>
+                      }
                             <span className={getActivityTimelineAccentClass(item.itemType)}>{change.new_value || "empty"}</span>
                           </div>
-                        ))}
-                      </div>
-                    ) : null
-                  )}
+                    )}
+                      </div> :
+                  null
+                  }
                 </div>
-              </div>
-            );
+              </div>);
+
           })}
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
