@@ -34,8 +34,11 @@ import moment from "moment";
 import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 import OrganizationDetailsSection from "@/components/organizations/OrganizationDetailsSection";
 
-function OrgLogo({ logoUrl, name }) {
+function OrgLogo({ logoUrl, name, onSave, disabled = false }) {
   const [imgError, setImgError] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(logoUrl || "");
+  const inputRef = useRef(null);
   const initials = name ? name.charAt(0).toUpperCase() : "?";
   const normalizedLogoUrl = React.useMemo(() => {
     if (!logoUrl) return "";
@@ -47,21 +50,78 @@ function OrgLogo({ logoUrl, name }) {
 
   useEffect(() => {
     setImgError(false);
-  }, [normalizedLogoUrl]);
+    setDraft(logoUrl || "");
+  }, [normalizedLogoUrl, logoUrl]);
+
+  useEffect(() => {
+    if (editing && inputRef.current) inputRef.current.focus();
+  }, [editing]);
+
+  const startEdit = () => {
+    if (disabled) return;
+    setDraft(logoUrl || "");
+    setEditing(true);
+  };
+
+  const commit = () => {
+    setEditing(false);
+    if ((draft || "") !== (logoUrl || "")) onSave?.(draft || null);
+  };
+
+  const cancel = () => {
+    setEditing(false);
+    setDraft(logoUrl || "");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commit();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      cancel();
+    }
+  };
 
   return (
-    <div className="w-10 h-10 rounded-full flex-shrink-0 border border-slate-200 overflow-hidden bg-white flex items-center justify-center p-1">
-      {normalizedLogoUrl && !imgError ? (
-        <img
-          key={normalizedLogoUrl}
-          src={normalizedLogoUrl}
-          alt={name}
-          className="w-full h-full object-contain"
-          referrerPolicy="no-referrer"
-          onError={() => setImgError(true)}
+    <div className="relative flex-shrink-0">
+      {editing ? (
+        <Input
+          ref={inputRef}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={handleKeyDown}
+          placeholder="Paste logo URL"
+          className="h-10 w-56 text-xs"
         />
       ) : (
-        <span className="text-slate-600 text-sm font-bold">{initials}</span>
+        <button
+          type="button"
+          onClick={startEdit}
+          disabled={disabled}
+          title={disabled ? undefined : "Click to edit logo URL"}
+          className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white p-1 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-default"
+        >
+          {normalizedLogoUrl && !imgError ? (
+            <img
+              key={normalizedLogoUrl}
+              src={normalizedLogoUrl}
+              alt={name}
+              className="w-full h-full object-contain"
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <span className="text-slate-600 text-sm font-bold">{initials}</span>
+          )}
+          {!disabled && (
+            <span className="absolute inset-0 flex items-center justify-center bg-slate-900/8 opacity-0 transition-opacity group-hover:opacity-100">
+              <Pencil className="w-3.5 h-3.5 text-slate-700" />
+            </span>
+          )}
+        </button>
       )}
     </div>
   );
