@@ -422,7 +422,12 @@ export default function OrganizationSummary({
       <div className="bg-white px-4 py-5 border-b border-slate-100">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <OrgLogo logoUrl={displayData.logo_url} name={displayData.organization_name} />
+            <OrgLogo
+              logoUrl={displayData.logo_url}
+              name={displayData.organization_name}
+              onSave={(val) => saveField("logo_url", val)}
+              disabled={!isSaved}
+            />
             <div className="flex-1 min-w-0">
               <InlineHeaderText
                 value={displayData.organization_name}
