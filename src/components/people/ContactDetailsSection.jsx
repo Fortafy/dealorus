@@ -7,6 +7,13 @@ import InlineTextDetailField from "@/components/people/InlineTextDetailField";
 import MultiValueInlineField from "@/components/people/MultiValueInlineField";
 import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
+const LINKEDIN_PROFILE_URL_REGEX = /^https:\/\/www\.linkedin\.com\/in\/[^/?#]+\/?$/i;
+
+const formatLinkedInDisplayValue = (value) => {
+  const match = value?.trim().match(/^https:\/\/www\.linkedin\.com\/in\/([^/?#]+)\/?$/i);
+  return match ? match[1] : value;
+};
+
 const normalizeActivityValue = (value) => {
   if (Array.isArray(value)) {
     const cleaned = value.map((item) => item == null ? null : String(item).trim()).filter(Boolean);
@@ -143,7 +150,10 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
               value={contact.linkedin}
               onSave={(value) => saveContact({ linkedin: value })}
               placeholder="Add LinkedIn"
-              isLink />
+              isLink
+              validate={(value) => LINKEDIN_PROFILE_URL_REGEX.test(value)}
+              validationMessage="copy & paste the full linkedin url of the person"
+              displayValueFormatter={formatLinkedInDisplayValue} />
             
             </div>
           </div>

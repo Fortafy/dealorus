@@ -8,10 +8,14 @@ export default function InlineTextDetailField({
   onSave,
   placeholder,
   multiline = false,
-  isLink = false
+  isLink = false,
+  validate,
+  validationMessage,
+  displayValueFormatter
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || "");
+  const [error, setError] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -19,57 +23,81 @@ export default function InlineTextDetailField({
   }, [editing]);
 
   useEffect(() => {
-    if (!editing) setDraft(value || "");
+    if (!editing) {
+      setDraft(value || "");
+      setError("");
+    }
   }, [value, editing]);
 
   const commit = () => {
-    setEditing(false);
     const nextValue = draft.trim() || null;
+
+    if (nextValue && validate && !validate(nextValue)) {
+      setError(validationMessage || "Invalid value");
+      return;
+    }
+
+    setError("");
+    setEditing(false);
     if (nextValue !== (value || null)) onSave(nextValue);
   };
 
   const cancel = () => {
     setEditing(false);
     setDraft(value || "");
+    setError("");
   };
 
   if (editing) {
     if (multiline) {
       return (
-        <Textarea
-          ref={inputRef}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") cancel();
-          }}
-          rows={3}
-          className="min-h-[84px] text-sm placeholder:text-xs" />);
+        <div className="space-y-1">
+          <Textarea
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              if (error) setError("");
+            }}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") cancel();
+            }}
+            rows={3}
+            className="min-h-[84px] text-sm placeholder:text-xs" />
+          {error ? <p className="px-1 text-xs text-red-600">{error}</p> : null}
+        </div>);
 
 
     }
 
     return (
-      <Input
-        ref={inputRef}
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-          }
-          if (e.key === "Escape") cancel();
-        }}
-        className="h-10 text-sm placeholder:text-xs" />);
+      <div className="space-y-1">
+        <Input
+          ref={inputRef}
+          value={draft}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            if (error) setError("");
+          }}
+          onBlur={commit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              commit();
+            }
+            if (e.key === "Escape") cancel();
+          }}
+          className="h-10 text-sm placeholder:text-xs" />
+        {error ? <p className="px-1 text-xs text-red-600">{error}</p> : null}
+      </div>);
 
 
   }
 
   if (value && isLink) {
     const href = value.startsWith("http") ? value : `https://${value}`;
+    const displayValue = displayValueFormatter ? displayValueFormatter(value) : value.replace(/^https?:\/\/(www\.)?/, "");
     return (
       <button
         type="button"
@@ -84,7 +112,7 @@ export default function InlineTextDetailField({
 
           onClick={(e) => e.stopPropagation()}>
           
-          {value.replace(/^https?:\/\/(www\.)?/, "")}
+          {displayValue}
           <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
         </a>
       </button>);
