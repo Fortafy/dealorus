@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp, ExternalLink, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function ContactOrganizationsList({ organizations = [] }) {
   const [isOpen, setIsOpen] = useState(true);
@@ -16,34 +17,40 @@ export default function ContactOrganizationsList({ organizations = [] }) {
       </div>
 
       {isOpen ? (
-        <div className="space-y-3 px-4 py-3">
-          {count === 0 ? (
-            <p className="text-sm text-slate-500">No organizations linked.</p>
-          ) : organizations.map((organization) => (
-            <div key={organization.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-900">{organization.organization_name}</p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    {organization.organization_type ? <Badge variant="secondary">{organization.organization_type}</Badge> : null}
-                    {organization.website ? (
-                      <a href={organization.website.startsWith("http") ? organization.website : `https://${organization.website}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline">
-                        Website
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+        count === 0 ? (
+          <p className="px-4 py-4 text-sm text-slate-500">No organizations linked.</p>
+        ) : (
+          <div className="divide-y divide-slate-200">
+            {organizations.map((organization) => (
+              <Link
+                key={organization.id}
+                to={`/Organizations?id=${organization.id}`}
+                className="block w-full px-4 py-3 transition-colors hover:bg-slate-50"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold text-slate-900">{organization.organization_name}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      {organization.organization_type ? <Badge variant="secondary">{organization.organization_type}</Badge> : null}
+                      {organization.website ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-blue-600">
+                          Website
+                          <ExternalLink className="h-3 w-3" />
+                        </span>
+                      ) : null}
+                    </div>
+                    {organization.city || organization.state ? (
+                      <div className="mt-2 flex items-center gap-1 text-xs text-slate-500">
+                        <MapPin className="h-3 w-3" />
+                        {[organization.city, organization.state].filter(Boolean).join(", ")}
+                      </div>
                     ) : null}
                   </div>
                 </div>
-              </div>
-              {organization.city || organization.state ? (
-                <div className="mt-3 flex items-center gap-1 text-xs text-slate-500">
-                  <MapPin className="h-3 w-3" />
-                  {[organization.city, organization.state].filter(Boolean).join(", ")}
-                </div>
-              ) : null}
-            </div>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )
       ) : null}
     </div>
   );
