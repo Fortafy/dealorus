@@ -8,7 +8,7 @@ export default function InlineTextDetailField({
   onSave,
   placeholder,
   multiline = false,
-  isLink = false,
+  isLink = false
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || "");
@@ -45,9 +45,9 @@ export default function InlineTextDetailField({
             if (e.key === "Escape") cancel();
           }}
           rows={3}
-          className="min-h-[84px] text-sm"
-        />
-      );
+          className="min-h-[84px] text-sm" />);
+
+
     }
 
     return (
@@ -63,9 +63,9 @@ export default function InlineTextDetailField({
           }
           if (e.key === "Escape") cancel();
         }}
-        className="h-10 text-sm"
-      />
-    );
+        className="h-10 text-sm" />);
+
+
   }
 
   if (value && isLink) {
@@ -75,20 +75,20 @@ export default function InlineTextDetailField({
         type="button"
         onClick={() => setEditing(true)}
         className="flex min-h-10 w-full items-center rounded-md px-3 py-2 text-left transition-colors hover:bg-slate-50"
-        title="Click to edit"
-      >
+        title="Click to edit">
+        
         <a
           href={href}
           target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1 break-all text-sm text-blue-600 hover:underline"
-          onClick={(e) => e.stopPropagation()}
-        >
+          rel="noreferrer" className="text-blue-600 text-xs flex items-center gap-1 break-all hover:underline"
+
+          onClick={(e) => e.stopPropagation()}>
+          
           {value.replace(/^https?:\/\/(www\.)?/, "")}
           <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
         </a>
-      </button>
-    );
+      </button>);
+
   }
 
   return (
@@ -96,13 +96,13 @@ export default function InlineTextDetailField({
       type="button"
       onClick={() => setEditing(true)}
       className="min-h-10 w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-slate-50"
-      title="Click to edit"
-    >
-      {value ? (
-        <span className={multiline ? "whitespace-pre-wrap text-slate-800" : "text-slate-800"}>{value}</span>
-      ) : (
-        <span className="text-slate-400">{placeholder}</span>
-      )}
-    </button>
-  );
+      title="Click to edit">
+      
+      {value ?
+      <span className="text-slate-800 text-xs">{value}</span> :
+
+      <span className="text-slate-400">{placeholder}</span>
+      }
+    </button>);
+
 }
