@@ -14,28 +14,9 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const clientId = user?.data?.client_id;
-    if (!clientId) {
-      return Response.json({ success: false, error: 'Client not found for user' }, { status: 400 });
-    }
+    await req.json().catch(() => ({}));
 
-    const payload = await req.json().catch(() => ({}));
-    let apiKey = payload?.api_key?.trim();
-
-    if (!apiKey) {
-      const integrations = await base44.asServiceRole.entities.ClientIntegration.filter(
-        { client_id: clientId, integration_type: 'ProPublica', is_active: true },
-        '-updated_date',
-        1,
-      );
-      apiKey = integrations?.[0]?.api_key;
-    }
-
-    const headers = apiKey ? { 'X-API-Key': apiKey } : undefined;
-
-    const response = await fetch('https://projects.propublica.org/nonprofits/api/v2/search.json?q=american%20red%20cross', {
-      headers,
-    });
+    const response = await fetch('https://projects.propublica.org/nonprofits/api/v2/search.json?q=american%20red%20cross');
 
     if (!response.ok) {
       const errorText = await response.text();
