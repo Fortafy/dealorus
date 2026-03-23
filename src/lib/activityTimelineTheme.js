@@ -30,9 +30,8 @@ export function getActivityTimelineAppearance(type) {
   return ACTIVITY_TIMELINE_APPEARANCE[type] || ACTIVITY_TIMELINE_APPEARANCE.default;
 }
 
-export function getActivityTimelineNodeClass(type) {
-  const appearance = getActivityTimelineAppearance(type);
-  return `activity-timeline-node activity-timeline-node--${appearance.tone}`;
+export function getActivityTimelineNodeClass() {
+  return "activity-timeline-node";
 }
 
 export function getActivityTimelineIconClass(type) {

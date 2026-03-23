@@ -237,47 +237,47 @@
   }
 
   .activity-timeline-icon {
-    @apply h-3.5 w-3.5;
+    @apply h-3.5 w-3.5 shrink-0 stroke-current;
   }
 
-  .activity-timeline-node--note,
+  .activity-timeline-node > .activity-timeline-icon--note,
   .activity-timeline-icon--note {
-    @apply text-amber-600;
+    @apply !text-amber-600;
   }
 
-  .activity-timeline-node--success,
+  .activity-timeline-node > .activity-timeline-icon--success,
   .activity-timeline-icon--success {
-    @apply text-green-600;
+    @apply !text-green-600;
   }
 
-  .activity-timeline-node--edit,
+  .activity-timeline-node > .activity-timeline-icon--edit,
   .activity-timeline-icon--edit {
-    @apply text-sky-600;
+    @apply !text-sky-600;
   }
 
-  .activity-timeline-node--enrich,
+  .activity-timeline-node > .activity-timeline-icon--enrich,
   .activity-timeline-icon--enrich {
-    @apply text-indigo-600;
+    @apply !text-indigo-600;
   }
 
-  .activity-timeline-node--deal,
+  .activity-timeline-node > .activity-timeline-icon--deal,
   .activity-timeline-icon--deal {
-    @apply text-emerald-600;
+    @apply !text-emerald-600;
   }
 
-  .activity-timeline-node--call,
+  .activity-timeline-node > .activity-timeline-icon--call,
   .activity-timeline-icon--call {
-    @apply text-violet-600;
+    @apply !text-violet-600;
   }
 
-  .activity-timeline-node--email,
+  .activity-timeline-node > .activity-timeline-icon--email,
   .activity-timeline-icon--email {
-    @apply text-blue-600;
+    @apply !text-blue-600;
   }
 
-  .activity-timeline-node--meeting,
+  .activity-timeline-node > .activity-timeline-icon--meeting,
   .activity-timeline-icon--meeting {
-    @apply text-rose-600;
+    @apply !text-rose-600;
   }
 
   .activity-timeline-card {
