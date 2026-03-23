@@ -1,7 +1,7 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { AlertCircle, CheckCircle, Edit, MessageSquare, Sparkles, Star } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -49,6 +49,14 @@ const formatFieldName = (field) => field
   .join(" ");
 
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
+const toSafeDate = (value) => {
+  const date = value ? new Date(value) : null;
+  return date && isValid(date) ? date : null;
+};
+const formatTimestamp = (value) => {
+  const date = toSafeDate(value);
+  return date ? format(date, "MMM d, yyyy 'at' h:mm a") : "Date unavailable";
+};
 
 export default function ActivityFeed({ contactId }) {
   const { data: items = [], isLoading, error } = useQuery({
@@ -63,14 +71,18 @@ export default function ActivityFeed({ contactId }) {
         ...activities.map((activity) => ({
           ...activity,
           itemType: activity.action || "edit",
-          timestamp: activity.created_date
+          timestamp: activity.created_date || activity.updated_date || null
         })),
         ...notes.map((note) => ({
           ...note,
           itemType: "note",
-          timestamp: note.created_date
+          timestamp: note.created_date || note.updated_date || null
         }))
-      ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      ].sort((a, b) => {
+        const first = toSafeDate(a.timestamp)?.getTime() || 0;
+        const second = toSafeDate(b.timestamp)?.getTime() || 0;
+        return second - first;
+      });
     }
   });
 
@@ -122,7 +134,7 @@ export default function ActivityFeed({ contactId }) {
                   <div className="mb-1 flex items-start justify-between gap-3">
                     <p className="text-sm font-medium text-slate-900">{config.label}</p>
                     <span className="flex-shrink-0 text-xs text-slate-400">
-                      {format(new Date(item.timestamp), "MMM d, yyyy 'at' h:mm a")}
+                      {formatTimestamp(item.timestamp)}
                     </span>
                   </div>
 
