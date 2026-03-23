@@ -55,12 +55,6 @@ const buildFieldsChanged = (oldData = {}, newData = {}, changedFields = []) => {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const payload = await req.json();
 
     if (payload?.event?.type === 'update' && payload?.event?.entity_name === 'Contact') {
@@ -84,8 +78,14 @@ Deno.serve(async (req) => {
         activityData.organization_id = contact.organization_id;
       }
 
-      const activity = await base44.entities.Activity.create(activityData);
+      const activity = await base44.asServiceRole.entities.Activity.create(activityData);
       return Response.json({ success: true, activity });
+    }
+
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const {
