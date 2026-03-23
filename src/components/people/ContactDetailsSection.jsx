@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,7 +9,6 @@ import ContactOrganizationsList from "@/components/people/ContactOrganizationsLi
 export default function ContactDetailsSection({ contact, organizations = [], onSaved }) {
   const [isOpen, setIsOpen] = useState(true);
 
-  useEffect(() => {}, [contact]);
 
   const saveField = async (field, value) => {
     const updatedContact = {
