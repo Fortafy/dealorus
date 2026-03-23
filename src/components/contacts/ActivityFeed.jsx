@@ -132,7 +132,7 @@ export default function ActivityFeed({ contactId }) {
 
                 <div className="min-w-0 flex-1 rounded-lg border border-slate-100 bg-white px-3 py-2.5 shadow-sm transition-shadow hover:shadow-md">
                   <div className="mb-1 flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium text-slate-900">{config.label}</p>
+                    <p className="text-sm font-medium text-slate-900">{item.itemType === "note" ? item.title : config.label}</p>
                     <span className="flex-shrink-0 text-xs text-slate-400">
                       {formatTimestamp(item.timestamp)}
                     </span>
@@ -140,9 +140,8 @@ export default function ActivityFeed({ contactId }) {
 
                   {item.itemType === "note" ?
                   <>
-                      <p className="text-sm font-medium text-slate-800">{item.title}</p>
                       {stripHtml(item.content) ?
-                    <p className="mt-1 text-sm text-slate-600">{stripHtml(item.content)}</p> :
+                    <div className="mt-2 rounded-md bg-slate-50 px-2.5 py-2 text-xs text-slate-600">{stripHtml(item.content)}</div> :
                     null}
                     </> :
 
