@@ -14,7 +14,6 @@ export default function DealEditorDialog({
   lifecycleStages = [],
   onSaved,
 }) {
-  const isEdit = !!deal;
   const resolvedClientId = clientId || organization?.client_id || deal?.client_id || null;
   const resolvedOrganizations = organization ? undefined : organizations;
 

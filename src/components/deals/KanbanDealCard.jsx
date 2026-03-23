@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, Building2, CalendarDays } from "lucide-react";
@@ -17,8 +17,6 @@ const CONTRACT_TYPES = [
 export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUpdate }) {
   const [showEdit, setShowEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
-  const queryClient = useQueryClient();
-
 
   const deleteMutation = useMutation({
     mutationFn: () => base44.entities.Deal.delete(deal.id),
