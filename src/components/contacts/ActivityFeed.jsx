@@ -43,10 +43,10 @@ const ITEM_CONFIG = {
   }
 };
 
-const formatFieldName = (field) => field
-  .split("_")
-  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-  .join(" ");
+const formatFieldName = (field) => field.
+split("_").
+map((part) => part.charAt(0).toUpperCase() + part.slice(1)).
+join(" ");
 
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 const toSafeDate = (value) => {
@@ -63,22 +63,22 @@ export default function ActivityFeed({ contactId }) {
     queryKey: ["activities", contactId],
     queryFn: async () => {
       const [activities, notes] = await Promise.all([
-        base44.entities.Activity.filter({ contact_id: contactId }),
-        base44.entities.Note.filter({ contact_id: contactId })
-      ]);
+      base44.entities.Activity.filter({ contact_id: contactId }),
+      base44.entities.Note.filter({ contact_id: contactId })]
+      );
 
       return [
-        ...activities.map((activity) => ({
-          ...activity,
-          itemType: activity.action || "edit",
-          timestamp: activity.created_date || activity.updated_date || null
-        })),
-        ...notes.map((note) => ({
-          ...note,
-          itemType: "note",
-          timestamp: note.created_date || note.updated_date || null
-        }))
-      ].sort((a, b) => {
+      ...activities.map((activity) => ({
+        ...activity,
+        itemType: activity.action || "edit",
+        timestamp: activity.created_date || activity.updated_date || null
+      })),
+      ...notes.map((note) => ({
+        ...note,
+        itemType: "note",
+        timestamp: note.created_date || note.updated_date || null
+      }))].
+      sort((a, b) => {
         const first = toSafeDate(a.timestamp)?.getTime() || 0;
         const second = toSafeDate(b.timestamp)?.getTime() || 0;
         return second - first;
@@ -93,8 +93,8 @@ export default function ActivityFeed({ contactId }) {
           <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
           <p className="text-sm text-slate-500">Loading activity history...</p>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (error) {
@@ -102,16 +102,16 @@ export default function ActivityFeed({ contactId }) {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>Failed to load activity history</AlertDescription>
-      </Alert>
-    );
+      </Alert>);
+
   }
 
   if (items.length === 0) {
     return (
       <div className="py-8 text-center">
         <p className="text-sm text-slate-500">No activity recorded yet</p>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -138,40 +138,40 @@ export default function ActivityFeed({ contactId }) {
                     </span>
                   </div>
 
-                  {item.itemType === "note" ? (
-                    <>
+                  {item.itemType === "note" ?
+                  <>
                       <p className="text-sm font-medium text-slate-800">{item.title}</p>
-                      {stripHtml(item.content) ? (
-                        <p className="mt-1 text-sm text-slate-600">{stripHtml(item.content)}</p>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm text-slate-600">{item.description}</p>
+                      {stripHtml(item.content) ?
+                    <p className="mt-1 text-sm text-slate-600">{stripHtml(item.content)}</p> :
+                    null}
+                    </> :
 
-                      {item.fields_changed && item.fields_changed.length > 0 ? (
-                        <div className="mt-2 space-y-1.5">
-                          {item.fields_changed.map((change, idx) => (
-                            <div key={idx} className="rounded-md bg-slate-50 px-2.5 py-2 text-xs text-slate-600">
+                  <>
+                      
+
+                      {item.fields_changed && item.fields_changed.length > 0 ?
+                    <div className="mt-2 space-y-1.5">
+                          {item.fields_changed.map((change, idx) =>
+                      <div key={idx} className="rounded-md bg-slate-50 px-2.5 py-2 text-xs text-slate-600">
                               <span className="font-medium text-slate-700">{formatFieldName(change.field)}:</span>
-                              {change.old_value ? (
-                                <span className="mx-1 line-through text-slate-400">{change.old_value}</span>
-                              ) : (
-                                <span className="mx-1 text-slate-400">empty</span>
-                              )}
+                              {change.old_value ?
+                        <span className="mx-1 line-through text-slate-400">{change.old_value}</span> :
+
+                        <span className="mx-1 text-slate-400">empty</span>
+                        }
                               <span className={config.accentColor}>{change.new_value || "empty"}</span>
                             </div>
-                          ))}
-                        </div>
-                      ) : null}
+                      )}
+                        </div> :
+                    null}
                     </>
-                  )}
+                  }
                 </div>
-              </div>
-            );
+              </div>);
+
           })}
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
