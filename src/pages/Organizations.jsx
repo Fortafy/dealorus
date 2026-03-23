@@ -268,8 +268,7 @@ export default function Organizations() {
             </Link>
             <Button
               onClick={() => setShowNewAccountDialog(true)}
-              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
-              className="hover:opacity-90 h-8 text-xs px-3"
+              className="h-8 text-xs px-3"
             >
               <Plus className="w-3.5 h-3.5 mr-1.5" /> New Account
             </Button>

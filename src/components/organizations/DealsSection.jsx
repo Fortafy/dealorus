@@ -136,7 +136,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
               <span className="text-xs font-semibold text-slate-700">Deals ({deals.length})</span>
               {isOpen ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
             </CollapsibleTrigger>
-            <Button size="sm" onClick={openCreate} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90 h-6 px-2 text-xs">
+            <Button size="sm" onClick={openCreate} className="h-6 px-2 text-xs">
               <Plus className="w-2.5 h-2.5 mr-1" />
               New Deal
             </Button>

@@ -188,8 +188,6 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
           <Button
             disabled={!canSubmit || isChecking || isSaving}
             onClick={() => handleSave(false)}
-            style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-            className="text-white hover:opacity-90"
           >
             {isChecking ? "Checking..." : isSaving ? "Saving..." : "Save Organization"}
           </Button>
@@ -336,7 +334,7 @@ function SearchAddTab({ clientId, userId, onSaved, onClose }) {
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
               <p className="text-slate-700 mb-4">No results found in ProPublica. Try searching via AI.</p>
               <div className="flex gap-3 justify-center">
-                <Button onClick={handleLLMSearch} disabled={isLLMSearching} style={{ backgroundColor: "hsl(217, 91%, 60%)", color: "white" }} className="hover:opacity-90">
+                <Button onClick={handleLLMSearch} disabled={isLLMSearching}>
                   {isLLMSearching ? "Searching..." : "Search via AI"}
                 </Button>
                 <Button variant="outline" onClick={() => { setSearchResult(null); setLastSearchParams(null); }}>
