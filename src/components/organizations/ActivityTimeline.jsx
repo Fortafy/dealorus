@@ -6,6 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import ActivityRecordModifiedCard from "@/components/activity/ActivityRecordModifiedCard";
 import DealDialog from "@/components/deals/DealDialog";
 import NoteDialog from "@/components/notes/NoteDialog";
 import { MoreHorizontal, Pencil, SlidersHorizontal, Trash2, X } from "lucide-react";
