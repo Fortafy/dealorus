@@ -43,7 +43,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
       {isOpen ?
       <div className="px-4 py-2">
           <div className="divide-y divide-slate-100">
-            <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)] md:gap-6">
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Email addresses</div>
               <MultiValueInlineField
               values={emailValues}
@@ -52,7 +52,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             
             </div>
 
-            <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)] md:gap-6">
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Phone numbers</div>
               <MultiValueInlineField
               values={phoneValues}
@@ -61,7 +61,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             
             </div>
 
-            <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)] md:gap-6">
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Description</div>
               <InlineTextDetailField
               value={contact.description}
@@ -71,7 +71,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             
             </div>
 
-            <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)] md:gap-6">
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Department</div>
               <InlineTextDetailField
               value={contact.role_department}
@@ -80,7 +80,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             
             </div>
 
-            <div className="grid gap-2 md:grid-cols-[160px_minmax(0,1fr)] md:gap-6">
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">LinkedIn</div>
               <InlineTextDetailField
               value={contact.linkedin}

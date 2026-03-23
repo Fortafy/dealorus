@@ -90,7 +90,7 @@ export default function MultiValueInlineField({ values, onSave, placeholder }) {
             }
           }}
           placeholder={placeholder}
-          className="min-w-[180px] flex-1 border-0 bg-transparent p-0 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
+          className="min-w-[180px] flex-1 border-0 bg-transparent p-0 text-sm text-slate-800 outline-none placeholder:text-slate-400 placeholder:text-xs" />
         
       </div>);
 
@@ -110,7 +110,7 @@ export default function MultiValueInlineField({ values, onSave, placeholder }) {
           </span>
       ) :
 
-      <span className="text-sm text-slate-400">{placeholder}</span>
+      <span className="text-xs text-slate-400">{placeholder}</span>
       }
     </button>);
 

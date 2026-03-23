@@ -45,7 +45,7 @@ export default function InlineTextDetailField({
             if (e.key === "Escape") cancel();
           }}
           rows={3}
-          className="min-h-[84px] text-sm" />);
+          className="min-h-[84px] text-sm placeholder:text-xs" />);
 
 
     }
@@ -63,7 +63,7 @@ export default function InlineTextDetailField({
           }
           if (e.key === "Escape") cancel();
         }}
-        className="h-10 text-sm" />);
+        className="h-10 text-sm placeholder:text-xs" />);
 
 
   }
@@ -101,7 +101,7 @@ export default function InlineTextDetailField({
       {value ?
       <span className="text-slate-800 text-xs">{value}</span> :
 
-      <span className="text-slate-400">{placeholder}</span>
+      <span className="text-slate-400 text-xs">{placeholder}</span>
       }
     </button>);
 
