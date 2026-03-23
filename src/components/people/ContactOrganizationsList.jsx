@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, ExternalLink, MapPin } from "lucide-react";
 
 export default function ContactOrganizationsList({ organization }) {
@@ -10,12 +9,10 @@ export default function ContactOrganizationsList({ organization }) {
   return (
     <div className="border-b border-slate-200 overflow-hidden">
       <div className="bg-slate-50 border-b border-slate-200 px-4 py-2.5">
-        <CollapsibleTrigger asChild onClick={() => setIsOpen((current) => !current)}>
-          <button className="flex w-full items-center justify-between text-left hover:opacity-80 transition-opacity">
-            <span className="text-sm font-semibold text-slate-700">Organizations ({count})</span>
-            {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
-          </button>
-        </CollapsibleTrigger>
+        <button onClick={() => setIsOpen((current) => !current)} className="flex w-full items-center justify-between text-left hover:opacity-80 transition-opacity">
+          <span className="text-sm font-semibold text-slate-700">Organizations ({count})</span>
+          {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+        </button>
       </div>
 
       {isOpen && (

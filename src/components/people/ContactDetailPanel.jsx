@@ -2,17 +2,33 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Users, ChevronRight, ExternalLink, Star, Pencil, X } from "lucide-react";
+import { Users, ChevronRight, StickyNote, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import ContactHeaderSummary from "@/components/people/ContactHeaderSummary";
+import ContactDetailsSection from "@/components/people/ContactDetailsSection";
+import ContactOrganizationsList from "@/components/people/ContactOrganizationsList";
+import ContactActivityTimelineSection from "@/components/people/ContactActivityTimelineSection";
+import ContactQuickAddNoteDialog from "@/components/people/ContactQuickAddNoteDialog";
+import DealsSection from "@/components/organizations/DealsSection";
+import EnrichContactDialog from "@/components/contacts/EnrichContactDialog";
 
 export default function ContactDetailPanel({ contactId, onClose }) {
   const queryClient = useQueryClient();
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(null);
+  const [showEnrichDialog, setShowEnrichDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showNoteDialog, setShowNoteDialog] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [triggerDeal, setTriggerDeal] = useState(0);
 
   const { data: contact, isLoading } = useQuery({
     queryKey: ["contact-detail", contactId],
@@ -32,24 +48,52 @@ export default function ContactDetailPanel({ contactId, onClose }) {
     },
   });
 
-  const startEdit = () => {
-    setForm({ ...contact });
-    setEditing(true);
-  };
+  const { data: currentUser } = useQuery({
+    queryKey: ["current-user-for-contact-panel"],
+    queryFn: async () => {
+      try {
+        return await base44.auth.me();
+      } catch {
+        return null;
+      }
+    },
+  });
 
-  const handleSave = async () => {
-    await base44.entities.Contact.update(contactId, { ...form, last_modified: new Date().toISOString() });
+  const clientId = currentUser?.client_id || currentUser?.data?.client_id;
+
+  const { data: clientData } = useQuery({
+    queryKey: ["client-for-contact-panel", clientId],
+    enabled: !!clientId,
+    queryFn: async () => {
+      const results = await base44.entities.Client.filter({ id: clientId });
+      return results[0] || null;
+    },
+  });
+
+  const refreshContact = () => {
     queryClient.invalidateQueries({ queryKey: ["contact-detail", contactId] });
     queryClient.invalidateQueries({ queryKey: ["people"] });
-    setEditing(false);
+    queryClient.invalidateQueries({ queryKey: ["activities", contactId] });
   };
 
-  const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const handleDelete = async () => {
+    await base44.entities.Contact.delete(contactId);
+    queryClient.invalidateQueries({ queryKey: ["people"] });
+    onClose();
+  };
+
+  const handleSyncToCRM = async () => {
+    if (!organization) return;
+    setIsSyncing(true);
+    await base44.functions.invoke("pushToSalesforce", { organization_id: organization.id });
+    queryClient.invalidateQueries({ queryKey: ["org-for-contact", contact.organization_id] });
+    setIsSyncing(false);
+  };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-7 h-7 border-2 border-slate-200 border-t-blue-500 rounded-full animate-spin" />
+      <div className="flex h-full items-center justify-center">
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
       </div>
     );
   }
@@ -61,120 +105,92 @@ export default function ContactDetailPanel({ contactId, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col h-full overflow-hidden"
+      className="flex h-full flex-col overflow-hidden"
     >
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-100 flex-shrink-0 text-sm text-slate-500">
-        <button onClick={onClose} className="flex items-center gap-1.5 hover:text-slate-800 transition-colors">
-          <Users className="w-3.5 h-3.5" />
+      <div className="flex flex-shrink-0 items-center gap-1.5 border-b border-slate-100 px-4 py-2 text-sm text-slate-500">
+        <button onClick={onClose} className="flex items-center gap-1.5 transition-colors hover:text-slate-800">
+          <Users className="h-3.5 w-3.5" />
           <span>People</span>
         </button>
-        <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-        <span className="text-slate-800 font-medium truncate">{contact.name}</span>
+        <ChevronRight className="h-3.5 w-3.5 text-slate-300" />
+        <span className="truncate font-medium text-slate-800">{contact.name}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5">
-        {/* Header card */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg flex-shrink-0">
-              {contact.name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                {contact.name}
-                {contact.starred && <Star className="w-4 h-4 text-amber-400 fill-amber-400" />}
-              </h2>
-              {contact.title && <p className="text-sm text-slate-500">{contact.title}</p>}
-              {organization && (
-                <p className="text-xs text-blue-600">{organization.organization_name}</p>
-              )}
-            </div>
-          </div>
-          <Button size="sm" variant="outline" className="gap-1.5 h-7 text-xs" onClick={startEdit}>
-            <Pencil className="w-3 h-3" /> Edit
-          </Button>
-        </div>
+      <div className="flex-1 overflow-y-auto bg-white p-5">
+        <div className="grid h-full grid-cols-1 gap-5 xl:grid-cols-2">
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <ContactHeaderSummary
+              contact={contact}
+              organization={organization}
+              onEnrich={() => setShowEnrichDialog(true)}
+              onSync={handleSyncToCRM}
+              onDelete={() => setShowDeleteConfirm(true)}
+              isSyncing={isSyncing}
+            />
 
-        {editing && form ? (
-          <div className="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Editing Contact</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs">Name</Label>
-                <Input className="h-8 text-sm" value={form.name || ""} onChange={e => update("name", e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">Title</Label>
-                <Input className="h-8 text-sm" value={form.title || ""} onChange={e => update("title", e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">Email</Label>
-                <Input className="h-8 text-sm" value={form.email || ""} onChange={e => update("email", e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">Phone</Label>
-                <Input className="h-8 text-sm" value={form.phone || ""} onChange={e => update("phone", e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">LinkedIn</Label>
-                <Input className="h-8 text-sm" value={form.linkedin || ""} onChange={e => update("linkedin", e.target.value)} />
-              </div>
-              <div>
-                <Label className="text-xs">Department</Label>
-                <Input className="h-8 text-sm" value={form.role_department || ""} onChange={e => update("role_department", e.target.value)} />
-              </div>
-              <div className="col-span-2">
-                <Label className="text-xs">Notes</Label>
-                <Textarea value={form.notes || ""} onChange={e => update("notes", e.target.value)} rows={3} className="text-sm" />
-              </div>
+            <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-3">
+              <span className="mr-1 text-xs font-medium uppercase tracking-wide text-slate-400">Quick Add</span>
+              <Button size="sm" variant="outline" className="h-6 gap-1 px-2 text-xs" onClick={() => setShowNoteDialog(true)} disabled={!organization || !clientId}>
+                <StickyNote className="h-3 w-3" />Note
+              </Button>
+              <Button size="sm" variant="outline" className="h-6 gap-1 px-2 text-xs" onClick={() => setTriggerDeal((current) => current + 1)} disabled={!organization || !clientId}>
+                <Handshake className="h-3 w-3" />Deal
+              </Button>
             </div>
-            <div className="flex gap-2 justify-end">
-              <Button size="sm" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
-              <Button size="sm" onClick={handleSave} style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}>Save</Button>
-            </div>
+
+            <ContactActivityTimelineSection contactId={contactId} />
           </div>
-        ) : (
-          <div className="space-y-3">
-            <InfoRow label="Email" value={contact.email} isEmail />
-            <InfoRow label="Phone" value={contact.phone} />
-            <InfoRow label="Department" value={contact.role_department} />
-            <InfoRow label="LinkedIn" value={contact.linkedin} isLink />
-            <InfoRow label="Organization" value={organization?.organization_name} />
-            <InfoRow label="Primary Contact" value={contact.is_primary_contact ? "Yes" : "No"} />
-            <InfoRow label="Business Contact" value={contact.is_business_contact ? "Yes" : "No"} />
-            {contact.notes && (
-              <div className="pt-2 border-t border-slate-100">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Notes</p>
-                <p className="text-sm text-slate-600 whitespace-pre-wrap">{contact.notes}</p>
-              </div>
+
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <ContactDetailsSection contact={contact} onSaved={refreshContact} />
+            <ContactOrganizationsList organization={organization} />
+            {organization ? (
+              <DealsSection
+                organization={organization}
+                clientId={clientId}
+                clientLifecycleStages={clientData?.lifecycle_stages || []}
+                externalOpenCreate={triggerDeal}
+              />
+            ) : (
+              <div className="px-4 py-4 text-sm text-slate-500">No linked organization, so there are no related deals to show.</div>
             )}
-            <div className="pt-2 border-t border-slate-100 text-xs text-slate-400">
-              Created {contact.created_date ? format(new Date(contact.created_date), "MMM d, yyyy") : "—"}
-              {contact.created_by && ` · by ${contact.created_by.split("@")[0]}`}
-            </div>
           </div>
-        )}
+        </div>
       </div>
-    </motion.div>
-  );
-}
 
-function InfoRow({ label, value, isEmail, isLink }) {
-  if (!value) return null;
-  return (
-    <div className="flex items-start gap-3 py-1.5 border-b border-slate-50 last:border-0">
-      <span className="text-xs font-medium text-slate-400 w-32 flex-shrink-0 pt-0.5">{label}</span>
-      {isEmail ? (
-        <a href={`mailto:${value}`} className="text-sm text-blue-600 hover:underline">{value}</a>
-      ) : isLink ? (
-        <a href={value} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-          {value.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]}
-          <ExternalLink className="w-3 h-3" />
-        </a>
-      ) : (
-        <span className="text-sm text-slate-700">{value}</span>
-      )}
-    </div>
+      {organization && clientId ? (
+        <ContactQuickAddNoteDialog
+          open={showNoteDialog}
+          onOpenChange={setShowNoteDialog}
+          organization={organization}
+          clientId={clientId}
+        />
+      ) : null}
+
+      <EnrichContactDialog
+        open={showEnrichDialog}
+        onOpenChange={setShowEnrichDialog}
+        contact={contact}
+        organization={organization || { organization_name: "", city: "", state: "", website: "" }}
+        onSave={() => refreshContact()}
+      />
+
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete <strong>{contact.name}</strong>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Delete Contact
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </motion.div>
   );
 }

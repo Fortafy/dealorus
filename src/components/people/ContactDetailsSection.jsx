@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,15 +33,10 @@ export default function ContactDetailsSection({ contact, onSaved }) {
     <div className="border-b border-slate-200 overflow-hidden">
       <div className="bg-slate-50 border-b border-slate-200 px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <CollapsibleTrigger
-            asChild
-            onClick={() => setIsOpen((current) => !current)}
-          >
-            <button className="flex flex-1 items-center justify-between text-left hover:opacity-80 transition-opacity">
-              <span className="text-sm font-semibold text-slate-700">Contact Details</span>
-              {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
-            </button>
-          </CollapsibleTrigger>
+          <button onClick={() => setIsOpen((current) => !current)} className="flex flex-1 items-center justify-between text-left hover:opacity-80 transition-opacity">
+            <span className="text-sm font-semibold text-slate-700">Contact Details</span>
+            {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+          </button>
           {!editing ? (
             <Button size="sm" variant="outline" className="h-6 px-2 text-xs gap-1" onClick={() => setEditing(true)}>
               <Pencil className="h-3 w-3" />Edit
