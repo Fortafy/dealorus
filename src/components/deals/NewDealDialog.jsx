@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import DealDialog from "@/components/deals/DealDialog";
 
-export default function NewDealDialog({ open, onOpenChange, currentUser, organizations = [], lifecycleStages = [], onSaved }) {
+export default function NewDealDialog({ open, onOpenChange, currentUser, clientId, organizations = [], lifecycleStages = [], onSaved }) {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Deal.create(data),
     onSuccess: () => {
@@ -15,10 +15,11 @@ export default function NewDealDialog({ open, onOpenChange, currentUser, organiz
   });
 
   const handleSubmit = (payload) => {
+    const resolvedClientId = clientId || currentUser?.data?.client_id || currentUser?.client_id;
     const org = organizations.find(o => o.id === payload.organization_id);
     createMutation.mutate({
       ...payload,
-      client_id: currentUser?.client_id,
+      client_id: resolvedClientId,
       organization_name: org?.organization_name || "",
       is_active: true,
     });
@@ -33,6 +34,7 @@ export default function NewDealDialog({ open, onOpenChange, currentUser, organiz
       organizations={organizations}
       onSubmit={handleSubmit}
       isPending={createMutation.isPending}
+      clientId={clientId || currentUser?.data?.client_id || currentUser?.client_id}
     />
   );
 }

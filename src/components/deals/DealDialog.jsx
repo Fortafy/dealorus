@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,9 +106,24 @@ function ReminderPickerField({ value, onChange }) {
  *  - onSubmit: (formPayload, dealId?) => void  — called with the built payload
  *  - isPending: boolean
  */
-export default function DealDialog({ open, onOpenChange, deal, lifecycleStages = [], organizations, onSubmit, isPending }) {
+export default function DealDialog({ open, onOpenChange, deal, lifecycleStages = [], organizations, onSubmit, isPending, clientId }) {
   const isEdit = !!deal;
   const [form, setForm] = useState(emptyForm());
+  const resolvedClientId = clientId || deal?.client_id || null;
+
+  const { data: fallbackClient, isLoading: isLoadingFallbackStages } = useQuery({
+    queryKey: ["deal-dialog-client-stages", resolvedClientId],
+    enabled: open && !!resolvedClientId && lifecycleStages.length === 0,
+    queryFn: async () => {
+      const results = await base44.entities.Client.filter({ id: resolvedClientId });
+      return results[0] || null;
+    }
+  });
+
+  const stageOptions = React.useMemo(() => {
+    const stages = lifecycleStages.length ? lifecycleStages : fallbackClient?.lifecycle_stages || [];
+    return [...stages].sort((a, b) => a.order - b.order);
+  }, [lifecycleStages, fallbackClient]);
 
   useEffect(() => {
     if (open) {
@@ -186,8 +203,8 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
             <div>
               <label className="text-xs text-slate-500 mb-1 block">Stage *</label>
               <select value={form.stage} onChange={(e) => setField("stage", e.target.value)} className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md bg-white">
-                <option value="">Select stage...</option>
-                {lifecycleStages.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                <option value="">{isLoadingFallbackStages ? "Loading stages..." : "Select stage..."}</option>
+                {stageOptions.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
 

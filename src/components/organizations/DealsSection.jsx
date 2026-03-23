@@ -163,6 +163,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         lifecycleStages={clientLifecycleStages}
         onSubmit={handleSubmit}
         isPending={isPending}
+        clientId={clientId}
       />
 
       {/* Delete Confirmation */}

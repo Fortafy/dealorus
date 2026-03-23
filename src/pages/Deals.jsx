@@ -15,6 +15,7 @@ import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
   const { user: currentUser } = useAuth();
+  const clientId = currentUser?.data?.client_id || currentUser?.client_id;
   const [showNewDeal, setShowNewDeal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -25,22 +26,22 @@ export default function Deals() {
   const queryClient = useQueryClient();
 
   const { data: deals = [], isLoading } = useQuery({
-    queryKey: ["deals-board", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Deal.filter({ client_id: currentUser.client_id }, "-created_date")
+    queryKey: ["deals-board", clientId],
+    enabled: !!clientId,
+    queryFn: () => base44.entities.Deal.filter({ client_id: clientId }, "-created_date")
   });
 
   const { data: organizations = [] } = useQuery({
-    queryKey: ["organizations-list", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "organization_name")
+    queryKey: ["organizations-list", clientId],
+    enabled: !!clientId,
+    queryFn: () => base44.entities.Organization.filter({ client_id: clientId }, "organization_name")
   });
 
   const { data: clientRecord, isLoading: isClientLoading } = useQuery({
-    queryKey: ["client", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
+    queryKey: ["client", clientId],
+    enabled: !!clientId,
     queryFn: async () => {
-      const results = await base44.entities.Client.filter({ id: currentUser.client_id });
+      const results = await base44.entities.Client.filter({ id: clientId });
       return results[0] || null;
     }
   });
@@ -303,6 +304,7 @@ export default function Deals() {
         open={showNewDeal}
         onOpenChange={setShowNewDeal}
         currentUser={currentUser}
+        clientId={clientId}
         organizations={organizations}
         lifecycleStages={sortedStages}
         onSaved={() => {
