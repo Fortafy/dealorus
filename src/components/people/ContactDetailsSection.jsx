@@ -6,6 +6,22 @@ import ContactOrganizationsList from "@/components/people/ContactOrganizationsLi
 import InlineTextDetailField from "@/components/people/InlineTextDetailField";
 import MultiValueInlineField from "@/components/people/MultiValueInlineField";
 
+const normalizeActivityValue = (value) => {
+  if (Array.isArray(value)) {
+    const cleaned = value.map((item) => item == null ? null : String(item).trim()).filter(Boolean);
+    return cleaned.length ? cleaned.join(", ") : null;
+  }
+
+  if (value == null) return null;
+  const normalized = typeof value === "string" ? value.trim() : String(value);
+  return normalized || null;
+};
+
+const formatFieldLabel = (field) => field
+  .split("_")
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
+
 export default function ContactDetailsSection({ contact, organizations = [], onSaved }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -18,6 +34,14 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
   contact.phone ? [contact.phone] : [];
 
   const saveContact = async (updates) => {
+    const fieldsChanged = Object.entries(updates)
+      .map(([field, newValue]) => ({
+        field,
+        old_value: normalizeActivityValue(contact[field]),
+        new_value: normalizeActivityValue(newValue)
+      }))
+      .filter((change) => change.old_value !== change.new_value);
+
     const updatedContact = {
       ...contact,
       ...updates,
@@ -25,6 +49,20 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
     };
 
     await base44.entities.Contact.update(contact.id, updatedContact);
+
+    if (fieldsChanged.length > 0) {
+      await base44.entities.Activity.create({
+        client_id: contact.client_id,
+        organization_id: contact.organization_id,
+        contact_id: contact.id,
+        action: "edit",
+        description: fieldsChanged
+          .map((change) => `${formatFieldLabel(change.field)}: ${change.old_value ?? "empty"} → ${change.new_value ?? "empty"}`)
+          .join(" • "),
+        fields_changed: fieldsChanged
+      });
+    }
+
     onSaved(updatedContact);
   };
 
