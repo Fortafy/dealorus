@@ -21,7 +21,7 @@ const formatFieldLabel = (field) => field
   .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
   .join(" ");
 
-export default function ContactDetailsSection({ contact, organizations = [], onSaved }) {
+export default function ContactDetailsSection({ contact, organizations = [], onSaved, onOrganizationSaved }) {
   const [isOpen, setIsOpen] = useState(true);
 
   const emailValues = Array.isArray(contact.email_addresses) ?
@@ -129,7 +129,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
           </div>
 
           <div className="-mx-4 mt-3">
-            <ContactOrganizationsList organizations={organizations} />
+            <ContactOrganizationsList organizations={organizations} onOrganizationSaved={onOrganizationSaved} />
           </div>
 
         </div> :

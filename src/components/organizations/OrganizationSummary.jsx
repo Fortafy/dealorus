@@ -29,8 +29,9 @@ import { toast } from "sonner";
 import EnrichDialog from "@/components/organizations/EnrichDialog";
 import EnrichmentComparisonDialog from "@/components/organizations/EnrichmentComparisonDialog";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
+import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
 function OrgLogo({ logoUrl, name }) {
   const [imgError, setImgError] = useState(false);
@@ -348,7 +349,14 @@ export default function OrganizationSummary({
                 onSave={(val) => saveField("organization_name", val)}
               />
               {/* External link icons */}
-              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+              <div className="mt-2">
+                <RecordLabelsEditor
+                  labels={labels}
+                  selectedIds={displayData.label_ids || []}
+                  onChange={(labelIds) => saveField("label_ids", labelIds)}
+                />
+              </div>
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                 {hasSalesforce && (
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>

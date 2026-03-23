@@ -1,5 +1,6 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
 "@/components/ui/dropdown-menu";
 import { Linkedin, Mail, MoreHorizontal, Sparkles, Star, Trash2, Upload } from "lucide-react";
 import InlineContactHeaderField from "@/components/people/InlineContactHeaderField";
+import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
 export default function ContactHeaderSummary({
   contact,
@@ -29,6 +31,12 @@ export default function ContactHeaderSummary({
   const linkedInUrl = contact.linkedin ?
   contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}` :
   null;
+
+  const { data: labels = [] } = useQuery({
+    queryKey: ["labels", contact.client_id],
+    enabled: !!contact.client_id,
+    queryFn: () => base44.entities.Label.filter({ client_id: contact.client_id }, "name"),
+  });
 
   const saveField = async (field, value) => {
     const updatedContact = {
@@ -66,7 +74,13 @@ export default function ContactHeaderSummary({
               placeholder="Click to add title..."
               textClassName="mt-1 truncate rounded px-1 -ml-1 text-left text-[11px] font-medium text-slate-500 transition-colors hover:bg-slate-100"
               inputClassName="mt-1 h-7 text-[11px] font-medium" />
-            
+
+            <RecordLabelsEditor
+              labels={labels}
+              selectedIds={contact.label_ids || []}
+              onChange={(labelIds) => saveField("label_ids", labelIds)}
+              className="mt-2"
+            />
 
             <div className="mt-2 flex items-center gap-2">
               {contact.email ?

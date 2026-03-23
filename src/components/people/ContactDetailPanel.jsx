@@ -113,6 +113,11 @@ export default function ContactDetailPanel({ contactId, onClose }) {
     queryClient.invalidateQueries({ queryKey: ["activities", contactId] });
   };
 
+  const refreshOrganizations = () => {
+    queryClient.invalidateQueries({ queryKey: ["org-for-contact", contact?.organization_id] });
+    queryClient.invalidateQueries({ queryKey: ["related-organizations-for-contact"] });
+  };
+
   const handleDelete = async () => {
     await base44.entities.Contact.delete(contactId);
     queryClient.invalidateQueries({ queryKey: ["people"] });
