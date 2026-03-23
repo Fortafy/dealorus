@@ -64,10 +64,12 @@ export default function ClientIntegrationsManager({ organization }) {
   });
 
   const testMutation = useMutation({
-    mutationFn: (service) => base44.functions.invoke("testClientIntegrationConnection", {
-      integration_type: service.integration_type
-    }),
-    onSuccess: (response, service) => {
+    mutationFn: ({ service, apiKey }) => base44.functions.invoke(
+      service.test_function_name,
+      apiKey ? { api_key: apiKey } : {}
+    ),
+    onSuccess: (response, variables) => {
+      const service = variables.service;
       if (response?.data?.success) {
         toast.success(response.data.message || `${service.display_name} connection is working.`);
         return;
@@ -75,7 +77,8 @@ export default function ClientIntegrationsManager({ organization }) {
 
       toast.error(response?.data?.error || `Could not connect to ${service.display_name}.`);
     },
-    onError: (error, service) => {
+    onError: (error, variables) => {
+      const service = variables.service;
       toast.error(error?.response?.data?.error || error?.message || `Could not connect to ${service.display_name}.`);
     }
   });
@@ -123,11 +126,11 @@ export default function ClientIntegrationsManager({ organization }) {
             }
             onToggle={(selectedIntegration) => toggleMutation.mutate(selectedIntegration)}
             onDelete={(selectedIntegration) => deleteMutation.mutate(selectedIntegration)}
-            onTest={(selectedService) => testMutation.mutate(selectedService)}
+            onTest={(selectedService, apiKey) => testMutation.mutate({ service: selectedService, apiKey })}
             isSaving={saveMutation.isPending}
             isToggling={toggleMutation.isPending}
             isDeleting={deleteMutation.isPending}
-            isTesting={testMutation.isPending && testMutation.variables?.integration_type === service.integration_type} />);
+            isTesting={testMutation.isPending && testMutation.variables?.service?.integration_type === service.integration_type} />);
 
 
       })}

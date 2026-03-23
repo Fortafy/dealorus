@@ -5,15 +5,17 @@ export const CLIENT_INTEGRATION_CATALOG = [
     description: "Use your own CharityAPI key for nonprofit enrichment.",
     help_url: "https://www.charityapi.org/",
     help_label: "Get CharityAPI key",
-    requires_key: true
+    requires_key: true,
+    test_function_name: "testCharityApiConnection"
   },
   {
     integration_type: "ProPublica",
     display_name: "ProPublica",
-    description: "ProPublica provides a a free API to the search engine and database that powers Nonprofit Explorer.",
+    description: "ProPublica provides a free API to the search engine and database that powers Nonprofit Explorer.",
     help_url: "https://projects.propublica.org/nonprofits/api",
     help_label: "View ProPublica API",
-    requires_key: false
+    requires_key: false,
+    test_function_name: "testProPublicaConnection"
   },
   {
     integration_type: "NonprofitCheckPlus",
@@ -21,6 +23,7 @@ export const CLIENT_INTEGRATION_CATALOG = [
     description: "Use your own Nonprofit Check Plus key for nonprofit verification.",
     help_url: "https://pactman.org/nonprofitcheckplus-api/docs",
     help_label: "Get Nonprofit Check Plus key",
-    requires_key: true
+    requires_key: true,
+    test_function_name: "testNonprofitCheckPlusConnection"
   }
 ];

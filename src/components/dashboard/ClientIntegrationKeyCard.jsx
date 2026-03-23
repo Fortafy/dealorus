@@ -93,9 +93,13 @@ export default function ClientIntegrationKeyCard({
               </div>
 
               <div className="settings-actions">
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <Button variant="outline" onClick={handleCancel} disabled={isSaving} className="settings-secondary-button">
                     Cancel
+                  </Button>
+                  <Button variant="outline" onClick={() => onTest(service, apiKey.trim())} disabled={isTesting || (!apiKey.trim() && !integration?.api_key)} className="settings-secondary-button">
+                    {isTesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Test Connection
                   </Button>
                   <Button onClick={handleSave} disabled={!apiKey.trim() || isSaving} className="settings-primary-button">
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : integration ? "Update Key" : "Save Key"}
@@ -106,7 +110,7 @@ export default function ClientIntegrationKeyCard({
           ) : (
             <div className="settings-actions">
               <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                <Button variant="outline" onClick={() => onTest(service)} disabled={isTesting} className="settings-secondary-button">
+                <Button variant="outline" onClick={() => onTest(service, integration?.api_key)} disabled={isTesting || (requiresKey && !integration?.api_key)} className="settings-secondary-button">
                   {isTesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   Test Connection
                 </Button>
