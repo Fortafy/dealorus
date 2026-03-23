@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ContactOrganizationsList from "@/components/people/ContactOrganizationsList";
 import InlineTextDetailField from "@/components/people/InlineTextDetailField";
 import MultiValueInlineField from "@/components/people/MultiValueInlineField";
+import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
 const normalizeActivityValue = (value) => {
   if (Array.isArray(value)) {
@@ -23,6 +25,12 @@ const formatFieldLabel = (field) => field
 
 export default function ContactDetailsSection({ contact, organizations = [], onSaved, onOrganizationSaved }) {
   const [isOpen, setIsOpen] = useState(true);
+
+  const { data: labels = [] } = useQuery({
+    queryKey: ["labels", contact.client_id],
+    enabled: !!contact.client_id,
+    queryFn: () => base44.entities.Label.filter({ client_id: contact.client_id }, "name"),
+  });
 
   const emailValues = Array.isArray(contact.email_addresses) ?
   contact.email_addresses.filter(Boolean) :
@@ -80,6 +88,18 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
       {isOpen ?
       <div className="px-4 py-2">
           <div className="divide-y divide-slate-100">
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
+              <div className="pt-2 text-xs text-slate-500">Labels</div>
+              <RecordLabelsEditor
+                labels={labels}
+                selectedIds={contact.label_ids || []}
+                onChange={(labelIds) => saveContact({ label_ids: labelIds })}
+                objectType="Contact"
+                triggerVariant="field"
+                placeholder="Add Labels"
+              />
+            </div>
+
             <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Email addresses</div>
               <MultiValueInlineField

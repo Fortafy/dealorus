@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import LabelBadge from "@/components/labels/LabelBadge";
 import { ALL_LABEL_OBJECTS } from "@/components/labels/LabelObjectScopeSelector";
+import { cn } from "@/lib/utils";
 
 const normalizeObjectType = (value) => {
   const normalized = String(value || "").trim().toLowerCase();
@@ -14,7 +15,7 @@ const normalizeObjectType = (value) => {
   return value;
 };
 
-export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "", objectType, buttonFirst = false, iconOnlyButton = false }) {
+export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "", objectType, buttonFirst = false, iconOnlyButton = false, triggerVariant = "button", placeholder = "Add Labels" }) {
   const normalizedObjectType = normalizeObjectType(objectType);
 
   const availableLabels = useMemo(
@@ -50,15 +51,35 @@ export default function RecordLabelsEditor({ labels = [], selectedIds = [], onCh
   const triggerButton = (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className={iconOnlyButton ? "h-6 w-6 p-0" : "h-6 gap-1 px-2 text-xs"}
-          aria-label="Edit labels"
-        >
-          <Tag className="h-3 w-3" />
-          {!iconOnlyButton && "Labels"}
-        </Button>
+        {triggerVariant === "field" ? (
+          <button
+            type="button"
+            className={cn(
+              "flex min-h-10 w-full flex-wrap items-center gap-1.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-slate-50",
+              className
+            )}
+            aria-label="Edit labels"
+            title="Click to edit"
+          >
+            {selectedLabels.length ? (
+              selectedLabels.map((label) => (
+                <LabelBadge key={label.id} label={label} className="pointer-events-none" />
+              ))
+            ) : (
+              <span className="text-xs text-slate-400">{placeholder}</span>
+            )}
+          </button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(iconOnlyButton ? "h-6 w-6 p-0" : "h-6 gap-1 px-2 text-xs", className)}
+            aria-label="Edit labels"
+          >
+            <Tag className="h-3 w-3" />
+            {!iconOnlyButton && "Labels"}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 p-2">
         {availableLabels.length === 0 ? (
