@@ -360,6 +360,7 @@ export default function OrganizationSummary({
                   labels={labels}
                   selectedIds={displayData.label_ids || []}
                   onChange={(labelIds) => saveField("label_ids", labelIds)}
+                  objectType="Organization"
                 />
               </div>
               <div className="flex items-center gap-1.5 mt-2 flex-wrap">

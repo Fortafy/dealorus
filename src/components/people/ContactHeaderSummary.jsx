@@ -79,6 +79,7 @@ export default function ContactHeaderSummary({
               labels={labels}
               selectedIds={contact.label_ids || []}
               onChange={(labelIds) => saveField("label_ids", labelIds)}
+              objectType="Contact"
               className="mt-2"
             />
 

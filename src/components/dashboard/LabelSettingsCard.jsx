@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LabelBadge from "@/components/labels/LabelBadge";
+import LabelObjectScopeSelector, { ALL_LABEL_OBJECTS } from "@/components/labels/LabelObjectScopeSelector";
 
 const DEFAULT_COLOR = "#7c3aed";
 
@@ -12,6 +13,7 @@ export default function LabelSettingsCard({ clientId }) {
   const queryClient = useQueryClient();
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState(DEFAULT_COLOR);
+  const [newApplicableObjects, setNewApplicableObjects] = useState(ALL_LABEL_OBJECTS);
   const [drafts, setDrafts] = useState({});
 
   const { data: labels = [] } = useQuery({
@@ -29,10 +31,16 @@ export default function LabelSettingsCard({ clientId }) {
   }, [labels]);
 
   const createLabelMutation = useMutation({
-    mutationFn: () => base44.entities.Label.create({ client_id: clientId, name: newName.trim(), color: newColor }),
+    mutationFn: () => base44.entities.Label.create({
+      client_id: clientId,
+      name: newName.trim(),
+      color: newColor,
+      applicable_objects: newApplicableObjects,
+    }),
     onSuccess: () => {
       setNewName("");
       setNewColor(DEFAULT_COLOR);
+      setNewApplicableObjects(ALL_LABEL_OBJECTS);
       queryClient.invalidateQueries({ queryKey: ["labels", clientId] });
     },
   });
@@ -60,7 +68,7 @@ export default function LabelSettingsCard({ clientId }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_120px_auto] md:items-end">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_120px]">
             <div>
               <label className="settings-label">Label name</label>
               <Input
@@ -79,14 +87,20 @@ export default function LabelSettingsCard({ clientId }) {
                 className="h-11 w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-1"
               />
             </div>
-            <Button
-              onClick={() => newName.trim() && createLabelMutation.mutate()}
-              disabled={!newName.trim() || createLabelMutation.isPending}
-              className="h-11"
-            >
-              {createLabelMutation.isPending ? "Adding..." : "Add Label"}
-            </Button>
           </div>
+
+          <div className="mt-3">
+            <label className="settings-label">Use with</label>
+            <LabelObjectScopeSelector value={newApplicableObjects} onChange={setNewApplicableObjects} />
+          </div>
+
+          <Button
+            onClick={() => newName.trim() && createLabelMutation.mutate()}
+            disabled={!newName.trim() || newApplicableObjects.length === 0 || createLabelMutation.isPending}
+            className="mt-3 h-11"
+          >
+            {createLabelMutation.isPending ? "Adding..." : "Add Label"}
+          </Button>
         </div>
 
         <div className="mt-4 space-y-3">
@@ -96,7 +110,13 @@ export default function LabelSettingsCard({ clientId }) {
             </div>
           ) : (
             labels.map((label) => {
-              const draft = drafts[label.id] || { name: label.name || "", color: label.color || DEFAULT_COLOR };
+              const draft = drafts[label.id] || {
+                name: label.name || "",
+                color: label.color || DEFAULT_COLOR,
+                applicable_objects: Array.isArray(label.applicable_objects) && label.applicable_objects.length
+                  ? label.applicable_objects
+                  : ALL_LABEL_OBJECTS,
+              };
 
               return (
                 <div key={label.id} className="rounded-2xl border border-slate-200 p-4">
@@ -106,8 +126,15 @@ export default function LabelSettingsCard({ clientId }) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => updateLabelMutation.mutate({ id: label.id, data: { name: draft.name.trim(), color: draft.color } })}
-                        disabled={!draft.name.trim() || updateLabelMutation.isPending}
+                        onClick={() => updateLabelMutation.mutate({
+                          id: label.id,
+                          data: {
+                            name: draft.name.trim(),
+                            color: draft.color,
+                            applicable_objects: draft.applicable_objects,
+                          },
+                        })}
+                        disabled={!draft.name.trim() || draft.applicable_objects.length === 0 || updateLabelMutation.isPending}
                       >
                         Save
                       </Button>
@@ -134,6 +161,17 @@ export default function LabelSettingsCard({ clientId }) {
                       value={draft.color}
                       onChange={(event) => setDrafts((current) => ({ ...current, [label.id]: { ...draft, color: event.target.value } }))}
                       className="h-11 w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-1"
+                    />
+                  </div>
+
+                  <div className="mt-3">
+                    <label className="settings-label">Use with</label>
+                    <LabelObjectScopeSelector
+                      value={draft.applicable_objects}
+                      onChange={(applicableObjects) => setDrafts((current) => ({
+                        ...current,
+                        [label.id]: { ...draft, applicable_objects: applicableObjects },
+                      }))}
                     />
                   </div>
                 </div>

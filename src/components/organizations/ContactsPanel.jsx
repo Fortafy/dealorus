@@ -378,6 +378,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   labels={labels}
                   selectedIds={contact.label_ids || []}
                   onChange={(labelIds) => handleContactLabelsChange(contact, labelIds)}
+                  objectType="Contact"
                   className="mt-1"
                 />
               </div>

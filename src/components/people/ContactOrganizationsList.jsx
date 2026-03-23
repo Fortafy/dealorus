@@ -64,6 +64,7 @@ export default function ContactOrganizationsList({ organizations = [], onOrganiz
                   labels={labels}
                   selectedIds={organization.label_ids || []}
                   onChange={(labelIds) => handleOrganizationLabelsChange(organization, labelIds)}
+                  objectType="Organization"
                   className="mt-2"
                 />
               </div>

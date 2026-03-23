@@ -3,11 +3,23 @@ import { Check, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import LabelBadge from "@/components/labels/LabelBadge";
+import { ALL_LABEL_OBJECTS } from "@/components/labels/LabelObjectScopeSelector";
 
-export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "" }) {
+export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "", objectType }) {
+  const availableLabels = useMemo(
+    () => labels.filter((label) => {
+      const applicableObjects = Array.isArray(label.applicable_objects) && label.applicable_objects.length
+        ? label.applicable_objects
+        : ALL_LABEL_OBJECTS;
+
+      return !objectType || applicableObjects.includes(objectType);
+    }),
+    [labels, objectType]
+  );
+
   const selectedLabels = useMemo(
-    () => labels.filter((label) => (selectedIds || []).includes(label.id)),
-    [labels, selectedIds]
+    () => availableLabels.filter((label) => (selectedIds || []).includes(label.id)),
+    [availableLabels, selectedIds]
   );
 
   const toggleLabel = (labelId) => {
@@ -38,11 +50,11 @@ export default function RecordLabelsEditor({ labels = [], selectedIds = [], onCh
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-64 p-2">
-          {labels.length === 0 ? (
-            <p className="px-2 py-3 text-xs text-slate-500">No labels have been created yet.</p>
+          {availableLabels.length === 0 ? (
+            <p className="px-2 py-3 text-xs text-slate-500">No labels are available for this record type.</p>
           ) : (
             <div className="space-y-1">
-              {labels.map((label) => {
+              {availableLabels.map((label) => {
                 const isSelected = (selectedIds || []).includes(label.id);
 
                 return (

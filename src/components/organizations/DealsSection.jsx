@@ -230,6 +230,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                     labels={labels}
                     selectedIds={deal.label_ids || []}
                     onChange={(labelIds) => handleDealLabelsChange(deal, labelIds)}
+                    objectType="Deal"
                     className="mt-2"
                   />
                   {deal.start_date && deal.end_date && (
