@@ -44,7 +44,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
       <div className="px-4 py-2">
           <div className="divide-y divide-slate-100">
             <div className="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
-              <div className="pt-2 text-sm text-slate-500">Email addresses</div>
+              <div className="pt-2 text-xs text-slate-500">Email addresses</div>
               <MultiValueInlineField
               values={emailValues}
               onSave={(values) => saveContact({ email_addresses: values, email: values[0] || null })}
@@ -53,7 +53,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             </div>
 
             <div className="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
-              <div className="pt-2 text-sm text-slate-500">Phone numbers</div>
+              <div className="pt-2 text-xs text-slate-500">Phone numbers</div>
               <MultiValueInlineField
               values={phoneValues}
               onSave={(values) => saveContact({ phone_numbers: values, phone: values[0] || null })}
@@ -62,7 +62,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             </div>
 
             <div className="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
-              <div className="pt-2 text-sm text-slate-500">Description</div>
+              <div className="pt-2 text-xs text-slate-500">Description</div>
               <InlineTextDetailField
               value={contact.description}
               onSave={(value) => saveContact({ description: value })}
@@ -72,7 +72,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             </div>
 
             <div className="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
-              <div className="pt-2 text-sm text-slate-500">Department</div>
+              <div className="pt-2 text-xs text-slate-500">Department</div>
               <InlineTextDetailField
               value={contact.role_department}
               onSave={(value) => saveContact({ role_department: value })}
@@ -81,7 +81,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             </div>
 
             <div className="grid gap-2 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
-              <div className="pt-2 text-sm text-slate-500">LinkedIn</div>
+              <div className="pt-2 text-xs text-slate-500">LinkedIn</div>
               <InlineTextDetailField
               value={contact.linkedin}
               onSave={(value) => saveContact({ linkedin: value })}
