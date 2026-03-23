@@ -49,3 +49,25 @@ export function formatActivityTimelineDate(value) {
   const date = toSafeActivityTimelineDate(value);
   return date ? format(date, "MMM d, yyyy") : "Date unavailable";
 }
+
+export function formatActivityActorName(value) {
+  if (!value) return "Unknown User";
+
+  const baseValue = String(value).trim();
+  const localPart = baseValue.includes("@") ? baseValue.split("@")[0] : baseValue;
+  const cleaned = localPart.replace(/[._-]+/g, " ").trim();
+
+  if (!cleaned) return baseValue;
+
+  return cleaned
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export function getActivityActorInitials(value) {
+  const name = formatActivityActorName(value);
+  const parts = name.split(/\s+/).filter(Boolean);
+  return parts.slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase() || "U";
+}

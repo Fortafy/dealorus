@@ -310,84 +310,88 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
                       <Icon className="h-3.5 w-3.5" />
                     </div>
 
-                    <div className="activity-timeline-card">
-                      <div className="activity-timeline-card-header">
-                        <p className="activity-timeline-card-title">
-                          {item.type === "note"
-                            ? item.title
-                            : item.type === "deal"
-                              ? item.name
-                              : item.type === "created"
-                                ? "Organization Created"
-                                : item.subject}
-                        </p>
-                        <div className="flex items-center gap-1">
-                          <span className="activity-timeline-card-timestamp">
-                            {formatActivityTimelineDate(item.timestamp)}
-                          </span>
-                          {item.type === "note" || item.type === "deal" ? (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button className="rounded-sm p-0.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
-                                  <MoreHorizontal className="h-3.5 w-3.5" />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-32">
-                                <DropdownMenuItem onSelect={() => item.type === "note" ? setEditingNote(item) : setEditingDeal(item)}>
-                                  <Pencil className="h-3.5 w-3.5" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onSelect={() => setDeleteTarget({
-                                    id: item.id,
-                                    type: item.type,
-                                    label: item.type === "note" ? item.title : item.name,
-                                  })}
-                                  className="text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          ) : null}
-                        </div>
-                      </div>
-
-                      {item.type === "note" && stripHtml(item.content) ? (
-                        <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div>
-                      ) : null}
-
-                      {item.type === "deal" ? (
-                        <div className="activity-timeline-pills">
-                          {item.stage ? (
-                            <span className="activity-timeline-pill">
-                              Stage: {lifecycleStages.find((stage) => stage.id === item.stage)?.name || item.stage}
+                    {item.type === "edit" ? (
+                      <ActivityRecordModifiedCard item={{ ...item, itemType: "edit" }} />
+                    ) : (
+                      <div className="activity-timeline-card">
+                        <div className="activity-timeline-card-header">
+                          <p className="activity-timeline-card-title">
+                            {item.type === "note"
+                              ? item.title
+                              : item.type === "deal"
+                                ? item.name
+                                : item.type === "created"
+                                  ? "Organization Created"
+                                  : item.subject}
+                          </p>
+                          <div className="flex items-center gap-1">
+                            <span className="activity-timeline-card-timestamp">
+                              {formatActivityTimelineDate(item.timestamp)}
                             </span>
-                          ) : null}
-                          {item.value ? (
-                            <span className={`activity-timeline-pill ${getActivityTimelineAccentClass(appearanceKey)}`}>
-                              ${item.value.toLocaleString()}
-                            </span>
-                          ) : null}
-                          {item.expected_close_date ? (
-                            <span className="activity-timeline-pill">Close: {moment(item.expected_close_date).format("MMM D, YYYY")}</span>
-                          ) : null}
-                        </div>
-                      ) : null}
-
-                      {item.type === "interaction" ? (
-                        <div className="activity-timeline-card-body">
-                          <div className="activity-timeline-detail-box">
-                            <span className="activity-timeline-detail-label">Type:</span>{" "}
-                            <span className={getActivityTimelineAccentClass(appearanceKey)}>
-                              {item.interactionType?.charAt(0).toUpperCase() + item.interactionType?.slice(1)}
-                            </span>
-                            {item.description ? <div className="mt-1 text-slate-600">{item.description}</div> : null}
+                            {item.type === "note" || item.type === "deal" ? (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="rounded-sm p-0.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
+                                    <MoreHorizontal className="h-3.5 w-3.5" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-32">
+                                  <DropdownMenuItem onSelect={() => item.type === "note" ? setEditingNote(item) : setEditingDeal(item)}>
+                                    <Pencil className="h-3.5 w-3.5" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onSelect={() => setDeleteTarget({
+                                      id: item.id,
+                                      type: item.type,
+                                      label: item.type === "note" ? item.title : item.name,
+                                    })}
+                                    className="text-red-600 focus:text-red-600"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            ) : null}
                           </div>
                         </div>
-                      ) : null}
-                    </div>
+
+                        {item.type === "note" && stripHtml(item.content) ? (
+                          <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div>
+                        ) : null}
+
+                        {item.type === "deal" ? (
+                          <div className="activity-timeline-pills">
+                            {item.stage ? (
+                              <span className="activity-timeline-pill">
+                                Stage: {lifecycleStages.find((stage) => stage.id === item.stage)?.name || item.stage}
+                              </span>
+                            ) : null}
+                            {item.value ? (
+                              <span className={`activity-timeline-pill ${getActivityTimelineAccentClass(appearanceKey)}`}>
+                                ${item.value.toLocaleString()}
+                              </span>
+                            ) : null}
+                            {item.expected_close_date ? (
+                              <span className="activity-timeline-pill">Close: {moment(item.expected_close_date).format("MMM D, YYYY")}</span>
+                            ) : null}
+                          </div>
+                        ) : null}
+
+                        {item.type === "interaction" ? (
+                          <div className="activity-timeline-card-body">
+                            <div className="activity-timeline-detail-box">
+                              <span className="activity-timeline-detail-label">Type:</span>{" "}
+                              <span className={getActivityTimelineAccentClass(appearanceKey)}>
+                                {item.interactionType?.charAt(0).toUpperCase() + item.interactionType?.slice(1)}
+                              </span>
+                              {item.description ? <div className="mt-1 text-slate-600">{item.description}</div> : null}
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 );
               })}
