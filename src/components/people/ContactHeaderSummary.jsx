@@ -26,14 +26,14 @@ export default function ContactHeaderSummary({
 
   return (
     <div className="border-b border-slate-100 bg-white px-4 py-5">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold text-slate-600">
             {initials}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="truncate text-lg font-semibold text-slate-900">{contact.name}</h2>
+              <h2 className="truncate text-base font-semibold text-slate-900">{contact.name}</h2>
               {contact.starred && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
