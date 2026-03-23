@@ -5,8 +5,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 import { Linkedin, Mail, MoreHorizontal, Sparkles, Star, Trash2, Upload } from "lucide-react";
 import InlineContactHeaderField from "@/components/people/InlineContactHeaderField";
 
@@ -17,24 +17,24 @@ export default function ContactHeaderSummary({
   onSync,
   onDelete,
   onSaved,
-  isSyncing,
+  isSyncing
 }) {
-  const initials = contact.name
-    ?.split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "?";
+  const initials = contact.name?.
+  split(" ").
+  map((part) => part[0]).
+  join("").
+  slice(0, 2).
+  toUpperCase() || "?";
 
-  const linkedInUrl = contact.linkedin
-    ? (contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}`)
-    : null;
+  const linkedInUrl = contact.linkedin ?
+  contact.linkedin.startsWith("http") ? contact.linkedin : `https://${contact.linkedin}` :
+  null;
 
   const saveField = async (field, value) => {
     const updatedContact = {
       ...contact,
       [field]: value,
-      last_modified: new Date().toISOString(),
+      last_modified: new Date().toISOString()
     };
 
     await base44.entities.Contact.update(contact.id, updatedContact);
@@ -55,8 +55,8 @@ export default function ContactHeaderSummary({
                 onSave={(value) => saveField("name", value)}
                 placeholder="Click to add name..."
                 textClassName="truncate rounded px-1 -ml-1 text-left text-base font-semibold text-slate-900 transition-colors hover:bg-slate-100"
-                inputClassName="h-8 text-base font-semibold"
-              />
+                inputClassName="h-8 text-base font-semibold" />
+              
               {contact.starred && <Star className="mt-0.5 h-4 w-4 flex-shrink-0 fill-amber-400 text-amber-400" />}
             </div>
 
@@ -65,30 +65,30 @@ export default function ContactHeaderSummary({
               onSave={(value) => saveField("title", value)}
               placeholder="Click to add title..."
               textClassName="mt-1 truncate rounded px-1 -ml-1 text-left text-[11px] font-medium text-slate-500 transition-colors hover:bg-slate-100"
-              inputClassName="mt-1 h-7 text-[11px] font-medium"
-            />
+              inputClassName="mt-1 h-7 text-[11px] font-medium" />
+            
 
             <div className="mt-2 flex items-center gap-2">
-              {contact.email ? (
-                <a
-                  href={`mailto:${contact.email}`}
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
-                  title="Email"
-                >
+              {contact.email ?
+              <a
+                href={`mailto:${contact.email}`}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
+                title="Email">
+                
                   <Mail className="h-3.5 w-3.5" />
-                </a>
-              ) : null}
-              {linkedInUrl ? (
-                <a
-                  href={linkedInUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
-                  title="LinkedIn"
-                >
-                  <Linkedin className="h-3.5 w-3.5" />
-                </a>
-              ) : null}
+                </a> :
+              null}
+              {linkedInUrl ?
+              <a
+                href={linkedInUrl}
+                target="_blank"
+                rel="noreferrer" className="bg-blue-600 text-slate-500 rounded-full flex h-7 w-7 items-center justify-center border border-slate-200 transition-colors hover:border-blue-200 hover:text-blue-600"
+
+                title="LinkedIn">
+                
+                  <Linkedin className="bg-transparent text-slate-50 lucide lucide-linkedin h-3.5 w-3.5" />
+                </a> :
+              null}
             </div>
           </div>
         </div>
@@ -115,6 +115,6 @@ export default function ContactHeaderSummary({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
-  );
+    </div>);
+
 }
