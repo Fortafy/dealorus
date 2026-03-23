@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -141,7 +141,7 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
   const addService = () => setForm((currentForm) => ({ ...currentForm, services: [...currentForm.services, emptyService()] }));
   const removeService = (index) => setForm((currentForm) => ({ ...currentForm, services: currentForm.services.filter((_, i) => i !== index) }));
 
-  const previewDeal = React.useMemo(() => {
+  const previewDeal = useMemo(() => {
     if (!deal) return null;
 
     const selectedOrganizationName = organizations?.find((organization) => organization.id === form.organization_id)?.organization_name;

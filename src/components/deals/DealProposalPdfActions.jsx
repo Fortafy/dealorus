@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { jsPDF } from "jspdf";
 import moment from "moment";
@@ -58,15 +58,15 @@ const htmlToPdfText = (html) => {
 };
 
 export default function DealProposalPdfActions({ deal, lifecycleStages = [], variant = "inline", onUpdated }) {
-  const [pdfUrl, setPdfUrl] = React.useState(deal.proposal_pdf_url || "");
-  const [generatedAt, setGeneratedAt] = React.useState(deal.proposal_pdf_generated_at || "");
+  const [pdfUrl, setPdfUrl] = useState(deal.proposal_pdf_url || "");
+  const [generatedAt, setGeneratedAt] = useState(deal.proposal_pdf_generated_at || "");
 
-  React.useEffect(() => {
+  useEffect(() => {
     setPdfUrl(deal.proposal_pdf_url || "");
     setGeneratedAt(deal.proposal_pdf_generated_at || "");
   }, [deal.proposal_pdf_generated_at, deal.proposal_pdf_url, deal.id]);
 
-  const displayDeal = React.useMemo(
+  const displayDeal = useMemo(
     () => ({
       ...deal,
       proposal_pdf_url: pdfUrl,
@@ -75,7 +75,7 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
     [deal, pdfUrl, generatedAt]
   );
 
-  const { label: stageLabel, isProposalStage, isFinalStage } = React.useMemo(
+  const { label: stageLabel, isProposalStage, isFinalStage } = useMemo(
     () => getStageMeta(displayDeal, lifecycleStages),
     [displayDeal, lifecycleStages]
   );
