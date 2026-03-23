@@ -294,17 +294,20 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
               <div className="flex gap-1">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      onClick={() => { setEditingContact(null); setShowContactForm(true); }}
-                      style={{ backgroundColor: "hsl(217, 91%, 60%)" }}
-                      className="text-white hover:opacity-90 h-6 px-2 text-xs"
-                    >
-                      <Plus className="w-2.5 h-2.5 mr-1" />
-                      Add
+                    <Button onClick={() => setShowAdvancedSearch(true)} disabled={isSearching} variant="outline" size="sm" className="h-6 px-1.5">
+                      {isSearching ? <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" /> : <Sparkles className="w-3 h-3" />}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Add Contact</TooltipContent>
+                  <TooltipContent>Enrich</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={() => searchContacts()} disabled={isSearching} size="sm" className="h-6 px-1.5 bg-black text-white hover:bg-black/90">
+                      {isSearching ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-3 h-3 text-white" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Quick Search</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -319,20 +322,15 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button onClick={() => setShowAdvancedSearch(true)} disabled={isSearching} variant="outline" size="sm" className="h-6 px-1.5">
-                      {isSearching ? <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                    <Button
+                      size="sm"
+                      onClick={() => { setEditingContact(null); setShowContactForm(true); }}
+                      className="h-6 px-2 text-xs"
+                    >
+                      <Plus className="w-2.5 h-2.5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Advanced Search</TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button onClick={() => searchContacts()} disabled={isSearching} size="sm" className="h-6 px-1.5 text-white" style={{ backgroundColor: "hsl(217, 91%, 60%)" }}>
-                      {isSearching ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-3 h-3" />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Quick Search</TooltipContent>
+                  <TooltipContent>Add Contact</TooltipContent>
                 </Tooltip>
               </div>
             </TooltipProvider>
