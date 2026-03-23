@@ -38,6 +38,49 @@ const getServiceLineTotal = (service, contractType) => {
   return quantity * rate;
 };
 
+const hexToRgb = (hex) => {
+  if (!hex) return [49, 46, 129];
+  const normalized = hex.replace("#", "").trim();
+  const safeHex = normalized.length === 3
+    ? normalized.split("").map((char) => `${char}${char}`).join("")
+    : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(safeHex)) return [49, 46, 129];
+
+  return [
+    parseInt(safeHex.slice(0, 2), 16),
+    parseInt(safeHex.slice(2, 4), 16),
+    parseInt(safeHex.slice(4, 6), 16),
+  ];
+};
+
+const loadImageData = async (url) => {
+  if (!url) return null;
+
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+
+  const image = await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+
+  return {
+    dataUrl,
+    width: image.width,
+    height: image.height,
+    format: blob.type === "image/png" ? "PNG" : "JPEG",
+  };
+};
+
 const renderRichTextHtml = async (doc, html, x, y, width, pageHeight, margin) => {
   const container = document.createElement("div");
   container.style.position = "fixed";
@@ -165,6 +208,15 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
     },
   });
 
+  const { data: client } = useQuery({
+    queryKey: ["deal-proposal-client", displayDeal.client_id],
+    enabled: !!displayDeal.client_id && (isProposalStage || !!displayDeal.proposal_pdf_url),
+    queryFn: async () => {
+      const results = await base44.entities.Client.filter({ id: displayDeal.client_id });
+      return results[0] || null;
+    },
+  });
+
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
       const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -175,6 +227,8 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       const generatedTimestamp = new Date().toISOString();
       const orderNumber = `SO-${(displayDeal.id || "DEAL").slice(0, 8).toUpperCase()}`;
       const quantityLabel = displayDeal.contract_type === "project" ? "Hours" : "Hours/Mo";
+      const [headerR, headerG, headerB] = hexToRgb(client?.primary_color);
+      const logo = client?.logo_url ? await loadImageData(client.logo_url).catch(() => null) : null;
       let y = 18;
 
       const ensureSpace = (needed = 10) => {
@@ -214,15 +268,27 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         y += lines.length * 5 + 1;
       };
 
-      doc.setFillColor(49, 46, 129);
+      doc.setFillColor(headerR, headerG, headerB);
       doc.roundedRect(margin, y, contentWidth, 20, 3, 3, "F");
+
+      let headerTextX = margin + 6;
+      if (logo) {
+        const maxLogoWidth = 26;
+        const maxLogoHeight = 12;
+        const scale = Math.min(maxLogoWidth / logo.width, maxLogoHeight / logo.height);
+        const logoWidth = logo.width * scale;
+        const logoHeight = logo.height * scale;
+        doc.addImage(logo.dataUrl, logo.format, margin + 6, y + (20 - logoHeight) / 2, logoWidth, logoHeight);
+        headerTextX = margin + 6 + maxLogoWidth + 4;
+      }
+
       doc.setFont("helvetica", "bold");
       doc.setFontSize(22);
       doc.setTextColor(255, 255, 255);
-      doc.text("Sales Order", margin + 6, y + 8.5);
+      doc.text("Sales Order", headerTextX, y + 8.5);
       doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
-      doc.text(`Generated ${moment(generatedTimestamp).format("MMM D, YYYY h:mm A")}`, margin + 6, y + 15);
+      doc.text(`Generated ${moment(generatedTimestamp).format("MMM D, YYYY h:mm A")}`, headerTextX, y + 15);
       doc.setFont("helvetica", "bold");
       doc.text(orderNumber, pageWidth - margin - 6, y + 8.5, { align: "right" });
       doc.setFont("helvetica", "normal");
@@ -310,11 +376,9 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       }
 
       ensureSpace(14);
-      doc.setDrawColor(148, 163, 184);
-      doc.line(margin + 116, y, margin + contentWidth, y);
       y += 7;
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
+      doc.setFontSize(10);
       doc.setTextColor(15, 23, 42);
       doc.text("Order Total", margin + 120, y);
       doc.text(formatMoney(displayDeal.value || computedTotal), margin + contentWidth, y, { align: "right" });
