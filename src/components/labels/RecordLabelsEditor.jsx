@@ -28,13 +28,18 @@ export default function RecordLabelsEditor({ labels = [], selectedIds = [], onCh
     [labels, normalizedObjectType]
   );
 
+  const availableLabelIds = useMemo(
+    () => new Set(availableLabels.map((label) => label.id)),
+    [availableLabels]
+  );
+
   const selectedLabels = useMemo(
     () => availableLabels.filter((label) => (selectedIds || []).includes(label.id)),
     [availableLabels, selectedIds]
   );
 
   const toggleLabel = (labelId) => {
-    const currentIds = Array.isArray(selectedIds) ? selectedIds : [];
+    const currentIds = (Array.isArray(selectedIds) ? selectedIds : []).filter((id) => availableLabelIds.has(id));
     const nextIds = currentIds.includes(labelId)
       ? currentIds.filter((id) => id !== labelId)
       : [...currentIds, labelId];
