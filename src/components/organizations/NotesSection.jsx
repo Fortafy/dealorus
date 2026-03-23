@@ -2,17 +2,14 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus, Trash2, Pencil, ChevronDown, ChevronUp, CalendarDays, X } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
-import ReminderPicker from "@/components/reminders/ReminderPicker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import NoteDialog from "@/components/notes/NoteDialog";
 
 function InlineReminderBadge({ value, isPastDue, onSave }) {
   const [open, setOpen] = React.useState(false);
@@ -106,9 +103,6 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
     if (externalOpenCreate > 0) openCreate();
   }, [externalOpenCreate]);
   const [editingNote, setEditingNote] = useState(null);
-  const [noteTitle, setNoteTitle] = useState("");
-  const [noteContent, setNoteContent] = useState("");
-  const [reminderDate, setReminderDate] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -147,37 +141,24 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
 
   const openCreate = () => {
     setEditingNote(null);
-    setNoteTitle("");
-    setNoteContent("");
-    setReminderDate(null);
     setShowNoteForm(true);
   };
 
   const openEdit = (note) => {
     setEditingNote(note);
-    setNoteTitle(note.title);
-    setNoteContent(note.content);
-    setReminderDate(note.remind_at || null);
     setShowNoteForm(true);
   };
 
   const closeForm = () => {
     setShowNoteForm(false);
     setEditingNote(null);
-    setNoteTitle("");
-    setNoteContent("");
-    setReminderDate(null);
   };
 
-  const handleSubmit = () => {
-    if (!noteTitle.trim() || !noteContent.trim()) {
-      toast.error("Please fill in both title and content");
-      return;
-    }
-    if (editingNote) {
-      updateNoteMutation.mutate({ id: editingNote.id, data: { title: noteTitle, content: noteContent, remind_at: reminderDate || null } });
+  const handleSubmit = (payload, noteId) => {
+    if (noteId) {
+      updateNoteMutation.mutate({ id: noteId, data: payload });
     } else {
-      createNoteMutation.mutate({ title: noteTitle, content: noteContent, remind_at: reminderDate || null });
+      createNoteMutation.mutate(payload);
     }
   };
 
@@ -200,28 +181,13 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
         </Collapsible>
       </div>
 
-      {/* Create / Edit Dialog */}
-      <Dialog open={showNoteForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingNote ? "Edit Note" : "Add Note"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <Input placeholder="Note title..." value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} className="text-sm" />
-            <Textarea placeholder="Write your note here..." value={noteContent} onChange={(e) => setNoteContent(e.target.value)} className="text-sm h-32" />
-            <div className="flex items-center gap-2 pt-1">
-              <span className="text-xs text-muted-foreground">Reminder:</span>
-              <ReminderPicker value={reminderDate} onChange={setReminderDate} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button size="sm" variant="outline" onClick={closeForm}>Cancel</Button>
-            <Button size="sm" onClick={handleSubmit} disabled={isPending} style={{ backgroundColor: "hsl(217, 91%, 60%)" }} className="text-white hover:opacity-90">
-              {editingNote ? "Save Changes" : "Save Note"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <NoteDialog
+        open={showNoteForm}
+        onOpenChange={(open) => { if (!open) closeForm(); }}
+        note={editingNote}
+        onSubmit={handleSubmit}
+        isPending={isPending}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>

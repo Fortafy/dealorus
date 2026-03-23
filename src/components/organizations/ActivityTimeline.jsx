@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { SlidersHorizontal, X } from "lucide-react";
+import DealDialog from "@/components/deals/DealDialog";
+import NoteDialog from "@/components/notes/NoteDialog";
+import { MoreHorizontal, Pencil, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
 import moment from "moment";
 import {
   formatActivityTimelineDate,
@@ -24,12 +29,16 @@ const TYPE_OPTIONS = [
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 
 export default function ActivityTimeline({ organization, lifecycleStages = [] }) {
+  const queryClient = useQueryClient();
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [dateFrom, setDateFrom] = useState(null);
   const [dateTo, setDateTo] = useState(null);
   const [showFromCal, setShowFromCal] = useState(false);
   const [showToCal, setShowToCal] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
+  const [editingDeal, setEditingDeal] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const { data: interactions = [] } = useQuery({
     queryKey: ["interactions", organization.id],
@@ -84,6 +93,42 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
     return true;
   });
 
+  const updateNoteMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Note.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes", organization.id] });
+      toast.success("Note updated");
+      setEditingNote(null);
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Note.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes", organization.id] });
+      toast.success("Note deleted");
+      setDeleteTarget(null);
+    },
+  });
+
+  const updateDealMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Deal.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
+      toast.success("Deal updated");
+      setEditingDeal(null);
+    },
+  });
+
+  const deleteDealMutation = useMutation({
+    mutationFn: (id) => base44.entities.Deal.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
+      toast.success("Deal deleted");
+      setDeleteTarget(null);
+    },
+  });
+
   const hasActiveFilters = selectedTypes.length > 0 || dateFrom || dateTo;
 
   const clearFilters = () => {
@@ -98,8 +143,59 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
     );
   };
 
+  const handleNoteSubmit = (payload, noteId) => {
+    updateNoteMutation.mutate({ id: noteId, data: payload });
+  };
+
+  const handleDealSubmit = (payload, dealId) => {
+    updateDealMutation.mutate({ id: dealId, data: { ...payload, is_active: true } });
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === "note") {
+      deleteNoteMutation.mutate(deleteTarget.id);
+      return;
+    }
+    deleteDealMutation.mutate(deleteTarget.id);
+  };
+
   return (
     <div>
+      <NoteDialog
+        open={!!editingNote}
+        onOpenChange={(open) => { if (!open) setEditingNote(null); }}
+        note={editingNote}
+        onSubmit={handleNoteSubmit}
+        isPending={updateNoteMutation.isPending}
+      />
+
+      <DealDialog
+        open={!!editingDeal}
+        onOpenChange={(open) => { if (!open) setEditingDeal(null); }}
+        deal={editingDeal}
+        lifecycleStages={lifecycleStages}
+        onSubmit={handleDealSubmit}
+        isPending={updateDealMutation.isPending}
+      />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteTarget?.type === "deal" ? "Deal" : "Note"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteTarget?.label}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 text-white hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5">
         <span className="text-sm font-semibold text-slate-700">
           Activity Timeline ({filteredActivity.length}{hasActiveFilters ? ` of ${mergedActivity.length}` : ""})
@@ -224,9 +320,37 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
                                 ? "Organization Created"
                                 : item.subject}
                         </p>
-                        <span className="activity-timeline-card-timestamp">
-                          {formatActivityTimelineDate(item.timestamp)}
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="activity-timeline-card-timestamp">
+                            {formatActivityTimelineDate(item.timestamp)}
+                          </span>
+                          {item.type === "note" || item.type === "deal" ? (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <button className="rounded-sm p-0.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
+                                  <MoreHorizontal className="h-3.5 w-3.5" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-32">
+                                <DropdownMenuItem onSelect={() => item.type === "note" ? setEditingNote(item) : setEditingDeal(item)}>
+                                  <Pencil className="h-3.5 w-3.5" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => setDeleteTarget({
+                                    id: item.id,
+                                    type: item.type,
+                                    label: item.type === "note" ? item.title : item.name,
+                                  })}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          ) : null}
+                        </div>
                       </div>
 
                       {item.type === "note" && stripHtml(item.content) ? (
