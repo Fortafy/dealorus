@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
-import DealDialog from "@/components/deals/DealDialog";
+import DealEditorDialog from "@/components/deals/DealEditorDialog";
 import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
 const CONTRACT_TYPES = [
@@ -89,17 +89,6 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     queryFn: () => base44.entities.Label.filter({ client_id: clientId }, "name"),
   });
 
-  const createDealMutation = useMutation({
-    mutationFn: (data) =>
-      base44.entities.Deal.create({ ...data, client_id: clientId, organization_id: organization.id, organization_name: organization.organization_name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
-      toast.success("Deal created");
-      setShowDealForm(false);
-      setEditingDeal(null);
-    },
-  });
-
   const updateDealMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Deal.update(id, data),
     onSuccess: () => {
@@ -123,16 +112,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
   const openEdit = (deal) => { setEditingDeal(deal); setShowDealForm(true); };
   const closeForm = () => { setShowDealForm(false); setEditingDeal(null); };
 
-  const handleSubmit = (payload, dealId) => {
-    if (dealId) {
-      updateDealMutation.mutate({ id: dealId, data: { ...payload, is_active: true } });
-    } else {
-      createDealMutation.mutate({ ...payload, is_active: true });
-    }
-  };
-
   const getStageLabel = (stageId) => clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
-  const isPending = createDealMutation.isPending || updateDealMutation.isPending;
 
   const handleDealLabelsChange = async (deal, labelIds) => {
     await base44.entities.Deal.update(deal.id, { label_ids: labelIds });
@@ -156,14 +136,18 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
       </div>
 
       {/* Create / Edit Dialog — shared component */}
-      <DealDialog
+      <DealEditorDialog
         open={showDealForm}
-        onOpenChange={(v) => { if (!v) closeForm(); }}
+        onOpenChange={(v) => { if (!v) closeForm(); else setShowDealForm(v); }}
         deal={editingDeal}
-        lifecycleStages={clientLifecycleStages}
-        onSubmit={handleSubmit}
-        isPending={isPending}
         clientId={clientId}
+        organization={organization}
+        lifecycleStages={clientLifecycleStages}
+        onSaved={() => {
+          queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
+          setShowDealForm(false);
+          setEditingDeal(null);
+        }}
       />
 
       {/* Delete Confirmation */}

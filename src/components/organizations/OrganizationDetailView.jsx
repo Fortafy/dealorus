@@ -55,14 +55,16 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     },
   });
 
+  const clientId = organization?.client_id || currentUser?.data?.client_id || currentUser?.client_id;
+
   const { data: clientData } = useQuery({
-    queryKey: ["client", currentUser?.data?.client_id],
+    queryKey: ["client", clientId],
     queryFn: async () => {
-      if (!currentUser?.data?.client_id) return null;
-      const all = await base44.entities.Client.list();
-      return all.find(c => c.id === currentUser.data.client_id) || null;
+      if (!clientId) return null;
+      const results = await base44.entities.Client.filter({ id: clientId });
+      return results[0] || null;
     },
-    enabled: !!currentUser?.data?.client_id,
+    enabled: !!clientId,
   });
 
   // Expose callbacks for quick-add buttons to trigger child components
@@ -176,12 +178,12 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
           <div className="space-y-0 border-t border-slate-100">
             <ContactsPanel
               organization={organization}
-              clientId={currentUser?.data?.client_id}
+              clientId={clientId}
             />
             <DealsSectionWithTrigger
               organization={organization}
-              clientId={currentUser?.data?.client_id}
-                    clientLifecycleStages={clientData?.lifecycle_stages || []}
+              clientId={clientId}
+              clientLifecycleStages={clientData?.lifecycle_stages || []}
               externalTrigger={triggerDeal}
             />
           </div>

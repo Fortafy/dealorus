@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Pencil, Trash2, Building2, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import moment from "moment";
-import DealDialog from "@/components/deals/DealDialog";
+import DealEditorDialog from "@/components/deals/DealEditorDialog";
 
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
@@ -19,14 +19,6 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
   const [showDelete, setShowDelete] = useState(false);
   const queryClient = useQueryClient();
 
-  const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Deal.update(deal.id, data),
-    onSuccess: () => {
-      toast.success("Deal updated");
-      setShowEdit(false);
-      onUpdate?.();
-    },
-  });
 
   const deleteMutation = useMutation({
     mutationFn: () => base44.entities.Deal.delete(deal.id),
@@ -38,10 +30,6 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
   });
 
   const handleEdit = () => setShowEdit(true);
-
-  const handleSave = (payload) => {
-    updateMutation.mutate(payload);
-  };
 
   const contractLabel = CONTRACT_TYPES.find(t => t.value === deal.contract_type)?.label;
 
@@ -89,13 +77,13 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
       </div>
 
       {/* Edit Dialog */}
-      <DealDialog
+      <DealEditorDialog
         open={showEdit}
         onOpenChange={setShowEdit}
         deal={deal}
+        clientId={deal.client_id}
         lifecycleStages={lifecycleStages}
-        onSubmit={handleSave}
-        isPending={updateMutation.isPending}
+        onSaved={onUpdate}
       />
 
       {/* Delete Confirmation */}

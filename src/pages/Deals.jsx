@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import moment from "moment";
 import KanbanDealCard from "@/components/deals/KanbanDealCard";
-import NewDealDialog from "@/components/deals/NewDealDialog";
+import DealEditorDialog from "@/components/deals/DealEditorDialog";
 import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
@@ -300,10 +300,9 @@ export default function Deals() {
         </DragDropContext>
       }
 
-      <NewDealDialog
+      <DealEditorDialog
         open={showNewDeal}
         onOpenChange={setShowNewDeal}
-        currentUser={currentUser}
         clientId={clientId}
         organizations={organizations}
         lifecycleStages={sortedStages}
