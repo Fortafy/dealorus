@@ -1,10 +1,7 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Building2, CalendarDays } from "lucide-react";
-import { toast } from "sonner";
+import { Building2, CalendarDays } from "lucide-react";
 import moment from "moment";
 import DealEditorDialog from "@/components/deals/DealEditorDialog";
 
@@ -16,65 +13,67 @@ const CONTRACT_TYPES = [
 
 export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUpdate }) {
   const [showEdit, setShowEdit] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
 
-  const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Deal.delete(deal.id),
-    onSuccess: () => {
-      toast.success("Deal deleted");
-      setShowDelete(false);
-      onUpdate?.();
-    },
-  });
-
-  const handleEdit = () => setShowEdit(true);
-
-  const contractLabel = CONTRACT_TYPES.find(t => t.value === deal.contract_type)?.label;
+  const contractLabel = CONTRACT_TYPES.find((t) => t.value === deal.contract_type)?.label;
+  const displayDate = deal.remind_at || deal.expected_close_date;
+  const isPastOrToday = displayDate
+    ? moment(displayDate).startOf("day").isSameOrBefore(moment().startOf("day"))
+    : false;
+  const dateToneClass = isPastOrToday ? "text-red-600" : "text-slate-400";
+  const dateLabel = deal.remind_at ? "Reminder" : "Close";
 
   return (
     <>
-      <div className={`bg-white rounded-lg border p-3 text-xs transition-shadow ${isDragging ? "shadow-lg border-blue-300" : "border-slate-200 shadow-sm hover:shadow-md"}`}>
-        <div className="flex items-start justify-between gap-1 mb-1.5">
-          <p className="font-semibold text-slate-800 leading-snug flex-1 min-w-0 truncate">{deal.name}</p>
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            <button onClick={handleEdit} className="p-1 text-slate-400 hover:text-blue-600 rounded transition-colors">
-              <Pencil className="w-3 h-3" />
-            </button>
-            <button onClick={() => setShowDelete(true)} className="p-1 text-slate-400 hover:text-red-500 rounded transition-colors">
-              <Trash2 className="w-3 h-3" />
-            </button>
-          </div>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setShowEdit(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setShowEdit(true);
+          }
+        }}
+        className={`bg-white rounded-lg border p-3 text-xs transition-shadow cursor-pointer ${isDragging ? "shadow-lg border-blue-300" : "border-slate-200 shadow-sm hover:shadow-md"}`}
+      >
+        <div className="mb-1.5">
+          <p className="truncate font-semibold leading-snug text-slate-800">{deal.name}</p>
         </div>
 
-        {deal.organization_name && (
-          <div className="flex items-center gap-1 text-[11px] text-slate-500 mb-2">
-            <Building2 className="w-3 h-3 flex-shrink-0" />
-            <span className="truncate">{deal.organization_name}</span>
+        {deal.organization_name && deal.organization_id && (
+          <div className="mb-2 flex items-center gap-1 text-[11px] text-slate-500">
+            <Building2 className="h-3 w-3 flex-shrink-0" />
+            <Link
+              to={`/Organizations?id=${deal.organization_id}`}
+              onClick={(event) => event.stopPropagation()}
+              className="truncate hover:text-blue-600 hover:underline"
+            >
+              {deal.organization_name}
+            </Link>
           </div>
         )}
 
-        <div className="flex flex-wrap gap-1 mt-1">
+        <div className="mt-1 flex flex-wrap gap-1">
           {deal.value > 0 && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-semibold text-emerald-700 border-emerald-200 bg-emerald-50">
+            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 px-1.5 py-0 text-[10px] font-semibold text-emerald-700">
               ${deal.value.toLocaleString()}
             </Badge>
           )}
           {contractLabel && (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-slate-500">
+            <Badge variant="outline" className="px-1.5 py-0 text-[10px] text-slate-500">
               {contractLabel}
             </Badge>
           )}
         </div>
 
-        {deal.expected_close_date && (
-          <div className="flex items-center gap-1 text-[10px] text-slate-400 mt-1.5">
-            <CalendarDays className="w-3 h-3" />
-            <span>Close {moment(deal.expected_close_date).format("MMM D, YYYY")}</span>
+        {displayDate && (
+          <div className={`mt-1.5 flex items-center gap-1 text-[10px] ${dateToneClass}`}>
+            <CalendarDays className={`h-3 w-3 ${dateToneClass}`} />
+            <span>{dateLabel} {moment(displayDate).format("MMM D, YYYY")}</span>
           </div>
         )}
       </div>
 
-      {/* Edit Dialog */}
       <DealEditorDialog
         open={showEdit}
         onOpenChange={setShowEdit}
@@ -83,22 +82,6 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
         lifecycleStages={lifecycleStages}
         onSaved={onUpdate}
       />
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDelete} onOpenChange={setShowDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Deal</AlertDialogTitle>
-            <AlertDialogDescription>Are you sure you want to delete "{deal.name}"? This cannot be undone.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteMutation.mutate()} className="bg-red-600 hover:bg-red-700 text-white">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
