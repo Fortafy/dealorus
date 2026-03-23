@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DealDialog from "@/components/deals/DealDialog";
+import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
@@ -82,6 +83,12 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     queryFn: () => base44.entities.Deal.filter({ organization_id: organization.id }, "-created_date"),
   });
 
+  const { data: labels = [] } = useQuery({
+    queryKey: ["labels", clientId],
+    enabled: !!clientId,
+    queryFn: () => base44.entities.Label.filter({ client_id: clientId }, "name"),
+  });
+
   const createDealMutation = useMutation({
     mutationFn: (data) =>
       base44.entities.Deal.create({ ...data, client_id: clientId, organization_id: organization.id, organization_name: organization.organization_name }),
@@ -126,6 +133,11 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
 
   const getStageLabel = (stageId) => clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
   const isPending = createDealMutation.isPending || updateDealMutation.isPending;
+
+  const handleDealLabelsChange = async (deal, labelIds) => {
+    await base44.entities.Deal.update(deal.id, { label_ids: labelIds });
+    queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
+  };
 
   return (
     <div className="border-b border-slate-200 overflow-hidden">
@@ -214,6 +226,12 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
                       </Badge>
                     )}
                   </div>
+                  <RecordLabelsEditor
+                    labels={labels}
+                    selectedIds={deal.label_ids || []}
+                    onChange={(labelIds) => handleDealLabelsChange(deal, labelIds)}
+                    className="mt-2"
+                  />
                   {deal.start_date && deal.end_date && (
                     <p className="text-[10px] text-slate-400 mt-0.5">
                       {moment(deal.start_date).format("MMM D, YYYY")} – {moment(deal.end_date).format("MMM D, YYYY")}

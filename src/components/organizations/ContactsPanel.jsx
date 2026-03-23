@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Phone, Linkedin, Plus, Search, Sparkles, Filter, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
+import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import ContactForm from "@/components/contacts/ContactForm";
@@ -45,6 +45,14 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
     queryFn: () => base44.entities.Contact.filter({ organization_id: organization.id }, "-created_date"),
   });
 
+  const resolvedClientId = currentUser?.client_id || currentUser?.data?.client_id;
+
+  const { data: labels = [] } = useQuery({
+    queryKey: ["labels", resolvedClientId],
+    enabled: !!resolvedClientId,
+    queryFn: () => base44.entities.Label.filter({ client_id: resolvedClientId }, "name"),
+  });
+
   const updateContactMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Contact.update(id, data),
     onSuccess: () => {
@@ -60,42 +68,6 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
       toast.success("Contact deleted");
     },
   });
-
-  const handleSetPrimary = async (contact) => {
-    // Remove primary from all other contacts
-    const updates = contacts.map((c) =>
-      c.id === contact.id
-        ? { ...c, is_primary_contact: true }
-        : { ...c, is_primary_contact: false }
-    );
-
-    for (const updated of updates) {
-      if (updated.id !== contact.id || updated.is_primary_contact !== contact.is_primary_contact) {
-        await base44.entities.Contact.update(updated.id, {
-          is_primary_contact: updated.is_primary_contact,
-        });
-      }
-    }
-    queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
-  };
-
-  const handleSetBusiness = async (contact) => {
-    // Remove business from all other contacts
-    const updates = contacts.map((c) =>
-      c.id === contact.id
-        ? { ...c, is_business_contact: true }
-        : { ...c, is_business_contact: false }
-    );
-
-    for (const updated of updates) {
-      if (updated.id !== contact.id || updated.is_business_contact !== contact.is_business_contact) {
-        await base44.entities.Contact.update(updated.id, {
-          is_business_contact: updated.is_business_contact,
-        });
-      }
-    }
-    queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
-  };
 
   const cleanLinkedInUrl = (url) => {
     if (!url || url === 'null') return null;
@@ -251,6 +223,16 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
     setEnrichingContactId(null);
   };
 
+  const handleContactLabelsChange = async (contact, labelIds) => {
+    await base44.entities.Contact.update(contact.id, {
+      label_ids: labelIds,
+      last_modified: new Date().toISOString(),
+    });
+    queryClient.invalidateQueries({ queryKey: ["contacts", organization.id] });
+    queryClient.invalidateQueries({ queryKey: ["people"] });
+    queryClient.invalidateQueries({ queryKey: ["contact-detail", contact.id] });
+  };
+
   const filteredContacts = contacts.filter(contact => {
     if (filters.title && !contact.title?.toLowerCase().includes(filters.title.toLowerCase())) {
       return false;
@@ -265,15 +247,6 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
   });
 
   const sortedContacts = [...filteredContacts].sort((a, b) => {
-    // Primary contacts first
-    if (a.is_primary_contact && !b.is_primary_contact) return -1;
-    if (!a.is_primary_contact && b.is_primary_contact) return 1;
-    
-    // Decision Makers second
-    if (a.is_business_contact && !b.is_business_contact) return -1;
-    if (!a.is_business_contact && b.is_business_contact) return 1;
-    
-    // Everyone else alphabetically by first name
     const aFirstName = a.name?.split(' ')[0]?.toLowerCase() || '';
     const bFirstName = b.name?.split(' ')[0]?.toLowerCase() || '';
     return aFirstName.localeCompare(bFirstName);
@@ -401,24 +374,12 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
                   )}
                 </div>
 
-                <div className="flex gap-1 flex-wrap">
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={() => handleSetPrimary(contact)}
-                    className={`text-xs px-3 py-1 ${contact.is_primary_contact ? "bg-blue-50 border-blue-300" : ""}`}
-                  >
-                    {contact.is_primary_contact ? "★ Primary" : "☆ Primary"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={() => handleSetBusiness(contact)}
-                    className={`text-xs px-3 py-1 ${contact.is_business_contact ? "bg-purple-50 border-purple-300" : ""}`}
-                  >
-                    Decision Maker
-                  </Button>
-                </div>
+                <RecordLabelsEditor
+                  labels={labels}
+                  selectedIds={contact.label_ids || []}
+                  onChange={(labelIds) => handleContactLabelsChange(contact, labelIds)}
+                  className="mt-1"
+                />
               </div>
             ))}
           </div>
