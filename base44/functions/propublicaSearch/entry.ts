@@ -9,26 +9,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const clientId = user?.data?.client_id;
-    if (!clientId) {
-      return Response.json({ error: 'Client not found for user' }, { status: 400 });
-    }
-
     const { ein, state, city, orgName, orgType, nteeCodeId } = await req.json();
-    const integrations = await base44.asServiceRole.entities.ClientIntegration.filter(
-      { client_id: clientId, integration_type: 'ProPublica', is_active: true },
-      '-updated_date',
-      1,
-    );
-    const requestHeaders = integrations?.[0]?.api_key ? { 'X-API-Key': integrations[0].api_key } : undefined;
 
     console.log('ProPublica function received:', { ein, state, city, orgName, orgType, nteeCodeId });
 
     if (ein) {
       const cleanEin = ein.replace(/-/g, '');
-      const response = await fetch(`https://projects.propublica.org/nonprofits/api/v2/organizations/${cleanEin}.json`, {
-        headers: requestHeaders,
-      });
+      const response = await fetch(`https://projects.propublica.org/nonprofits/api/v2/organizations/${cleanEin}.json`);
 
       if (!response.ok) {
         return Response.json({ error: 'Organization not found in ProPublica', ein }, { status: 404 });
@@ -109,9 +96,7 @@ Deno.serve(async (req) => {
 
     console.log('ProPublica search URL:', `https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);
 
-    const response = await fetch(`https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`, {
-      headers: requestHeaders,
-    });
+    const response = await fetch(`https://projects.propublica.org/nonprofits/api/v2/search.json?${searchParams.toString()}`);
 
     if (!response.ok) {
       console.error('ProPublica API error:', response.status, response.statusText);
@@ -134,9 +119,7 @@ Deno.serve(async (req) => {
         const pageParams = new URLSearchParams(searchParams);
         pageParams.append('page', page.toString());
         pagePromises.push(
-          fetch(`https://projects.propublica.org/nonprofits/api/v2/search.json?${pageParams.toString()}`, {
-            headers: requestHeaders,
-          })
+          fetch(`https://projects.propublica.org/nonprofits/api/v2/search.json?${pageParams.toString()}`)
             .then((request) => request.json())
             .then((data) => data.organizations || []),
         );
