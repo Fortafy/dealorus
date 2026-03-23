@@ -1,14 +1,15 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
-import { format, isValid } from "date-fns";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
+  formatActivityTimelineDate,
   getActivityTimelineAccentClass,
   getActivityTimelineAppearance,
-  getActivityTimelineNodeClass } from
-"@/lib/activityTimelineTheme";
+  getActivityTimelineNodeClass,
+  toSafeActivityTimelineDate,
+} from "@/lib/activityTimelineTheme";
 
 const formatFieldName = (field) => field.
 split("_").
@@ -16,14 +17,6 @@ map((part) => part.charAt(0).toUpperCase() + part.slice(1)).
 join(" ");
 
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
-const toSafeDate = (value) => {
-  const date = value ? new Date(value) : null;
-  return date && isValid(date) ? date : null;
-};
-const formatTimestamp = (value) => {
-  const date = toSafeDate(value);
-  return date ? format(date, "MMM d, yyyy 'at' h:mm a") : "Date unavailable";
-};
 
 export default function ActivityFeed({ contactId, contact }) {
   const { data: items = [], isLoading, error } = useQuery({
@@ -52,8 +45,8 @@ export default function ActivityFeed({ contactId, contact }) {
         timestamp: note.created_date || note.updated_date || null
       }))].
       sort((a, b) => {
-        const first = toSafeDate(a.timestamp)?.getTime() || 0;
-        const second = toSafeDate(b.timestamp)?.getTime() || 0;
+        const first = toSafeActivityTimelineDate(a.timestamp)?.getTime() || 0;
+        const second = toSafeActivityTimelineDate(b.timestamp)?.getTime() || 0;
         return second - first;
       });
     }
@@ -105,8 +98,8 @@ export default function ActivityFeed({ contactId, contact }) {
 
                 <div className="activity-timeline-card">
                   <div className="activity-timeline-card-header">
-                    <p className="text-xs activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
-                    <span className="activity-timeline-card-timestamp">{formatTimestamp(item.timestamp)}</span>
+                    <p className="activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
+                    <span className="activity-timeline-card-timestamp">{formatActivityTimelineDate(item.timestamp)}</span>
                   </div>
 
                   {item.itemType === "note" ?

@@ -277,7 +277,7 @@
   }
 
   .activity-timeline-card-title {
-    @apply text-sm font-medium text-slate-900;
+    @apply text-xs font-medium text-slate-900;
   }
 
   .activity-timeline-card-timestamp {

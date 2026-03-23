@@ -7,6 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { SlidersHorizontal, X } from "lucide-react";
 import moment from "moment";
 import {
+  formatActivityTimelineDate,
   getActivityTimelineAccentClass,
   getActivityTimelineAppearance,
   getActivityTimelineNodeClass,
@@ -224,7 +225,7 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
                                 : item.subject}
                         </p>
                         <span className="activity-timeline-card-timestamp">
-                          {item.type === "created" ? moment(item.timestamp).format("MMM D, YYYY") : moment(item.timestamp).fromNow()}
+                          {formatActivityTimelineDate(item.timestamp)}
                         </span>
                       </div>
 
