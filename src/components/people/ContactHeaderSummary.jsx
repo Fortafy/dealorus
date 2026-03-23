@@ -1,0 +1,73 @@
+import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Sparkles, Star, Trash2, Upload } from "lucide-react";
+
+export default function ContactHeaderSummary({
+  contact,
+  organization,
+  onEnrich,
+  onSync,
+  onDelete,
+  isSyncing,
+}) {
+  const initials = contact.name
+    ?.split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "?";
+
+  return (
+    <div className="border-b border-slate-100 bg-white px-4 py-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-lg font-semibold text-slate-900">{contact.name}</h2>
+              {contact.starred && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              {contact.title && <Badge variant="secondary">{contact.title}</Badge>}
+              {contact.role_department && <Badge variant="outline">{contact.role_department}</Badge>}
+              {organization?.organization_name && (
+                <span className="text-sm text-blue-600">{organization.organization_name}</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-slate-800">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem onClick={onEnrich}>
+              <Sparkles className="mr-2 h-3.5 w-3.5" />
+              Enrich
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onSync} disabled={!organization || isSyncing}>
+              <Upload className="mr-2 h-3.5 w-3.5" />
+              {isSyncing ? "Syncing..." : "Sync to CRM"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600">
+              <Trash2 className="mr-2 h-3.5 w-3.5" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
