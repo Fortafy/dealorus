@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronDown, ChevronUp, ExternalLink, FileText, Globe, Mail, Pencil, Phone, Star, Users } from "lucide-react";
 import { format } from "date-fns";
@@ -10,24 +8,18 @@ import ContactOrganizationsList from "@/components/people/ContactOrganizationsLi
 
 export default function ContactDetailsSection({ contact, organizations = [], onSaved }) {
   const [isOpen, setIsOpen] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState(contact);
 
-  useEffect(() => {
-    setForm(contact);
-  }, [contact]);
+  useEffect(() => {}, [contact]);
 
-  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
-
-  const handleSave = async () => {
+  const saveField = async (field, value) => {
     const updatedContact = {
-      ...form,
+      ...contact,
+      [field]: value,
       last_modified: new Date().toISOString(),
     };
 
     await base44.entities.Contact.update(contact.id, updatedContact);
     onSaved(updatedContact);
-    setEditing(false);
   };
 
   return (
@@ -40,79 +32,33 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
           <span className="text-sm font-semibold text-slate-700">Details</span>
           {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
         </button>
-        {!editing ? (
-          <Button size="sm" variant="outline" className="ml-3 h-6 gap-1 px-2 text-xs" onClick={() => setEditing(true)}>
-            <Pencil className="h-3 w-3" />Edit
-          </Button>
-        ) : null}
       </div>
 
       {isOpen ? (
         <div className="px-4 py-3">
-          {editing && form ? (
-            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="grid gap-3 md:grid-cols-2">
-                <div>
-                  <Label className="text-xs">Name</Label>
-                  <Input className="mt-1 h-8 text-sm" value={form.name || ""} onChange={(e) => update("name", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs">Title</Label>
-                  <Input className="mt-1 h-8 text-sm" value={form.title || ""} onChange={(e) => update("title", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs">Email</Label>
-                  <Input className="mt-1 h-8 text-sm" value={form.email || ""} onChange={(e) => update("email", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs">Phone</Label>
-                  <Input className="mt-1 h-8 text-sm" value={form.phone || ""} onChange={(e) => update("phone", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs">LinkedIn</Label>
-                  <Input className="mt-1 h-8 text-sm" value={form.linkedin || ""} onChange={(e) => update("linkedin", e.target.value)} />
-                </div>
-                <div>
-                  <Label className="text-xs">Department</Label>
-                  <Input className="mt-1 h-8 text-sm" value={form.role_department || ""} onChange={(e) => update("role_department", e.target.value)} />
-                </div>
-                <div className="md:col-span-2">
-                  <Label className="text-xs">Notes</Label>
-                  <Textarea className="mt-1 text-sm" rows={4} value={form.notes || ""} onChange={(e) => update("notes", e.target.value)} />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button size="sm" variant="outline" onClick={() => { setForm(contact); setEditing(false); }}>Cancel</Button>
-                <Button size="sm" onClick={handleSave}>Save</Button>
-              </div>
+          <div className="grid gap-x-6 md:grid-cols-2">
+            <div>
+              <EditableField icon={Mail} label="Email" value={contact.email} onSave={(value) => saveField("email", value)} isEmail placeholder="Email address..." />
+              <EditableField icon={Phone} label="Phone" value={contact.phone} onSave={(value) => saveField("phone", value)} placeholder="Phone number..." />
+              <EditableField icon={Users} label="Department" value={contact.role_department} onSave={(value) => saveField("role_department", value)} placeholder="Department..." />
             </div>
-          ) : (
-            <>
-              <div className="grid gap-x-6 md:grid-cols-2">
-                <div>
-                  <InfoRow icon={Mail} label="Email" value={contact.email} isEmail placeholder="Email address..." />
-                  <InfoRow icon={Phone} label="Phone" value={contact.phone} placeholder="Phone number..." />
-                  <InfoRow icon={Users} label="Department" value={contact.role_department} placeholder="Department..." />
-                </div>
-                <div>
-                  <InfoRow icon={Globe} label="LinkedIn" value={contact.linkedin} isLink placeholder="LinkedIn URL..." />
-                  <InfoRow icon={Star} label="Primary Contact" value={contact.is_primary_contact ? "Yes" : "No"} />
-                  <InfoRow icon={Users} label="Business Contact" value={contact.is_business_contact ? "Yes" : "No"} />
-                </div>
-              </div>
+            <div>
+              <EditableField icon={Globe} label="LinkedIn" value={contact.linkedin} onSave={(value) => saveField("linkedin", value)} isLink placeholder="LinkedIn URL..." />
+              <EditableBooleanField icon={Star} label="Primary Contact" value={contact.is_primary_contact} onSave={(value) => saveField("is_primary_contact", value)} />
+              <EditableBooleanField icon={Users} label="Business Contact" value={contact.is_business_contact} onSave={(value) => saveField("is_business_contact", value)} />
+            </div>
+          </div>
 
-              <InfoRow icon={FileText} label="Notes" value={contact.notes} multiline placeholder="Click to add notes..." />
+          <EditableField icon={FileText} label="Notes" value={contact.notes} onSave={(value) => saveField("notes", value)} multiline placeholder="Click to add notes..." />
 
-              <div className="-mx-4 mt-3">
-                <ContactOrganizationsList organizations={organizations} />
-              </div>
+          <div className="-mx-4 mt-3">
+            <ContactOrganizationsList organizations={organizations} />
+          </div>
 
-              <div className="border-t border-slate-100 pt-3 text-xs text-slate-400">
-                Created {contact.created_date ? format(new Date(contact.created_date), "MMM d, yyyy") : "—"}
-                {contact.created_by ? ` · by ${contact.created_by.split("@")[0]}` : ""}
-              </div>
-            </>
-          )}
+          <div className="border-t border-slate-100 pt-3 text-xs text-slate-400">
+            Created {contact.created_date ? format(new Date(contact.created_date), "MMM d, yyyy") : "—"}
+            {contact.created_by ? ` · by ${contact.created_by.split("@")[0]}` : ""}
+          </div>
         </div>
       ) : null}
     </div>
