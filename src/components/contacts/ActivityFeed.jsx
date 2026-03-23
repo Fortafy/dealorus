@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -9,28 +9,37 @@ const ACTION_CONFIG = {
   create: {
     icon: CheckCircle,
     label: "Contact Created",
-    color: "text-green-600",
-    bgColor: "bg-green-50"
+    iconColor: "text-green-600",
+    iconBg: "bg-green-100",
+    accentColor: "text-green-700"
   },
   edit: {
     icon: Edit,
     label: "Contact Edited",
-    color: "text-blue-600",
-    bgColor: "bg-blue-50"
+    iconColor: "text-blue-600",
+    iconBg: "bg-blue-100",
+    accentColor: "text-blue-700"
   },
   enrich: {
     icon: Sparkles,
     label: "Contact Enriched",
-    color: "text-indigo-600",
-    bgColor: "bg-indigo-50"
+    iconColor: "text-indigo-600",
+    iconBg: "bg-indigo-100",
+    accentColor: "text-indigo-700"
   },
   star: {
     icon: Star,
     label: "Contact Starred",
-    color: "text-yellow-600",
-    bgColor: "bg-yellow-50"
+    iconColor: "text-amber-600",
+    iconBg: "bg-amber-100",
+    accentColor: "text-amber-700"
   }
 };
+
+const formatFieldName = (field) => field
+  .split("_")
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
 
 export default function ActivityFeed({ contactId }) {
   const { data: activities = [], isLoading, error } = useQuery({
@@ -45,7 +54,7 @@ export default function ActivityFeed({ contactId }) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-2" />
+          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
           <p className="text-sm text-slate-500">Loading activity history...</p>
         </div>
       </div>
@@ -63,55 +72,59 @@ export default function ActivityFeed({ contactId }) {
 
   if (activities.length === 0) {
     return (
-      <div className="text-center py-8">
-        <p className="text-slate-500 text-sm">No activity recorded yet</p>
+      <div className="py-8 text-center">
+        <p className="text-sm text-slate-500">No activity recorded yet</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 max-h-96 overflow-y-auto">
-      {activities.map((activity) => {
-        const config = ACTION_CONFIG[activity.action] || ACTION_CONFIG.edit;
-        const Icon = config.icon;
+    <div className="max-h-96 overflow-y-auto">
+      <div className="relative">
+        <div className="absolute bottom-3 left-[13px] top-3 w-px bg-slate-200" />
 
-        return (
-          <div key={activity.id} className={`p-3 rounded-lg border border-slate-200 ${config.bgColor}`}>
-            <div className="flex gap-3">
-              <div className="flex-shrink-0 mt-1">
-                <Icon className={`w-4 h-4 ${config.color}`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className={`text-sm font-medium ${config.color}`}>
-                    {config.label}
-                  </p>
+        <div className="space-y-0 pr-1">
+          {activities.map((activity) => {
+            const config = ACTION_CONFIG[activity.action] || ACTION_CONFIG.edit;
+            const Icon = config.icon;
+
+            return (
+              <div key={activity.id} className="relative flex gap-3 pb-4 last:pb-0">
+                <div className={`relative z-10 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full ${config.iconBg}`}>
+                  <Icon className={`h-3.5 w-3.5 ${config.iconColor}`} />
                 </div>
-                <p className="text-xs text-slate-600 mb-2">
-                  {format(new Date(activity.created_date), "MMM d, yyyy 'at' h:mm a")}
-                </p>
-                <p className="text-sm text-slate-700">{activity.description}</p>
 
-                {activity.fields_changed && activity.fields_changed.length > 0 && (
-                  <div className="mt-2 space-y-1 text-xs">
-                    {activity.fields_changed.map((change, idx) => (
-                      <div key={idx} className="text-slate-600">
-                        <span className="font-medium">{change.field}:</span>
-                        {change.old_value && (
-                          <span className="line-through text-slate-500 mx-1">{change.old_value}</span>
-                        )}
-                        {change.new_value && (
-                          <span className={`font-medium ${config.color}`}>{change.new_value}</span>
-                        )}
-                      </div>
-                    ))}
+                <div className="min-w-0 flex-1 rounded-lg border border-slate-100 bg-white px-3 py-2.5 shadow-sm transition-shadow hover:shadow-md">
+                  <div className="mb-1 flex items-start justify-between gap-3">
+                    <p className="text-sm font-medium text-slate-900">{config.label}</p>
+                    <span className="flex-shrink-0 text-xs text-slate-400">
+                      {format(new Date(activity.created_date), "MMM d, yyyy 'at' h:mm a")}
+                    </span>
                   </div>
-                )}
+
+                  <p className="text-sm text-slate-600">{activity.description}</p>
+
+                  {activity.fields_changed && activity.fields_changed.length > 0 && (
+                    <div className="mt-2 space-y-1.5">
+                      {activity.fields_changed.map((change, idx) => (
+                        <div key={idx} className="rounded-md bg-slate-50 px-2.5 py-2 text-xs text-slate-600">
+                          <span className="font-medium text-slate-700">{formatFieldName(change.field)}:</span>
+                          {change.old_value ? (
+                            <span className="mx-1 line-through text-slate-400">{change.old_value}</span>
+                          ) : (
+                            <span className="mx-1 text-slate-400">empty</span>
+                          )}
+                          <span className={config.accentColor}>{change.new_value || "empty"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
