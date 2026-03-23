@@ -33,13 +33,11 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
         phone: "",
         linkedin: "",
         role_department: "",
-        notes: "",
         source: "Manual",
       });
     }
   }, [contact, organizationId, clientId]);
 
-  // Parse source in markdown link format: [display text](url)
   const parseSource = (source) => {
     if (!source) return null;
     const match = source.match(/\[([^\]]+)\]\(([^)]+)\)/);
@@ -229,7 +227,6 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
                   placeholder="e.g., Executive, Finance, Marketing"
                 />
               </div>
-
             </div>
 
             <div className="flex justify-end gap-3 pt-4">

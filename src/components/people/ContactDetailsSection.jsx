@@ -58,7 +58,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
   );
 }
 
-function EditableField({ icon: Icon, label, value, onSave, multiline = false, isEmail = false, isLink = false, placeholder = "Click to add..." }) {
+function EditableField({ icon: Icon, label, value, onSave, isEmail = false, isLink = false, placeholder = "Click to add..." }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value || "");
   const inputRef = useRef(null);
@@ -92,34 +92,20 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
       <div className="min-w-0 flex-1">
         <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">{label}</p>
         {editing ? (
-          multiline ? (
-            <Textarea
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commit}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") cancel();
-              }}
-              rows={3}
-              className="mt-1 text-xs"
-            />
-          ) : (
-            <Input
-              ref={inputRef}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commit}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  commit();
-                }
-                if (e.key === "Escape") cancel();
-              }}
-              className="mt-0.5 h-7 text-xs"
-            />
-          )
+          <Input
+            ref={inputRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commit();
+              }
+              if (e.key === "Escape") cancel();
+            }}
+            className="mt-0.5 h-7 text-xs"
+          />
         ) : (
           <div
             className="-mx-1 flex min-h-[1.5rem] cursor-pointer items-center rounded px-1 transition-colors hover:bg-slate-100"
@@ -140,8 +126,6 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
                   {displayValue.replace(/^https?:\/\/(www\.)?/, "")}
                   <ExternalLink className="h-3 w-3 flex-shrink-0" />
                 </a>
-              ) : multiline ? (
-                <p className="whitespace-pre-wrap text-xs text-slate-800">{displayValue}</p>
               ) : (
                 <p className="break-words text-xs text-slate-800">{displayValue}</p>
               )
@@ -151,28 +135,6 @@ function EditableField({ icon: Icon, label, value, onSave, multiline = false, is
             <Pencil className="ml-2 h-3 w-3 flex-shrink-0 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function EditableBooleanField({ icon: Icon, label, value, onSave }) {
-  return (
-    <div className="group flex items-start gap-2 border-b border-slate-100 py-2 last:border-0">
-      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
-        <Icon className="h-3.5 w-3.5" style={{ color: "hsl(217, 91%, 60%)" }} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="mb-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-400">{label}</p>
-        <button
-          type="button"
-          className="-mx-1 flex min-h-[1.5rem] items-center rounded px-1 text-left transition-colors hover:bg-slate-100"
-          onClick={() => onSave(!value)}
-          title="Click to edit"
-        >
-          <p className="text-xs text-slate-800">{value ? "Yes" : "No"}</p>
-          <Pencil className="ml-2 h-3 w-3 flex-shrink-0 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100" />
-        </button>
       </div>
     </div>
   );
