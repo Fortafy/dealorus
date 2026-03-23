@@ -26,6 +26,7 @@ const TYPE_OPTIONS = [
   { value: "email", label: "Emails" },
   { value: "call", label: "Calls" },
   { value: "meeting", label: "Meetings" },
+  { value: "enrich", label: "Data Enrichment" },
 ];
 
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
@@ -57,6 +58,11 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
     queryFn: () => base44.entities.Deal.filter({ organization_id: organization.id }, "-created_date"),
   });
 
+  const { data: activityRecords = [] } = useQuery({
+    queryKey: ["organization-activity-records", organization.id],
+    queryFn: () => base44.entities.Activity.filter({ organization_id: organization.id, contact_id: organization.id }, "-created_date"),
+  });
+
   const mergedActivity = [
     ...(organization.created_date
       ? [{ id: `organization-created-${organization.id}`, type: "created", timestamp: organization.created_date }]
@@ -76,6 +82,11 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
       ...deal,
       type: "deal",
       timestamp: deal.created_date,
+    })),
+    ...activityRecords.map((activity) => ({
+      ...activity,
+      type: activity.action,
+      timestamp: activity.created_date,
     })),
   ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -323,7 +334,9 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
                                 ? item.name
                                 : item.type === "created"
                                   ? "Organization Created"
-                                  : item.subject}
+                                  : item.type === "interaction"
+                                    ? item.subject
+                                    : appearance.label}
                           </p>
                           <div className="flex items-center gap-1">
                             <span className="activity-timeline-card-timestamp">
@@ -389,6 +402,12 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
                               </span>
                               {item.description ? <div className="mt-1 text-slate-600">{item.description}</div> : null}
                             </div>
+                          </div>
+                        ) : null}
+
+                        {item.type === "enrich" && item.description ? (
+                          <div className="activity-timeline-card-body">
+                            <div className="activity-timeline-detail-box">{item.description}</div>
                           </div>
                         ) : null}
                       </div>

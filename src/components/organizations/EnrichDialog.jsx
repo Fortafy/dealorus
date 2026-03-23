@@ -173,22 +173,27 @@ Search the web and return all available data. Find the organization's logo image
     await base44.entities.Organization.update(organization.id, updatedData);
 
     // Create Activity record
-    const successSources = enrichmentResults.sources_checked.filter((s) => s.success).map((s) => s.source);
+    const updatedSources = enrichmentResults.sources_checked.filter((result) => result.fields_updated.length > 0).map((result) => SOURCE_LABELS[result.source]);
+    const checkedSources = enrichmentResults.sources_checked.map((result) => SOURCE_LABELS[result.source]);
     const totalFields = Object.keys(enrichmentResults.fields_found).length;
     try {
-      const user = await base44.auth.me();
       await base44.entities.Activity.create({
+        client_id: organization.client_id,
         organization_id: organization.id,
-        contact_id: organization.id, // required field — using org id as placeholder
+        contact_id: organization.id,
         action: "enrich",
-        description: `Enriched from ${successSources.join(", ") || "no sources"} — ${totalFields} field${totalFields !== 1 ? "s" : ""} updated`,
-        fields_changed: Object.entries(enrichmentResults.fields_found).map(([field, source]) => ({
-          field,
-          old_value: String(organization[field] ?? ""),
-          new_value: String(enrichmentResults.merged_data[field] ?? ""),
-        })),
-        ...(user?.client_id ? { client_id: user.client_id } : {}),
+        description: updatedSources.length > 0
+          ? `Updated via ${updatedSources.join(", ")} · ${totalFields} field${totalFields !== 1 ? "s" : ""} changed`
+          : `Checked ${checkedSources.join(", ")} · no fields changed`,
+        fields_changed: Object.entries(enrichmentResults.fields_found)
+          .filter(([field]) => String(organization[field] ?? "") !== String(enrichmentResults.merged_data[field] ?? ""))
+          .map(([field]) => ({
+            field,
+            old_value: String(organization[field] ?? ""),
+            new_value: String(enrichmentResults.merged_data[field] ?? ""),
+          })),
       });
+      queryClient.invalidateQueries({ queryKey: ["organization-activity-records", organization.id] });
     } catch (_) {
       // Activity creation is non-blocking
     }

@@ -16,7 +16,7 @@ const ACTIVITY_TIMELINE_APPEARANCE = {
   create: { icon: CheckCircle2, label: "Contact Created", tone: "success" },
   created: { icon: CheckCircle2, label: "Created", tone: "success" },
   edit: { icon: Edit, label: "Record Modified", tone: "edit" },
-  enrich: { icon: Sparkles, label: "Contact Enriched", tone: "enrich" },
+  enrich: { icon: Sparkles, label: "Data Enrichment", tone: "enrich" },
   star: { icon: Star, label: "Contact Starred", tone: "note" },
   deal: { icon: Handshake, label: "Deal Added", tone: "deal" },
   call: { icon: Phone, label: "Call Logged", tone: "call" },
