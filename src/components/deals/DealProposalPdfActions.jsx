@@ -22,7 +22,67 @@ const buildFileName = (name) => {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "deal";
-  return `${slug}-proposal.pdf`;
+  return `${slug}-sales-order.pdf`;
+};
+
+const getServiceQuantity = (service, contractType) => {
+  const value = contractType === "project" ? service.total_estimated_hours : service.hours_per_month;
+  return value || value === 0 ? Number(value) : null;
+};
+
+const getServiceLineTotal = (service, contractType) => {
+  const quantity = getServiceQuantity(service, contractType);
+  const rate = service.rate || service.rate === 0 ? Number(service.rate) : null;
+  if (quantity === null || rate === null) return null;
+  return quantity * rate;
+};
+
+const renderRichTextHtml = async (doc, html, x, y, width) => {
+  const container = document.createElement("div");
+  container.style.position = "fixed";
+  container.style.left = "-10000px";
+  container.style.top = "0";
+  container.style.width = "700px";
+  container.style.padding = "0";
+  container.style.background = "#ffffff";
+  container.innerHTML = `
+    <style>
+      .pdf-rich-text { color: #334155; font-family: Helvetica, Arial, sans-serif; font-size: 12px; line-height: 1.55; }
+      .pdf-rich-text h1, .pdf-rich-text h2, .pdf-rich-text h3 { color: #0f172a; margin: 0 0 8px; font-weight: 700; }
+      .pdf-rich-text h1 { font-size: 22px; }
+      .pdf-rich-text h2 { font-size: 18px; }
+      .pdf-rich-text h3 { font-size: 15px; }
+      .pdf-rich-text p { margin: 0 0 8px; }
+      .pdf-rich-text ul, .pdf-rich-text ol { margin: 0 0 8px 18px; padding: 0; }
+      .pdf-rich-text li { margin: 0 0 4px; }
+      .pdf-rich-text strong { font-weight: 700; }
+      .pdf-rich-text em { font-style: italic; }
+      .pdf-rich-text u { text-decoration: underline; }
+      .pdf-rich-text a { color: #312e81; text-decoration: underline; }
+      .pdf-rich-text blockquote { margin: 0 0 8px; padding-left: 10px; border-left: 3px solid #cbd5e1; color: #475569; }
+    </style>
+    <div class="pdf-rich-text">${html || "<p>No notes added.</p>"}</div>
+  `;
+
+  document.body.appendChild(container);
+
+  await new Promise((resolve) => {
+    doc.html(container, {
+      x,
+      y,
+      width,
+      windowWidth: 700,
+      autoPaging: "text",
+      html2canvas: {
+        backgroundColor: "#ffffff",
+        scale: 0.45,
+        useCORS: true,
+      },
+      callback: () => resolve(),
+    });
+  });
+
+  document.body.removeChild(container);
 };
 
 const getStageMeta = (deal, lifecycleStages) => {
@@ -97,6 +157,8 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       const margin = 16;
       const contentWidth = pageWidth - margin * 2;
       const generatedTimestamp = new Date().toISOString();
+      const orderNumber = `SO-${(displayDeal.id || "DEAL").slice(0, 8).toUpperCase()}`;
+      const quantityLabel = displayDeal.contract_type === "project" ? "Hours" : "Hours/Mo";
       let y = 18;
 
       const ensureSpace = (needed = 10) => {
@@ -105,86 +167,147 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         y = 18;
       };
 
-      const addTitle = (text) => {
-        ensureSpace(14);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(18);
-        doc.text(text, margin, y);
-        y += 8;
-      };
-
       const addSectionTitle = (text) => {
         ensureSpace(10);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
+        doc.setTextColor(15, 23, 42);
         doc.text(text, margin, y);
         y += 6;
       };
 
-      const addBodyText = (text) => {
-        if (!text) return;
-        const lines = doc.splitTextToSize(String(text), contentWidth);
-        ensureSpace(lines.length * 5 + 2);
+      const addMutedLine = (label, value, x, lineY) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(label, x, lineY);
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.text(lines, margin, y);
-        y += lines.length * 5 + 2;
+        doc.setTextColor(15, 23, 42);
+        doc.text(String(value || "—"), x, lineY + 4.5);
       };
 
-      const addKeyValue = (label, value) => {
+      const addInfoRow = (label, value) => {
         if (!value || value === "—") return;
         const text = `${label}: ${value}`;
         const lines = doc.splitTextToSize(text, contentWidth);
         ensureSpace(lines.length * 5 + 1);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
+        doc.setTextColor(51, 65, 85);
         doc.text(lines, margin, y);
         y += lines.length * 5 + 1;
       };
 
-      addTitle("Deal Proposal Summary");
+      doc.setFillColor(49, 46, 129);
+      doc.roundedRect(margin, y, contentWidth, 20, 3, 3, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Sales Order", margin + 6, y + 8.5);
+      doc.setFontSize(9);
       doc.setFont("helvetica", "normal");
+      doc.text(`Generated ${moment(generatedTimestamp).format("MMM D, YYYY h:mm A")}`, margin + 6, y + 15);
+      doc.setFont("helvetica", "bold");
+      doc.text(orderNumber, pageWidth - margin - 6, y + 8.5, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      doc.text(`Order Date ${moment(generatedTimestamp).format("MMM D, YYYY")}`, pageWidth - margin - 6, y + 15, { align: "right" });
+      y += 28;
+
+      const leftBoxWidth = 108;
+      const rightBoxWidth = contentWidth - leftBoxWidth - 6;
+      ensureSpace(34);
+      doc.setDrawColor(203, 213, 225);
+      doc.roundedRect(margin, y, leftBoxWidth, 30, 2, 2);
+      doc.roundedRect(margin + leftBoxWidth + 6, y, rightBoxWidth, 30, 2, 2);
+
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.text(`Generated ${moment(generatedTimestamp).format("MMM D, YYYY h:mm A")}`, margin, y);
-      y += 8;
+      doc.setTextColor(15, 23, 42);
+      doc.text("Bill To", margin + 4, y + 6);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(51, 65, 85);
+      const billToLines = [
+        displayDeal.organization_name || organization?.organization_name || "—",
+        buildOrganizationAddress(organization),
+        organization?.email,
+        organization?.phone,
+      ].filter(Boolean);
+      doc.text(doc.splitTextToSize(billToLines.join("\n"), leftBoxWidth - 8), margin + 4, y + 11);
 
-      addSectionTitle("Deal Overview");
-      addKeyValue("Deal Name", displayDeal.name);
-      addKeyValue("Organization", displayDeal.organization_name || organization?.organization_name || "—");
-      addKeyValue("Stage", stageLabel);
-      addKeyValue("Contract Type", formatContractType(displayDeal.contract_type));
-      addKeyValue("Value", formatMoney(displayDeal.value));
-      addKeyValue("Probability", displayDeal.probability || displayDeal.probability === 0 ? `${displayDeal.probability}%` : "—");
-      addKeyValue("Start Date", formatDate(displayDeal.start_date));
-      addKeyValue("End Date", formatDate(displayDeal.end_date));
-      addKeyValue("Expected Close Date", formatDate(displayDeal.expected_close_date));
-      addKeyValue("Reminder Date", displayDeal.remind_at ? formatDate(displayDeal.remind_at, "MMM D, YYYY h:mm A") : "—");
+      addMutedLine("Deal Name", displayDeal.name || "—", margin + leftBoxWidth + 10, y + 6);
+      addMutedLine("Stage", stageLabel, margin + leftBoxWidth + 10, y + 17);
+      addMutedLine("Contract", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 28);
+      y += 38;
 
-      if (organization) {
-        addSectionTitle("Organization Details");
-        addKeyValue("Address", buildOrganizationAddress(organization));
-        addKeyValue("Website", organization.website || "—");
-        addKeyValue("Phone", organization.phone || "—");
-        addKeyValue("Email", organization.email || "—");
-        addKeyValue("State", organization.state || "—");
-      }
+      addSectionTitle("Order Details");
+      addInfoRow("Service Period", [formatDate(displayDeal.start_date), formatDate(displayDeal.end_date)].filter((value) => value !== "—").join(" to "));
+      addInfoRow("Expected Close", formatDate(displayDeal.expected_close_date));
+      addInfoRow("Quoted Value", formatMoney(displayDeal.value));
 
-      addSectionTitle("Notes");
-      addBodyText(htmlToPdfText(displayDeal.description) || "No notes added.");
+      addSectionTitle("Line Items");
+      ensureSpace(14);
+      const columns = [
+        { label: "Service", x: margin + 3, width: 90 },
+        { label: quantityLabel, x: margin + 96, width: 20 },
+        { label: "Rate", x: margin + 120, width: 24 },
+        { label: "Line Total", x: margin + 148, width: 27 },
+      ];
 
-      addSectionTitle("Services");
+      doc.setFillColor(241, 245, 249);
+      doc.rect(margin, y, contentWidth, 8, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(15, 23, 42);
+      columns.forEach((column) => {
+        doc.text(column.label, column.x, y + 5.2);
+      });
+      y += 10;
+
+      let computedTotal = 0;
+
       if (displayDeal.services?.length) {
-        displayDeal.services.forEach((service, index) => {
-          addKeyValue(`Service ${index + 1}`, service.service_name || "—");
-          addKeyValue("Hourly Rate", formatMoney(service.rate));
-          addKeyValue("Hours / Month", service.hours_per_month || service.hours_per_month === 0 ? String(service.hours_per_month) : "—");
-          addKeyValue("Total Estimated Hours", service.total_estimated_hours || service.total_estimated_hours === 0 ? String(service.total_estimated_hours) : "—");
-          addKeyValue("Overage Rate", formatMoney(service.overage_rate));
-          y += 2;
+        displayDeal.services.forEach((service) => {
+          const quantity = getServiceQuantity(service, displayDeal.contract_type);
+          const lineTotal = getServiceLineTotal(service, displayDeal.contract_type);
+          if (lineTotal !== null) computedTotal += lineTotal;
+
+          const serviceLines = doc.splitTextToSize(service.service_name || "—", 86);
+          const rowHeight = Math.max(8, serviceLines.length * 4 + 2);
+          ensureSpace(rowHeight + 2);
+          doc.setDrawColor(226, 232, 240);
+          doc.line(margin, y + rowHeight, margin + contentWidth, y + rowHeight);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(51, 65, 85);
+          doc.text(serviceLines, columns[0].x, y + 4.5);
+          doc.text(quantity === null ? "—" : String(quantity), columns[1].x, y + 4.5);
+          doc.text(formatMoney(service.rate), columns[2].x, y + 4.5);
+          doc.text(lineTotal === null ? "—" : formatMoney(lineTotal), columns[3].x, y + 4.5, { align: "right" });
+          y += rowHeight + 2;
         });
       } else {
-        addBodyText("No services added.");
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(51, 65, 85);
+        doc.text("No services added.", margin + 3, y + 4.5);
+        y += 10;
       }
+
+      ensureSpace(14);
+      doc.setDrawColor(148, 163, 184);
+      doc.line(margin + 116, y, margin + contentWidth, y);
+      y += 7;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Order Total", margin + 120, y);
+      doc.text(formatMoney(displayDeal.value || computedTotal), margin + contentWidth, y, { align: "right" });
+      y += 10;
+
+      addSectionTitle("Notes");
+      ensureSpace(30);
+      await renderRichTextHtml(doc, displayDeal.description, margin, y, contentWidth);
 
       const pdfBlob = doc.output("blob");
       const file = new File([pdfBlob], buildFileName(displayDeal.name), { type: "application/pdf" });
