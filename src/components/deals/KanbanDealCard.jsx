@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, CalendarDays } from "lucide-react";
 import moment from "moment";
 import DealEditorDialog from "@/components/deals/DealEditorDialog";
+import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
@@ -72,6 +73,12 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
             <span>{dateLabel} {moment(displayDate).format("MMM D, YYYY")}</span>
           </div>
         )}
+
+        <DealProposalPdfActions
+          deal={deal}
+          lifecycleStages={lifecycleStages}
+          onUpdated={onUpdate}
+        />
       </div>
 
       <DealEditorDialog
