@@ -14,7 +14,7 @@ const normalizeObjectType = (value) => {
   return value;
 };
 
-export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "", objectType }) {
+export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "", objectType, buttonFirst = false, iconOnlyButton = false }) {
   const normalizedObjectType = normalizeObjectType(objectType);
 
   const availableLabels = useMemo(

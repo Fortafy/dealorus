@@ -264,12 +264,6 @@ export default function OrganizationSummary({
     return organization;
   }, [organization]);
 
-  const { data: labels = [] } = useQuery({
-    queryKey: ["labels", organization.client_id],
-    enabled: !!organization.client_id,
-    queryFn: () => base44.entities.Label.filter({ client_id: organization.client_id }, "name"),
-  });
-
   const saveField = async (field, value) => {
     if (!isSaved || !organization.id) return;
     const updatedData = { ...organization, [field]: value };
@@ -355,14 +349,6 @@ export default function OrganizationSummary({
                 onSave={(val) => saveField("organization_name", val)}
               />
               {/* External link icons */}
-              <div className="mt-2">
-                <RecordLabelsEditor
-                  labels={labels}
-                  selectedIds={displayData.label_ids || []}
-                  onChange={(labelIds) => saveField("label_ids", labelIds)}
-                  objectType="Organization"
-                />
-              </div>
               <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                 {hasSalesforce && (
                   <TooltipProvider delayDuration={200}>
@@ -583,6 +569,26 @@ export function OrganizationFields({ organization, onEdit, isSaved = true, clien
               placeholder="Click to add mission statement..."
             />
           </div>
+
+          <div className="mb-3 border-b border-slate-100 pb-3">
+            <div className="flex items-start gap-2">
+              <div className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: "hsl(214, 95%, 93%)" }}>
+                <Tag className="w-3.5 h-3.5" style={{ color: "hsl(217, 91%, 60%)" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Labels</p>
+                <RecordLabelsEditor
+                  labels={labels}
+                  selectedIds={displayData.label_ids || []}
+                  onChange={(labelIds) => saveField("label_ids", labelIds)}
+                  objectType="Organization"
+                  buttonFirst
+                  iconOnlyButton
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-x-6">
             <div>
               <EditableField icon={Hash} label="EIN" value={organization.ein} onSave={(val) => saveField("ein", val)} placeholder="XX-XXXXXXX" />
