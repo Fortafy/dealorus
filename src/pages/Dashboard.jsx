@@ -13,10 +13,9 @@ import AdminUsers from "@/components/dashboard/AdminUsers";
 import AdminApiUsageSection from "@/components/dashboard/AdminApiUsageSection";
 import OrganizationMembers from "@/components/organizations/OrganizationMembers";
 import DataSourceConfiguration from "@/components/dashboard/DataSourceConfiguration";
-import DuplicatesReview from "@/components/organizations/DuplicatesReview";
 import SalesforceFieldMappingSection from "@/components/dashboard/SalesforceFieldMappingSection";
+import DataHygieneSection from "@/components/dashboard/DataHygieneSection";
 import { Home } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { isOrgAdmin } from "@/components/utils/roleChecking";
 import { Link, useLocation } from "react-router-dom";
@@ -26,7 +25,6 @@ import { createPageUrl } from "@/utils";
 export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeSection, setActiveSection] = useState("preferences");
-  const queryClient = useQueryClient();
   const location = useLocation();
   const clientId = currentUser?.client_id || currentUser?.data?.client_id;
 
@@ -99,16 +97,7 @@ export default function Dashboard() {
         null;
       case "data-hygiene":
         return isOrgAdmin(currentUser) ?
-        <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Data Hygiene</h2>
-            <DuplicatesReview
-            clientId={clientId}
-            onComplete={() => {
-              queryClient.invalidateQueries({ queryKey: ["organizations"] });
-              setActiveSection("data-hygiene");
-            }} />
-          
-          </div> :
+          <DataHygieneSection clientId={clientId} /> :
         null;
       default:
         return null;
