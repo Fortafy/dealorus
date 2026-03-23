@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CLIENT_INTEGRATION_CATALOG } from "@/lib/clientIntegrationCatalog";
 import ClientIntegrationKeyCard from "./ClientIntegrationKeyCard";
 import { ShieldCheck, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ClientIntegrationsManager({ organization }) {
   const queryClient = useQueryClient();
@@ -62,6 +63,23 @@ export default function ClientIntegrationsManager({ organization }) {
     }
   });
 
+  const testMutation = useMutation({
+    mutationFn: (service) => base44.functions.invoke("testClientIntegrationConnection", {
+      integration_type: service.integration_type
+    }),
+    onSuccess: (response, service) => {
+      if (response?.data?.success) {
+        toast.success(response.data.message || `${service.display_name} connection is working.`);
+        return;
+      }
+
+      toast.error(response?.data?.error || `Could not connect to ${service.display_name}.`);
+    },
+    onError: (error, service) => {
+      toast.error(error?.response?.data?.error || error?.message || `Could not connect to ${service.display_name}.`);
+    }
+  });
+
   if (!organization?.id) {
     return null;
   }
@@ -105,9 +123,11 @@ export default function ClientIntegrationsManager({ organization }) {
             }
             onToggle={(selectedIntegration) => toggleMutation.mutate(selectedIntegration)}
             onDelete={(selectedIntegration) => deleteMutation.mutate(selectedIntegration)}
+            onTest={(selectedService) => testMutation.mutate(selectedService)}
             isSaving={saveMutation.isPending}
             isToggling={toggleMutation.isPending}
-            isDeleting={deleteMutation.isPending} />);
+            isDeleting={deleteMutation.isPending}
+            isTesting={testMutation.isPending && testMutation.variables?.integration_type === service.integration_type} />);
 
 
       })}
