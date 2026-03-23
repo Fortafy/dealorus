@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ChevronDown, ChevronUp, ExternalLink, FileText, Globe, Mail, Pencil, Phone, Star, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Globe, Mail, Pencil, Phone, Users } from "lucide-react";
 import { format } from "date-fns";
 import ContactOrganizationsList from "@/components/people/ContactOrganizationsList";
 
@@ -38,16 +37,12 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             <div>
               <EditableField icon={Mail} label="Email" value={contact.email} onSave={(value) => saveField("email", value)} isEmail placeholder="Email address..." />
               <EditableField icon={Phone} label="Phone" value={contact.phone} onSave={(value) => saveField("phone", value)} placeholder="Phone number..." />
-              <EditableField icon={Users} label="Department" value={contact.role_department} onSave={(value) => saveField("role_department", value)} placeholder="Department..." />
             </div>
             <div>
               <EditableField icon={Globe} label="LinkedIn" value={contact.linkedin} onSave={(value) => saveField("linkedin", value)} isLink placeholder="LinkedIn URL..." />
-              <EditableBooleanField icon={Star} label="Primary Contact" value={contact.is_primary_contact} onSave={(value) => saveField("is_primary_contact", value)} />
-              <EditableBooleanField icon={Users} label="Business Contact" value={contact.is_business_contact} onSave={(value) => saveField("is_business_contact", value)} />
+              <EditableField icon={Users} label="Department" value={contact.role_department} onSave={(value) => saveField("role_department", value)} placeholder="Department..." />
             </div>
           </div>
-
-          <EditableField icon={FileText} label="Notes" value={contact.notes} onSave={(value) => saveField("notes", value)} multiline placeholder="Click to add notes..." />
 
           <div className="-mx-4 mt-3">
             <ContactOrganizationsList organizations={organizations} />

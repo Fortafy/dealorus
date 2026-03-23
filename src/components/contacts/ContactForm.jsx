@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import ActivityFeed from "./ActivityFeed";
@@ -18,7 +17,6 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
     phone: "",
     linkedin: "",
     role_department: "",
-    notes: "",
     source: "Manual",
   });
 
@@ -137,36 +135,27 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
                     />
                   </div>
 
-                  <div className="col-span-2">
-                    <Label>Notes</Label>
-                    <Textarea
-                      value={formData.notes || ""}
-                      onChange={(e) => handleChange("notes", e.target.value)}
-                      rows={3}
-                      placeholder="Additional information about this contact"
-                    />
-                    <div className="mt-2 flex items-center justify-between">
-                      <div>
-                        {parsedSource && (
-                          <div>
-                            <span className="text-xs text-slate-500">Original Source: </span>
-                            <a
-                              href={parsedSource.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
-                            >
-                              {parsedSource.text}
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                      {contact?.last_modified && (
-                        <div className="text-xs text-slate-500">
-                          Last Modified: {format(new Date(contact.last_modified), "MMM d, yyyy h:mm a")}
+                  <div className="col-span-2 mt-2 flex items-center justify-between">
+                    <div>
+                      {parsedSource && (
+                        <div>
+                          <span className="text-xs text-slate-500">Original Source: </span>
+                          <a
+                            href={parsedSource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline"
+                          >
+                            {parsedSource.text}
+                          </a>
                         </div>
                       )}
                     </div>
+                    {contact?.last_modified && (
+                      <div className="text-xs text-slate-500">
+                        Last Modified: {format(new Date(contact.last_modified), "MMM d, yyyy h:mm a")}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -241,15 +230,6 @@ export default function ContactForm({ contact, organizationId, clientId, open, o
                 />
               </div>
 
-              <div className="col-span-2">
-                <Label>Notes</Label>
-                <Textarea
-                  value={formData.notes || ""}
-                  onChange={(e) => handleChange("notes", e.target.value)}
-                  rows={3}
-                  placeholder="Additional information about this contact"
-                />
-              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4">

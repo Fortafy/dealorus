@@ -162,6 +162,7 @@ export default function ContactDetailPanel({ contactId, onClose }) {
               onEnrich={() => setShowEnrichDialog(true)}
               onSync={handleSyncToCRM}
               onDelete={() => setShowDeleteConfirm(true)}
+              onSaved={refreshContact}
               isSyncing={isSyncing}
             />
           </div>

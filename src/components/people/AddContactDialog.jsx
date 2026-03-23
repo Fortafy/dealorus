@@ -5,12 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 export default function AddContactDialog({ open, onOpenChange, clientId, onSaved }) {
   const [form, setForm] = useState({
     name: "", title: "", email: "", phone: "",
-    linkedin: "", role_department: "", notes: "",
+    linkedin: "", role_department: "",
     organization_id: "",
   });
 
@@ -22,7 +21,7 @@ export default function AddContactDialog({ open, onOpenChange, clientId, onSaved
 
   useEffect(() => {
     if (open) {
-      setForm({ name: "", title: "", email: "", phone: "", linkedin: "", role_department: "", notes: "", organization_id: "" });
+      setForm({ name: "", title: "", email: "", phone: "", linkedin: "", role_department: "", organization_id: "" });
     }
   }, [open]);
 
@@ -88,10 +87,6 @@ export default function AddContactDialog({ open, onOpenChange, clientId, onSaved
                   <option key={o.id} value={o.id}>{o.organization_name}</option>
                 ))}
               </select>
-            </div>
-            <div className="col-span-2">
-              <Label className="text-xs">Notes</Label>
-              <Textarea value={form.notes} onChange={e => update("notes", e.target.value)} rows={3} className="text-sm" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
