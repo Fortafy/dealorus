@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { Check, Plus, Trash2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import LabelBadge from "@/components/labels/LabelBadge";
-import LabelObjectScopeSelector, { ALL_LABEL_OBJECTS } from "@/components/labels/LabelObjectScopeSelector";
+import CompactLabelScopeSelector, { ALL_LABEL_OBJECTS } from "@/components/dashboard/CompactLabelScopeSelector";
 
 const DEFAULT_COLOR = "#7c3aed";
 
@@ -87,40 +88,33 @@ export default function LabelSettingsCard({ clientId }) {
           <p className="settings-card-description">Create and manage the fixed labels your team can apply to contacts, organizations, and deals.</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_120px]">
-            <div>
-              <label className="settings-label">Label name</label>
-              <Input
-                value={newName}
-                onChange={(event) => setNewName(event.target.value)}
-                placeholder="e.g. Primary, VIP, High Priority"
-                className="settings-input"
-              />
-            </div>
-            <div>
-              <label className="settings-label">Color</label>
-              <Input
-                type="color"
-                value={newColor}
-                onChange={(event) => setNewColor(event.target.value)}
-                className="h-11 w-full cursor-pointer rounded-xl border border-slate-200 bg-white p-1"
-              />
-            </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-slate-600">New label</span>
+            <Input
+              value={newName}
+              onChange={(event) => setNewName(event.target.value)}
+              placeholder="Primary, VIP, High Priority"
+              className="h-9 min-w-[180px] flex-1 text-xs"
+            />
+            <Input
+              type="color"
+              value={newColor}
+              onChange={(event) => setNewColor(event.target.value)}
+              className="h-9 w-11 cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
+              aria-label="Label color"
+            />
+            <CompactLabelScopeSelector value={newApplicableObjects} onChange={setNewApplicableObjects} className="flex-1" />
+            <Button
+              onClick={() => newName.trim() && createLabelMutation.mutate()}
+              disabled={!newName.trim() || newApplicableObjects.length === 0 || createLabelMutation.isPending}
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              title="Add label"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-
-          <div className="mt-3">
-            <label className="settings-label">Use with</label>
-            <LabelObjectScopeSelector value={newApplicableObjects} onChange={setNewApplicableObjects} />
-          </div>
-
-          <Button
-            onClick={() => newName.trim() && createLabelMutation.mutate()}
-            disabled={!newName.trim() || newApplicableObjects.length === 0 || createLabelMutation.isPending}
-            className="mt-3 h-11"
-          >
-            {createLabelMutation.isPending ? "Adding..." : "Add Label"}
-          </Button>
         </div>
 
         <div className="mt-4 space-y-3">
