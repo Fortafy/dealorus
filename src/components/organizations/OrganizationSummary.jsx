@@ -37,15 +37,29 @@ import OrganizationDetailsSection from "@/components/organizations/OrganizationD
 function OrgLogo({ logoUrl, name }) {
   const [imgError, setImgError] = useState(false);
   const initials = name ? name.charAt(0).toUpperCase() : "?";
+  const normalizedLogoUrl = React.useMemo(() => {
+    if (!logoUrl) return "";
+    const trimmed = String(logoUrl).trim();
+    if (!trimmed) return "";
+    const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    return encodeURI(withProtocol);
+  }, [logoUrl]);
 
   useEffect(() => {
     setImgError(false);
-  }, [logoUrl]);
+  }, [normalizedLogoUrl]);
 
   return (
-    <div className="w-10 h-10 rounded-full flex-shrink-0 border border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center">
-      {logoUrl && !imgError ? (
-        <img src={logoUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+    <div className="w-10 h-10 rounded-full flex-shrink-0 border border-slate-200 overflow-hidden bg-white flex items-center justify-center p-1">
+      {normalizedLogoUrl && !imgError ? (
+        <img
+          key={normalizedLogoUrl}
+          src={normalizedLogoUrl}
+          alt={name}
+          className="w-full h-full object-contain"
+          referrerPolicy="no-referrer"
+          onError={() => setImgError(true)}
+        />
       ) : (
         <span className="text-slate-600 text-sm font-bold">{initials}</span>
       )}
