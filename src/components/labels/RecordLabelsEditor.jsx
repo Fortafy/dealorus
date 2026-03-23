@@ -107,6 +107,10 @@ export default function RecordLabelsEditor({ labels = [], selectedIds = [], onCh
     </Popover>
   );
 
+  if (triggerVariant === "field") {
+    return triggerButton;
+  }
+
   return (
     <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
       {buttonFirst && triggerButton}
