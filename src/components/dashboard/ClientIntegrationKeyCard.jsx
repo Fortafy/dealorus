@@ -116,7 +116,7 @@ export default function ClientIntegrationKeyCard({
                       <Pencil className="h-4 w-4" />
                       Replace Key
                     </Button>
-                    <Button variant="outline" onClick={() => onToggle(integration)} disabled={isToggling} className="settings-secondary-button">
+                    <Button variant="outline" onClick={() => onToggle(integration)} disabled={isToggling || !integration} className="settings-secondary-button">
                       {isToggling ? <Loader2 className="h-4 w-4 animate-spin" /> : integration?.is_active ? "Disable" : "Enable"}
                     </Button>
                   </>
