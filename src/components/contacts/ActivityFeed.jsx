@@ -58,16 +58,24 @@ const formatTimestamp = (value) => {
   return date ? format(date, "MMM d, yyyy 'at' h:mm a") : "Date unavailable";
 };
 
-export default function ActivityFeed({ contactId }) {
+export default function ActivityFeed({ contactId, contact }) {
   const { data: items = [], isLoading, error } = useQuery({
-    queryKey: ["activities", contactId],
+    queryKey: ["activities", contactId, contact?.created_date],
     queryFn: async () => {
       const [activities, notes] = await Promise.all([
       base44.entities.Activity.filter({ contact_id: contactId }),
       base44.entities.Note.filter({ contact_id: contactId })]
       );
 
+      const hasCreateActivity = activities.some((activity) => activity.action === "create");
+      const createdItem = contact?.created_date && !hasCreateActivity ? [{
+        id: `contact-created-${contactId}`,
+        itemType: "create",
+        timestamp: contact.created_date
+      }] : [];
+
       return [
+      ...createdItem,
       ...activities.map((activity) => ({
         ...activity,
         itemType: activity.action || "edit",

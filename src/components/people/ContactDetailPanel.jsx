@@ -175,7 +175,7 @@ export default function ContactDetailPanel({ contactId, onClose }) {
           </div>
 
           <div className="border-t border-slate-100">
-            <ContactActivityTimelineSection contactId={contactId} />
+            <ContactActivityTimelineSection contactId={contactId} contact={contact} />
           </div>
         </div>
 

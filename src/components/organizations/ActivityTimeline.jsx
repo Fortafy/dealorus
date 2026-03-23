@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { MessageSquare, Handshake, Phone, Mail, Users, SlidersHorizontal, X } from "lucide-react";
+import { MessageSquare, Handshake, Phone, Mail, Users, SlidersHorizontal, X, CheckCircle2 } from "lucide-react";
 import moment from "moment";
 
 const TYPE_OPTIONS = [
@@ -45,6 +45,12 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
   };
 
   const mergedActivity = [
+    ...(organization.created_date ? [{
+      id: `organization-created-${organization.id}`,
+      type: "created",
+      timestamp: organization.created_date,
+      created_by: organization.created_by,
+    }] : []),
     ...interactions.map((i) => ({
       ...i,
       type: "interaction",
@@ -94,6 +100,7 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
   };
 
   const getItemIcon = (item) => {
+    if (item.type === "created") return <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />;
     if (item.type === "note") return <MessageSquare className="w-3.5 h-3.5 text-amber-600" />;
     if (item.type === "deal") return <Handshake className="w-3.5 h-3.5 text-emerald-600" />;
     if (item.interactionType === "call") return <Phone className="w-3.5 h-3.5 text-purple-600" />;
@@ -102,6 +109,7 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
   };
 
   const getItemIconBg = (item) => {
+    if (item.type === "created") return "bg-green-100";
     if (item.type === "note") return "bg-amber-100";
     if (item.type === "deal") return "bg-emerald-100";
     if (item.interactionType === "call") return "bg-purple-100";
@@ -110,6 +118,7 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
   };
 
   const getAvatarBg = (item) => {
+    if (item.type === "created") return "bg-green-600";
     if (item.type === "deal") return "bg-emerald-600";
     if (item.type === "note") return "bg-indigo-600";
     if (item.interactionType === "call") return "bg-purple-600";
@@ -235,6 +244,22 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
 
                   {/* Card content */}
                   <div className="flex-1 min-w-0 bg-white border border-slate-100 rounded-lg px-3 py-2.5 shadow-sm hover:shadow-md transition-shadow">
+
+                    {/* Created */}
+                    {item.type === "created" && (
+                      <>
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-5 h-5 rounded-full ${getAvatarBg(item)} flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0`}>
+                              {getInitials(item.created_by)}
+                            </div>
+                            <span className="text-xs font-semibold text-slate-700">{item.created_by?.split("@")[0] || "Unknown"}</span>
+                          </div>
+                          <span className="text-xs text-slate-400 flex-shrink-0">{moment(item.timestamp).format("MMM D, YYYY")}</span>
+                        </div>
+                        <p className="text-sm font-medium text-slate-900">Organization Created</p>
+                      </>
+                    )}
 
                     {/* Note */}
                     {item.type === "note" && (

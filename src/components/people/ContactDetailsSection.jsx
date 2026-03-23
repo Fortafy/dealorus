@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { format } from "date-fns";
 import ContactOrganizationsList from "@/components/people/ContactOrganizationsList";
 import InlineTextDetailField from "@/components/people/InlineTextDetailField";
 import MultiValueInlineField from "@/components/people/MultiValueInlineField";
@@ -133,10 +132,6 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
             <ContactOrganizationsList organizations={organizations} />
           </div>
 
-          <div className="border-t border-slate-100 pt-3 text-xs text-slate-400">
-            Created {contact.created_date ? format(new Date(contact.created_date), "MMM d, yyyy") : "—"}
-            {contact.created_by ? ` · by ${contact.created_by.split("@")[0]}` : ""}
-          </div>
         </div> :
       null}
     </div>);
