@@ -1,40 +1,15 @@
 import React from "react";
-import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
-import DealDialog from "@/components/deals/DealDialog";
+import DealEditorDialog from "@/components/deals/DealEditorDialog";
 
 export default function NewDealDialog({ open, onOpenChange, currentUser, clientId, organizations = [], lifecycleStages = [], onSaved }) {
-  const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Deal.create(data),
-    onSuccess: () => {
-      toast.success("Deal created");
-      onOpenChange(false);
-      onSaved?.();
-    },
-  });
-
-  const handleSubmit = (payload) => {
-    const resolvedClientId = clientId || currentUser?.data?.client_id || currentUser?.client_id;
-    const org = organizations.find(o => o.id === payload.organization_id);
-    createMutation.mutate({
-      ...payload,
-      client_id: resolvedClientId,
-      organization_name: org?.organization_name || "",
-      is_active: true,
-    });
-  };
-
   return (
-    <DealDialog
+    <DealEditorDialog
       open={open}
       onOpenChange={onOpenChange}
-      deal={null}
-      lifecycleStages={lifecycleStages}
-      organizations={organizations}
-      onSubmit={handleSubmit}
-      isPending={createMutation.isPending}
       clientId={clientId || currentUser?.data?.client_id || currentUser?.client_id}
+      organizations={organizations}
+      lifecycleStages={lifecycleStages}
+      onSaved={onSaved}
     />
   );
 }
