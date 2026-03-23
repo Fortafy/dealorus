@@ -10,6 +10,7 @@ import {
   getActivityTimelineNodeClass,
   toSafeActivityTimelineDate,
 } from "@/lib/activityTimelineTheme";
+import ActivityRecordModifiedCard from "@/components/activity/ActivityRecordModifiedCard";
 
 const formatFieldName = (field) => field.
 split("_").
@@ -96,32 +97,36 @@ export default function ActivityFeed({ contactId, contact }) {
                   <Icon className="h-3.5 w-3.5" />
                 </div>
 
-                <div className="activity-timeline-card">
-                  <div className="activity-timeline-card-header">
-                    <p className="activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
-                    <span className="activity-timeline-card-timestamp">{formatActivityTimelineDate(item.timestamp)}</span>
+                {item.itemType === "edit" ? (
+                  <ActivityRecordModifiedCard item={item} />
+                ) : (
+                  <div className="activity-timeline-card">
+                    <div className="activity-timeline-card-header">
+                      <p className="activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
+                      <span className="activity-timeline-card-timestamp">{formatActivityTimelineDate(item.timestamp)}</span>
+                    </div>
+
+                    {item.itemType === "note" ?
+                    stripHtml(item.content) ? <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div> : null :
+
+                    item.fields_changed?.length ?
+                    <div className="activity-timeline-card-body">
+                          {item.fields_changed.map((change, idx) =>
+                      <div key={idx} className="activity-timeline-detail-box">
+                              <span className="activity-timeline-detail-label">{formatFieldName(change.field)}:</span>
+                              {change.old_value ?
+                        <span className="mx-1 line-through text-slate-400">{change.old_value}</span> :
+
+                        <span className="mx-1 text-slate-400">empty</span>
+                        }
+                              <span className={getActivityTimelineAccentClass(item.itemType)}>{change.new_value || "empty"}</span>
+                            </div>
+                      )}
+                        </div> :
+                    null
+                    }
                   </div>
-
-                  {item.itemType === "note" ?
-                  stripHtml(item.content) ? <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div> : null :
-
-                  item.fields_changed?.length ?
-                  <div className="activity-timeline-card-body">
-                        {item.fields_changed.map((change, idx) =>
-                    <div key={idx} className="activity-timeline-detail-box">
-                            <span className="activity-timeline-detail-label">{formatFieldName(change.field)}:</span>
-                            {change.old_value ?
-                      <span className="mx-1 line-through text-slate-400">{change.old_value}</span> :
-
-                      <span className="mx-1 text-slate-400">empty</span>
-                      }
-                            <span className={getActivityTimelineAccentClass(item.itemType)}>{change.new_value || "empty"}</span>
-                          </div>
-                    )}
-                      </div> :
-                  null
-                  }
-                </div>
+                )}
               </div>);
 
           })}
