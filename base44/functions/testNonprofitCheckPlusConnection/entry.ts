@@ -16,12 +16,12 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
-    const clientId = user?.data?.client_id;
+    const payload = await req.json().catch(() => ({}));
+    const clientId = payload?.client_id || user?.data?.client_id;
     if (!clientId) {
-      return Response.json({ success: false, error: 'Client not found for user' }, { status: 400 });
+      return Response.json({ success: false, error: 'Client not found for this test request.' }, { status: 400 });
     }
 
-    const payload = await req.json().catch(() => ({}));
     let apiKey = payload?.api_key?.trim();
 
     if (!apiKey) {

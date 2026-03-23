@@ -65,9 +65,12 @@ export default function ClientIntegrationsManager({ organization }) {
   });
 
   const testMutation = useMutation({
-    mutationFn: ({ service, apiKey }) => base44.functions.invoke(
+    mutationFn: ({ service, apiKey, clientId }) => base44.functions.invoke(
       service.test_function_name,
-      apiKey ? { api_key: apiKey } : {}
+      {
+        client_id: clientId,
+        ...(apiKey ? { api_key: apiKey } : {})
+      }
     ),
     onMutate: ({ service }) => {
       setTestResults((current) => ({
@@ -156,7 +159,7 @@ export default function ClientIntegrationsManager({ organization }) {
             }
             onToggle={(selectedIntegration) => toggleMutation.mutate(selectedIntegration)}
             onDelete={(selectedIntegration) => deleteMutation.mutate(selectedIntegration)}
-            onTest={(selectedService, apiKey) => testMutation.mutate({ service: selectedService, apiKey })}
+            onTest={(selectedService, apiKey) => testMutation.mutate({ service: selectedService, apiKey, clientId: organization.id })}
             isSaving={saveMutation.isPending}
             isToggling={toggleMutation.isPending}
             isDeleting={deleteMutation.isPending}
