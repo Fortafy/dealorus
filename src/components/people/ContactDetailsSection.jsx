@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ChevronDown, ChevronUp, ExternalLink, FileText, Globe, Mail, Pencil, Phone, Star, Users } from "lucide-react";
 import { format } from "date-fns";
+import ContactOrganizationsList from "@/components/people/ContactOrganizationsList";
 
-export default function ContactDetailsSection({ contact, onSaved }) {
+export default function ContactDetailsSection({ contact, organizations = [], onSaved }) {
   const [isOpen, setIsOpen] = useState(true);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(contact);
@@ -36,7 +37,7 @@ export default function ContactDetailsSection({ contact, onSaved }) {
           className="flex flex-1 items-center justify-between text-left transition-opacity hover:opacity-80"
           onClick={() => setIsOpen((current) => !current)}
         >
-          <span className="text-sm font-semibold text-slate-700">Contact Details</span>
+          <span className="text-sm font-semibold text-slate-700">Details</span>
           {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
         </button>
         {!editing ? (
@@ -101,6 +102,8 @@ export default function ContactDetailsSection({ contact, onSaved }) {
               </div>
 
               <InfoRow icon={FileText} label="Notes" value={contact.notes} multiline placeholder="Click to add notes..." />
+
+              <ContactOrganizationsList organizations={organizations} />
 
               <div className="border-t border-slate-100 pt-3 text-xs text-slate-400">
                 Created {contact.created_date ? format(new Date(contact.created_date), "MMM d, yyyy") : "—"}

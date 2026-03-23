@@ -82,6 +82,31 @@ export default function ContactDetailPanel({ contactId, onClose }) {
 
   const clientId = currentUser?.client_id || currentUser?.data?.client_id;
 
+  const { data: relatedOrganizations = [] } = useQuery({
+    queryKey: ["related-organizations-for-contact", contactId, clientId, contact?.email, contact?.linkedin, contact?.name],
+    enabled: !!contact && !!clientId,
+    queryFn: async () => {
+      const [allContacts, allOrganizations] = await Promise.all([
+        base44.entities.Contact.filter({ client_id: clientId }, "-created_date"),
+        base44.entities.Organization.filter({ client_id: clientId }, "organization_name"),
+      ]);
+
+      const email = contact.email?.trim().toLowerCase();
+      const linkedin = contact.linkedin?.trim().toLowerCase();
+      const name = contact.name?.trim().toLowerCase();
+
+      const matchingContacts = allContacts.filter((item) => {
+        const emailMatch = email && item.email?.trim().toLowerCase() === email;
+        const linkedinMatch = linkedin && item.linkedin?.trim().toLowerCase() === linkedin;
+        const nameMatch = !email && !linkedin && name && item.name?.trim().toLowerCase() === name;
+        return item.id === contact.id || emailMatch || linkedinMatch || nameMatch;
+      });
+
+      const organizationIds = [...new Set(matchingContacts.map((item) => item.organization_id).filter(Boolean))];
+      return allOrganizations.filter((item) => organizationIds.includes(item.id));
+    },
+  });
+
   const refreshContact = () => {
     queryClient.invalidateQueries({ queryKey: ["contact-detail", contactId] });
     queryClient.invalidateQueries({ queryKey: ["people"] });
@@ -162,7 +187,7 @@ export default function ContactDetailPanel({ contactId, onClose }) {
         </div>
 
         <div className="flex flex-col overflow-y-auto overflow-x-hidden" style={{ width: `${100 - leftPct}%` }}>
-          <ContactDetailsSection contact={contact} onSaved={refreshContact} />
+          <ContactDetailsSection contact={contact} organizations={relatedOrganizations} onSaved={refreshContact} />
         </div>
       </div>
 
