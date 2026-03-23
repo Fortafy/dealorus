@@ -303,8 +303,8 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button onClick={() => searchContacts()} disabled={isSearching} size="sm" className="h-6 px-1.5 bg-black text-white hover:bg-black/90">
-                      {isSearching ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search className="w-3 h-3 text-white" />}
+                    <Button onClick={() => searchContacts()} disabled={isSearching} variant="outline" size="sm" className="h-6 px-1.5">
+                      {isSearching ? <div className="w-3 h-3 border-2 border-slate-300/50 border-t-slate-600 rounded-full animate-spin" /> : <Search className="w-3 h-3 text-black" />}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Quick Search</TooltipContent>

@@ -137,8 +137,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
               {isOpen ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
             </CollapsibleTrigger>
             <Button size="sm" onClick={openCreate} className="h-6 px-2 text-xs">
-              <Plus className="w-2.5 h-2.5 mr-1" />
-              New Deal
+              <Plus className="w-2.5 h-2.5" />
             </Button>
           </div>
         </Collapsible>
