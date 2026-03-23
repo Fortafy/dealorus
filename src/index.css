@@ -236,35 +236,47 @@
     @apply relative z-10 flex h-7 w-7 flex-shrink-0 items-center justify-center bg-transparent;
   }
 
-  .activity-timeline-node--note {
+  .activity-timeline-icon {
+    @apply h-3.5 w-3.5;
+  }
+
+  .activity-timeline-node--note,
+  .activity-timeline-icon--note {
     @apply text-amber-600;
   }
 
-  .activity-timeline-node--success {
+  .activity-timeline-node--success,
+  .activity-timeline-icon--success {
     @apply text-green-600;
   }
 
-  .activity-timeline-node--edit {
+  .activity-timeline-node--edit,
+  .activity-timeline-icon--edit {
     @apply text-sky-600;
   }
 
-  .activity-timeline-node--enrich {
+  .activity-timeline-node--enrich,
+  .activity-timeline-icon--enrich {
     @apply text-indigo-600;
   }
 
-  .activity-timeline-node--deal {
+  .activity-timeline-node--deal,
+  .activity-timeline-icon--deal {
     @apply text-emerald-600;
   }
 
-  .activity-timeline-node--call {
+  .activity-timeline-node--call,
+  .activity-timeline-icon--call {
     @apply text-violet-600;
   }
 
-  .activity-timeline-node--email {
+  .activity-timeline-node--email,
+  .activity-timeline-icon--email {
     @apply text-blue-600;
   }
 
-  .activity-timeline-node--meeting {
+  .activity-timeline-node--meeting,
+  .activity-timeline-icon--meeting {
     @apply text-rose-600;
   }
 

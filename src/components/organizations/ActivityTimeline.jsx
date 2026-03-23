@@ -16,6 +16,7 @@ import {
   formatActivityTimelineDate,
   getActivityTimelineAccentClass,
   getActivityTimelineAppearance,
+  getActivityTimelineIconClass,
   getActivityTimelineNodeClass,
 } from "@/lib/activityTimelineTheme";
 
@@ -307,7 +308,7 @@ export default function ActivityTimeline({ organization, lifecycleStages = [] })
                 return (
                   <div key={`${item.type}-${item.id}`} className="activity-timeline-item">
                     <div className={getActivityTimelineNodeClass(appearanceKey)}>
-                      <Icon className="h-3.5 w-3.5" />
+                      <Icon className={getActivityTimelineIconClass(appearanceKey)} />
                     </div>
 
                     {item.type === "edit" ? (

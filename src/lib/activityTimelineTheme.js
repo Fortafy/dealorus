@@ -35,6 +35,11 @@ export function getActivityTimelineNodeClass(type) {
   return `activity-timeline-node activity-timeline-node--${appearance.tone}`;
 }
 
+export function getActivityTimelineIconClass(type) {
+  const appearance = getActivityTimelineAppearance(type);
+  return `activity-timeline-icon activity-timeline-icon--${appearance.tone}`;
+}
+
 export function getActivityTimelineAccentClass(type) {
   const appearance = getActivityTimelineAppearance(type);
   return `activity-timeline-accent activity-timeline-accent--${appearance.tone}`;

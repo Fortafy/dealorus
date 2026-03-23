@@ -7,6 +7,7 @@ import {
   formatActivityTimelineDate,
   getActivityTimelineAccentClass,
   getActivityTimelineAppearance,
+  getActivityTimelineIconClass,
   getActivityTimelineNodeClass,
   toSafeActivityTimelineDate,
 } from "@/lib/activityTimelineTheme";
@@ -94,7 +95,7 @@ export default function ActivityFeed({ contactId, contact }) {
             return (
               <div key={`${item.itemType}-${item.id}`} className="activity-timeline-item">
                 <div className={getActivityTimelineNodeClass(item.itemType)}>
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className={getActivityTimelineIconClass(item.itemType)} />
                 </div>
 
                 {item.itemType === "edit" ? (
