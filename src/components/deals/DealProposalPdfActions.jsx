@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import moment from "moment";
 import { FileText, ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
@@ -37,7 +38,7 @@ const getServiceLineTotal = (service, contractType) => {
   return quantity * rate;
 };
 
-const renderRichTextHtml = async (doc, html, x, y, width) => {
+const renderRichTextHtml = async (doc, html, x, y, width, pageHeight, margin) => {
   const container = document.createElement("div");
   container.style.position = "fixed";
   container.style.left = "-10000px";
@@ -65,24 +66,39 @@ const renderRichTextHtml = async (doc, html, x, y, width) => {
   `;
 
   document.body.appendChild(container);
-
-  await new Promise((resolve) => {
-    doc.html(container, {
-      x,
-      y,
-      width,
-      windowWidth: 700,
-      autoPaging: "text",
-      html2canvas: {
-        backgroundColor: "#ffffff",
-        scale: 0.45,
-        useCORS: true,
-      },
-      callback: () => resolve(),
-    });
+  const content = container.querySelector(".pdf-rich-text");
+  const canvas = await html2canvas(content, {
+    backgroundColor: "#ffffff",
+    scale: 2,
+    useCORS: true,
   });
-
   document.body.removeChild(container);
+
+  const mmPerPx = width / canvas.width;
+  let offsetPx = 0;
+  let currentY = y;
+  let lastSliceHeightMm = 0;
+
+  while (offsetPx < canvas.height) {
+    const availableHeightMm = pageHeight - currentY - margin;
+    const sliceHeightPx = Math.min(Math.floor(availableHeightMm / mmPerPx), canvas.height - offsetPx);
+    const sliceCanvas = document.createElement("canvas");
+    sliceCanvas.width = canvas.width;
+    sliceCanvas.height = sliceHeightPx;
+    const sliceContext = sliceCanvas.getContext("2d");
+    sliceContext.drawImage(canvas, 0, offsetPx, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+
+    lastSliceHeightMm = sliceHeightPx * mmPerPx;
+    doc.addImage(sliceCanvas.toDataURL("image/png"), "PNG", x, currentY, width, lastSliceHeightMm);
+    offsetPx += sliceHeightPx;
+
+    if (offsetPx < canvas.height) {
+      doc.addPage();
+      currentY = margin;
+    }
+  }
+
+  return currentY + lastSliceHeightMm;
 };
 
 const getStageMeta = (deal, lifecycleStages) => {
@@ -235,16 +251,15 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       ].filter(Boolean);
       doc.text(doc.splitTextToSize(billToLines.join("\n"), leftBoxWidth - 8), margin + 4, y + 11);
 
-      addMutedLine("Deal Name", displayDeal.name || "—", margin + leftBoxWidth + 10, y + 6);
-      addMutedLine("Stage", stageLabel, margin + leftBoxWidth + 10, y + 17);
-      addMutedLine("Contract", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 28);
+      addMutedLine("Deal Name", displayDeal.name || "—", margin + leftBoxWidth + 10, y + 9);
+      addMutedLine("Contract Type", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 22);
       y += 38;
 
       addSectionTitle("Order Details");
       addInfoRow("Service Period", [formatDate(displayDeal.start_date), formatDate(displayDeal.end_date)].filter((value) => value !== "—").join(" to "));
-      addInfoRow("Expected Close", formatDate(displayDeal.expected_close_date));
-      addInfoRow("Quoted Value", formatMoney(displayDeal.value));
+      addInfoRow("Estimate", formatMoney(displayDeal.value));
 
+      y += 5;
       addSectionTitle("Line Items");
       ensureSpace(14);
       const columns = [
@@ -307,7 +322,7 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
       addSectionTitle("Notes");
       ensureSpace(30);
-      await renderRichTextHtml(doc, displayDeal.description, margin, y, contentWidth);
+      y = await renderRichTextHtml(doc, displayDeal.description, margin, y, contentWidth, pageHeight, margin);
 
       const pdfBlob = doc.output("blob");
       const file = new File([pdfBlob], buildFileName(displayDeal.name), { type: "application/pdf" });
