@@ -532,6 +532,12 @@ export function OrganizationFields({ organization, onEdit, isSaved = true, clien
     return organization;
   }, [organization]);
 
+  const { data: labels = [] } = useQuery({
+    queryKey: ["labels", organization.client_id],
+    enabled: !!organization.client_id,
+    queryFn: () => base44.entities.Label.filter({ client_id: organization.client_id }, "name"),
+  });
+
   const saveField = async (field, value) => {
     if (!isSaved || !organization.id) return;
     const updatedData = { ...organization, [field]: value };
