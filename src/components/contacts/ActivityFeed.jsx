@@ -2,51 +2,18 @@ import React from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
-import { AlertCircle, CheckCircle, Edit, MessageSquare, Sparkles, Star } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  getActivityTimelineAccentClass,
+  getActivityTimelineAppearance,
+  getActivityTimelineNodeClass,
+} from "@/lib/activityTimelineTheme";
 
-const ITEM_CONFIG = {
-  note: {
-    icon: MessageSquare,
-    label: "Note Added",
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-100",
-    accentColor: "text-amber-700"
-  },
-  create: {
-    icon: CheckCircle,
-    label: "Contact Created",
-    iconColor: "text-green-600",
-    iconBg: "bg-green-100",
-    accentColor: "text-green-700"
-  },
-  edit: {
-    icon: Edit,
-    label: "Contact Edited",
-    iconColor: "text-blue-600",
-    iconBg: "bg-blue-100",
-    accentColor: "text-blue-700"
-  },
-  enrich: {
-    icon: Sparkles,
-    label: "Contact Enriched",
-    iconColor: "text-indigo-600",
-    iconBg: "bg-indigo-100",
-    accentColor: "text-indigo-700"
-  },
-  star: {
-    icon: Star,
-    label: "Contact Starred",
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-100",
-    accentColor: "text-amber-700"
-  }
-};
-
-const formatFieldName = (field) => field.
-split("_").
-map((part) => part.charAt(0).toUpperCase() + part.slice(1)).
-join(" ");
+const formatFieldName = (field) => field
+  .split("_")
+  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+  .join(" ");
 
 const stripHtml = (value) => value?.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() || "";
 const toSafeDate = (value) => {
@@ -63,35 +30,33 @@ export default function ActivityFeed({ contactId, contact }) {
     queryKey: ["activities", contactId, contact?.created_date],
     queryFn: async () => {
       const [activities, notes] = await Promise.all([
-      base44.entities.Activity.filter({ contact_id: contactId }),
-      base44.entities.Note.filter({ contact_id: contactId })]
-      );
+        base44.entities.Activity.filter({ contact_id: contactId }),
+        base44.entities.Note.filter({ contact_id: contactId }),
+      ]);
 
       const hasCreateActivity = activities.some((activity) => activity.action === "create");
-      const createdItem = contact?.created_date && !hasCreateActivity ? [{
-        id: `contact-created-${contactId}`,
-        itemType: "create",
-        timestamp: contact.created_date
-      }] : [];
+      const createdItem = contact?.created_date && !hasCreateActivity
+        ? [{ id: `contact-created-${contactId}`, itemType: "create", timestamp: contact.created_date }]
+        : [];
 
       return [
-      ...createdItem,
-      ...activities.map((activity) => ({
-        ...activity,
-        itemType: activity.action || "edit",
-        timestamp: activity.created_date || activity.updated_date || null
-      })),
-      ...notes.map((note) => ({
-        ...note,
-        itemType: "note",
-        timestamp: note.created_date || note.updated_date || null
-      }))].
-      sort((a, b) => {
+        ...createdItem,
+        ...activities.map((activity) => ({
+          ...activity,
+          itemType: activity.action || "edit",
+          timestamp: activity.created_date || activity.updated_date || null,
+        })),
+        ...notes.map((note) => ({
+          ...note,
+          itemType: "note",
+          timestamp: note.created_date || note.updated_date || null,
+        })),
+      ].sort((a, b) => {
         const first = toSafeDate(a.timestamp)?.getTime() || 0;
         const second = toSafeDate(b.timestamp)?.getTime() || 0;
         return second - first;
       });
-    }
+    },
   });
 
   if (isLoading) {
@@ -101,8 +66,8 @@ export default function ActivityFeed({ contactId, contact }) {
           <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-indigo-600" />
           <p className="text-sm text-slate-500">Loading activity history...</p>
         </div>
-      </div>);
-
+      </div>
+    );
   }
 
   if (error) {
@@ -110,75 +75,65 @@ export default function ActivityFeed({ contactId, contact }) {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>Failed to load activity history</AlertDescription>
-      </Alert>);
-
+      </Alert>
+    );
   }
 
   if (items.length === 0) {
     return (
       <div className="py-8 text-center">
         <p className="text-sm text-slate-500">No activity recorded yet</p>
-      </div>);
-
+      </div>
+    );
   }
 
   return (
-    <div className="max-h-96 overflow-y-auto">
-      <div className="relative">
-        <div className="absolute bottom-3 left-[13px] top-3 w-px bg-slate-200" />
+    <div className="activity-timeline-scroll">
+      <div className="activity-timeline-track">
+        <div className="activity-timeline-line" />
 
-        <div className="space-y-0 pr-1">
+        <div className="activity-timeline-list">
           {items.map((item) => {
-            const config = ITEM_CONFIG[item.itemType] || ITEM_CONFIG.edit;
-            const Icon = config.icon;
+            const appearance = getActivityTimelineAppearance(item.itemType);
+            const Icon = appearance.icon;
 
             return (
-              <div key={`${item.itemType}-${item.id}`} className="relative flex gap-3 pb-4 last:pb-0">
-                <div className={`relative z-10 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full ${config.iconBg}`}>
-                  <Icon className={`h-3.5 w-3.5 ${config.iconColor}`} />
+              <div key={`${item.itemType}-${item.id}`} className="activity-timeline-item">
+                <div className={getActivityTimelineNodeClass(item.itemType)}>
+                  <Icon className="h-3.5 w-3.5" />
                 </div>
 
-                <div className="min-w-0 flex-1 rounded-lg border border-slate-100 bg-white px-3 py-2.5 shadow-sm transition-shadow hover:shadow-md">
-                  <div className="mb-1 flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium text-slate-900">{item.itemType === "note" ? item.title : config.label}</p>
-                    <span className="flex-shrink-0 text-xs text-slate-400">
-                      {formatTimestamp(item.timestamp)}
-                    </span>
+                <div className="activity-timeline-card">
+                  <div className="activity-timeline-card-header">
+                    <p className="activity-timeline-card-title">{item.itemType === "note" ? item.title : appearance.label}</p>
+                    <span className="activity-timeline-card-timestamp">{formatTimestamp(item.timestamp)}</span>
                   </div>
 
-                  {item.itemType === "note" ?
-                  <>
-                      {stripHtml(item.content) ?
-                    <div className="mt-2 rounded-md bg-slate-50 px-2.5 py-2 text-xs text-slate-600">{stripHtml(item.content)}</div> :
-                    null}
-                    </> :
-
-                  <>
-                      
-
-                      {item.fields_changed && item.fields_changed.length > 0 ?
-                    <div className="mt-2 space-y-1.5">
-                          {item.fields_changed.map((change, idx) =>
-                      <div key={idx} className="rounded-md bg-slate-50 px-2.5 py-2 text-xs text-slate-600">
-                              <span className="font-medium text-slate-700">{formatFieldName(change.field)}:</span>
-                              {change.old_value ?
-                        <span className="mx-1 line-through text-slate-400">{change.old_value}</span> :
-
-                        <span className="mx-1 text-slate-400">empty</span>
-                        }
-                              <span className={config.accentColor}>{change.new_value || "empty"}</span>
-                            </div>
-                      )}
-                        </div> :
-                    null}
-                    </>
-                  }
+                  {item.itemType === "note" ? (
+                    stripHtml(item.content) ? <div className="activity-timeline-detail-box">{stripHtml(item.content)}</div> : null
+                  ) : (
+                    item.fields_changed?.length ? (
+                      <div className="activity-timeline-card-body">
+                        {item.fields_changed.map((change, idx) => (
+                          <div key={idx} className="activity-timeline-detail-box">
+                            <span className="activity-timeline-detail-label">{formatFieldName(change.field)}:</span>
+                            {change.old_value ? (
+                              <span className="mx-1 line-through text-slate-400">{change.old_value}</span>
+                            ) : (
+                              <span className="mx-1 text-slate-400">empty</span>
+                            )}
+                            <span className={getActivityTimelineAccentClass(item.itemType)}>{change.new_value || "empty"}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null
+                  )}
                 </div>
-              </div>);
-
+              </div>
+            );
           })}
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 }
