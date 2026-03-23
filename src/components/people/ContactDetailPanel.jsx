@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -22,10 +22,34 @@ import EnrichContactDialog from "@/components/contacts/EnrichContactDialog";
 
 export default function ContactDetailPanel({ contactId, onClose }) {
   const queryClient = useQueryClient();
+  const [leftPct, setLeftPct] = useState(55);
+  const containerRef = useRef(null);
+  const dragging = useRef(false);
   const [showEnrichDialog, setShowEnrichDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleDividerMouseDown = useCallback((e) => {
+    e.preventDefault();
+    dragging.current = true;
+
+    const onMouseMove = (moveEvent) => {
+      if (!dragging.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const pct = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      setLeftPct(Math.min(Math.max(pct, 25), 75));
+    };
+
+    const onMouseUp = () => {
+      dragging.current = false;
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, []);
 
   const { data: contact, isLoading } = useQuery({
     queryKey: ["contact-detail", contactId],
@@ -104,9 +128,9 @@ export default function ContactDetailPanel({ contactId, onClose }) {
         <span className="truncate font-medium text-slate-800">{contact.name}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-white p-5">
-        <div className="grid h-full grid-cols-1 gap-5 xl:grid-cols-2">
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div ref={containerRef} className="flex flex-1 overflow-hidden bg-white">
+        <div className="flex flex-col overflow-y-auto overflow-x-hidden" style={{ width: `${leftPct}%` }}>
+          <div className="border-b border-slate-100">
             <ContactHeaderSummary
               contact={contact}
               organization={organization}
@@ -115,20 +139,30 @@ export default function ContactDetailPanel({ contactId, onClose }) {
               onDelete={() => setShowDeleteConfirm(true)}
               isSyncing={isSyncing}
             />
+          </div>
 
-            <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-3">
-              <span className="mr-1 text-xs font-medium uppercase tracking-wide text-slate-400">Quick Add</span>
-              <Button size="sm" variant="outline" className="h-6 gap-1 px-2 text-xs" onClick={() => setShowNoteDialog(true)} disabled={!organization || !clientId}>
-                <StickyNote className="h-3 w-3" />Note
-              </Button>
-            </div>
+          <div className="flex flex-shrink-0 items-center gap-2 border-b border-slate-100 px-3 py-3">
+            <span className="mr-1 text-xs font-medium uppercase tracking-wide text-slate-400">Quick Add</span>
+            <Button size="sm" variant="outline" className="h-6 gap-1 px-2 text-xs" onClick={() => setShowNoteDialog(true)} disabled={!organization || !clientId}>
+              <StickyNote className="h-3 w-3" />Note
+            </Button>
+          </div>
 
+          <div className="border-t border-slate-100">
             <ContactActivityTimelineSection contactId={contactId} />
           </div>
+        </div>
 
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <ContactDetailsSection contact={contact} onSaved={refreshContact} />
-          </div>
+        <div
+          onMouseDown={handleDividerMouseDown}
+          className="group flex w-1.5 flex-shrink-0 cursor-col-resize items-center justify-center bg-slate-100 transition-colors hover:bg-blue-200 active:bg-blue-300"
+          title="Drag to resize"
+        >
+          <div className="h-8 w-0.5 rounded-full bg-slate-300 transition-colors group-hover:bg-blue-400" />
+        </div>
+
+        <div className="flex flex-col overflow-y-auto overflow-x-hidden" style={{ width: `${100 - leftPct}%` }}>
+          <ContactDetailsSection contact={contact} onSaved={refreshContact} />
         </div>
       </div>
 
