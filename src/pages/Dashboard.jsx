@@ -97,7 +97,7 @@ export default function Dashboard() {
         null;
       case "data-hygiene":
         return isOrgAdmin(currentUser) ?
-          <DataHygieneSection clientId={clientId} /> :
+        <DataHygieneSection clientId={clientId} /> :
         null;
       default:
         return null;
@@ -124,7 +124,7 @@ export default function Dashboard() {
           <div className="h-9 w-full overflow-hidden">
             <img
               src={organization?.logo_url || "https://media.base44.com/images/public/696a507ebd3734abacaf302c/14d6fec09_Dealorus_transparent.png"}
-              alt="Dealorus" className="px-6 h-full w-full object-cover"
+              alt="Dealorus" className="pr-6 pl-6 h-full w-full object-cover"
 
               style={{ objectPosition: "center 42%" }} />
             
