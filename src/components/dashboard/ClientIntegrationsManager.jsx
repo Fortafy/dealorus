@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 export default function ClientIntegrationsManager({ organization }) {
   const queryClient = useQueryClient();
+  const [testResults, setTestResults] = React.useState({});
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
     queryKey: ["me"],
@@ -68,18 +69,47 @@ export default function ClientIntegrationsManager({ organization }) {
       service.test_function_name,
       apiKey ? { api_key: apiKey } : {}
     ),
+    onMutate: ({ service }) => {
+      setTestResults((current) => ({
+        ...current,
+        [service.integration_type]: null
+      }));
+    },
     onSuccess: (response, variables) => {
       const service = variables.service;
-      if (response?.data?.success) {
-        toast.success(response.data.message || `${service.display_name} connection is working.`);
+      const isSuccess = Boolean(response?.data?.success);
+      const message = isSuccess
+        ? response.data.message || `${service.display_name} connection is working.`
+        : response?.data?.error || `Could not connect to ${service.display_name}.`;
+
+      setTestResults((current) => ({
+        ...current,
+        [service.integration_type]: {
+          status: isSuccess ? "success" : "error",
+          message
+        }
+      }));
+
+      if (isSuccess) {
+        toast.success(message);
         return;
       }
 
-      toast.error(response?.data?.error || `Could not connect to ${service.display_name}.`);
+      toast.error(message);
     },
     onError: (error, variables) => {
       const service = variables.service;
-      toast.error(error?.response?.data?.error || error?.message || `Could not connect to ${service.display_name}.`);
+      const message = error?.response?.data?.error || error?.message || `Could not connect to ${service.display_name}.`;
+
+      setTestResults((current) => ({
+        ...current,
+        [service.integration_type]: {
+          status: "error",
+          message
+        }
+      }));
+
+      toast.error(message);
     }
   });
 
@@ -130,7 +160,8 @@ export default function ClientIntegrationsManager({ organization }) {
             isSaving={saveMutation.isPending}
             isToggling={toggleMutation.isPending}
             isDeleting={deleteMutation.isPending}
-            isTesting={testMutation.isPending && testMutation.variables?.service?.integration_type === service.integration_type} />);
+            isTesting={testMutation.isPending && testMutation.variables?.service?.integration_type === service.integration_type}
+            testResult={testResults[service.integration_type]} />);
 
 
       })}

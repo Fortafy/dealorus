@@ -21,7 +21,8 @@ export default function ClientIntegrationKeyCard({
   isSaving,
   isToggling,
   isDeleting,
-  isTesting
+  isTesting,
+  testResult
 }) {
   const requiresKey = service.requires_key !== false;
   const [isEditing, setIsEditing] = useState(requiresKey && !integration);
@@ -132,6 +133,16 @@ export default function ClientIntegrationKeyCard({
                   </Button>
                 )}
               </div>
+            </div>
+          )}
+
+          {testResult?.message && (
+            <div className={`rounded-xl border px-3 py-2 text-xs ${
+              testResult.status === "success"
+                ? "border-green-200 bg-green-50 text-green-700"
+                : "border-red-200 bg-red-50 text-red-700"
+            }`}>
+              {testResult.message}
             </div>
           )}
         </div>

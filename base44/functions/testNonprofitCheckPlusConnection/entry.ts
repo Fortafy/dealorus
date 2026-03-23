@@ -48,7 +48,8 @@ Deno.serve(async (req) => {
     }
 
     if (!response.ok) {
-      return Response.json({ success: false, error: `Nonprofit Check Plus test failed with status ${response.status}.` }, { status: 400 });
+      const errorText = await response.text();
+      return Response.json({ success: false, error: errorText || `Nonprofit Check Plus test failed with status ${response.status}.` }, { status: 400 });
     }
 
     const result = await response.json();
