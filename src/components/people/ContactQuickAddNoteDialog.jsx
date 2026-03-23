@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ReminderPicker from "@/components/reminders/ReminderPicker";
 
-export default function ContactQuickAddNoteDialog({ open, onOpenChange, organization, clientId }) {
+export default function ContactQuickAddNoteDialog({ open, onOpenChange, organization, clientId, contactId }) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -25,12 +25,14 @@ export default function ContactQuickAddNoteDialog({ open, onOpenChange, organiza
     mutationFn: () => base44.entities.Note.create({
       client_id: clientId,
       organization_id: organization.id,
+      contact_id: contactId,
       title,
       content,
       remind_at: remindAt || null,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes", organization.id] });
+      queryClient.invalidateQueries({ queryKey: ["activities", contactId] });
       onOpenChange(false);
     },
   });

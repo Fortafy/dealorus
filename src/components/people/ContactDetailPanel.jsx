@@ -198,6 +198,7 @@ export default function ContactDetailPanel({ contactId, onClose }) {
           onOpenChange={setShowNoteDialog}
           organization={organization}
           clientId={clientId}
+          contactId={contact.id}
         />
       ) : null}
 
