@@ -47,8 +47,48 @@ export default function RecordLabelsEditor({ labels = [], selectedIds = [], onCh
     onChange(nextIds);
   };
 
+  const triggerButton = (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className={iconOnlyButton ? "h-6 w-6 p-0" : "h-6 gap-1 px-2 text-xs"}
+          aria-label="Edit labels"
+        >
+          <Tag className="h-3 w-3" />
+          {!iconOnlyButton && "Labels"}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-64 p-2">
+        {availableLabels.length === 0 ? (
+          <p className="px-2 py-3 text-xs text-slate-500">No labels are available for this record type.</p>
+        ) : (
+          <div className="space-y-1">
+            {availableLabels.map((label) => {
+              const isSelected = (selectedIds || []).includes(label.id);
+
+              return (
+                <button
+                  key={label.id}
+                  type="button"
+                  onClick={() => toggleLabel(label.id)}
+                  className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors hover:bg-slate-50"
+                >
+                  <LabelBadge label={label} className="pointer-events-none" />
+                  <Check className={`h-3.5 w-3.5 ${isSelected ? "text-slate-900" : "text-transparent"}`} />
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+
   return (
     <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
+      {buttonFirst && triggerButton}
       {selectedLabels.map((label) => (
         <LabelBadge
           key={label.id}
@@ -57,38 +97,7 @@ export default function RecordLabelsEditor({ labels = [], selectedIds = [], onCh
           onRemove={() => toggleLabel(label.id)}
         />
       ))}
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="h-6 gap-1 px-2 text-xs">
-            <Tag className="h-3 w-3" />
-            Labels
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-64 p-2">
-          {availableLabels.length === 0 ? (
-            <p className="px-2 py-3 text-xs text-slate-500">No labels are available for this record type.</p>
-          ) : (
-            <div className="space-y-1">
-              {availableLabels.map((label) => {
-                const isSelected = (selectedIds || []).includes(label.id);
-
-                return (
-                  <button
-                    key={label.id}
-                    type="button"
-                    onClick={() => toggleLabel(label.id)}
-                    className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left transition-colors hover:bg-slate-50"
-                  >
-                    <LabelBadge label={label} className="pointer-events-none" />
-                    <Check className={`h-3.5 w-3.5 ${isSelected ? "text-slate-900" : "text-transparent"}`} />
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </PopoverContent>
-      </Popover>
+      {!buttonFirst && triggerButton}
     </div>
   );
 }
