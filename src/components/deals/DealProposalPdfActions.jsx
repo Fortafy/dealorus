@@ -40,17 +40,51 @@ const buildOrganizationAddress = (organization) => {
   return [organization.address, organization.city, organization.state, organization.zip_code].filter(Boolean).join(", ");
 };
 
-export default function DealProposalPdfActions({ deal, lifecycleStages = [], onUpdated }) {
+const htmlToPdfText = (html) => {
+  if (!html) return "";
+
+  const parsed = new DOMParser().parseFromString(html, "text/html");
+  parsed.querySelectorAll("a").forEach((link) => {
+    const href = link.getAttribute("href");
+    const text = link.textContent?.trim();
+    if (href && text && !text.includes(href)) {
+      link.textContent = `${text} (${href})`;
+    } else if (href && !text) {
+      link.textContent = href;
+    }
+  });
+
+  return (parsed.body.innerText || parsed.body.textContent || "").trim();
+};
+
+export default function DealProposalPdfActions({ deal, lifecycleStages = [], variant = "inline", onUpdated }) {
+  const [pdfUrl, setPdfUrl] = React.useState(deal.proposal_pdf_url || "");
+  const [generatedAt, setGeneratedAt] = React.useState(deal.proposal_pdf_generated_at || "");
+
+  React.useEffect(() => {
+    setPdfUrl(deal.proposal_pdf_url || "");
+    setGeneratedAt(deal.proposal_pdf_generated_at || "");
+  }, [deal.proposal_pdf_generated_at, deal.proposal_pdf_url, deal.id]);
+
+  const displayDeal = React.useMemo(
+    () => ({
+      ...deal,
+      proposal_pdf_url: pdfUrl,
+      proposal_pdf_generated_at: generatedAt,
+    }),
+    [deal, pdfUrl, generatedAt]
+  );
+
   const { label: stageLabel, isProposalStage, isFinalStage } = React.useMemo(
-    () => getStageMeta(deal, lifecycleStages),
-    [deal, lifecycleStages]
+    () => getStageMeta(displayDeal, lifecycleStages),
+    [displayDeal, lifecycleStages]
   );
 
   const { data: organization } = useQuery({
-    queryKey: ["deal-proposal-organization", deal.organization_id],
-    enabled: !!deal.organization_id && (isProposalStage || !!deal.proposal_pdf_url),
+    queryKey: ["deal-proposal-organization", displayDeal.organization_id],
+    enabled: !!displayDeal.organization_id && (isProposalStage || !!displayDeal.proposal_pdf_url),
     queryFn: async () => {
-      const results = await base44.entities.Organization.filter({ id: deal.organization_id });
+      const results = await base44.entities.Organization.filter({ id: displayDeal.organization_id });
       return results[0] || null;
     },
   });
@@ -62,6 +96,7 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], onU
       const pageWidth = doc.internal.pageSize.getWidth();
       const margin = 16;
       const contentWidth = pageWidth - margin * 2;
+      const generatedTimestamp = new Date().toISOString();
       let y = 18;
 
       const ensureSpace = (needed = 10) => {
@@ -110,20 +145,20 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], onU
       addTitle("Deal Proposal Summary");
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(`Generated ${moment().format("MMM D, YYYY h:mm A")}`, margin, y);
+      doc.text(`Generated ${moment(generatedTimestamp).format("MMM D, YYYY h:mm A")}`, margin, y);
       y += 8;
 
       addSectionTitle("Deal Overview");
-      addKeyValue("Deal Name", deal.name);
-      addKeyValue("Organization", deal.organization_name || organization?.organization_name || "—");
+      addKeyValue("Deal Name", displayDeal.name);
+      addKeyValue("Organization", displayDeal.organization_name || organization?.organization_name || "—");
       addKeyValue("Stage", stageLabel);
-      addKeyValue("Contract Type", formatContractType(deal.contract_type));
-      addKeyValue("Value", formatMoney(deal.value));
-      addKeyValue("Probability", deal.probability || deal.probability === 0 ? `${deal.probability}%` : "—");
-      addKeyValue("Start Date", formatDate(deal.start_date));
-      addKeyValue("End Date", formatDate(deal.end_date));
-      addKeyValue("Expected Close Date", formatDate(deal.expected_close_date));
-      addKeyValue("Reminder Date", deal.remind_at ? formatDate(deal.remind_at, "MMM D, YYYY h:mm A") : "—");
+      addKeyValue("Contract Type", formatContractType(displayDeal.contract_type));
+      addKeyValue("Value", formatMoney(displayDeal.value));
+      addKeyValue("Probability", displayDeal.probability || displayDeal.probability === 0 ? `${displayDeal.probability}%` : "—");
+      addKeyValue("Start Date", formatDate(displayDeal.start_date));
+      addKeyValue("End Date", formatDate(displayDeal.end_date));
+      addKeyValue("Expected Close Date", formatDate(displayDeal.expected_close_date));
+      addKeyValue("Reminder Date", displayDeal.remind_at ? formatDate(displayDeal.remind_at, "MMM D, YYYY h:mm A") : "—");
 
       if (organization) {
         addSectionTitle("Organization Details");
@@ -135,11 +170,11 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], onU
       }
 
       addSectionTitle("Notes");
-      addBodyText(deal.description || "No notes added.");
+      addBodyText(htmlToPdfText(displayDeal.description) || "No notes added.");
 
       addSectionTitle("Services");
-      if (deal.services?.length) {
-        deal.services.forEach((service, index) => {
+      if (displayDeal.services?.length) {
+        displayDeal.services.forEach((service, index) => {
           addKeyValue(`Service ${index + 1}`, service.service_name || "—");
           addKeyValue("Hourly Rate", formatMoney(service.rate));
           addKeyValue("Hours / Month", service.hours_per_month || service.hours_per_month === 0 ? String(service.hours_per_month) : "—");
@@ -152,31 +187,84 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], onU
       }
 
       const pdfBlob = doc.output("blob");
-      const file = new File([pdfBlob], buildFileName(deal.name), { type: "application/pdf" });
+      const file = new File([pdfBlob], buildFileName(displayDeal.name), { type: "application/pdf" });
       const uploadResult = await base44.integrations.Core.UploadFile({ file });
 
-      await base44.entities.Deal.update(deal.id, {
+      await base44.entities.Deal.update(displayDeal.id, {
         proposal_pdf_url: uploadResult.file_url,
-        proposal_pdf_generated_at: new Date().toISOString(),
+        proposal_pdf_generated_at: generatedTimestamp,
       });
 
-      return uploadResult.file_url;
+      return {
+        fileUrl: uploadResult.file_url,
+        generatedTimestamp,
+      };
     },
-    onSuccess: () => {
-      toast.success(deal.proposal_pdf_url ? "Proposal PDF regenerated" : "Proposal PDF generated");
-      onUpdated?.();
+    onSuccess: ({ fileUrl, generatedTimestamp }) => {
+      setPdfUrl(fileUrl);
+      setGeneratedAt(generatedTimestamp);
+      toast.success(displayDeal.proposal_pdf_url ? "Proposal PDF regenerated" : "Proposal PDF generated");
+      onUpdated?.({ fileUrl, generatedTimestamp });
     },
   });
 
-  if (!isProposalStage && !deal.proposal_pdf_url) {
+  if (!isProposalStage && !displayDeal.proposal_pdf_url) {
     return null;
+  }
+
+  if (variant === "section") {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-slate-800">Proposal PDF</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Generate and keep the latest proposal PDF attached to this deal.
+            </p>
+            {displayDeal.proposal_pdf_generated_at && (
+              <p className="mt-1 text-[11px] text-slate-400">
+                Last generated {moment(displayDeal.proposal_pdf_generated_at).format("MMM D, YYYY h:mm A")}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {displayDeal.proposal_pdf_url && (
+            <a
+              href={displayDeal.proposal_pdf_url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 hover:bg-slate-100"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View PDF
+            </a>
+          )}
+
+          {isProposalStage && !isFinalStage && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => generatePdfMutation.mutate()}
+              disabled={generatePdfMutation.isPending}
+              className="h-8 px-3 text-xs"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              {generatePdfMutation.isPending ? "Generating..." : displayDeal.proposal_pdf_url ? "Regenerate PDF" : "Generate PDF"}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
-      {deal.proposal_pdf_url && (
+      {displayDeal.proposal_pdf_url && (
         <a
-          href={deal.proposal_pdf_url}
+          href={displayDeal.proposal_pdf_url}
           target="_blank"
           rel="noreferrer"
           onClick={(event) => event.stopPropagation()}
@@ -200,7 +288,7 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], onU
           className="h-6 px-2 text-[10px]"
         >
           <FileText className="h-3 w-3" />
-          {generatePdfMutation.isPending ? "Generating..." : deal.proposal_pdf_url ? "Regenerate PDF" : "Generate PDF"}
+          {generatePdfMutation.isPending ? "Generating..." : displayDeal.proposal_pdf_url ? "Regenerate PDF" : "Generate PDF"}
         </Button>
       )}
     </div>
