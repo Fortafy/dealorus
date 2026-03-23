@@ -39,3 +39,13 @@ export function getActivityTimelineAccentClass(type) {
   const appearance = getActivityTimelineAppearance(type);
   return `activity-timeline-accent activity-timeline-accent--${appearance.tone}`;
 }
+
+export function toSafeActivityTimelineDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && isValid(date) ? date : null;
+}
+
+export function formatActivityTimelineDate(value) {
+  const date = toSafeActivityTimelineDate(value);
+  return date ? format(date, "MMM d, yyyy") : "Date unavailable";
+}
