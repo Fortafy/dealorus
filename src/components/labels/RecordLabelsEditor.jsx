@@ -5,16 +5,27 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import LabelBadge from "@/components/labels/LabelBadge";
 import { ALL_LABEL_OBJECTS } from "@/components/labels/LabelObjectScopeSelector";
 
+const normalizeObjectType = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  if (normalized === "organization" || normalized === "organizations") return "Organization";
+  if (normalized === "contact" || normalized === "contacts") return "Contact";
+  if (normalized === "deal" || normalized === "deals") return "Deal";
+  return value;
+};
+
 export default function RecordLabelsEditor({ labels = [], selectedIds = [], onChange, className = "", objectType }) {
+  const normalizedObjectType = normalizeObjectType(objectType);
+
   const availableLabels = useMemo(
     () => labels.filter((label) => {
-      const applicableObjects = Array.isArray(label.applicable_objects) && label.applicable_objects.length
+      const applicableObjects = (Array.isArray(label.applicable_objects) && label.applicable_objects.length
         ? label.applicable_objects
-        : ALL_LABEL_OBJECTS;
+        : ALL_LABEL_OBJECTS).map(normalizeObjectType);
 
-      return !objectType || applicableObjects.includes(objectType);
+      return !normalizedObjectType || applicableObjects.includes(normalizedObjectType);
     }),
-    [labels, objectType]
+    [labels, normalizedObjectType]
   );
 
   const selectedLabels = useMemo(

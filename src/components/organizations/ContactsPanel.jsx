@@ -45,7 +45,7 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
     queryFn: () => base44.entities.Contact.filter({ organization_id: organization.id }, "-created_date"),
   });
 
-  const resolvedClientId = currentUser?.client_id || currentUser?.data?.client_id;
+  const resolvedClientId = clientId || organization?.client_id || currentUser?.client_id || currentUser?.data?.client_id;
 
   const { data: labels = [] } = useQuery({
     queryKey: ["labels", resolvedClientId],

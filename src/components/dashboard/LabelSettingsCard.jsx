@@ -23,8 +23,8 @@ export default function LabelSettingsCard({ clientId }) {
   });
 
   useEffect(() => {
-    setDrafts(
-      Object.fromEntries(
+    setDrafts((current) => {
+      const next = Object.fromEntries(
         labels.map((label) => [label.id, {
           name: label.name || "",
           color: label.color || DEFAULT_COLOR,
@@ -32,8 +32,22 @@ export default function LabelSettingsCard({ clientId }) {
             ? label.applicable_objects
             : ALL_LABEL_OBJECTS,
         }])
-      )
-    );
+      );
+
+      const currentKeys = Object.keys(current);
+      const nextKeys = Object.keys(next);
+      const hasChanged = currentKeys.length !== nextKeys.length || nextKeys.some((key) => {
+        const currentDraft = current[key];
+        const nextDraft = next[key];
+
+        return !currentDraft
+          || currentDraft.name !== nextDraft.name
+          || currentDraft.color !== nextDraft.color
+          || JSON.stringify(currentDraft.applicable_objects || []) !== JSON.stringify(nextDraft.applicable_objects || []);
+      });
+
+      return hasChanged ? next : current;
+    });
   }, [labels]);
 
   const createLabelMutation = useMutation({
