@@ -8,6 +8,7 @@ import SubscriptionDetails from "@/components/dashboard/SubscriptionDetails";
 import IntegrationsSection from "@/components/dashboard/IntegrationsSection";
 import PreferencesSection from "@/components/dashboard/PreferencesSection";
 import NotificationsSection from "@/components/dashboard/NotificationsSection";
+import ConnectedAppsSection from "@/components/dashboard/ConnectedAppsSection";
 import AdminOrganizations from "@/components/dashboard/AdminOrganizations.jsx";
 import AdminUsers from "@/components/dashboard/AdminUsers";
 import AdminApiUsageSection from "@/components/dashboard/AdminApiUsageSection";
@@ -61,6 +62,8 @@ export default function Dashboard() {
         return <PreferencesSection user={currentUser} />;
       case "notifications":
         return <NotificationsSection user={currentUser} />;
+      case "connected-apps":
+        return <ConnectedAppsSection />;
       case "admin-users":
         return currentUser?.role === "admin" ? <AdminUsers /> : null;
       case "admin-organizations":

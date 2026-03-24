@@ -28,6 +28,11 @@ export default function DashboardNav({ activeSection, onSectionChange, isAdmin, 
       label: "Notifications",
       icon: Bell,
     },
+    {
+      id: "connected-apps",
+      label: "Connected Apps",
+      icon: Link2,
+    },
   ];
 
   const orgSections = isAdmin ? [
