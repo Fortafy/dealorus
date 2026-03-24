@@ -44,39 +44,59 @@ const readState = async (rawState) => {
   return state;
 };
 
-const buildRedirectUrl = (origin, status, message) => {
-  const params = new URLSearchParams({
-    section: 'connected-apps',
-    google_oauth: status,
-  });
+const normalizeAppOrigin = (value, fallback) =>
+  typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))
+    ? value.replace(/\/$/, '')
+    : fallback;
+
+const normalizeReturnPath = (value) =>
+  typeof value === 'string' && value.startsWith('/') ? value : '/Settings?section=connected-apps';
+
+const buildRedirectUrl = (origin, returnPath, status, message) => {
+  const redirectUrl = new URL(normalizeReturnPath(returnPath), origin);
+  redirectUrl.searchParams.set('google_oauth', status);
 
   if (message) {
-    params.set('message', message);
+    redirectUrl.searchParams.set('message', message);
   }
 
-  return `${origin}/Settings?${params.toString()}`;
+  return redirectUrl.toString();
 };
 
 Deno.serve(async (req) => {
+  const requestUrl = new URL(req.url);
+  const code = requestUrl.searchParams.get('code');
+  const rawState = requestUrl.searchParams.get('state');
+  const oauthError = requestUrl.searchParams.get('error');
+
+  let state = null;
+  let appOrigin = requestUrl.origin;
+  let returnPath = '/Settings?section=connected-apps';
+
+  if (rawState) {
+    try {
+      state = await readState(rawState);
+      appOrigin = normalizeAppOrigin(state.appOrigin, appOrigin);
+      returnPath = normalizeReturnPath(state.returnPath);
+    } catch (error) {
+      const redirectUrl = buildRedirectUrl(appOrigin, returnPath, 'error', error.message || 'Google connection failed.');
+      return Response.redirect(redirectUrl, 302);
+    }
+  }
+
   try {
-    const requestUrl = new URL(req.url);
-    const code = requestUrl.searchParams.get('code');
-    const rawState = requestUrl.searchParams.get('state');
-    const oauthError = requestUrl.searchParams.get('error');
-
     if (oauthError) {
-      const redirectUrl = buildRedirectUrl(requestUrl.origin, 'error', 'Google authorization was cancelled.');
+      const redirectUrl = buildRedirectUrl(appOrigin, returnPath, 'error', 'Google authorization was cancelled.');
       return Response.redirect(redirectUrl, 302);
     }
 
-    if (!code || !rawState) {
-      const redirectUrl = buildRedirectUrl(requestUrl.origin, 'error', 'Missing Google authorization data.');
+    if (!code || !state) {
+      const redirectUrl = buildRedirectUrl(appOrigin, returnPath, 'error', 'Missing Google authorization data.');
       return Response.redirect(redirectUrl, 302);
     }
 
-    const state = await readState(rawState);
     const base44 = createClientFromRequest(req);
-    const redirectUri = `${requestUrl.origin}/functions/googleOAuthCallback`;
+    const redirectUri = `${appOrigin}/functions/googleOAuthCallback`;
 
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -150,11 +170,10 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.UserIntegration.create(payload);
     }
 
-    const redirectUrl = buildRedirectUrl(requestUrl.origin, 'success', 'Google account connected successfully.');
+    const redirectUrl = buildRedirectUrl(appOrigin, returnPath, 'success', 'Google account connected successfully.');
     return Response.redirect(redirectUrl, 302);
   } catch (error) {
-    const requestUrl = new URL(req.url);
-    const redirectUrl = buildRedirectUrl(requestUrl.origin, 'error', error.message || 'Google connection failed.');
+    const redirectUrl = buildRedirectUrl(appOrigin, returnPath, 'error', error.message || 'Google connection failed.');
     return Response.redirect(redirectUrl, 302);
   }
 });

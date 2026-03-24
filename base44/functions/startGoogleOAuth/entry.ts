@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
     const state = await buildState({
       userId: user.id,
       integrationType,
+      appOrigin: redirectBase,
       returnPath: '/Settings?section=connected-apps',
       createdAt: new Date().toISOString(),
     });
