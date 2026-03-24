@@ -96,16 +96,7 @@ Deno.serve(async (req) => {
     }
 
     const base44 = createClientFromRequest(req);
-    const isAuthenticated = await base44.auth.isAuthenticated();
-    const currentUser = isAuthenticated ? await base44.auth.me() : null;
-
-    if (currentUser && currentUser.id !== state.userId) {
-      throw new Error('Google authorization session does not match the current signed-in user.');
-    }
-
-    const integrationClient = currentUser?.id === state.userId
-      ? base44.entities.UserIntegration
-      : base44.asServiceRole.entities.UserIntegration;
+    const integrationClient = base44.asServiceRole.entities.UserIntegration;
     const redirectUri = `${appOrigin}/functions/googleOAuthCallback`;
 
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
