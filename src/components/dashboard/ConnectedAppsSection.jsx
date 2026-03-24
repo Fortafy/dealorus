@@ -26,7 +26,10 @@ export default function ConnectedAppsSection() {
 
   const connectMutation = useMutation({
     mutationFn: async (integrationType) => {
-      const response = await base44.functions.invoke("startGoogleOAuth", { integrationType });
+      const response = await base44.functions.invoke("startGoogleOAuth", {
+        integrationType,
+        appOrigin: window.location.origin,
+      });
       window.location.href = response.data.authUrl;
       return response.data;
     },

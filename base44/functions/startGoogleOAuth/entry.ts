@@ -64,7 +64,11 @@ Deno.serve(async (req) => {
     }
 
     const requestUrl = new URL(req.url);
-    const redirectUri = `${requestUrl.origin}/functions/googleOAuthCallback`;
+    const appOrigin = typeof body?.appOrigin === 'string' ? body.appOrigin.trim() : '';
+    const redirectBase = appOrigin.startsWith('http://') || appOrigin.startsWith('https://')
+      ? appOrigin.replace(/\/$/, '')
+      : requestUrl.origin;
+    const redirectUri = `${redirectBase}/functions/googleOAuthCallback`;
     const state = await buildState({
       userId: user.id,
       integrationType,
