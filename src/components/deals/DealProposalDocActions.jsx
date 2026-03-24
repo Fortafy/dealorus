@@ -73,6 +73,10 @@ export default function DealProposalDocActions({ deal, lifecycleStages = [], var
     },
   });
 
+  const hasRequiredScopes = (googleDriveConnection?.scopes || []).includes("https://www.googleapis.com/auth/drive.file")
+    && (googleDriveConnection?.scopes || []).includes("https://www.googleapis.com/auth/documents");
+  const needsReconnect = !!googleDriveConnection && !hasRequiredScopes;
+
   const connectMutation = useMutation({
     mutationFn: async () => {
       const response = await base44.functions.invoke("startGoogleOAuth", {
@@ -118,12 +122,12 @@ export default function DealProposalDocActions({ deal, lifecycleStages = [], var
 
   const actionButton = (
     <Button
-      type="button"
-      size="sm"
-      variant="outline"
-      onClick={() => setIsOpen(true)}
-      disabled={!googleDriveConnection || generateMutation.isPending}
-      className={variant === "section" ? "h-8 px-3 text-xs" : "h-6 px-2 text-[10px]"}
+    type="button"
+    size="sm"
+    variant="outline"
+    onClick={() => setIsOpen(true)}
+    disabled={!googleDriveConnection || needsReconnect || generateMutation.isPending}
+    className={variant === "section" ? "h-8 px-3 text-xs" : "h-6 px-2 text-[10px]"}
     >
       <FileText className="h-3.5 w-3.5" />
       {generateMutation.isPending ? "Generating..." : docUrl ? "Regenerate Doc" : "Generate Doc"}
@@ -157,10 +161,10 @@ export default function DealProposalDocActions({ deal, lifecycleStages = [], var
               </a>
             )}
 
-            {!googleDriveConnection ? (
+            {!googleDriveConnection || needsReconnect ? (
               <Button type="button" size="sm" variant="outline" onClick={() => connectMutation.mutate()} disabled={connectMutation.isPending} className="h-8 px-3 text-xs">
                 <LinkIcon className="h-3.5 w-3.5" />
-                {connectMutation.isPending ? "Connecting..." : "Connect Google Drive"}
+                {connectMutation.isPending ? "Connecting..." : needsReconnect ? "Reconnect Google Drive" : "Connect Google Drive"}
               </Button>
             ) : (
               !isFinalStage && actionButton
@@ -181,7 +185,7 @@ export default function DealProposalDocActions({ deal, lifecycleStages = [], var
               Open Doc
             </a>
           )}
-          {!googleDriveConnection ? (
+          {!googleDriveConnection || needsReconnect ? (
             <Button
               type="button"
               size="sm"
@@ -194,7 +198,7 @@ export default function DealProposalDocActions({ deal, lifecycleStages = [], var
               className="h-6 px-2 text-[10px]"
             >
               <LinkIcon className="h-3 w-3" />
-              {connectMutation.isPending ? "Connecting..." : "Connect Drive"}
+              {connectMutation.isPending ? "Connecting..." : needsReconnect ? "Reconnect Drive" : "Connect Drive"}
             </Button>
           ) : (
             !isFinalStage && (
