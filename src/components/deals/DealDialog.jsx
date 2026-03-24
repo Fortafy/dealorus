@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import moment from "moment";
 import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
+import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
 
 const SERVICE_NAMES = [
   "Salesforce Administration",
@@ -309,11 +310,18 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
             </div>
 
             {isEdit && previewDeal && (
-              <DealProposalPdfActions
-                deal={previewDeal}
-                lifecycleStages={stageOptions}
-                variant="section"
-              />
+              <div className="space-y-4">
+                <DealProposalPdfActions
+                  deal={previewDeal}
+                  lifecycleStages={stageOptions}
+                  variant="section"
+                />
+                <DealProposalDocActions
+                  deal={previewDeal}
+                  lifecycleStages={stageOptions}
+                  variant="section"
+                />
+              </div>
             )}
           </div>
         </div>

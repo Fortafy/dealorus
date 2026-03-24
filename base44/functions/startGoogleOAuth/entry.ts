@@ -7,7 +7,8 @@ const GOOGLE_SCOPES = {
     'openid',
     'email',
     'profile',
-    'https://www.googleapis.com/auth/drive.metadata.readonly',
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/documents',
   ],
   google_calendar: [
     'openid',
@@ -69,11 +70,15 @@ Deno.serve(async (req) => {
       ? appOrigin.replace(/\/$/, '')
       : requestUrl.origin;
     const redirectUri = `${redirectBase}/functions/googleOAuthCallback`;
+    const returnPath = typeof body?.returnPath === 'string' && body.returnPath.startsWith('/')
+      ? body.returnPath
+      : '/Settings?section=connected-apps';
+
     const state = await buildState({
       userId: user.id,
       integrationType,
       appOrigin: redirectBase,
-      returnPath: '/Settings?section=connected-apps',
+      returnPath,
       createdAt: new Date().toISOString(),
     });
 
