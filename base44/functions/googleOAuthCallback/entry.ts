@@ -150,34 +150,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    const existingRecords = await base44.asServiceRole.entities.UserIntegration.filter({
+    const existingRecords = await integrationClient.filter({
       user_id: state.userId,
       integration_type: state.integrationType,
     });
     const existingRecord = existingRecords[0] || null;
-
-    const payload = {
-      user_id: state.userId,
-      provider: 'google',
-      integration_type: state.integrationType,
-      status: 'connected',
-      access_token: tokenData.access_token || null,
-      refresh_token: tokenData.refresh_token || existingRecord?.refresh_token || null,
-      expires_at: expiresAt,
-      scopes,
-      account_email: profile.email || existingRecord?.account_email || null,
-      account_name: profile.name || existingRecord?.account_name || null,
-      error_message: null,
-      metadata: {
-        token_type: tokenData.token_type || null,
-        scope_count: scopes.length,
-      },
-    };
-
+...
     if (existingRecord) {
-      await base44.asServiceRole.entities.UserIntegration.update(existingRecord.id, payload);
+      await integrationClient.update(existingRecord.id, payload);
     } else {
-      await base44.asServiceRole.entities.UserIntegration.create(payload);
+      await integrationClient.create(payload);
     }
 
     const redirectUrl = buildRedirectUrl(appOrigin, returnPath, 'success', 'Google account connected successfully.');
