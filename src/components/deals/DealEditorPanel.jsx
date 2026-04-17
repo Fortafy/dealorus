@@ -232,129 +232,128 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full flex-col">
             <TabsList className="grid w-full grid-cols-3 rounded-none border-b border-slate-200 bg-white px-0">
-                <TabsTrigger value="details">Detail</TabsTrigger>
-                <TabsTrigger value="notes">Notes</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-              </TabsList>
+              <TabsTrigger value="details">Detail</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="details" className="mt-0 px-5 py-4 space-y-5">
-                <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs text-slate-500">Deal Name *</label>
-                <Input placeholder="Deal name..." value={form.name} onChange={(e) => setField("name", e.target.value)} className="text-sm" />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Stage *</label>
-                <select value={form.stage} onChange={(e) => setField("stage", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                  <option value="">Select stage...</option>
-                  {lifecycleStages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Contract Type</label>
-                <select value={form.contract_type} onChange={(e) => setField("contract_type", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                  <option value="">Select type...</option>
-                  {CONTRACT_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Start Date</label>
-                <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">End Date</label>
-                <Input type="date" value={form.end_date} onChange={(e) => setField("end_date", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Expected Close Date</label>
-                <Input type="date" value={form.expected_close_date} onChange={(e) => setField("expected_close_date", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Deal Value ($)</label>
-                <Input type="number" placeholder="0.00" value={form.value} onChange={(e) => setField("value", e.target.value)} className="text-sm" />
-              </div>
-
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs text-slate-500">Description</label>
-                <DealRichTextEditor value={form.description} onChange={(value) => setField("description", value)} editorClassName="[&_.ql-editor]:min-h-[90px]" />
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">Services</p>
-                <Button size="sm" variant="outline" onClick={addService} className="h-6 px-2 text-xs">
-                  <Plus className="mr-1 h-3 w-3" /> Add Service
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {form.services.map((service, index) => (
-                  <div key={index} className="relative rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    {form.services.length > 1 && (
-                      <button onClick={() => removeService(index)} className="absolute right-2 top-2 text-slate-400 hover:text-red-500">
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="col-span-2">
-                        <label className="mb-1 block text-xs text-slate-500">Service</label>
-                        <select value={service.service_name} onChange={(e) => setServiceField(index, "service_name", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                          <option value="">Select service...</option>
-                          {SERVICE_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs text-slate-500">Hourly Rate ($)</label>
-                        <Input type="number" placeholder="0.00" value={service.rate} onChange={(e) => setServiceField(index, "rate", e.target.value)} className="text-sm" />
-                      </div>
-                      {!isProject && (
-                        <div>
-                          <label className="mb-1 block text-xs text-slate-500">{isRetainer ? "Hours/Month" : "Max Hours/Month"}</label>
-                          <Input type="number" placeholder="0" value={service.hours_per_month} onChange={(e) => setServiceField(index, "hours_per_month", e.target.value)} className="text-sm" />
-                        </div>
-                      )}
-                      {isProject && (
-                        <div>
-                          <label className="mb-1 block text-xs text-slate-500">Total Est. Hours</label>
-                          <Input type="number" placeholder="0" value={service.total_estimated_hours} onChange={(e) => setServiceField(index, "total_estimated_hours", e.target.value)} className="text-sm" />
-                        </div>
-                      )}
-                      {isRetainer && (
-                        <div className="col-span-2">
-                          <label className="mb-1 block text-xs text-slate-500">Overage Rate ($/hr)</label>
-                          <Input type="number" placeholder="0.00" value={service.overage_rate} onChange={(e) => setServiceField(index, "overage_rate", e.target.value)} className="text-sm" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {previewDeal ? (
-              <div className="space-y-4">
-                <DealProposalPdfActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
-                <DealProposalDocActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
-              </div>
-            ) : null}
-              </TabsContent>
-
-              <TabsContent value="notes" className="mt-0 px-5 py-4">
-                <DealNotesSection deal={deal} clientId={deal.client_id} />
-              </TabsContent>
-
-              <TabsContent value="activity" className="mt-0 px-5 py-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">
-                  <History className="mx-auto mb-3 h-8 w-8 text-slate-400" />
-                  <h3 className="text-sm font-semibold text-slate-700">Activity</h3>
-                  <p className="mt-1 text-xs text-slate-500">Deal activity feed can be added here next.</p>
+            <TabsContent value="details" className="mt-0 space-y-5 px-5 py-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="mb-1 block text-xs text-slate-500">Deal Name *</label>
+                  <Input placeholder="Deal name..." value={form.name} onChange={(e) => setField("name", e.target.value)} className="text-sm" />
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Stage *</label>
+                  <select value={form.stage} onChange={(e) => setField("stage", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                    <option value="">Select stage...</option>
+                    {lifecycleStages.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Contract Type</label>
+                  <select value={form.contract_type} onChange={(e) => setField("contract_type", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                    <option value="">Select type...</option>
+                    {CONTRACT_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Start Date</label>
+                  <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">End Date</label>
+                  <Input type="date" value={form.end_date} onChange={(e) => setField("end_date", e.target.value)} className="text-sm" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Expected Close Date</label>
+                  <Input type="date" value={form.expected_close_date} onChange={(e) => setField("expected_close_date", e.target.value)} className="text-sm" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Deal Value ($)</label>
+                  <Input type="number" placeholder="0.00" value={form.value} onChange={(e) => setField("value", e.target.value)} className="text-sm" />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="mb-1 block text-xs text-slate-500">Description</label>
+                  <DealRichTextEditor value={form.description} onChange={(value) => setField("description", value)} editorClassName="[&_.ql-editor]:min-h-[90px]" />
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-700">Services</p>
+                  <Button size="sm" variant="outline" onClick={addService} className="h-6 px-2 text-xs">
+                    <Plus className="mr-1 h-3 w-3" /> Add Service
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {form.services.map((service, index) => (
+                    <div key={index} className="relative rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      {form.services.length > 1 && (
+                        <button onClick={() => removeService(index)} className="absolute right-2 top-2 text-slate-400 hover:text-red-500">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="col-span-2">
+                          <label className="mb-1 block text-xs text-slate-500">Service</label>
+                          <select value={service.service_name} onChange={(e) => setServiceField(index, "service_name", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                            <option value="">Select service...</option>
+                            {SERVICE_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs text-slate-500">Hourly Rate ($)</label>
+                          <Input type="number" placeholder="0.00" value={service.rate} onChange={(e) => setServiceField(index, "rate", e.target.value)} className="text-sm" />
+                        </div>
+                        {!isProject && (
+                          <div>
+                            <label className="mb-1 block text-xs text-slate-500">{isRetainer ? "Hours/Month" : "Max Hours/Month"}</label>
+                            <Input type="number" placeholder="0" value={service.hours_per_month} onChange={(e) => setServiceField(index, "hours_per_month", e.target.value)} className="text-sm" />
+                          </div>
+                        )}
+                        {isProject && (
+                          <div>
+                            <label className="mb-1 block text-xs text-slate-500">Total Est. Hours</label>
+                            <Input type="number" placeholder="0" value={service.total_estimated_hours} onChange={(e) => setServiceField(index, "total_estimated_hours", e.target.value)} className="text-sm" />
+                          </div>
+                        )}
+                        {isRetainer && (
+                          <div className="col-span-2">
+                            <label className="mb-1 block text-xs text-slate-500">Overage Rate ($/hr)</label>
+                            <Input type="number" placeholder="0.00" value={service.overage_rate} onChange={(e) => setServiceField(index, "overage_rate", e.target.value)} className="text-sm" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {previewDeal ? (
+                <div className="space-y-4">
+                  <DealProposalPdfActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
+                  <DealProposalDocActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
+                </div>
+              ) : null}
+            </TabsContent>
+
+            <TabsContent value="notes" className="mt-0 px-5 py-4">
+              <DealNotesSection deal={deal} clientId={deal.client_id} />
+            </TabsContent>
+
+            <TabsContent value="activity" className="mt-0 px-5 py-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">
+                <History className="mx-auto mb-3 h-8 w-8 text-slate-400" />
+                <h3 className="text-sm font-semibold text-slate-700">Activity</h3>
+                <p className="mt-1 text-xs text-slate-500">Deal activity feed can be added here next.</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
