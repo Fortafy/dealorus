@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Building2, CalendarDays, Plus, X, History } from "lucide-react";
+import { ArrowLeft, Building2, CalendarDays, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,6 +11,7 @@ import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
 import DealNotesSection from "@/components/deals/DealNotesSection";
+import DealActivityFeed from "@/components/deals/DealActivityFeed";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import moment from "moment";
@@ -347,11 +348,7 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
             </TabsContent>
 
             <TabsContent value="activity" className="mt-0 px-5 py-4">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">
-                <History className="mx-auto mb-3 h-8 w-8 text-slate-400" />
-                <h3 className="text-sm font-semibold text-slate-700">Activity</h3>
-                <p className="mt-1 text-xs text-slate-500">Deal activity feed can be added here next.</p>
-              </div>
+              <DealActivityFeed deal={deal} lifecycleStages={lifecycleStages} />
             </TabsContent>
           </Tabs>
         </div>
