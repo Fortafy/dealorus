@@ -242,7 +242,7 @@ export default function Organizations() {
             <span className="text-base font-semibold text-slate-800">Organizations</span>
           </div>
           <div className="flex items-center gap-2">
-            {currentUser?.client_id && (
+            {isEmptyAccount && currentUser?.client_id && (
               <SeedDemoDataButton
                 clientId={currentUser.client_id}
                 userId={currentUser.id}
