@@ -13,17 +13,6 @@ export default function BrandingSettings({ organization }) {
     logo_url: "",
     primary_color: "#3b82f6",
   });
-
-  if (!organization) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-200 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
-          <p className="text-slate-600">Loading organization...</p>
-        </div>
-      </div>
-    );
-  }
   const [logoPreview, setLogoPreview] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -74,6 +63,17 @@ export default function BrandingSettings({ organization }) {
   const handleSave = () => {
     updateMutation.mutate();
   };
+
+  if (!organization) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 rounded-full animate-spin mx-auto mb-4" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
+          <p className="text-slate-600">Loading organization...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
