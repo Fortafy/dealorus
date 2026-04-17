@@ -26,9 +26,9 @@ const formats = [
   "link",
 ];
 
-export default function DealRichTextEditor({ value, onChange }) {
+export default function DealRichTextEditor({ value, onChange, editorClassName = "" }) {
   return (
-    <div className="deal-rich-text-editor overflow-hidden rounded-md border border-slate-300 bg-white">
+    <div className={`deal-rich-text-editor overflow-hidden rounded-md border border-slate-300 bg-white ${editorClassName}`}>
       <ReactQuill
         theme="snow"
         value={value || ""}

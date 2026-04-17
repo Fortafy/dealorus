@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Building2, CalendarDays, Plus, X } from "lucide-react";
+import { ArrowLeft, Building2, CalendarDays, Plus, X, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,6 +11,7 @@ import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
 import DealNotesSection from "@/components/deals/DealNotesSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import moment from "moment";
 
@@ -107,9 +108,13 @@ function ReminderPickerField({ value, onChange }) {
 export default function DealEditorPanel({ deal, open, onClose, organizations = [], lifecycleStages = [] }) {
   const queryClient = useQueryClient();
   const [form, setForm] = React.useState(emptyForm());
+  const [activeTab, setActiveTab] = React.useState("details");
 
   React.useEffect(() => {
-    if (open) setForm(deal ? dealToForm(deal) : emptyForm());
+    if (open) {
+      setForm(deal ? dealToForm(deal) : emptyForm());
+      setActiveTab("details");
+    }
   }, [open, deal]);
 
   const updateMutation = useMutation({
@@ -204,25 +209,38 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="space-y-5">
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Organization</p>
-              {selectedOrganization ? (
-                <div className="flex items-center gap-2 text-sm text-slate-700">
-                  <Building2 className="h-4 w-4 text-slate-400" />
-                  <Link to={`/Organizations?id=${selectedOrganization.id}`} className="font-medium text-blue-600 hover:underline">
-                    {selectedOrganization.organization_name}
-                  </Link>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Organization</p>
+                  {selectedOrganization ? (
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Building2 className="h-4 w-4 text-slate-400" />
+                      <Link to={`/Organizations?id=${selectedOrganization.id}`} className="font-medium text-blue-600 hover:underline">
+                        {selectedOrganization.organization_name}
+                      </Link>
+                    </div>
+                  ) : deal.organization_name ? (
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <Building2 className="h-4 w-4 text-slate-400" />
+                      <span className="font-medium">{deal.organization_name}</span>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500">No organization linked</p>
+                  )}
                 </div>
-              ) : deal.organization_name ? (
-                <div className="flex items-center gap-2 text-sm text-slate-700">
-                  <Building2 className="h-4 w-4 text-slate-400" />
-                  <span className="font-medium">{deal.organization_name}</span>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500">No organization linked</p>
-              )}
+                <ReminderPickerField value={form.remind_at} onChange={(value) => setField("remind_at", value)} />
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="details">Detail</TabsTrigger>
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="space-y-5 mt-0">
+                <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="mb-1 block text-xs text-slate-500">Deal Name *</label>
                 <Input placeholder="Deal name..." value={form.name} onChange={(e) => setField("name", e.target.value)} className="text-sm" />
@@ -263,7 +281,7 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
 
               <div className="col-span-2">
                 <label className="mb-1 block text-xs text-slate-500">Description</label>
-                <DealRichTextEditor value={form.description} onChange={(value) => setField("description", value)} />
+                <DealRichTextEditor value={form.description} onChange={(value) => setField("description", value)} editorClassName="[&_.ql-editor]:min-h-[90px]" />
               </div>
             </div>
 
@@ -318,21 +336,26 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-700">Reminder</p>
-                <ReminderPickerField value={form.remind_at} onChange={(value) => setField("remind_at", value)} />
-              </div>
-            </div>
-
             {previewDeal ? (
               <div className="space-y-4">
                 <DealProposalPdfActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
                 <DealProposalDocActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
               </div>
             ) : null}
+              </TabsContent>
 
-            <DealNotesSection deal={deal} clientId={deal.client_id} />
+              <TabsContent value="notes" className="mt-0">
+                <DealNotesSection deal={deal} clientId={deal.client_id} />
+              </TabsContent>
+
+              <TabsContent value="activity" className="mt-0">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">
+                  <History className="mx-auto mb-3 h-8 w-8 text-slate-400" />
+                  <h3 className="text-sm font-semibold text-slate-700">Activity</h3>
+                  <p className="mt-1 text-xs text-slate-500">Deal activity feed can be added here next.</p>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
