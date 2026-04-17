@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import moment from "moment";
 import KanbanDealCard from "@/components/deals/KanbanDealCard";
 import DealEditorDialog from "@/components/deals/DealEditorDialog";
+import DealEditorPanel from "@/components/deals/DealEditorPanel";
 import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
   const { user: currentUser } = useAuth();
   const clientId = currentUser?.data?.client_id || currentUser?.client_id;
   const [showNewDeal, setShowNewDeal] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -120,7 +122,8 @@ export default function Deals() {
   const getStageColor = (id) => stageColorMap[id] || COLOR_PALETTE[0];
 
   return (
-    <div className="h-full bg-white flex flex-col overflow-hidden">
+    <div className="h-full bg-white flex overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
       {/* Page Header */}
       <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
@@ -273,11 +276,7 @@ export default function Deals() {
                                   <KanbanDealCard
                             deal={deal}
                             isDragging={snapshot.isDragging}
-                            lifecycleStages={sortedStages}
-                            onUpdate={() => {
-                              queryClient.invalidateQueries({ queryKey: ["deals-board"] });
-                              queryClient.invalidateQueries({ queryKey: ["deals"] });
-                            }} />
+                            onSelectDeal={setSelectedDeal} />
                           
                                 </div>
                         }
@@ -310,7 +309,15 @@ export default function Deals() {
           queryClient.invalidateQueries({ queryKey: ["deals-board"] });
           queryClient.invalidateQueries({ queryKey: ["deals"] });
         }} />
-      
+      </div>
+
+      <DealEditorPanel
+        open={!!selectedDeal}
+        deal={selectedDeal}
+        onClose={() => setSelectedDeal(null)}
+        organizations={organizations}
+        lifecycleStages={sortedStages}
+      />
     </div>);
 
 }

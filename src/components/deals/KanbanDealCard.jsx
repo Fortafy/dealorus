@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Building2, CalendarDays } from "lucide-react";
 import moment from "moment";
-import DealEditorDialog from "@/components/deals/DealEditorDialog";
 
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
@@ -11,9 +10,7 @@ const CONTRACT_TYPES = [
   { value: "project", label: "Project" },
 ];
 
-export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUpdate }) {
-  const [showEdit, setShowEdit] = useState(false);
-
+export default function KanbanDealCard({ deal, isDragging, onSelectDeal }) {
   const contractLabel = CONTRACT_TYPES.find((t) => t.value === deal.contract_type)?.label;
   const displayDate = deal.remind_at || deal.expected_close_date;
   const isPastOrToday = displayDate
@@ -27,11 +24,11 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
       <div
         role="button"
         tabIndex={0}
-        onClick={() => setShowEdit(true)}
+        onClick={() => onSelectDeal?.(deal)}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            setShowEdit(true);
+            onSelectDeal?.(deal);
           }
         }}
         className={`bg-white rounded-lg border p-3 text-xs transition-shadow cursor-pointer ${isDragging ? "shadow-lg border-blue-300" : "border-slate-200 shadow-sm hover:shadow-md"}`}
@@ -74,15 +71,6 @@ export default function KanbanDealCard({ deal, isDragging, lifecycleStages, onUp
         )}
 
       </div>
-
-      <DealEditorDialog
-        open={showEdit}
-        onOpenChange={setShowEdit}
-        deal={deal}
-        clientId={deal.client_id}
-        lifecycleStages={lifecycleStages}
-        onSaved={onUpdate}
-      />
     </>
   );
 }
