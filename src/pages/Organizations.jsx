@@ -1,11 +1,8 @@
-import React, { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import OrganizationDetailView from "@/components/organizations/OrganizationDetailView";
-import SearchPanel from "@/components/search/SearchPanel";
 import NewAccountDialog from "@/components/organizations/NewAccountDialog";
-import DuplicatesReview from "@/components/organizations/DuplicatesReview";
-import { motion } from "framer-motion";
 import { Building2, Search, X, Plus, ChevronUp, ChevronDown, ChevronsUpDown, SlidersHorizontal, Upload, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -14,13 +11,12 @@ import { format } from "date-fns";
 import SavedFilterSelector from "@/components/organizations/SavedFilterSelector";
 import FilterPanel from "@/components/organizations/FilterPanel";
 import FieldsPanel, { ALL_COLUMNS, DEFAULT_VISIBLE_FIELDS } from "@/components/organizations/FieldsPanel";
+import SeedDemoDataButton from "@/components/demo/SeedDemoDataButton";
 
 export default function Organizations() {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showNewAccountDialog, setShowNewAccountDialog] = useState(false);
-  const [showDuplicates, setShowDuplicates] = useState(false);
   const [sortField, setSortField] = useState("organization_name");
   const [sortDir, setSortDir] = useState("asc");
   const [currentUser, setCurrentUser] = useState(null);
@@ -74,16 +70,6 @@ export default function Organizations() {
       if (org) setSelectedOrg(org);
     }
   }, [organizations, currentUser]);
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Organization.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["organizations"] }),
-  });
-
-  const handleEdit = (updatedData) => {
-    updateMutation.mutate({ id: updatedData.id, data: updatedData });
-    setSelectedOrg(updatedData);
-  };
 
   const EMPTY_FILTERS = {
     type: "", state: "", owner: "",
@@ -171,6 +157,8 @@ export default function Organizations() {
     return result;
   }, [organizations, searchQuery, filters, sortField, sortDir]);
 
+  const isEmptyAccount = !isLoading && organizations.length === 0;
+
   const SortIcon = ({ field }) => {
     if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-400 inline ml-1" />;
     return sortDir === "asc"
@@ -254,6 +242,12 @@ export default function Organizations() {
             <span className="text-base font-semibold text-slate-800">Organizations</span>
           </div>
           <div className="flex items-center gap-2">
+            {isEmptyAccount && currentUser?.client_id && (
+              <SeedDemoDataButton
+                clientId={currentUser.client_id}
+                userId={currentUser.id}
+              />
+            )}
             <Link
               to="/organizations/import"
               className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
@@ -418,6 +412,15 @@ export default function Organizations() {
                     <td colSpan={COLUMNS.length} className="text-center py-16 text-slate-400">
                       <Building2 className="w-10 h-10 mx-auto mb-2 opacity-20" />
                       <p>No organizations found</p>
+                      {isEmptyAccount && currentUser?.client_id && (
+                        <div className="mt-4 flex justify-center">
+                          <SeedDemoDataButton
+                            clientId={currentUser.client_id}
+                            userId={currentUser.id}
+                            onSeeded={() => setActiveFilterId(null)}
+                          />
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ) : filteredAndSorted.map(org => (
