@@ -76,23 +76,23 @@ function ReminderPickerField({ value, onChange }) {
   const isPastDue = value && new Date(value) < new Date();
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-1.5 flex-wrap">
       {value ? (
-        <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${isPastDue ? "border-red-300 text-red-600" : "border-slate-300 text-slate-700"}`}>
-          <CalendarDays className={`h-3.5 w-3.5 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
+        <div className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-medium ${isPastDue ? "border-red-300 text-red-600" : "border-slate-300 text-slate-700"}`}>
+          <CalendarDays className={`h-3 w-3 ${isPastDue ? "text-red-500" : "text-slate-500"}`} />
           <span>{moment(value).format("MMM D, YYYY")}</span>
-          <button type="button" onClick={() => onChange(null)} className={`ml-1 ${isPastDue ? "text-red-400 hover:text-red-700" : "text-slate-400 hover:text-slate-700"}`}>
-            <X className="h-3 w-3" />
+          <button type="button" onClick={() => onChange(null)} className={`ml-0.5 ${isPastDue ? "text-red-400 hover:text-red-700" : "text-slate-400 hover:text-slate-700"}`}>
+            <X className="h-2.5 w-2.5" />
           </button>
         </div>
       ) : (
         <>
-          <button type="button" onClick={() => onChange(at9am(today).toISOString())} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">Today</button>
-          <button type="button" onClick={() => onChange(at9am(tomorrow).toISOString())} className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">Tomorrow</button>
+          <button type="button" onClick={() => onChange(at9am(today).toISOString())} className="rounded-full border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50">Today</button>
+          <button type="button" onClick={() => onChange(at9am(tomorrow).toISOString())} className="rounded-full border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50">Tomorrow</button>
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
-              <button type="button" className="rounded-full border border-slate-300 bg-white p-1.5 text-slate-700 transition-colors hover:bg-slate-50">
-                <CalendarDays className="h-4 w-4" />
+              <button type="button" className="rounded-full border border-slate-300 bg-white p-1 text-slate-700 transition-colors hover:bg-slate-50">
+                <CalendarDays className="h-3.5 w-3.5" />
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -206,40 +206,38 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
-          <div className="space-y-5">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Organization</p>
-                  {selectedOrganization ? (
-                    <div className="flex items-center gap-2 text-sm text-slate-700">
-                      <Building2 className="h-4 w-4 text-slate-400" />
-                      <Link to={`/Organizations?id=${selectedOrganization.id}`} className="font-medium text-blue-600 hover:underline">
-                        {selectedOrganization.organization_name}
-                      </Link>
-                    </div>
-                  ) : deal.organization_name ? (
-                    <div className="flex items-center gap-2 text-sm text-slate-700">
-                      <Building2 className="h-4 w-4 text-slate-400" />
-                      <span className="font-medium">{deal.organization_name}</span>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-slate-500">No organization linked</p>
-                  )}
-                </div>
-                <ReminderPickerField value={form.remind_at} onChange={(value) => setField("remind_at", value)} />
+        <div className="flex-1 overflow-y-auto">
+          <div className="border-b border-slate-200 bg-slate-50 px-5 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                {selectedOrganization ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Building2 className="h-4 w-4 text-slate-400" />
+                    <Link to={`/Organizations?id=${selectedOrganization.id}`} className="font-medium text-blue-600 hover:underline">
+                      {selectedOrganization.organization_name}
+                    </Link>
+                  </div>
+                ) : deal.organization_name ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <Building2 className="h-4 w-4 text-slate-400" />
+                    <span className="font-medium">{deal.organization_name}</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500">No organization linked</p>
+                )}
               </div>
+              <ReminderPickerField value={form.remind_at} onChange={(value) => setField("remind_at", value)} />
             </div>
+          </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full flex-col">
+            <TabsList className="grid w-full grid-cols-3 rounded-none border-b border-slate-200 bg-white px-0">
                 <TabsTrigger value="details">Detail</TabsTrigger>
                 <TabsTrigger value="notes">Notes</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="details" className="space-y-5 mt-0">
+              <TabsContent value="details" className="mt-0 px-5 py-4 space-y-5">
                 <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="mb-1 block text-xs text-slate-500">Deal Name *</label>
@@ -344,11 +342,11 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
             ) : null}
               </TabsContent>
 
-              <TabsContent value="notes" className="mt-0">
+              <TabsContent value="notes" className="mt-0 px-5 py-4">
                 <DealNotesSection deal={deal} clientId={deal.client_id} />
               </TabsContent>
 
-              <TabsContent value="activity" className="mt-0">
+              <TabsContent value="activity" className="mt-0 px-5 py-4">
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">
                   <History className="mx-auto mb-3 h-8 w-8 text-slate-400" />
                   <h3 className="text-sm font-semibold text-slate-700">Activity</h3>
