@@ -17,10 +17,23 @@ export default function InlineTextDetailField({
   const [draft, setDraft] = useState(value || "");
   const [error, setError] = useState("");
   const inputRef = useRef(null);
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     if (editing && inputRef.current) inputRef.current.focus();
   }, [editing]);
+
+  useEffect(() => {
+    if (!editing) return;
+
+    const handlePointerDown = (event) => {
+      if (wrapperRef.current?.contains(event.target)) return;
+      commit();
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [editing, draft, value]);
 
   useEffect(() => {
     if (!editing) {
@@ -51,7 +64,7 @@ export default function InlineTextDetailField({
   if (editing) {
     if (multiline) {
       return (
-        <div className="space-y-1">
+        <div ref={wrapperRef} className="space-y-1">
           <Textarea
             ref={inputRef}
             value={draft}
@@ -72,7 +85,7 @@ export default function InlineTextDetailField({
     }
 
     return (
-      <div className="space-y-1">
+      <div ref={wrapperRef} className="space-y-1">
         <Input
           ref={inputRef}
           value={draft}
