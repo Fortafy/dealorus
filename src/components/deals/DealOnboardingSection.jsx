@@ -10,14 +10,14 @@ const STEP_CONFIG = [
   { key: "google_group", label: "Create Google Group", functionName: "proxyCreateGoogleGroup" },
   { key: "google_drive", label: "Create Google Drive Folder", functionName: "proxyCreateGoogleDriveFolder" },
   { key: "clickup", label: "Create ClickUp Space", functionName: "proxyCreateClickUpSpace" },
-  { key: "timesync", label: "Add to Timesync", functionName: "proxyCreateTimesyncClient" },
+  { key: "timesync", label: "Create Timesync Client", functionName: "proxyCreateTimesyncClient" },
 ];
 
 const VERIFY_CONFIG = [
   { key: "google_group", label: "Google Group" },
   { key: "google_drive", label: "Google Drive Folder" },
-  { key: "timesync", label: "Timesync" },
-  { key: "clickup", label: "ClickUp" },
+  { key: "clickup", label: "Create ClickUp Space" },
+  { key: "timesync", label: "Create Timesync Client" },
 ];
 
 const createInitialSteps = () => ({
