@@ -26,6 +26,7 @@ const US_STATES = [
 
 function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
   const [form, setForm] = useState({
+    abbreviation: "",
     organization_name: "",
     state: "",
     city: "",
@@ -49,8 +50,8 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
   };
 
   const checkForDuplicate = async () => {
-    if (!form.organization_name.trim() || !form.state.trim()) {
-      setError("Organization name and state are required.");
+    if (!form.abbreviation.trim() || !form.organization_name.trim() || !form.state.trim()) {
+      setError("Abbreviation, organization name, and state are required.");
       return false;
     }
     setIsChecking(true);
@@ -98,11 +99,15 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
     onClose();
   };
 
-  const canSubmit = form.organization_name.trim() && form.state.trim();
+  const canSubmit = form.abbreviation.trim() && form.organization_name.trim() && form.state.trim();
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-slate-600 mb-1">Abbreviation *</label>
+          <Input value={form.abbreviation} onChange={e => set("abbreviation", e.target.value)} placeholder="e.g. UWA" />
+        </div>
         <div className="col-span-2">
           <label className="block text-xs font-medium text-slate-600 mb-1">Organization Name *</label>
           <Input value={form.organization_name} onChange={e => set("organization_name", e.target.value)} placeholder="e.g. United Way of America" />
@@ -151,7 +156,7 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
           <Input value={form.phone} onChange={e => set("phone", e.target.value)} placeholder="Phone number" />
         </div>
 
-        <div className="col-span-2">
+        <div className="col-span-3 md:col-span-2">
           <label className="block text-xs font-medium text-slate-600 mb-1">Email</label>
           <Input value={form.email} onChange={e => set("email", e.target.value)} placeholder="contact@org.org" type="email" />
         </div>
