@@ -44,6 +44,7 @@ export default function InlineTextDetailField({
 
   const commit = () => {
     const nextValue = draft.trim() || null;
+    const currentValue = typeof value === "string" ? value.trim() || null : value || null;
 
     if (nextValue && validate && !validate(nextValue)) {
       setError(validationMessage || "Invalid value");
@@ -52,7 +53,7 @@ export default function InlineTextDetailField({
 
     setError("");
     setEditing(false);
-    if (nextValue !== (value || null)) onSave(nextValue);
+    if (nextValue !== currentValue) onSave(nextValue);
   };
 
   const cancel = () => {
