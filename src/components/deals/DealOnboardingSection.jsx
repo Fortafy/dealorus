@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,12 @@ const STEP_CONFIG = [
   { key: "google_group", label: "Create Google Group" },
   { key: "google_drive", label: "Create Google Drive Folder" },
   { key: "timesync", label: "Add to Timesync" },
+];
+
+const VERIFY_CONFIG = [
+  { key: "google_group", label: "Google Group" },
+  { key: "google_drive", label: "Google Drive Folder" },
+  { key: "timesync", label: "Timesync" },
 ];
 
 const createInitialSteps = () => ({
@@ -57,13 +63,27 @@ function ErrorLogPanel({ errors }) {
     <div className="rounded-xl border border-red-200 bg-red-50 p-4">
       <p className="mb-3 text-sm font-semibold text-red-700">Error Log</p>
       <div className="space-y-3">
-        {errors.map((error) => (
-          <div key={error.step} className="rounded-lg border border-red-100 bg-white p-3">
+        {errors.map((error, index) => (
+          <div key={`${error.step}-${index}`} className="rounded-lg border border-red-100 bg-white p-3">
             <p className="text-xs font-semibold text-red-700">{error.label}</p>
             <p className="mt-1 whitespace-pre-wrap break-words text-xs text-red-600">{error.message}</p>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function VerifyResultRow({ label, found, value }) {
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+      <div>
+        <p className="text-sm font-medium text-slate-900">{label}</p>
+        <p className={`text-xs font-medium ${found ? "text-green-700" : "text-red-700"}`}>
+          {found ? "✅ Found" : "❌ Not Found"}
+        </p>
+      </div>
+      <div className="max-w-[45%] truncate text-xs text-slate-600">{value || "—"}</div>
     </div>
   );
 }
@@ -75,6 +95,13 @@ export default function DealOnboardingSection({ organizationId }) {
   const [steps, setSteps] = useState(createInitialSteps());
   const [errors, setErrors] = useState([]);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyErrors, setVerifyErrors] = useState([]);
+  const [verifyResults, setVerifyResults] = useState({});
+  const [verifyFieldsToSave, setVerifyFieldsToSave] = useState(null);
+  const [hasVerifyCompleted, setHasVerifyCompleted] = useState(false);
+  const [isSavingVerify, setIsSavingVerify] = useState(false);
 
   const { data: organization, isLoading } = useQuery({
     queryKey: ["deal-onboarding-org", organizationId],
@@ -101,6 +128,70 @@ export default function DealOnboardingSection({ organizationId }) {
     if (key === "google_drive") return `https://drive.google.com/drive/folders/${encodeURIComponent(value)}`;
     if (key === "timesync") return `https://timesync.fortafy.us/clients/${encodeURIComponent(value)}`;
     return null;
+  };
+
+  const resetVerifyState = () => {
+    setVerifyErrors([]);
+    setVerifyResults({});
+    setVerifyFieldsToSave(null);
+    setHasVerifyCompleted(false);
+  };
+
+  const handleVerify = async () => {
+    if (!organization) return;
+
+    setIsVerifying(true);
+    resetVerifyState();
+
+    try {
+      const response = await fetch("https://client-onboarding-fdfc7132.base44.app/functions/verifyOnboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          organization_name: organization.organization_name,
+          abbreviation: organization.abbreviation,
+          website: organization.website || null,
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      setVerifyResults(data.results || {});
+      setVerifyFieldsToSave(data.fields_to_save || {});
+      setVerifyErrors(data.errors || []);
+      setHasVerifyCompleted(true);
+    } catch (error) {
+      setVerifyErrors([{ step: "verify", label: "Verify Onboarding", message: error.message }]);
+      setHasVerifyCompleted(true);
+      toast.error("Verification failed");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleSaveVerify = async () => {
+    if (!organization || !verifyFieldsToSave) return;
+
+    setIsSavingVerify(true);
+
+    try {
+      await base44.entities.Organization.update(organization.id, verifyFieldsToSave);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["deal-onboarding-org", organization.id] }),
+        queryClient.invalidateQueries({ queryKey: ["organizations-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["organizations"] }),
+      ]);
+      toast.success("Organization updated");
+      setIsVerifyModalOpen(false);
+    } catch (error) {
+      toast.error("Failed to save verification results");
+    } finally {
+      setIsSavingVerify(false);
+    }
   };
 
   const handleStart = async () => {
@@ -178,14 +269,24 @@ export default function DealOnboardingSection({ organizationId }) {
                 </div>
               ))}
             </div>
-            <Button variant="outline" onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
-              View Onboarding
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
+                View Onboarding
+              </Button>
+              <Button variant="outline" onClick={() => { resetVerifyState(); setIsVerifyModalOpen(true); handleVerify(); }} disabled={!organization || isVerifying} className="gap-2">
+                Verify Onboarding
+              </Button>
+            </div>
           </div>
         ) : (
-          <Button onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
-            Open Onboarding
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
+              Start Onboarding
+            </Button>
+            <Button variant="outline" onClick={() => { resetVerifyState(); setIsVerifyModalOpen(true); handleVerify(); }} disabled={!organization || isVerifying} className="gap-2">
+              Verify Onboarding
+            </Button>
+          </div>
         )}
       </div>
 
@@ -209,11 +310,59 @@ export default function DealOnboardingSection({ organizationId }) {
           </div>
 
           <DialogFooter className="flex items-center justify-between sm:justify-between">
-            <Button onClick={handleStart} disabled={isRunning || !organization}>
-              {isRunning ? "Running..." : "Start Onboarding"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleStart} disabled={isRunning || !organization}>
+                {isRunning ? "Running..." : "Start Onboarding"}
+              </Button>
+              <Button variant="outline" onClick={() => { resetVerifyState(); setIsVerifyModalOpen(true); handleVerify(); }} disabled={isRunning || isVerifying || !organization}>
+                Verify Onboarding
+              </Button>
+            </div>
             <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isRunning}>
               {hasCompleted ? "Done" : "Close"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isVerifyModalOpen} onOpenChange={(open) => { if (!isVerifying && !isSavingVerify) setIsVerifyModalOpen(open); }}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Verifying Onboarding — {organization?.organization_name || "Organization"}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {isVerifying ? (
+              <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-500" />
+                <p className="text-sm font-medium text-slate-700">Checking onboarding services...</p>
+              </div>
+            ) : hasVerifyCompleted ? (
+              <>
+                <div className="space-y-3">
+                  {VERIFY_CONFIG.map((item) => {
+                    const result = verifyResults[item.key] || {};
+                    return (
+                      <VerifyResultRow
+                        key={item.key}
+                        label={item.label}
+                        found={!!result.found}
+                        value={result.value || null}
+                      />
+                    );
+                  })}
+                </div>
+                <ErrorLogPanel errors={verifyErrors} />
+              </>
+            ) : null}
+          </div>
+
+          <DialogFooter className="flex items-center justify-between sm:justify-between">
+            <Button onClick={handleSaveVerify} disabled={!hasVerifyCompleted || isVerifying || isSavingVerify || !verifyFieldsToSave}>
+              {isSavingVerify ? "Saving..." : "Save to Organization"}
+            </Button>
+            <Button variant="outline" onClick={() => setIsVerifyModalOpen(false)} disabled={isVerifying || isSavingVerify}>
+              Done
             </Button>
           </DialogFooter>
         </DialogContent>
