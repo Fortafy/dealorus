@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
+import DealOnboardingSection from "@/components/deals/DealOnboardingSection";
 import DealNotesSection from "@/components/deals/DealNotesSection";
 import DealActivityFeed from "@/components/deals/DealActivityFeed";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -339,6 +340,7 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
                 <div className="space-y-4">
                   <DealProposalPdfActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
                   <DealProposalDocActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
+                  <DealOnboardingSection organizationId={previewDeal.organization_id} />
                 </div>
               ) : null}
             </TabsContent>
