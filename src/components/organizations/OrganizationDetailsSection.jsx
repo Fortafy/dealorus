@@ -110,7 +110,7 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
             <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Abbreviation</div>
               <InlineTextDetailField
-                value={organization.abbreviation}
+                value={displayData.abbreviation}
                 onSave={(value) => saveField("abbreviation", value)}
                 placeholder="Add Abbreviation"
               />
