@@ -96,6 +96,27 @@
       "type": "string",
       "description": "URL to the organization's logo"
     },
+    "google_group_id": {
+      "type": "string",
+      "description": "Google Group ID created during onboarding"
+    },
+    "google_group_email": {
+      "type": "string",
+      "description": "Google Group email created during onboarding"
+    },
+    "google_drive_folder_id": {
+      "type": "string",
+      "description": "Google Drive folder ID created during onboarding"
+    },
+    "timesync_id": {
+      "type": "string",
+      "description": "TimeSync record ID created during onboarding"
+    },
+    "is_provisioned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether onboarding provisioning has completed"
+    },
     "data_sources": {
       "type": "array",
       "items": {
