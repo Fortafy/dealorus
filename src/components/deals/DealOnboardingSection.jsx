@@ -265,15 +265,21 @@ export default function DealOnboardingSection({ organizationId }) {
   const handleProvisionMissing = async () => {
     if (!organization) return;
 
+    const missingItemKeys = VERIFY_CONFIG.filter((item) => {
+      const result = normalizedVerifyResults[item.key] || {};
+      return !((result.found ?? result.exists) === true);
+    }).map((item) => item.key);
+
+    if (!missingItemKeys.length) {
+      await handleSaveVerify(true);
+      return;
+    }
+
     setIsRunning(true);
     setErrors([]);
     setHasCompleted(false);
 
     try {
-      if (verifyFieldsToSave && Object.keys(verifyFieldsToSave).length) {
-        await handleSaveVerify(false);
-      }
-
       const response = await base44.functions.invoke("triggerOnboarding", { org_id: organization.id });
       const data = response.data || {};
       const nextSteps = createInitialSteps();
@@ -296,6 +302,7 @@ export default function DealOnboardingSection({ organizationId }) {
         queryClient.invalidateQueries({ queryKey: ["organizations-list"] }),
         queryClient.invalidateQueries({ queryKey: ["organizations"] }),
       ]);
+
       await handleVerify();
 
       const hasFailures = Object.values(data.steps || {}).some((step) => step?.status === "failed");
@@ -425,6 +432,10 @@ export default function DealOnboardingSection({ organizationId }) {
             {allItemsFound && hasVerifyCompleted ? (
               <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
                 All onboarding items were found and can be saved to complete onboarding.
+              </div>
+            ) : hasVerifyCompleted ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Missing items can now be provisioned while keeping any already found values.
               </div>
             ) : null}
 
