@@ -116,6 +116,12 @@ export default function DealOnboardingSection({ organizationId }) {
     },
   });
 
+  const normalizedVerifyResults = useMemo(() => ({
+    google_group: verifyResults.google_group || verifyResults.googleGroup || {},
+    google_drive: verifyResults.google_drive || verifyResults.googleDrive || {},
+    timesync: verifyResults.timesync || {},
+  }), [verifyResults]);
+
   const summaryRows = useMemo(() => [
     { label: "Google Group Email", value: organization?.google_group_email },
     { label: "Drive Folder ID", value: organization?.google_drive_folder_id },
@@ -234,7 +240,8 @@ export default function DealOnboardingSection({ organizationId }) {
     setIsSavingVerify(true);
 
     try {
-      await base44.entities.Organization.update(organization.id, verifyFieldsToSave);
+      const updatedOrganization = await base44.entities.Organization.update(organization.id, verifyFieldsToSave);
+      queryClient.setQueryData(["deal-onboarding-org", organization.id], updatedOrganization);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["deal-onboarding-org", organization.id] }),
         queryClient.invalidateQueries({ queryKey: ["organizations-list"] }),
@@ -410,13 +417,20 @@ export default function DealOnboardingSection({ organizationId }) {
               <>
                 <div className="space-y-3">
                   {VERIFY_CONFIG.map((item) => {
-                    const result = verifyResults[item.key] || {};
+                    const result = normalizedVerifyResults[item.key] || {};
+                    const found = !!(result.found ?? result.exists);
+                    const value = item.key === "google_group"
+                      ? (result.value || result.groupEmail || result.groupId || null)
+                      : item.key === "google_drive"
+                        ? (result.value || result.folderId || null)
+                        : (result.value || result.id || null);
+
                     return (
                       <VerifyResultRow
                         key={item.key}
                         label={item.label}
-                        found={!!result.found}
-                        value={result.value || null}
+                        found={found}
+                        value={value}
                         matchedBy={item.key === "timesync" ? result.matched_by || null : null}
                       />
                     );
