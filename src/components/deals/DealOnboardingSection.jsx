@@ -182,18 +182,8 @@ export default function DealOnboardingSection({ organizationId }) {
     setIsVerifying(true);
 
     try {
-      const response = await fetch("https://client-onboarding-fdfc7132.base44.app/functions/verifyOnboarding", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(verificationPayload),
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await base44.functions.invoke("proxyVerifyOnboarding", verificationPayload);
+      const data = response.data;
       setVerifyResults(data.results || {});
       setVerifyFieldsToSave(data.fields_to_save || {});
       setVerifyErrors(data.errors || []);
