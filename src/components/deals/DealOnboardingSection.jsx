@@ -3,7 +3,7 @@ import { ExternalLink, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const STEP_CONFIG = [
@@ -326,6 +326,9 @@ export default function DealOnboardingSection({ organizationId }) {
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Onboarding — {organization?.organization_name || "Organization"}</DialogTitle>
+            <DialogDescription>
+              Review onboarding steps and run provisioning for this organization.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
@@ -361,6 +364,9 @@ export default function DealOnboardingSection({ organizationId }) {
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Verifying Onboarding — {organization?.organization_name || "Organization"}</DialogTitle>
+            <DialogDescription>
+              Check whether the external onboarding resources already exist for this organization.
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
