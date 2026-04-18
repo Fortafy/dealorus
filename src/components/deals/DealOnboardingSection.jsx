@@ -127,7 +127,7 @@ export default function DealOnboardingSection({ organizationId }) {
   const summaryRows = useMemo(() => [
     { label: "Google Group Email", key: "google_group", value: organization?.google_group_email || organization?.google_group_id },
     { label: "Drive Folder ID", key: "google_drive", value: organization?.google_drive_folder_id },
-    { label: "ClickUp Space", key: "clickup", value: organization?.clickup_space_name || organization?.clickup_space_id, url: organization?.clickup_space_id ? `https://app.clickup.com/${encodeURIComponent(organization.clickup_space_id)}` : null },
+    { label: "ClickUp Space", key: "clickup", value: organization?.clickup_space_name || organization?.clickup_space_id, url: organization?.clickup_space_id ? `https://app.clickup.com/9017283090/v/o/s/${encodeURIComponent(organization.clickup_space_id)}` : null },
     { label: "Timesync ID", key: "timesync", value: organization?.timesync_id },
   ].filter((item) => item.value), [organization]);
   const verificationPayload = useMemo(() => {
