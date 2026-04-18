@@ -9,6 +9,7 @@ import { toast } from "sonner";
 const STEP_CONFIG = [
   { key: "google_group", label: "Create Google Group", functionName: "proxyCreateGoogleGroup" },
   { key: "google_drive", label: "Create Google Drive Folder", functionName: "proxyCreateGoogleDriveFolder" },
+  { key: "clickup", label: "Create ClickUp Space", functionName: "proxyCreateClickUpSpace" },
   { key: "timesync", label: "Add to Timesync", functionName: "proxyCreateTimesyncClient" },
 ];
 
@@ -16,14 +17,15 @@ const VERIFY_CONFIG = [
   { key: "google_group", label: "Google Group" },
   { key: "google_drive", label: "Google Drive Folder" },
   { key: "timesync", label: "Timesync" },
+  { key: "clickup", label: "ClickUp" },
 ];
 
 const createInitialSteps = () => ({
   google_group: { status: "pending", value: null, url: null },
   google_drive: { status: "pending", value: null, url: null },
+  clickup: { status: "pending", value: null, url: null },
   timesync: { status: "pending", value: null, url: null },
 });
-
 function StatusIcon({ status }) {
   if (status === "running") return <span className="text-blue-600">🔄</span>;
   if (status === "done") return <span className="text-green-600">✅</span>;
@@ -119,14 +121,15 @@ export default function DealOnboardingSection({ organizationId }) {
     google_group: verifyResults.google_group || verifyResults.googleGroup || {},
     google_drive: verifyResults.google_drive || verifyResults.googleDrive || {},
     timesync: verifyResults.timesync || {},
+    clickup: verifyResults.clickup || verifyResults.clickUp || {},
   }), [verifyResults]);
 
   const summaryRows = useMemo(() => [
     { label: "Google Group Email", key: "google_group", value: organization?.google_group_email || organization?.google_group_id },
     { label: "Drive Folder ID", key: "google_drive", value: organization?.google_drive_folder_id },
+    { label: "ClickUp Space ID", key: "clickup", value: organization?.clickup_space_id },
     { label: "Timesync ID", key: "timesync", value: organization?.timesync_id },
   ].filter((item) => item.value), [organization]);
-
   const verificationPayload = useMemo(() => {
     const organizationName = organization?.organization_name || organization?.name || "";
     const abbreviation = organization?.abbreviation || "";
@@ -166,6 +169,7 @@ export default function DealOnboardingSection({ organizationId }) {
       return `https://groups.google.com/a/fortafy.us/g/${encodeURIComponent(groupName)}`;
     }
     if (key === "google_drive") return `https://drive.google.com/drive/folders/${encodeURIComponent(value)}`;
+    if (key === "clickup") return null;
     if (key === "timesync") return `https://timesync.fortafy.us/Clients?clientId=${encodeURIComponent(value)}`;
     return null;
   };
@@ -297,6 +301,9 @@ export default function DealOnboardingSection({ organizationId }) {
         ...basePayload,
         google_group_email: organization.google_group_email || verifyFieldsToSave?.google_group_email || null,
       },
+      clickup: {
+        organization_name: organization.organization_name,
+      },
       timesync: {
         ...basePayload,
         google_group_email: organization.google_group_email || verifyFieldsToSave?.google_group_email || null,
@@ -307,6 +314,7 @@ export default function DealOnboardingSection({ organizationId }) {
     const valueExtractors = {
       google_group: (data) => data?.groupEmail || data?.groupId || null,
       google_drive: (data) => data?.clientFolderId || data?.folderId || null,
+      clickup: (data) => data?.spaceId || null,
       timesync: (data) => data?.id || null,
     };
 
@@ -326,7 +334,9 @@ export default function DealOnboardingSection({ organizationId }) {
             ? (organization.google_group_email || organization.google_group_id || null)
             : step.key === "google_drive"
               ? (organization.google_drive_folder_id || null)
-              : (organization.timesync_id || null);
+              : step.key === "clickup"
+                ? (organization.clickup_space_id || null)
+                : (organization.timesync_id || null);
 
           nextSteps[step.key] = {
             status: existingValue ? "skipped" : "pending",
@@ -361,6 +371,11 @@ export default function DealOnboardingSection({ organizationId }) {
           if (step.key === "google_drive" && value) {
             organizationUpdate.google_drive_folder_id = result.clientFolderId || result.folderId || value;
             payloadsByStep.timesync.google_drive_folder_id = organizationUpdate.google_drive_folder_id;
+          }
+
+          if (step.key === "clickup" && value) {
+            organizationUpdate.clickup_space_id = result.spaceId || value;
+            organizationUpdate.clickup_list_id = result.listId || null;
           }
 
           if (step.key === "timesync" && value) {
@@ -501,7 +516,9 @@ export default function DealOnboardingSection({ organizationId }) {
                     ? (result.value || result.groupEmail || result.groupId || null)
                     : item.key === "google_drive"
                       ? (result.value || result.folderId || null)
-                      : (result.value || result.id || null);
+                      : item.key === "clickup"
+                        ? (result.value || result.spaceId || null)
+                        : (result.value || result.id || null);
 
                   return (
                     <VerifyResultRow

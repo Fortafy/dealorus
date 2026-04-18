@@ -108,6 +108,14 @@
       "type": "string",
       "description": "Google Drive folder ID created during onboarding"
     },
+    "clickup_space_id": {
+      "type": "string",
+      "description": "ClickUp space ID created during onboarding"
+    },
+    "clickup_list_id": {
+      "type": "string",
+      "description": "ClickUp list ID created during onboarding"
+    },
     "timesync_id": {
       "type": "string",
       "description": "TimeSync record ID created during onboarding"
@@ -268,14 +276,44 @@
     "create": {
       "data.client_id": "{{user.data.client_id}}"
     },
-    "update": {
+    "read": {
       "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "data.client_id": "{{user.data.client_id}}"
-    },
-    "write": {
-      "data.client_id": "{{user.data.client_id}}"
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }
