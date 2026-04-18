@@ -127,7 +127,7 @@ export default function DealOnboardingSection({ organizationId }) {
   const summaryRows = useMemo(() => [
     { label: "Google Group Email", key: "google_group", value: organization?.google_group_email || organization?.google_group_id },
     { label: "Drive Folder ID", key: "google_drive", value: organization?.google_drive_folder_id },
-    { label: "ClickUp Space ID", key: "clickup", value: organization?.clickup_space_id },
+    { label: "ClickUp Space", key: "clickup", value: organization?.clickup_space_name || organization?.clickup_space_id },
     { label: "Timesync ID", key: "timesync", value: organization?.timesync_id },
   ].filter((item) => item.value), [organization]);
   const verificationPayload = useMemo(() => {
@@ -374,6 +374,7 @@ export default function DealOnboardingSection({ organizationId }) {
           }
 
           if (step.key === "clickup" && value) {
+            organizationUpdate.clickup_space_name = result.spaceName || result.name || null;
             organizationUpdate.clickup_space_id = result.spaceId || value;
             organizationUpdate.clickup_list_id = result.listId || null;
           }

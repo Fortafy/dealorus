@@ -108,6 +108,10 @@
       "type": "string",
       "description": "Google Drive folder ID created during onboarding"
     },
+    "clickup_space_name": {
+      "type": "string",
+      "description": "ClickUp space name created during onboarding"
+    },
     "clickup_space_id": {
       "type": "string",
       "description": "ClickUp space ID created during onboarding"
