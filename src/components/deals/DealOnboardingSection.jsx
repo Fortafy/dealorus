@@ -303,6 +303,7 @@ export default function DealOnboardingSection({ organizationId }) {
       },
       clickup: {
         organization_name: organization.organization_name,
+        website_url: organization.website || null,
       },
       timesync: {
         ...basePayload,
