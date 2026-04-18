@@ -104,28 +104,13 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-3">
-        <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Abbreviation *</label>
-          <Input value={form.abbreviation} onChange={e => set("abbreviation", e.target.value)} placeholder="e.g. UWA" />
-        </div>
         <div className="col-span-2">
           <label className="block text-xs font-medium text-slate-600 mb-1">Organization Name *</label>
           <Input value={form.organization_name} onChange={e => set("organization_name", e.target.value)} placeholder="e.g. United Way of America" />
         </div>
-
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">State *</label>
-          <Select value={form.state} onValueChange={v => set("state", v)}>
-            <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
-            <SelectContent>
-              {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">City</label>
-          <Input value={form.city} onChange={e => set("city", e.target.value)} placeholder="City" />
+          <label className="block text-xs font-medium text-slate-600 mb-1">Abbreviation *</label>
+          <Input value={form.abbreviation} onChange={e => set("abbreviation", e.target.value)} placeholder="e.g. UWA" />
         </div>
 
         <div>
@@ -133,7 +118,7 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
           <Input value={form.ein} onChange={e => set("ein", e.target.value)} placeholder="XX-XXXXXXX" />
         </div>
 
-        <div>
+        <div className="col-span-2">
           <label className="block text-xs font-medium text-slate-600 mb-1">Organization Type</label>
           <Select value={form.organization_type} onValueChange={v => set("organization_type", v)}>
             <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
@@ -146,9 +131,24 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
           </Select>
         </div>
 
+        <div className="col-span-2">
+          <label className="block text-xs font-medium text-slate-600 mb-1">City</label>
+          <Input value={form.city} onChange={e => set("city", e.target.value)} placeholder="City" />
+        </div>
+
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Website</label>
-          <Input value={form.website} onChange={e => set("website", e.target.value)} placeholder="https://..." />
+          <label className="block text-xs font-medium text-slate-600 mb-1">State *</label>
+          <Select value={form.state} onValueChange={v => set("state", v)}>
+            <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+            <SelectContent>
+              {US_STATES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="col-span-2">
+          <label className="block text-xs font-medium text-slate-600 mb-1">Email</label>
+          <Input value={form.email} onChange={e => set("email", e.target.value)} placeholder="contact@org.org" type="email" />
         </div>
 
         <div>
@@ -156,9 +156,9 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
           <Input value={form.phone} onChange={e => set("phone", e.target.value)} placeholder="Phone number" />
         </div>
 
-        <div className="col-span-3 md:col-span-2">
-          <label className="block text-xs font-medium text-slate-600 mb-1">Email</label>
-          <Input value={form.email} onChange={e => set("email", e.target.value)} placeholder="contact@org.org" type="email" />
+        <div className="col-span-3">
+          <label className="block text-xs font-medium text-slate-600 mb-1">Website</label>
+          <Input value={form.website} onChange={e => set("website", e.target.value)} placeholder="https://..." />
         </div>
       </div>
 
