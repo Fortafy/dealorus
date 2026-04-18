@@ -115,6 +115,14 @@ export default function DealOnboardingSection({ organizationId }) {
     { label: "Timesync ID", value: organization?.timesync_id },
   ].filter((item) => item.value), [organization]);
 
+  const missingVerificationFields = useMemo(() => {
+    const missing = [];
+    if (!verificationPayload.organization_name) missing.push("organization name");
+    if (!verificationPayload.abbreviation) missing.push("abbreviation");
+    if (!verificationPayload.website) missing.push("website");
+    return missing;
+  }, [verificationPayload]);
+
   const setStepState = (key, patch) => {
     setSteps((current) => ({
       ...current,
@@ -137,21 +145,40 @@ export default function DealOnboardingSection({ organizationId }) {
     setHasVerifyCompleted(false);
   };
 
+  const verificationPayload = useMemo(() => {
+    const organizationName = organization?.organization_name || organization?.name || "";
+    const abbreviation = organization?.abbreviation || "";
+    const website = organization?.website || organization?.url || "";
+
+    return {
+      organization_name: String(organizationName).trim(),
+      abbreviation: String(abbreviation).trim(),
+      website: String(website).trim(),
+    };
+  }, [organization]);
+
   const handleVerify = async () => {
     if (!organization) return;
 
-    setIsVerifying(true);
     resetVerifyState();
+
+    if (!verificationPayload.organization_name || !verificationPayload.abbreviation || !verificationPayload.website) {
+      setVerifyErrors([{
+        step: "verify",
+        label: "Verify Onboarding",
+        message: "Organization name, abbreviation, and website are required before verification can run.",
+      }]);
+      setHasVerifyCompleted(true);
+      return;
+    }
+
+    setIsVerifying(true);
 
     try {
       const response = await fetch("https://client-onboarding-fdfc7132.base44.app/functions/verifyOnboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          organization_name: organization.organization_name,
-          abbreviation: organization.abbreviation,
-          website: organization.website || null,
-        }),
+        body: JSON.stringify(verificationPayload),
       });
 
       if (!response.ok) {
@@ -277,15 +304,23 @@ export default function DealOnboardingSection({ organizationId }) {
                 Verify Onboarding
               </Button>
             </div>
+            {missingVerificationFields.length ? (
+              <p className="text-xs text-amber-700">Missing for verification: {missingVerificationFields.join(", ")}</p>
+            ) : null}
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
-              Start Onboarding
-            </Button>
-            <Button variant="outline" onClick={() => { resetVerifyState(); setIsVerifyModalOpen(true); handleVerify(); }} disabled={!organization || isVerifying} className="gap-2">
-              Verify Onboarding
-            </Button>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
+                Start Onboarding
+              </Button>
+              <Button variant="outline" onClick={() => { resetVerifyState(); setIsVerifyModalOpen(true); handleVerify(); }} disabled={!organization || isVerifying} className="gap-2">
+                Verify Onboarding
+              </Button>
+            </div>
+            {missingVerificationFields.length ? (
+              <p className="text-xs text-amber-700">Missing for verification: {missingVerificationFields.join(", ")}</p>
+            ) : null}
           </div>
         )}
       </div>
