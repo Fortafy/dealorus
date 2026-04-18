@@ -84,15 +84,31 @@ export default function Deals() {
 
   const dealsByStage = useMemo(() => {
     const map = {};
-    sortedStages.forEach((s) => {map[s.id] = [];});
+    const getSortDate = (deal) => {
+      const candidates = [deal.remind_at, deal.expected_close_date]
+        .filter(Boolean)
+        .map((value) => new Date(value))
+        .filter((date) => !Number.isNaN(date.getTime()));
+
+      if (candidates.length > 0) {
+        return Math.min(...candidates.map((date) => date.getTime()));
+      }
+
+      return new Date(deal.created_date).getTime();
+    };
+
+    sortedStages.forEach((s) => { map[s.id] = []; });
     filteredDeals.forEach((deal) => {
-      if (map[deal.stage]) map[deal.stage].push(deal);else
-      {
-        // stage not in map (custom stage not recognized), put in first column
+      if (map[deal.stage]) map[deal.stage].push(deal); else {
         const firstId = sortedStages[0]?.id;
         if (firstId) map[firstId].push(deal);
       }
     });
+
+    Object.keys(map).forEach((stageId) => {
+      map[stageId].sort((a, b) => getSortDate(a) - getSortDate(b));
+    });
+
     return map;
   }, [filteredDeals, sortedStages]);
 
