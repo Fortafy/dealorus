@@ -122,9 +122,9 @@ export default function DealOnboardingSection({ organizationId }) {
   }), [verifyResults]);
 
   const summaryRows = useMemo(() => [
-    { label: "Google Group Email", value: organization?.google_group_email },
-    { label: "Drive Folder ID", value: organization?.google_drive_folder_id },
-    { label: "Timesync ID", value: organization?.timesync_id },
+    { label: "Google Group Email", key: "google_group", value: organization?.google_group_email || organization?.google_group_id },
+    { label: "Drive Folder ID", key: "google_drive", value: organization?.google_drive_folder_id },
+    { label: "Timesync ID", key: "timesync", value: organization?.timesync_id },
   ].filter((item) => item.value), [organization]);
 
   const verificationPayload = useMemo(() => {
@@ -429,12 +429,23 @@ export default function DealOnboardingSection({ organizationId }) {
               ✅ Already Provisioned
             </div>
             <div className="space-y-2">
-              {summaryRows.map((row) => (
-                <div key={row.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{row.label}</p>
-                  <p className="mt-1 break-words text-sm text-slate-800">{row.value}</p>
-                </div>
-              ))}
+              {summaryRows.map((row) => {
+                const url = getStepUrl(row.key, row.value);
+
+                return (
+                  <div key={row.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{row.label}</p>
+                    {url ? (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 break-all text-sm text-blue-600 hover:underline">
+                        <span>{row.value}</span>
+                        <ExternalLink className="h-3.5 w-3.5 flex-shrink-0" />
+                      </a>
+                    ) : (
+                      <p className="mt-1 break-words text-sm text-slate-800">{row.value}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => { resetVerifyState(); setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); handleStart(); }} disabled={!organization || isRunning || isVerifying} className="gap-2">
