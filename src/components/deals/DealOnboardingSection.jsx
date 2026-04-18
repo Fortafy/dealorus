@@ -293,7 +293,10 @@ export default function DealOnboardingSection({ organizationId }) {
 
     const payloadsByStep = {
       google_group: basePayload,
-      google_drive: basePayload,
+      google_drive: {
+        ...basePayload,
+        google_group_email: organization.google_group_email || verifyFieldsToSave?.google_group_email || null,
+      },
       timesync: {
         ...basePayload,
         google_group_email: organization.google_group_email || verifyFieldsToSave?.google_group_email || null,
@@ -351,6 +354,7 @@ export default function DealOnboardingSection({ organizationId }) {
           if (step.key === "google_group" && value) {
             organizationUpdate.google_group_email = result.groupEmail || value;
             organizationUpdate.google_group_id = result.groupId || null;
+            payloadsByStep.google_drive.google_group_email = result.groupEmail || value;
             payloadsByStep.timesync.google_group_email = result.groupEmail || value;
           }
 
