@@ -1,0 +1,260 @@
+{
+  "name": "Organization",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this organization record belongs to"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who created this organization record"
+    },
+    "organization_name": {
+      "type": "string",
+      "description": "Name of the nonprofit organization"
+    },
+    "abbreviation": {
+      "type": "string",
+      "description": "Client abbreviation such as AHOST"
+    },
+    "state": {
+      "type": "string",
+      "description": "State where organization is located"
+    },
+    "ein": {
+      "type": "string",
+      "description": "Employer Identification Number"
+    },
+    "address": {
+      "type": "string",
+      "description": "Full address of the organization"
+    },
+    "city": {
+      "type": "string",
+      "description": "City where organization is located"
+    },
+    "zip_code": {
+      "type": "string",
+      "description": "Zip code"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email address"
+    },
+    "website": {
+      "type": "string",
+      "description": "Organization website"
+    },
+    "organization_type": {
+      "type": "string",
+      "description": "Type of organization (501c3, government, etc.)"
+    },
+    "mission": {
+      "type": "string",
+      "description": "Organization mission statement"
+    },
+    "annual_revenue": {
+      "type": "string",
+      "description": "Annual revenue"
+    },
+    "ntee_code": {
+      "type": "string",
+      "description": "National Taxonomy of Exempt Entities code"
+    },
+    "ntee_description": {
+      "type": "string",
+      "description": "Full description of the NTEE code (e.g., 'Professional Societies & Associations')"
+    },
+    "ruling_date": {
+      "type": "string",
+      "description": "Date organization received tax-exempt status"
+    },
+    "source_created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date organization was created in source database"
+    },
+    "source_updated_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date organization was last updated in source database"
+    },
+    "source_subseccd_code": {
+      "type": "string",
+      "description": "IRS subsection code from source"
+    },
+    "most_recent_990": {
+      "type": "string",
+      "description": "URL to the most recent 990 filing PDF"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL to the organization's logo"
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Sources where data was found"
+    },
+    "source_metadata": {
+      "type": "object",
+      "description": "Metadata about each data source including last checked timestamp",
+      "properties": {
+        "AI": {
+          "type": "object",
+          "properties": {
+            "last_checked": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "fields_updated": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "CharityAPI": {
+          "type": "object",
+          "properties": {
+            "last_checked": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "fields_updated": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ProPublica": {
+          "type": "object",
+          "properties": {
+            "last_checked": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "fields_updated": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "NonprofitCheckPlus": {
+          "type": "object",
+          "properties": {
+            "last_checked": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "fields_updated": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "data_source_priority": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User-defined priority order for data sources",
+      "default": [
+        "CharityAPI",
+        "ProPublica",
+        "NonprofitCheckPlus",
+        "AI"
+      ]
+    },
+    "source_system": {
+      "type": "string",
+      "enum": [
+        "Salesforce",
+        "Manual",
+        "AI Search",
+        "CSV Import"
+      ],
+      "default": "Manual",
+      "description": "System where this organization originated"
+    },
+    "salesforce_id": {
+      "type": "string",
+      "description": "Salesforce Account ID for syncing"
+    },
+    "client_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive"
+      ],
+      "default": "active",
+      "description": "Whether this organization is an active client"
+    },
+    "is_client": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the organization is an active client"
+    },
+    "deal_value": {
+      "type": "number",
+      "description": "Estimated or actual value of the deal"
+    },
+    "next_activity_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Next planned interaction date"
+    },
+    "assigned_to_user_id": {
+      "type": "string",
+      "description": "User responsible for managing this organization"
+    },
+    "last_salesforce_sync": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this record was synced with Salesforce"
+    },
+    "label_ids": {
+      "type": "array",
+      "description": "IDs of labels applied to this organization",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "client_id",
+    "organization_name",
+    "state"
+  ],
+  "rls": {
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}"
+    }
+  }
+}
