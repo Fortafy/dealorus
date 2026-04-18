@@ -21,8 +21,28 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Organization not found' }, { status: 404 });
     }
 
-    if (org.is_provisioned) {
-      return Response.json({ error: 'Organization is already provisioned', already_provisioned: true }, { status: 409 });
+    const existingGoogleGroupValue = org.google_group_email || org.google_group_id || null;
+    const existingGoogleDriveValue = org.google_drive_folder_id || null;
+    const existingTimesyncValue = org.timesync_id || null;
+
+    const needsGoogleGroup = !existingGoogleGroupValue;
+    const needsGoogleDrive = !existingGoogleDriveValue;
+    const needsTimesync = !existingTimesyncValue;
+
+    if (!needsGoogleGroup && !needsGoogleDrive && !needsTimesync) {
+      if (!org.is_provisioned) {
+        await base44.asServiceRole.entities.Organization.update(org_id, { is_provisioned: true });
+      }
+
+      return Response.json({
+        success: true,
+        already_provisioned: true,
+        steps: {
+          google_group: { label: 'Create Google Group', status: 'skipped', value: existingGoogleGroupValue },
+          google_drive: { label: 'Create Google Drive Folder', status: 'skipped', value: existingGoogleDriveValue },
+          timesync: { label: 'Add to Timesync', status: 'skipped', value: existingTimesyncValue },
+        },
+      });
     }
 
     const authHeader = req.headers.get('authorization') || '';
@@ -43,6 +63,9 @@ Deno.serve(async (req) => {
         mission: org.mission || null,
         annual_revenue: org.annual_revenue || null,
         salesforce_id: org.salesforce_id || null,
+        skip_google_group: !needsGoogleGroup,
+        skip_google_drive_folder: !needsGoogleDrive,
+        skip_timesync: !needsTimesync,
       }),
     });
 
@@ -54,20 +77,44 @@ Deno.serve(async (req) => {
     const result = await onboardResp.json();
     const { google_group, google_drive, timesync } = result.results || {};
 
-    await base44.asServiceRole.entities.Organization.update(org_id, {
-      google_group_id: google_group?.groupId || null,
-      google_group_email: google_group?.groupEmail || null,
-      google_drive_folder_id: google_drive?.clientFolderId || null,
-      timesync_id: timesync?.id || null,
+    const updatePayload = {
       is_provisioned: true,
-    });
+    };
+
+    if (needsGoogleGroup) {
+      updatePayload.google_group_id = google_group?.groupId || null;
+      updatePayload.google_group_email = google_group?.groupEmail || null;
+    }
+
+    if (needsGoogleDrive) {
+      updatePayload.google_drive_folder_id = google_drive?.clientFolderId || null;
+    }
+
+    if (needsTimesync) {
+      updatePayload.timesync_id = timesync?.id || null;
+    }
+
+    await base44.asServiceRole.entities.Organization.update(org_id, updatePayload);
 
     return Response.json({
       success: true,
+      is_provisioned: true,
       steps: {
-        google_group: { label: 'Create Google Group', status: 'done', value: google_group?.groupEmail },
-        google_drive: { label: 'Create Google Drive Folder', status: 'done', value: google_drive?.clientFolderId },
-        timesync: { label: 'Add to Timesync', status: 'done', value: timesync?.id },
+        google_group: {
+          label: 'Create Google Group',
+          status: needsGoogleGroup ? 'done' : 'skipped',
+          value: needsGoogleGroup ? (google_group?.groupEmail || google_group?.groupId || null) : existingGoogleGroupValue,
+        },
+        google_drive: {
+          label: 'Create Google Drive Folder',
+          status: needsGoogleDrive ? 'done' : 'skipped',
+          value: needsGoogleDrive ? (google_drive?.clientFolderId || null) : existingGoogleDriveValue,
+        },
+        timesync: {
+          label: 'Add to Timesync',
+          status: needsTimesync ? 'done' : 'skipped',
+          value: needsTimesync ? (timesync?.id || null) : existingTimesyncValue,
+        },
       },
     });
   } catch (error) {
