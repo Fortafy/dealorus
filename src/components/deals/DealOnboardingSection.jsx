@@ -166,7 +166,7 @@ export default function DealOnboardingSection({ organizationId }) {
       return `https://groups.google.com/a/fortafy.us/g/${encodeURIComponent(groupName)}`;
     }
     if (key === "google_drive") return `https://drive.google.com/drive/folders/${encodeURIComponent(value)}`;
-    if (key === "timesync") return `https://timesync.fortafy.us/clients/${encodeURIComponent(value)}`;
+    if (key === "timesync") return `https://timesync.fortafy.us/Clients?clientId=${encodeURIComponent(value)}`;
     return null;
   };
 
