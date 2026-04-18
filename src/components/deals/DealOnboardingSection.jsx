@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -12,19 +13,20 @@ const STEP_CONFIG = [
 ];
 
 const createInitialSteps = () => ({
-  google_group: { status: "pending", value: null },
-  google_drive: { status: "pending", value: null },
-  timesync: { status: "pending", value: null },
+  google_group: { status: "pending", value: null, url: null },
+  google_drive: { status: "pending", value: null, url: null },
+  timesync: { status: "pending", value: null, url: null },
 });
 
 function StatusIcon({ status }) {
   if (status === "running") return <span className="text-blue-600">🔄</span>;
-  if (status === "success") return <span className="text-green-600">✅</span>;
+  if (status === "done") return <span className="text-green-600">✅</span>;
+  if (status === "skipped") return <span className="text-amber-600">⏭️</span>;
   if (status === "failed") return <span className="text-red-600">❌</span>;
   return <span className="text-slate-400">⬜</span>;
 }
 
-function StepRow({ label, status, value }) {
+function StepRow({ label, status, value, url }) {
   return (
     <div className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
       <div className="flex items-start gap-3">
@@ -34,7 +36,16 @@ function StepRow({ label, status, value }) {
           <p className="text-xs text-slate-500 capitalize">{status}</p>
         </div>
       </div>
-      {value ? <div className="max-w-[45%] truncate text-xs text-slate-600">{value}</div> : null}
+      {value ? (
+        url ? (
+          <a href={url} target="_blank" rel="noopener noreferrer" className="flex max-w-[45%] items-center gap-1 truncate text-xs text-blue-600 hover:underline">
+            <span className="truncate">{value}</span>
+            <ExternalLink className="h-3 w-3 flex-shrink-0" />
+          </a>
+        ) : (
+          <div className="max-w-[45%] truncate text-xs text-slate-600">{value}</div>
+        )
+      ) : null}
     </div>
   );
 }
@@ -84,111 +95,60 @@ export default function DealOnboardingSection({ organizationId }) {
     }));
   };
 
-  const runStep = async ({ key, label, url, body, getValue }) => {
-    setStepState(key, { status: "running" });
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      const value = getValue(data);
-      setStepState(key, { status: "success", value: value || null });
-      return { success: true, data };
-    } catch (error) {
-      setStepState(key, { status: "failed" });
-      setErrors((current) => [...current, { step: key, label, message: error.message }]);
-      return { success: false, data: null };
-    }
+  const getStepUrl = (key, value) => {
+    if (!value) return null;
+    if (key === "google_group") return `https://groups.google.com/a/fortafy.us/g/${encodeURIComponent(value)}`;
+    if (key === "google_drive") return `https://drive.google.com/drive/folders/${encodeURIComponent(value)}`;
+    if (key === "timesync") return `https://timesync.fortafy.us/clients/${encodeURIComponent(value)}`;
+    return null;
   };
 
   const handleStart = async () => {
     if (!organization) return;
 
-    setIsModalOpen(true);
     setIsRunning(true);
     setHasCompleted(false);
     setSteps(createInitialSteps());
     setErrors([]);
 
-    const groupResult = await runStep({
-      key: "google_group",
-      label: "Create Google Group",
-      url: "https://client-onboarding-fdfc7132.base44.app/functions/createGoogleGroup",
-      body: {
-        organization_name: organization.organization_name,
-        abbreviation: organization.abbreviation,
-      },
-      getValue: (data) => data?.groupEmail || data?.result?.groupEmail || null,
-    });
+    try {
+      const response = await base44.functions.invoke("triggerOnboarding", { org_id: organization.id });
+      const data = response.data || {};
+      const nextSteps = createInitialSteps();
 
-    const googleGroupId = groupResult.data?.groupId || groupResult.data?.result?.groupId || null;
-    const googleGroupEmail = groupResult.data?.groupEmail || groupResult.data?.result?.groupEmail || null;
+      STEP_CONFIG.forEach((step) => {
+        const stepData = data.steps?.[step.key] || {};
+        const value = stepData.value || null;
+        const status = stepData.status || "pending";
+        nextSteps[step.key] = {
+          status,
+          value,
+          url: getStepUrl(step.key, value),
+        };
+      });
 
-    const driveResult = await runStep({
-      key: "google_drive",
-      label: "Create Google Drive Folder",
-      url: "https://client-onboarding-fdfc7132.base44.app/functions/createGoogleDriveFolder",
-      body: {
-        website: organization.website || organization.url || null,
-        group_email: googleGroupEmail || null,
-      },
-      getValue: (data) => data?.clientFolderId || data?.result?.clientFolderId || null,
-    });
+      setSteps(nextSteps);
+      setHasCompleted(true);
 
-    const driveFolderId = driveResult.data?.clientFolderId || driveResult.data?.result?.clientFolderId || null;
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["deal-onboarding-org", organization.id] }),
+        queryClient.invalidateQueries({ queryKey: ["organizations-list"] }),
+        queryClient.invalidateQueries({ queryKey: ["organizations"] }),
+      ]);
 
-    const timesyncResult = await runStep({
-      key: "timesync",
-      label: "Add to Timesync",
-      url: "https://timesync.fortafy.us/functions/createClient",
-      body: {
-        name: organization.organization_name || organization.name || null,
-        abbreviation: organization.abbreviation || null,
-        ein: organization.ein || null,
-        salesforceId: organization.salesforce_id || "N/A",
-        url: organization.website || organization.url || null,
-        city: organization.city || null,
-        state: organization.state || null,
-        zipCode: organization.zip_code || organization.zipCode || null,
-        missionStatement: organization.mission || organization.mission_statement || null,
-        annualRevenue: organization.annual_revenue ? parseFloat(String(organization.annual_revenue).replace(/[^0-9.]/g, "")) || null : null,
-      },
-      getValue: (data) => data?.client?.id || data?.id || data?.result?.client?.id || null,
-    });
-
-    const timesyncId = timesyncResult.data?.client?.id || timesyncResult.data?.id || timesyncResult.data?.result?.client?.id || null;
-    const allSucceeded = [groupResult.success, driveResult.success, timesyncResult.success].every(Boolean);
-
-    await base44.entities.Organization.update(organization.id, {
-      google_group_id: googleGroupId,
-      google_group_email: googleGroupEmail,
-      google_drive_folder_id: driveFolderId,
-      timesync_id: timesyncId,
-      is_provisioned: allSucceeded,
-    });
-
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["deal-onboarding-org", organization.id] }),
-      queryClient.invalidateQueries({ queryKey: ["organizations-list"] }),
-      queryClient.invalidateQueries({ queryKey: ["organizations"] }),
-    ]);
-
-    setIsRunning(false);
-    setHasCompleted(true);
-
-    if (allSucceeded) {
-      toast.success("Onboarding completed");
-    } else {
-      toast.error("Onboarding finished with some failed steps");
+      const hasFailures = Object.values(data.steps || {}).some((step) => step?.status === "failed");
+      if (hasFailures) {
+        toast.error("Onboarding finished with some failed steps");
+      } else if (data.already_provisioned) {
+        toast.success("Everything was already set up");
+      } else {
+        toast.success("Onboarding completed");
+      }
+    } catch (error) {
+      setErrors([{ step: "onboarding", label: "Onboarding", message: error.message }]);
+      toast.error("Onboarding failed");
+    } finally {
+      setIsRunning(false);
     }
   };
 
@@ -218,10 +178,13 @@ export default function DealOnboardingSection({ organizationId }) {
                 </div>
               ))}
             </div>
+            <Button variant="outline" onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
+              View Onboarding
+            </Button>
           </div>
         ) : (
-          <Button onClick={handleStart} disabled={!organization || isRunning} className="gap-2">
-            🚀 Start Onboarding
+          <Button onClick={() => { setSteps(createInitialSteps()); setErrors([]); setHasCompleted(false); setIsModalOpen(true); }} disabled={!organization || isRunning} className="gap-2">
+            Open Onboarding
           </Button>
         )}
       </div>
@@ -239,14 +202,18 @@ export default function DealOnboardingSection({ organizationId }) {
                 label={step.label}
                 status={steps[step.key].status}
                 value={steps[step.key].value}
+                url={steps[step.key].url}
               />
             ))}
             <ErrorLogPanel errors={errors} />
           </div>
 
-          <DialogFooter>
-            <Button onClick={() => setIsModalOpen(false)} disabled={isRunning || !hasCompleted}>
-              Done
+          <DialogFooter className="flex items-center justify-between sm:justify-between">
+            <Button onClick={handleStart} disabled={isRunning || !organization}>
+              {isRunning ? "Running..." : "Start Onboarding"}
+            </Button>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isRunning}>
+              {hasCompleted ? "Done" : "Close"}
             </Button>
           </DialogFooter>
         </DialogContent>
