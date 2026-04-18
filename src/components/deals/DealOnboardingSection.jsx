@@ -115,6 +115,18 @@ export default function DealOnboardingSection({ organizationId }) {
     { label: "Timesync ID", value: organization?.timesync_id },
   ].filter((item) => item.value), [organization]);
 
+  const verificationPayload = useMemo(() => {
+    const organizationName = organization?.organization_name || organization?.name || "";
+    const abbreviation = organization?.abbreviation || "";
+    const website = organization?.website || organization?.url || "";
+
+    return {
+      organization_name: String(organizationName).trim(),
+      abbreviation: String(abbreviation).trim(),
+      website: String(website).trim(),
+    };
+  }, [organization]);
+
   const missingVerificationFields = useMemo(() => {
     const missing = [];
     if (!verificationPayload.organization_name) missing.push("organization name");
@@ -144,18 +156,6 @@ export default function DealOnboardingSection({ organizationId }) {
     setVerifyFieldsToSave(null);
     setHasVerifyCompleted(false);
   };
-
-  const verificationPayload = useMemo(() => {
-    const organizationName = organization?.organization_name || organization?.name || "";
-    const abbreviation = organization?.abbreviation || "";
-    const website = organization?.website || organization?.url || "";
-
-    return {
-      organization_name: String(organizationName).trim(),
-      abbreviation: String(abbreviation).trim(),
-      website: String(website).trim(),
-    };
-  }, [organization]);
 
   const handleVerify = async () => {
     if (!organization) return;
