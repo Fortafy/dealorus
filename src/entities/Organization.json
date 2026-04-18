@@ -18,6 +18,27 @@
       "type": "string",
       "description": "Client abbreviation such as AHOST"
     },
+    "google_group_id": {
+      "type": "string",
+      "description": "Google Group ID"
+    },
+    "google_group_email": {
+      "type": "string",
+      "description": "Google Group email address"
+    },
+    "google_drive_folder_id": {
+      "type": "string",
+      "description": "Google Drive folder ID"
+    },
+    "timesync_id": {
+      "type": "string",
+      "description": "TimeSync identifier"
+    },
+    "is_provisioned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether provisioning has been completed"
+    },
     "state": {
       "type": "string",
       "description": "State where organization is located"
