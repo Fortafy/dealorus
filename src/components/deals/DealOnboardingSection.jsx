@@ -7,9 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { toast } from "sonner";
 
 const STEP_CONFIG = [
-  { key: "google_group", label: "Create Google Group" },
-  { key: "google_drive", label: "Create Google Drive Folder" },
-  { key: "timesync", label: "Add to Timesync" },
+  { key: "google_group", label: "Create Google Group", functionName: "proxyCreateGoogleGroup" },
+  { key: "google_drive", label: "Create Google Drive Folder", functionName: "proxyCreateGoogleDriveFolder" },
+  { key: "timesync", label: "Add to Timesync", functionName: "proxyCreateTimesyncClient" },
 ];
 
 const VERIFY_CONFIG = [
@@ -275,30 +275,114 @@ export default function DealOnboardingSection({ organizationId }) {
       return;
     }
 
+    const basePayload = {
+      organization_name: organization.organization_name,
+      abbreviation: organization.abbreviation,
+      ein: organization.ein || null,
+      website: organization.website || null,
+      city: organization.city || null,
+      state: organization.state || null,
+      zip_code: organization.zip_code || null,
+      mission: organization.mission || null,
+      annual_revenue: organization.annual_revenue || null,
+      salesforce_id: organization.salesforce_id || null,
+    };
+
+    const payloadsByStep = {
+      google_group: basePayload,
+      google_drive: basePayload,
+      timesync: {
+        ...basePayload,
+        google_group_email: organization.google_group_email || verifyFieldsToSave?.google_group_email || null,
+        google_drive_folder_id: organization.google_drive_folder_id || verifyFieldsToSave?.google_drive_folder_id || null,
+      },
+    };
+
+    const valueExtractors = {
+      google_group: (data) => data?.groupEmail || data?.groupId || null,
+      google_drive: (data) => data?.clientFolderId || data?.folderId || null,
+      timesync: (data) => data?.id || null,
+    };
+
+    const organizationUpdate = {};
+    const nextSteps = createInitialSteps();
+    const nextErrors = [];
+
     setIsRunning(true);
     setErrors([]);
     setHasCompleted(false);
+    setSteps(createInitialSteps());
 
     try {
-      const response = await base44.functions.invoke("triggerOnboarding", {
-        org_id: organization.id,
-        missing_items: missingItemKeys,
-      });
-      const data = response.data || {};
-      const nextSteps = createInitialSteps();
+      for (const step of STEP_CONFIG) {
+        if (!missingItemKeys.includes(step.key)) {
+          const existingValue = step.key === "google_group"
+            ? (organization.google_group_email || organization.google_group_id || null)
+            : step.key === "google_drive"
+              ? (organization.google_drive_folder_id || null)
+              : (organization.timesync_id || null);
 
-      STEP_CONFIG.forEach((step) => {
-        const stepData = data.steps?.[step.key] || {};
-        const value = stepData.value || null;
-        const status = stepData.status || "pending";
-        nextSteps[step.key] = {
-          status,
-          value,
-          url: getStepUrl(step.key, value),
-        };
-      });
+          nextSteps[step.key] = {
+            status: existingValue ? "skipped" : "pending",
+            value: existingValue,
+            url: getStepUrl(step.key, existingValue),
+          };
+          setSteps({ ...nextSteps });
+          continue;
+        }
 
-      setSteps(nextSteps);
+        nextSteps[step.key] = { status: "running", value: null, url: null };
+        setSteps({ ...nextSteps });
+
+        try {
+          const response = await base44.functions.invoke(step.functionName, payloadsByStep[step.key]);
+          const result = response.data || {};
+          const value = valueExtractors[step.key](result);
+
+          nextSteps[step.key] = {
+            status: value ? "done" : "failed",
+            value,
+            url: getStepUrl(step.key, value),
+          };
+
+          if (step.key === "google_group" && value) {
+            organizationUpdate.google_group_email = result.groupEmail || value;
+            organizationUpdate.google_group_id = result.groupId || null;
+            payloadsByStep.timesync.google_group_email = result.groupEmail || value;
+          }
+
+          if (step.key === "google_drive" && value) {
+            organizationUpdate.google_drive_folder_id = result.clientFolderId || result.folderId || value;
+            payloadsByStep.timesync.google_drive_folder_id = organizationUpdate.google_drive_folder_id;
+          }
+
+          if (step.key === "timesync" && value) {
+            organizationUpdate.timesync_id = value;
+          }
+        } catch (error) {
+          nextSteps[step.key] = {
+            status: "failed",
+            value: null,
+            url: null,
+          };
+          nextErrors.push({ step: step.key, label: step.label, message: error.message });
+        }
+
+        setSteps({ ...nextSteps });
+      }
+
+      const hasFailures = Object.values(nextSteps).some((step) => step.status === "failed");
+      const hasCompletedProvisioning = Object.values(nextSteps).every((step) => step.status === "done" || step.status === "skipped");
+
+      if (hasCompletedProvisioning) {
+        organizationUpdate.is_provisioned = true;
+      }
+
+      if (Object.keys(organizationUpdate).length) {
+        await base44.entities.Organization.update(organization.id, organizationUpdate);
+      }
+
+      setErrors(nextErrors);
       setHasCompleted(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["deal-onboarding-org", organization.id] }),
@@ -308,11 +392,8 @@ export default function DealOnboardingSection({ organizationId }) {
 
       await handleVerify();
 
-      const hasFailures = Object.values(data.steps || {}).some((step) => step?.status === "failed");
       if (hasFailures) {
         toast.error("Onboarding finished with some failed steps");
-      } else if (data.already_provisioned) {
-        toast.success("Everything was already set up");
       } else {
         toast.success("Onboarding completed");
       }
