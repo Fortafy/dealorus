@@ -74,7 +74,7 @@ function ErrorLogPanel({ errors }) {
   );
 }
 
-function VerifyResultRow({ label, found, value }) {
+function VerifyResultRow({ label, found, value, matchedBy }) {
   return (
     <div className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
       <div>
@@ -82,6 +82,9 @@ function VerifyResultRow({ label, found, value }) {
         <p className={`text-xs font-medium ${found ? "text-green-700" : "text-red-700"}`}>
           {found ? "✅ Found" : "❌ Not Found"}
         </p>
+        {found && matchedBy ? (
+          <p className="mt-1 text-xs text-slate-500">Matched by: {matchedBy}</p>
+        ) : null}
       </div>
       <div className="max-w-[45%] truncate text-xs text-slate-600">{value || "—"}</div>
     </div>
@@ -119,11 +122,15 @@ export default function DealOnboardingSection({ organizationId }) {
     const organizationName = organization?.organization_name || organization?.name || "";
     const abbreviation = organization?.abbreviation || "";
     const website = organization?.website || organization?.url || "";
+    const timesyncId = organization?.timesync_id || null;
+    const ein = organization?.ein || null;
 
     return {
       organization_name: String(organizationName).trim(),
       abbreviation: String(abbreviation).trim(),
       website: String(website).trim(),
+      timesync_id: timesyncId ? String(timesyncId).trim() : null,
+      ein: ein ? String(ein).trim() : null,
     };
   }, [organization]);
 
@@ -383,6 +390,7 @@ export default function DealOnboardingSection({ organizationId }) {
                         label={item.label}
                         found={!!result.found}
                         value={result.value || null}
+                        matchedBy={item.key === "timesync" ? result.matched_by || null : null}
                       />
                     );
                   })}
