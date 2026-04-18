@@ -109,7 +109,11 @@ export default function DealOnboardingSection({ organizationId }) {
   const { data: organization, isLoading } = useQuery({
     queryKey: ["deal-onboarding-org", organizationId],
     enabled: !!organizationId,
-    queryFn: () => base44.entities.Organization.get(organizationId),
+    queryFn: async () => {
+      const org = await base44.entities.Organization.get(organizationId);
+      console.log("[DealOnboardingSection] fetched organization", org);
+      return org;
+    },
   });
 
   const summaryRows = useMemo(() => [
@@ -125,13 +129,20 @@ export default function DealOnboardingSection({ organizationId }) {
     const timesyncId = organization?.timesync_id || null;
     const ein = organization?.ein || null;
 
-    return {
+    const payload = {
       organization_name: String(organizationName).trim(),
       abbreviation: String(abbreviation).trim(),
       website: String(website).trim(),
       timesync_id: timesyncId ? String(timesyncId).trim() : null,
       ein: ein ? String(ein).trim() : null,
     };
+
+    console.log("[DealOnboardingSection] verification payload", {
+      organization,
+      payload,
+    });
+
+    return payload;
   }, [organization]);
 
   const missingVerificationFields = useMemo(() => {
@@ -169,7 +180,18 @@ export default function DealOnboardingSection({ organizationId }) {
 
     resetVerifyState();
 
+    console.log("[DealOnboardingSection] handleVerify start", {
+      organization,
+      verificationPayload,
+      missingVerificationFields,
+    });
+
     if (!verificationPayload.organization_name || !verificationPayload.abbreviation || !verificationPayload.website) {
+      console.log("[DealOnboardingSection] verification blocked: missing required fields", {
+        organization,
+        verificationPayload,
+        missingVerificationFields,
+      });
       setVerifyErrors([{
         step: "verify",
         label: "Verify Onboarding",
