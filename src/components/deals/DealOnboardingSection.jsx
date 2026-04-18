@@ -161,7 +161,10 @@ export default function DealOnboardingSection({ organizationId }) {
 
   const getStepUrl = (key, value) => {
     if (!value) return null;
-    if (key === "google_group") return `https://groups.google.com/a/fortafy.us/g/${encodeURIComponent(value)}`;
+    if (key === "google_group") {
+      const groupName = String(value).split("@")[0];
+      return `https://groups.google.com/a/fortafy.us/g/${encodeURIComponent(groupName)}`;
+    }
     if (key === "google_drive") return `https://drive.google.com/drive/folders/${encodeURIComponent(value)}`;
     if (key === "timesync") return `https://timesync.fortafy.us/clients/${encodeURIComponent(value)}`;
     return null;
