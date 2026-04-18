@@ -44,7 +44,7 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
   const saveField = async (field, value) => {
     if (!isSaved || !organization.id) return;
     const updatedData = { ...organization, [field]: value };
-    await base44.entities.Organization.update(organization.id, updatedData);
+    await base44.entities.Organization.update(organization.id, { [field]: value });
     if (onEdit) onEdit(updatedData);
   };
 
@@ -55,14 +55,18 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
       ntee_code: code,
       ntee_description: description || getNTEEDescription(code) || organization.ntee_description,
     };
-    await base44.entities.Organization.update(organization.id, updatedData);
+    await base44.entities.Organization.update(organization.id, {
+      ntee_code: updatedData.ntee_code,
+      ntee_description: updatedData.ntee_description,
+    });
     if (onEdit) onEdit(updatedData);
   };
 
   const saveAddress = async (value) => {
     if (!isSaved || !organization.id) return;
-    const updatedData = { ...organization, ...parseAddressValue(value) };
-    await base44.entities.Organization.update(organization.id, updatedData);
+    const addressPatch = parseAddressValue(value);
+    const updatedData = { ...organization, ...addressPatch };
+    await base44.entities.Organization.update(organization.id, addressPatch);
     if (onEdit) onEdit(updatedData);
   };
 

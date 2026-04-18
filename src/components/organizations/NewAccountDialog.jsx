@@ -90,6 +90,14 @@ function ManualCreateTab({ clientId, userId, onSaved, onClose }) {
     setIsSaving(true);
     const saved = await base44.entities.Organization.create({
       ...form,
+      abbreviation: form.abbreviation.trim(),
+      organization_name: form.organization_name.trim(),
+      city: form.city?.trim() || null,
+      ein: form.ein?.trim() || null,
+      organization_type: form.organization_type || null,
+      website: form.website?.trim() || null,
+      phone: form.phone?.trim() || null,
+      email: form.email?.trim() || null,
       client_id: clientId,
       user_id: userId,
     });
