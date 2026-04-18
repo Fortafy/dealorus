@@ -206,11 +206,20 @@ export default function DealOnboardingSection({ organizationId }) {
     try {
       const response = await base44.functions.invoke("proxyVerifyOnboarding", verificationPayload);
       const data = response.data;
+      console.log("[DealOnboardingSection] proxyVerifyOnboarding response", {
+        status: response.status,
+        data,
+      });
       setVerifyResults(data.results || {});
       setVerifyFieldsToSave(data.fields_to_save || {});
       setVerifyErrors(data.errors || []);
       setHasVerifyCompleted(true);
     } catch (error) {
+      console.log("[DealOnboardingSection] proxyVerifyOnboarding error", {
+        message: error?.message,
+        response: error?.response?.data,
+        status: error?.response?.status,
+      });
       setVerifyErrors([{ step: "verify", label: "Verify Onboarding", message: error.message }]);
       setHasVerifyCompleted(true);
       toast.error("Verification failed");
