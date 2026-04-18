@@ -308,6 +308,8 @@ export default function DealOnboardingSection({ organizationId }) {
         ...basePayload,
         google_group_email: organization.google_group_email || verifyFieldsToSave?.google_group_email || null,
         google_drive_folder_id: organization.google_drive_folder_id || verifyFieldsToSave?.google_drive_folder_id || null,
+        clickup_space_id: organization.clickup_space_id || verifyFieldsToSave?.clickup_space_id || null,
+        clickup_space_name: organization.clickup_space_name || verifyFieldsToSave?.clickup_space_name || null,
       },
     };
 
@@ -377,6 +379,8 @@ export default function DealOnboardingSection({ organizationId }) {
             organizationUpdate.clickup_space_name = result.spaceName || result.name || null;
             organizationUpdate.clickup_space_id = result.spaceId || value;
             organizationUpdate.clickup_list_id = result.listId || null;
+            payloadsByStep.timesync.clickup_space_id = organizationUpdate.clickup_space_id;
+            payloadsByStep.timesync.clickup_space_name = organizationUpdate.clickup_space_name;
           }
 
           if (step.key === "timesync" && value) {
