@@ -280,7 +280,10 @@ export default function DealOnboardingSection({ organizationId }) {
     setHasCompleted(false);
 
     try {
-      const response = await base44.functions.invoke("triggerOnboarding", { org_id: organization.id });
+      const response = await base44.functions.invoke("triggerOnboarding", {
+        org_id: organization.id,
+        missing_items: missingItemKeys,
+      });
       const data = response.data || {};
       const nextSteps = createInitialSteps();
 

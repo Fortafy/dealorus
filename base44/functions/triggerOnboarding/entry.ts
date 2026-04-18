@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { org_id } = await req.json().catch(() => ({}));
+    const { org_id, missing_items } = await req.json().catch(() => ({}));
     if (!org_id) {
       return Response.json({ error: 'org_id is required' }, { status: 400 });
     }
@@ -25,9 +25,10 @@ Deno.serve(async (req) => {
     const existingGoogleDriveValue = org.google_drive_folder_id || null;
     const existingTimesyncValue = org.timesync_id || null;
 
-    const needsGoogleGroup = !existingGoogleGroupValue;
-    const needsGoogleDrive = !existingGoogleDriveValue;
-    const needsTimesync = !existingTimesyncValue;
+    const requestedMissingItems = Array.isArray(missing_items) ? missing_items : null;
+    const needsGoogleGroup = requestedMissingItems ? requestedMissingItems.includes('google_group') : !existingGoogleGroupValue;
+    const needsGoogleDrive = requestedMissingItems ? requestedMissingItems.includes('google_drive') : !existingGoogleDriveValue;
+    const needsTimesync = requestedMissingItems ? requestedMissingItems.includes('timesync') : !existingTimesyncValue;
 
     if (!needsGoogleGroup && !needsGoogleDrive && !needsTimesync) {
       if (!org.is_provisioned) {
