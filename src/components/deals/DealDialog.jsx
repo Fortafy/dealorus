@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import moment from "moment";
 import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
-import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
 import DealContactFields from "@/components/deals/DealContactFields";
 import DealOnboardingSection from "@/components/deals/DealOnboardingSection";
 
@@ -344,11 +343,6 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
             {isEdit && previewDeal && showProposalSection && (
               <section className="space-y-4 rounded-xl border border-slate-200 p-4">
                 <DealProposalPdfActions
-                  deal={previewDeal}
-                  lifecycleStages={stageOptions}
-                  variant="section"
-                />
-                <DealProposalDocActions
                   deal={previewDeal}
                   lifecycleStages={stageOptions}
                   variant="section"
