@@ -272,6 +272,11 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         y += lines.length * 5 + 1;
       };
 
+      const formatContactLine = (roleLabel, name) => {
+        if (!name) return null;
+        return `${roleLabel}: ${name}`;
+      };
+
       doc.setFillColor(headerR, headerG, headerB);
       doc.roundedRect(margin, y, contentWidth, 20, 3, 3, "F");
 
@@ -318,11 +323,14 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         buildOrganizationAddress(organization),
         organization?.email,
         organization?.phone,
+        formatContactLine("Administrative", displayDeal.administrative_contact_name),
+        formatContactLine("Billing", displayDeal.billing_contact_name),
       ].filter(Boolean);
       doc.text(doc.splitTextToSize(billToLines.join("\n"), leftBoxWidth - 8), margin + 4, y + 11);
 
       addMutedLine("Deal Name", displayDeal.name || "—", margin + leftBoxWidth + 10, y + 9);
-      addMutedLine("Contract Type", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 22);
+      addMutedLine("Contract Type", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 18);
+      addMutedLine("Admin Contact", displayDeal.administrative_contact_name || "—", margin + leftBoxWidth + 10, y + 27);
       y += 38;
 
       addSectionTitle("Order Details");
