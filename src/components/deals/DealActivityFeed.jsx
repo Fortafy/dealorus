@@ -357,6 +357,26 @@ export default function DealActivityFeed({ deal, lifecycleStages = [] }) {
                           </div>
                         ) : null}
 
+                        {item.type === "email" ? (
+                          <div className="activity-timeline-card-body">
+                            <div className="activity-timeline-detail-box space-y-1">
+                              {item.description ? <div>{item.description}</div> : null}
+                              {item.fields_changed?.find((change) => change.field === "recipient")?.new_value ? (
+                                <div>
+                                  <span className="activity-timeline-detail-label">Recipient:</span>{" "}
+                                  {item.fields_changed.find((change) => change.field === "recipient")?.new_value}
+                                </div>
+                              ) : null}
+                              {item.fields_changed?.find((change) => change.field === "subject")?.new_value ? (
+                                <div>
+                                  <span className="activity-timeline-detail-label">Subject:</span>{" "}
+                                  {item.fields_changed.find((change) => change.field === "subject")?.new_value}
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        ) : null}
+
                         {item.type === "enrich" && item.description ? (
                           <div className="activity-timeline-card-body">
                             <div className="activity-timeline-detail-box">{item.description}</div>
