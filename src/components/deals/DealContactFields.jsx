@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Pencil, Plus } from "lucide-react";
 
 const emptyContactForm = {
   first_name: "",
@@ -42,15 +43,17 @@ function ContactDetailsCard({ contact, onEdit }) {
   if (!contact) return null;
 
   return (
-    <div className="rounded-md border border-slate-200 bg-white p-3 text-sm">
+    <div className="rounded-md border border-slate-200 bg-white p-3 text-xs">
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="font-medium text-slate-900">{buildContactName(contact)}</p>
-        <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={onEdit}>Edit</Button>
+        <Button type="button" size="icon" variant="outline" className="h-7 w-7" onClick={onEdit}>
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
       </div>
-      <div className="grid grid-cols-1 gap-1 text-slate-600 md:grid-cols-2">
+      <div className="space-y-1 text-slate-600">
         <p><span className="font-medium text-slate-800">Email:</span> {contact.email || "—"}</p>
         <p><span className="font-medium text-slate-800">Phone:</span> {contact.phone || "—"}</p>
-        <p className="md:col-span-2"><span className="font-medium text-slate-800">Title:</span> {contact.title || "—"}</p>
+        <p><span className="font-medium text-slate-800">Title:</span> {contact.title || "—"}</p>
       </div>
     </div>
   );
@@ -155,37 +158,39 @@ export default function DealContactFields({ organizationId, clientId, value, onC
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <label className="block text-xs font-medium text-slate-600">Administrative Contact</label>
-              <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => openCreateDialog("administrative")}>Add Contact</Button>
+              <select
+                value={value.administrative_contact_id || ""}
+                onChange={(e) => updateRole("administrative_contact_id", e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="">Select administrative contact...</option>
+                {contactOptions.map((contact) => (
+                  <option key={contact.id} value={contact.id}>{contact.name}</option>
+                ))}
+              </select>
+              <Button type="button" size="icon" variant="outline" className="h-9 w-9 shrink-0" onClick={() => openCreateDialog("administrative")}>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
-            <select
-              value={value.administrative_contact_id || ""}
-              onChange={(e) => updateRole("administrative_contact_id", e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-            >
-              <option value="">Select administrative contact...</option>
-              {contactOptions.map((contact) => (
-                <option key={contact.id} value={contact.id}>{contact.name}</option>
-              ))}
-            </select>
             <ContactDetailsCard contact={administrativeContact} onEdit={() => openEditDialog("administrative", administrativeContact)} />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <label className="block text-xs font-medium text-slate-600">Billing Contact</label>
-              <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => openCreateDialog("billing")}>Add Contact</Button>
+              <select
+                value={value.billing_contact_id || ""}
+                onChange={(e) => updateRole("billing_contact_id", e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="">Select billing contact...</option>
+                {contactOptions.map((contact) => (
+                  <option key={contact.id} value={contact.id}>{contact.name}</option>
+                ))}
+              </select>
+              <Button type="button" size="icon" variant="outline" className="h-9 w-9 shrink-0" onClick={() => openCreateDialog("billing")}>
+                <Plus className="h-4 w-4" />
+              </Button>
             </div>
-            <select
-              value={value.billing_contact_id || ""}
-              onChange={(e) => updateRole("billing_contact_id", e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-            >
-              <option value="">Select billing contact...</option>
-              {contactOptions.map((contact) => (
-                <option key={contact.id} value={contact.id}>{contact.name}</option>
-              ))}
-            </select>
             <ContactDetailsCard contact={billingContact} onEdit={() => openEditDialog("billing", billingContact)} />
           </div>
         </div>
