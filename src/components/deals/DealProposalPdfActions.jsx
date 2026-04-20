@@ -244,8 +244,9 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       const billingContact = proposalContacts.find((contact) => contact.id === displayDeal.billing_contact_id) || null;
       let y = 18;
 
+      const footerHeight = 12.7;
       const ensureSpace = (needed = 10) => {
-        if (y + needed <= pageHeight - margin) return;
+        if (y + needed <= pageHeight - margin - footerHeight) return;
         doc.addPage();
         y = 18;
       };
@@ -329,8 +330,15 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       ].filter(Boolean);
       const adminLines = buildContactDetails("Administrative Contact", administrativeContact);
       const billingLines = buildContactDetails("Billing Contact", billingContact);
+      const orderDetailRows = [
+        ["Deal Name", displayDeal.name || "—"],
+        ["Contract Type", formatContractType(displayDeal.contract_type)],
+        ["Start Date", formatDate(displayDeal.start_date)],
+        ["End Date", formatDate(displayDeal.end_date)],
+        ["Order Total", formatMoney(displayDeal.value || 0)],
+      ];
       const leftBoxLines = Math.max(5, billToLines.length + adminLines.length + billingLines.length + (adminLines.length ? 1 : 0) + (billingLines.length ? 1 : 0));
-      const rightBoxLines = Math.max(3, 2 + (administrativeContact ? 4 : 1) + (billingContact ? 4 : 1));
+      const rightBoxLines = 2 + orderDetailRows.length * 3;
       const boxHeight = Math.max(30, Math.max(leftBoxLines, rightBoxLines) * 4 + 12);
       ensureSpace(boxHeight + 4);
       doc.setDrawColor(203, 213, 225);
@@ -363,17 +371,16 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         doc.text(doc.splitTextToSize(billingLines.slice(1).join("\n"), leftBoxWidth - 8), margin + 4, leftTextY);
       }
 
-      addMutedLine("Deal Name", displayDeal.name || "—", margin + leftBoxWidth + 10, y + 9);
-      addMutedLine("Contract Type", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 22);
-      addMutedLine("Admin Contact", administrativeContact?.name || displayDeal.administrative_contact_name || "—", margin + leftBoxWidth + 10, y + 35);
-      addMutedLine("Billing Contact", billingContact?.name || displayDeal.billing_contact_name || "—", margin + leftBoxWidth + 10, y + 48);
-      y += boxHeight + 8;
-
-      addSectionTitle("Order Details");
-      addInfoRow("Service Period", [formatDate(displayDeal.start_date), formatDate(displayDeal.end_date)].filter((value) => value !== "—").join(" to "));
-      addInfoRow("Estimate", formatMoney(displayDeal.value));
-
-      y += 5;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Order Details", margin + leftBoxWidth + 10, y + 6);
+      let rightTextY = y + 11;
+      orderDetailRows.forEach(([label, value]) => {
+        addMutedLine(label, value, margin + leftBoxWidth + 10, rightTextY);
+        rightTextY += 10;
+      });
+      y += boxHeight + 2;
       addSectionTitle("Line Items");
       ensureSpace(14);
       const columns = [
@@ -445,6 +452,17 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       addSectionTitle("Description");
       y += 2;
       y = await renderRichTextHtml(doc, displayDeal.description, margin, y, contentWidth, pageHeight, margin);
+
+      const footerText = "© 2026 A Row Above Consulting d.b.a. Fortafy.  Confidential & Proprietary.";
+      const footerY = pageHeight - 5.2;
+      const pageCount = doc.getNumberOfPages();
+      for (let pageIndex = 1; pageIndex <= pageCount; pageIndex += 1) {
+        doc.setPage(pageIndex);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(6);
+        doc.setTextColor(100, 116, 139);
+        doc.text(footerText, pageWidth / 2, footerY, { align: "center" });
+      }
 
       const pdfBlob = doc.output("blob");
       const file = new File([pdfBlob], buildFileName(displayDeal.name), { type: "application/pdf" });
