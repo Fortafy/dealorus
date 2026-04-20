@@ -12,6 +12,7 @@ import moment from "moment";
 import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
+import DealContactFields from "@/components/deals/DealContactFields";
 
 const SERVICE_NAMES = [
   "Salesforce Administration",
@@ -34,7 +35,10 @@ const emptyService = () => ({ service_name: "", hours_per_month: "", total_estim
 const emptyForm = () => ({
   name: "", stage: "", organization_id: "", contract_type: "",
   start_date: "", end_date: "", expected_close_date: "",
-  value: "", description: "", remind_at: null, services: [emptyService()],
+  value: "", description: "", remind_at: null,
+  administrative_contact_id: "", administrative_contact_name: "",
+  billing_contact_id: "", billing_contact_name: "",
+  services: [emptyService()],
 });
 
 const dealToForm = (deal) => ({
@@ -48,6 +52,10 @@ const dealToForm = (deal) => ({
   value: deal.value != null ? String(deal.value) : "",
   description: deal.description || "",
   remind_at: deal.remind_at || null,
+  administrative_contact_id: deal.administrative_contact_id || "",
+  administrative_contact_name: deal.administrative_contact_name || "",
+  billing_contact_id: deal.billing_contact_id || "",
+  billing_contact_name: deal.billing_contact_name || "",
   services: deal.services?.length
     ? deal.services.map((s) => ({
         service_name: s.service_name || "",
@@ -160,6 +168,10 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
       value: form.value ? parseFloat(form.value) : null,
       description: form.description || null,
       remind_at: form.remind_at || null,
+      administrative_contact_id: form.administrative_contact_id || "",
+      administrative_contact_name: form.administrative_contact_name || "",
+      billing_contact_id: form.billing_contact_id || "",
+      billing_contact_name: form.billing_contact_name || "",
       services: parseServices(form.services),
     };
   }, [deal, form, organizations]);
@@ -185,6 +197,10 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
       value: form.value ? parseFloat(form.value) : null,
       description: form.description || null,
       remind_at: form.remind_at || null,
+      administrative_contact_id: form.administrative_contact_id || "",
+      administrative_contact_name: form.administrative_contact_name || "",
+      billing_contact_id: form.billing_contact_id || "",
+      billing_contact_name: form.billing_contact_name || "",
       services: parseServices(form.services),
     };
 
@@ -239,6 +255,16 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
                 <label className="mb-1 block text-xs text-slate-500">Start Date</label>
                 <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
               </div>
+
+              <div className="col-span-2">
+                <DealContactFields
+                  organizationId={form.organization_id || deal?.organization_id}
+                  clientId={clientId}
+                  value={form}
+                  onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
+                />
+              </div>
+
               <div>
                 <label className="mb-1 block text-xs text-slate-500">End Date</label>
                 <Input type="date" value={form.end_date} onChange={(e) => setField("end_date", e.target.value)} className="text-sm" />
