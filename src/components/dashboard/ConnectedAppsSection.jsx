@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -12,7 +12,6 @@ export default function ConnectedAppsSection() {
   const searchParams = new URLSearchParams(location.search);
   const oauthStatus = searchParams.get("google_oauth");
   const oauthMessage = searchParams.get("message");
-  const [gmailRecord, setGmailRecord] = useState(null);
 
   const { data: integrations = [] } = useQuery({
     queryKey: ["user-integrations"],
@@ -28,14 +27,25 @@ export default function ConnectedAppsSection() {
   const driveRecord = integrationsByType.google_drive;
   const calendarRecord = integrationsByType.google_calendar;
 
+  const { data: gmailConnectionData, refetch: refetchGmailConnection } = useQuery({
+    queryKey: ["gmail-connection"],
+    queryFn: async () => {
+      const response = await base44.functions.invoke("checkGmailConnection", {});
+      return response.data;
+    },
+    retry: false,
+  });
+
+  const gmailRecord = gmailConnectionData?.record || null;
+
   const gmailConnectMutation = useMutation({
     mutationFn: async () => {
       const url = await base44.connectors.connectAppUser("69e6a0603f40a2278282ab3b");
       const popup = window.open(url, "_blank");
-      const timer = setInterval(() => {
+      const timer = setInterval(async () => {
         if (!popup || popup.closed) {
           clearInterval(timer);
-          setGmailRecord({ status: "connected", account_email: "Gmail account connected" });
+          await refetchGmailConnection();
         }
       }, 500);
     },
@@ -73,7 +83,7 @@ export default function ConnectedAppsSection() {
   const gmailDisconnectMutation = useMutation({
     mutationFn: async () => {
       await base44.connectors.disconnectAppUser("69e6a0603f40a2278282ab3b");
-      setGmailRecord(null);
+      await refetchGmailConnection();
     },
   });
   return (
@@ -114,7 +124,7 @@ export default function ConnectedAppsSection() {
           <GoogleIntegrationCard
             icon={Mail}
             title="Gmail"
-            description="Connect your Gmail account so proposal emails can be sent to external recipients from your own inbox."
+            description="Connect only your Gmail account for sending emails from your own inbox. This does not connect Google Calendar or Google Drive."
             record={gmailRecord}
             busy={gmailConnectMutation.isPending || gmailDisconnectMutation.isPending}
             onConnect={() => gmailConnectMutation.mutate()}
