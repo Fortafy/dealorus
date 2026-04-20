@@ -13,6 +13,7 @@ import DealRichTextEditor from "@/components/deals/DealRichTextEditor";
 import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 import DealProposalDocActions from "@/components/deals/DealProposalDocActions";
 import DealContactFields from "@/components/deals/DealContactFields";
+import DealOnboardingSection from "@/components/deals/DealOnboardingSection";
 
 const SERVICE_NAMES = [
   "Salesforce Administration",
@@ -209,6 +210,9 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
 
   const isProject = form.contract_type === "project";
   const isRetainer = form.contract_type === "monthly_retainer";
+  const currentStage = stageOptions.find((stage) => stage.id === form.stage)?.name?.toLowerCase() || form.stage?.toLowerCase() || "";
+  const showProposalSection = currentStage === "proposal";
+  const showOnboardingSection = currentStage === "won";
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onOpenChange(false); }}>
@@ -219,124 +223,126 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
 
         <div className="flex-1 overflow-y-auto py-2 pr-1">
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
+            {organizations && (
+              <div>
+                <label className="mb-1 block text-xs text-slate-500">Organization *</label>
+                <select value={form.organization_id} onChange={(e) => setField("organization_id", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                  <option value="">Select organization...</option>
+                  {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.organization_name}</option>)}
+                </select>
+              </div>
+            )}
+
+            <section className="space-y-3 rounded-xl border border-slate-200 p-4">
+              <div>
                 <label className="mb-1 block text-xs text-slate-500">Deal Name *</label>
                 <Input placeholder="Deal name..." value={form.name} onChange={(e) => setField("name", e.target.value)} className="text-sm" />
               </div>
-
-              {organizations && (
-                <div className="col-span-2">
-                  <label className="mb-1 block text-xs text-slate-500">Organization *</label>
-                  <select value={form.organization_id} onChange={(e) => setField("organization_id", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                    <option value="">Select organization...</option>
-                    {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.organization_name}</option>)}
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Stage *</label>
+                  <select value={form.stage} onChange={(e) => setField("stage", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                    <option value="">{isLoadingFallbackStages ? "Loading stages..." : "Select stage..."}</option>
+                    {stageOptions.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
                   </select>
                 </div>
-              )}
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Stage *</label>
-                <select value={form.stage} onChange={(e) => setField("stage", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                  <option value="">{isLoadingFallbackStages ? "Loading stages..." : "Select stage..."}</option>
-                  {stageOptions.map((stage) => <option key={stage.id} value={stage.id}>{stage.name}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Contract Type</label>
-                <select value={form.contract_type} onChange={(e) => setField("contract_type", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                  <option value="">Select type...</option>
-                  {CONTRACT_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Start Date</label>
-                <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
-              </div>
-
-              <div className="col-span-2">
-                <DealContactFields
-                  organizationId={form.organization_id || deal?.organization_id}
-                  clientId={clientId}
-                  value={form}
-                  onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">End Date</label>
-                <Input type="date" value={form.end_date} onChange={(e) => setField("end_date", e.target.value)} className="text-sm" />
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Close Date</label>
+                  <Input type="date" value={form.expected_close_date} onChange={(e) => setField("expected_close_date", e.target.value)} className="text-sm" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Amount</label>
+                  <Input type="number" placeholder="0.00" value={form.value} onChange={(e) => setField("value", e.target.value)} className="text-sm" />
+                </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-500">Expected Close Date</label>
-                <Input type="date" value={form.expected_close_date} onChange={(e) => setField("expected_close_date", e.target.value)} className="text-sm" />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs text-slate-500">Deal Value ($)</label>
-                <Input type="number" placeholder="0.00" value={form.value} onChange={(e) => setField("value", e.target.value)} className="text-sm" />
-              </div>
-
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs text-slate-500">Notes</label>
+                <label className="mb-1 block text-xs text-slate-500">Description</label>
                 <DealRichTextEditor value={form.description} onChange={(value) => setField("description", value)} />
               </div>
-            </div>
+            </section>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">Services</p>
-                <Button size="sm" variant="outline" onClick={addService} className="h-6 px-2 text-xs">
-                  <Plus className="mr-1 h-3 w-3" /> Add Service
-                </Button>
+            <section className="space-y-3 rounded-xl border border-slate-200 p-4">
+              <DealContactFields
+                organizationId={form.organization_id || deal?.organization_id}
+                clientId={clientId}
+                value={form}
+                onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
+              />
+            </section>
+
+            <section className="space-y-4 rounded-xl border border-slate-200 p-4">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Contract Type</label>
+                  <select value={form.contract_type} onChange={(e) => setField("contract_type", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                    <option value="">Select type...</option>
+                    {CONTRACT_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">Start Date</label>
+                  <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">End Date</label>
+                  <Input type="date" value={form.end_date} onChange={(e) => setField("end_date", e.target.value)} className="text-sm" />
+                </div>
               </div>
-              <div className="space-y-3">
-                {form.services.map((service, index) => (
-                  <div key={index} className="relative rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    {form.services.length > 1 && (
-                      <button onClick={() => removeService(index)} className="absolute right-2 top-2 text-slate-400 hover:text-red-500">
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="col-span-2">
-                        <label className="mb-1 block text-xs text-slate-500">Service</label>
-                        <select value={service.service_name} onChange={(e) => setServiceField(index, "service_name", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
-                          <option value="">Select service...</option>
-                          {SERVICE_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs text-slate-500">Hourly Rate ($)</label>
-                        <Input type="number" placeholder="0.00" value={service.rate} onChange={(e) => setServiceField(index, "rate", e.target.value)} className="text-sm" />
-                      </div>
-                      {!isProject && (
-                        <div>
-                          <label className="mb-1 block text-xs text-slate-500">{isRetainer ? "Hours/Month" : "Max Hours/Month"}</label>
-                          <Input type="number" placeholder="0" value={service.hours_per_month} onChange={(e) => setServiceField(index, "hours_per_month", e.target.value)} className="text-sm" />
-                        </div>
+
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-700">Services</p>
+                  <Button size="sm" variant="outline" onClick={addService} className="h-6 px-2 text-xs">
+                    <Plus className="mr-1 h-3 w-3" /> Add Service
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {form.services.map((service, index) => (
+                    <div key={index} className="relative rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      {form.services.length > 1 && (
+                        <button onClick={() => removeService(index)} className="absolute right-2 top-2 text-slate-400 hover:text-red-500">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
                       )}
-                      {isProject && (
-                        <div>
-                          <label className="mb-1 block text-xs text-slate-500">Total Est. Hours</label>
-                          <Input type="number" placeholder="0" value={service.total_estimated_hours} onChange={(e) => setServiceField(index, "total_estimated_hours", e.target.value)} className="text-sm" />
-                        </div>
-                      )}
-                      {isRetainer && (
+                      <div className="grid grid-cols-2 gap-2">
                         <div className="col-span-2">
-                          <label className="mb-1 block text-xs text-slate-500">Overage Rate ($/hr)</label>
-                          <Input type="number" placeholder="0.00" value={service.overage_rate} onChange={(e) => setServiceField(index, "overage_rate", e.target.value)} className="text-sm" />
+                          <label className="mb-1 block text-xs text-slate-500">Service</label>
+                          <select value={service.service_name} onChange={(e) => setServiceField(index, "service_name", e.target.value)} className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm">
+                            <option value="">Select service...</option>
+                            {SERVICE_NAMES.map((name) => <option key={name} value={name}>{name}</option>)}
+                          </select>
                         </div>
-                      )}
+                        <div>
+                          <label className="mb-1 block text-xs text-slate-500">Hourly Rate ($)</label>
+                          <Input type="number" placeholder="0.00" value={service.rate} onChange={(e) => setServiceField(index, "rate", e.target.value)} className="text-sm" />
+                        </div>
+                        {!isProject && (
+                          <div>
+                            <label className="mb-1 block text-xs text-slate-500">{isRetainer ? "Hours/Month" : "Max Hours/Month"}</label>
+                            <Input type="number" placeholder="0" value={service.hours_per_month} onChange={(e) => setServiceField(index, "hours_per_month", e.target.value)} className="text-sm" />
+                          </div>
+                        )}
+                        {isProject && (
+                          <div>
+                            <label className="mb-1 block text-xs text-slate-500">Total Est. Hours</label>
+                            <Input type="number" placeholder="0" value={service.total_estimated_hours} onChange={(e) => setServiceField(index, "total_estimated_hours", e.target.value)} className="text-sm" />
+                          </div>
+                        )}
+                        {isRetainer && (
+                          <div className="col-span-2">
+                            <label className="mb-1 block text-xs text-slate-500">Overage Rate ($/hr)</label>
+                            <Input type="number" placeholder="0.00" value={service.overage_rate} onChange={(e) => setServiceField(index, "overage_rate", e.target.value)} className="text-sm" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            </section>
 
-            {isEdit && previewDeal && (
-              <div className="space-y-4">
+            {isEdit && previewDeal && showProposalSection && (
+              <section className="space-y-4 rounded-xl border border-slate-200 p-4">
                 <DealProposalPdfActions
                   deal={previewDeal}
                   lifecycleStages={stageOptions}
@@ -347,7 +353,13 @@ export default function DealDialog({ open, onOpenChange, deal, lifecycleStages =
                   lifecycleStages={stageOptions}
                   variant="section"
                 />
-              </div>
+              </section>
+            )}
+
+            {isEdit && previewDeal && showOnboardingSection && (
+              <section className="space-y-4 rounded-xl border border-slate-200 p-4">
+                <DealOnboardingSection organizationId={previewDeal.organization_id} />
+              </section>
             )}
           </div>
         </div>
