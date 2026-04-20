@@ -221,6 +221,13 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
     },
   });
 
+  const { data: proposalContacts = [] } = useQuery({
+    queryKey: ["deal-proposal-contacts", displayDeal.organization_id],
+    enabled: !!displayDeal.organization_id && (isProposalStage || !!displayDeal.proposal_pdf_url),
+    queryFn: () => base44.entities.Contact.filter({ organization_id: displayDeal.organization_id }, "name"),
+    initialData: [],
+  });
+
   const generatePdfMutation = useMutation({
     mutationFn: async () => {
       const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -233,6 +240,8 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       const quantityLabel = displayDeal.contract_type === "project" ? "Hours" : "Hours/Mo";
       const [headerR, headerG, headerB] = hexToRgb(client?.primary_color);
       const logo = client?.logo_url ? await loadImageData(client.logo_url).catch(() => null) : null;
+      const administrativeContact = proposalContacts.find((contact) => contact.id === displayDeal.administrative_contact_id) || null;
+      const billingContact = proposalContacts.find((contact) => contact.id === displayDeal.billing_contact_id) || null;
       let y = 18;
 
       const ensureSpace = (needed = 10) => {
@@ -272,9 +281,15 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         y += lines.length * 5 + 1;
       };
 
-      const formatContactLine = (roleLabel, name) => {
-        if (!name) return null;
-        return `${roleLabel}: ${name}`;
+      const buildContactDetails = (roleLabel, contact) => {
+        if (!contact && !roleLabel) return [];
+        const lines = [];
+        if (roleLabel) lines.push(roleLabel);
+        if (contact?.name) lines.push(contact.name);
+        if (contact?.title) lines.push(contact.title);
+        if (contact?.email) lines.push(contact.email);
+        if (contact?.phone) lines.push(contact.phone);
+        return lines;
       };
 
       doc.setFillColor(headerR, headerG, headerB);
@@ -306,10 +321,21 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
       const leftBoxWidth = 108;
       const rightBoxWidth = contentWidth - leftBoxWidth - 6;
-      ensureSpace(34);
+      const billToLines = [
+        displayDeal.organization_name || organization?.organization_name || "—",
+        buildOrganizationAddress(organization),
+        organization?.email,
+        organization?.phone,
+      ].filter(Boolean);
+      const adminLines = buildContactDetails("Administrative Contact", administrativeContact);
+      const billingLines = buildContactDetails("Billing Contact", billingContact);
+      const leftBoxLines = Math.max(5, billToLines.length + adminLines.length + billingLines.length + (adminLines.length ? 1 : 0) + (billingLines.length ? 1 : 0));
+      const rightBoxLines = Math.max(3, 2 + (administrativeContact ? 4 : 1) + (billingContact ? 4 : 1));
+      const boxHeight = Math.max(30, Math.max(leftBoxLines, rightBoxLines) * 4 + 12);
+      ensureSpace(boxHeight + 4);
       doc.setDrawColor(203, 213, 225);
-      doc.roundedRect(margin, y, leftBoxWidth, 30, 2, 2);
-      doc.roundedRect(margin + leftBoxWidth + 6, y, rightBoxWidth, 30, 2, 2);
+      doc.roundedRect(margin, y, leftBoxWidth, boxHeight, 2, 2);
+      doc.roundedRect(margin + leftBoxWidth + 6, y, rightBoxWidth, boxHeight, 2, 2);
 
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
@@ -318,20 +344,30 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(51, 65, 85);
-      const billToLines = [
-        displayDeal.organization_name || organization?.organization_name || "—",
-        buildOrganizationAddress(organization),
-        organization?.email,
-        organization?.phone,
-        formatContactLine("Administrative", displayDeal.administrative_contact_name),
-        formatContactLine("Billing", displayDeal.billing_contact_name),
-      ].filter(Boolean);
-      doc.text(doc.splitTextToSize(billToLines.join("\n"), leftBoxWidth - 8), margin + 4, y + 11);
+      let leftTextY = y + 11;
+      doc.text(doc.splitTextToSize(billToLines.join("\n"), leftBoxWidth - 8), margin + 4, leftTextY);
+      leftTextY += billToLines.length * 4 + 2;
+      if (adminLines.length) {
+        doc.setFont("helvetica", "bold");
+        doc.text(adminLines[0], margin + 4, leftTextY);
+        leftTextY += 4;
+        doc.setFont("helvetica", "normal");
+        doc.text(doc.splitTextToSize(adminLines.slice(1).join("\n"), leftBoxWidth - 8), margin + 4, leftTextY);
+        leftTextY += Math.max(0, adminLines.slice(1).length * 4 + 2);
+      }
+      if (billingLines.length) {
+        doc.setFont("helvetica", "bold");
+        doc.text(billingLines[0], margin + 4, leftTextY);
+        leftTextY += 4;
+        doc.setFont("helvetica", "normal");
+        doc.text(doc.splitTextToSize(billingLines.slice(1).join("\n"), leftBoxWidth - 8), margin + 4, leftTextY);
+      }
 
       addMutedLine("Deal Name", displayDeal.name || "—", margin + leftBoxWidth + 10, y + 9);
-      addMutedLine("Contract Type", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 18);
-      addMutedLine("Admin Contact", displayDeal.administrative_contact_name || "—", margin + leftBoxWidth + 10, y + 27);
-      y += 38;
+      addMutedLine("Contract Type", formatContractType(displayDeal.contract_type), margin + leftBoxWidth + 10, y + 22);
+      addMutedLine("Admin Contact", administrativeContact?.name || displayDeal.administrative_contact_name || "—", margin + leftBoxWidth + 10, y + 35);
+      addMutedLine("Billing Contact", billingContact?.name || displayDeal.billing_contact_name || "—", margin + leftBoxWidth + 10, y + 48);
+      y += boxHeight + 8;
 
       addSectionTitle("Order Details");
       addInfoRow("Service Period", [formatDate(displayDeal.start_date), formatDate(displayDeal.end_date)].filter((value) => value !== "—").join(" to "));
@@ -346,16 +382,6 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         { label: "Rate", x: margin + 120, width: 24 },
         { label: "Line Total", x: margin + 148, width: 27 },
       ];
-
-      doc.setFillColor(241, 245, 249);
-      doc.rect(margin, y, contentWidth, 8, "F");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(9);
-      doc.setTextColor(15, 23, 42);
-      columns.forEach((column) => {
-        doc.text(column.label, column.x, y + 5.2);
-      });
-      y += 10;
 
       let computedTotal = 0;
 
@@ -416,8 +442,8 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       doc.text(formatMoney(displayDeal.value || computedTotal), margin + contentWidth, y, { align: "right" });
       y += 12;
 
-      addSectionTitle("Notes");
-      ensureSpace(30);
+      addSectionTitle("Description");
+      y += 2;
       y = await renderRichTextHtml(doc, displayDeal.description, margin, y, contentWidth, pageHeight, margin);
 
       const pdfBlob = doc.output("blob");
