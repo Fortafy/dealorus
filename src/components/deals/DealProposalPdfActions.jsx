@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import moment from "moment";
-import { FileText, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink, Mail } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
+import ProposalPdfEmailDialog from "@/components/deals/ProposalPdfEmailDialog";
 import { toast } from "sonner";
 
 const formatDate = (value, format = "MMM D, YYYY") => value ? moment(value).format(format) : "—";
@@ -177,9 +178,11 @@ const htmlToPdfText = (html) => {
 };
 
 export default function DealProposalPdfActions({ deal, lifecycleStages = [], variant = "inline", onUpdated }) {
+  const queryClient = useQueryClient();
   const [pdfUrl, setPdfUrl] = useState(deal.proposal_pdf_url || "");
   const [generatedAt, setGeneratedAt] = useState(deal.proposal_pdf_generated_at || "");
   const [lastStablePdfUrl, setLastStablePdfUrl] = useState(deal.proposal_pdf_url || "");
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 
   useEffect(() => {
     setPdfUrl(deal.proposal_pdf_url || "");
@@ -493,7 +496,15 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
   if (variant === "section") {
     return (
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <>
+        <ProposalPdfEmailDialog
+          open={emailDialogOpen}
+          onOpenChange={setEmailDialogOpen}
+          deal={displayDeal}
+          pdfUrl={pdfUrl || lastStablePdfUrl}
+          onSent={() => queryClient.invalidateQueries({ queryKey: ["deal-activity-records", deal.id] })}
+        />
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <h3 className="text-sm font-semibold text-slate-800">Proposal PDF</h3>
@@ -510,15 +521,27 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
         <div className="flex flex-wrap gap-2">
           {(pdfUrl || lastStablePdfUrl) && (
-            <a
-              href={pdfUrl || lastStablePdfUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 hover:bg-slate-100"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              View PDF
-            </a>
+            <>
+              <a
+                href={pdfUrl || lastStablePdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 hover:bg-slate-100"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                View PDF
+              </a>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setEmailDialogOpen(true)}
+                className="h-8 px-3 text-xs"
+              >
+                <Mail className="h-3.5 w-3.5" />
+                Email PDF
+              </Button>
+            </>
           )}
 
           {isProposalStage && !isFinalStage && (
@@ -536,40 +559,65 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
           )}
         </div>
       </div>
+      </>
     );
   }
 
   return (
-    <div className="mt-2 flex flex-wrap gap-1.5">
-      {(pdfUrl || lastStablePdfUrl) && (
-        <a
-          href={pdfUrl || lastStablePdfUrl}
-          target="_blank"
-          rel="noreferrer"
-          onClick={(event) => event.stopPropagation()}
-          className="inline-flex h-6 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
-        >
-          <ExternalLink className="h-3 w-3" />
-          View PDF
-        </a>
-      )}
+    <>
+      <ProposalPdfEmailDialog
+        open={emailDialogOpen}
+        onOpenChange={setEmailDialogOpen}
+        deal={displayDeal}
+        pdfUrl={pdfUrl || lastStablePdfUrl}
+        onSent={() => queryClient.invalidateQueries({ queryKey: ["deal-activity-records", deal.id] })}
+      />
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {(pdfUrl || lastStablePdfUrl) && (
+          <>
+            <a
+              href={pdfUrl || lastStablePdfUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => event.stopPropagation()}
+              className="inline-flex h-6 items-center gap-1 rounded-md border border-slate-200 bg-white px-2 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
+            >
+              <ExternalLink className="h-3 w-3" />
+              View PDF
+            </a>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={(event) => {
+                event.stopPropagation();
+                setEmailDialogOpen(true);
+              }}
+              className="h-6 px-2 text-[10px]"
+            >
+              <Mail className="h-3 w-3" />
+              Email PDF
+            </Button>
+          </>
+        )}
 
-      {isProposalStage && !isFinalStage && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={(event) => {
-            event.stopPropagation();
-            generatePdfMutation.mutate();
-          }}
-          disabled={generatePdfMutation.isPending}
-          className="h-6 px-2 text-[10px]"
-        >
-          <FileText className="h-3 w-3" />
-          {generatePdfMutation.isPending ? "Generating..." : displayDeal.proposal_pdf_url ? "Regenerate PDF" : "Generate PDF"}
-        </Button>
-      )}
-    </div>
+        {isProposalStage && !isFinalStage && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={(event) => {
+              event.stopPropagation();
+              generatePdfMutation.mutate();
+            }}
+            disabled={generatePdfMutation.isPending}
+            className="h-6 px-2 text-[10px]"
+          >
+            <FileText className="h-3 w-3" />
+            {generatePdfMutation.isPending ? "Generating..." : displayDeal.proposal_pdf_url ? "Regenerate PDF" : "Generate PDF"}
+          </Button>
+        )}
+      </div>
+    </>
   );
 }
