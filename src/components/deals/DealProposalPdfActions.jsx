@@ -179,10 +179,14 @@ const htmlToPdfText = (html) => {
 export default function DealProposalPdfActions({ deal, lifecycleStages = [], variant = "inline", onUpdated }) {
   const [pdfUrl, setPdfUrl] = useState(deal.proposal_pdf_url || "");
   const [generatedAt, setGeneratedAt] = useState(deal.proposal_pdf_generated_at || "");
+  const [lastStablePdfUrl, setLastStablePdfUrl] = useState(deal.proposal_pdf_url || "");
 
   useEffect(() => {
     setPdfUrl(deal.proposal_pdf_url || "");
     setGeneratedAt(deal.proposal_pdf_generated_at || "");
+    if (deal.proposal_pdf_url) {
+      setLastStablePdfUrl(deal.proposal_pdf_url);
+    }
   }, [deal.proposal_pdf_generated_at, deal.proposal_pdf_url, deal.id]);
 
   const displayDeal = useMemo(
@@ -232,7 +236,7 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
       let y = 18;
 
       const ensureSpace = (needed = 10) => {
-        if (y + needed <= pageHeight - 16) return;
+        if (y + needed <= pageHeight - margin) return;
         doc.addPage();
         y = 18;
       };
@@ -347,6 +351,21 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
       let computedTotal = 0;
 
+      const drawLineItemsHeader = () => {
+        ensureSpace(14);
+        doc.setFillColor(241, 245, 249);
+        doc.rect(margin, y, contentWidth, 8, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(15, 23, 42);
+        columns.forEach((column) => {
+          doc.text(column.label, column.x, y + 5.2);
+        });
+        y += 10;
+      };
+
+      drawLineItemsHeader();
+
       if (displayDeal.services?.length) {
         displayDeal.services.forEach((service) => {
           const quantity = getServiceQuantity(service, displayDeal.contract_type);
@@ -355,7 +374,12 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
           const serviceLines = doc.splitTextToSize(service.service_name || "—", 86);
           const rowHeight = Math.max(8, serviceLines.length * 4 + 2);
-          ensureSpace(rowHeight + 2);
+          const rowTextY = y + 4.5;
+          if (rowTextY + rowHeight > pageHeight - margin) {
+            doc.addPage();
+            y = 18;
+            drawLineItemsHeader();
+          }
           doc.setDrawColor(226, 232, 240);
           doc.line(margin, y + rowHeight, margin + contentWidth, y + rowHeight);
           doc.setFont("helvetica", "normal");
@@ -375,14 +399,14 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         y += 10;
       }
 
-      ensureSpace(14);
+      ensureSpace(18);
       y += 7;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(15, 23, 42);
       doc.text("Order Total", margin + 120, y);
       doc.text(formatMoney(displayDeal.value || computedTotal), margin + contentWidth, y, { align: "right" });
-      y += 10;
+      y += 12;
 
       addSectionTitle("Notes");
       ensureSpace(30);
@@ -404,6 +428,7 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
     },
     onSuccess: ({ fileUrl, generatedTimestamp }) => {
       setPdfUrl(fileUrl);
+      setLastStablePdfUrl(fileUrl);
       setGeneratedAt(generatedTimestamp);
       toast.success(displayDeal.proposal_pdf_url ? "Proposal PDF regenerated" : "Proposal PDF generated");
       onUpdated?.({ fileUrl, generatedTimestamp });
@@ -432,9 +457,9 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {displayDeal.proposal_pdf_url && (
+          {(pdfUrl || lastStablePdfUrl) && (
             <a
-              href={displayDeal.proposal_pdf_url}
+              href={pdfUrl || lastStablePdfUrl}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-8 items-center gap-1 rounded-md border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 hover:bg-slate-100"
@@ -464,9 +489,9 @@ export default function DealProposalPdfActions({ deal, lifecycleStages = [], var
 
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
-      {displayDeal.proposal_pdf_url && (
+      {(pdfUrl || lastStablePdfUrl) && (
         <a
-          href={displayDeal.proposal_pdf_url}
+          href={pdfUrl || lastStablePdfUrl}
           target="_blank"
           rel="noreferrer"
           onClick={(event) => event.stopPropagation()}
