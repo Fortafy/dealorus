@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import moment from "moment";
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible";
 import DealEditorDialog from "@/components/deals/DealEditorDialog";
+import DealEditorPanel from "@/components/deals/DealEditorPanel";
 import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 
 const CONTRACT_TYPES = [
@@ -71,6 +72,7 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
   const queryClient = useQueryClient();
   const [showDealForm, setShowDealForm] = useState(false);
   const [editingDeal, setEditingDeal] = useState(null);
+  const [selectedDeal, setSelectedDeal] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -108,8 +110,8 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     },
   });
 
-  const openCreate = () => { setEditingDeal(null); setShowDealForm(true); };
-  const openEdit = (deal) => { setEditingDeal(deal); setShowDealForm(true); };
+  const openCreate = () => { setEditingDeal(null); setSelectedDeal(null); setShowDealForm(true); };
+  const openEdit = (deal) => { setShowDealForm(false); setEditingDeal(null); setSelectedDeal(deal); };
   const closeForm = () => { setShowDealForm(false); setEditingDeal(null); };
 
   const getStageLabel = (stageId) => clientLifecycleStages.find((s) => s.id === stageId)?.name || stageId;
@@ -135,7 +137,6 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         </Collapsible>
       </div>
 
-      {/* Create / Edit Dialog — shared component */}
       <DealEditorDialog
         open={showDealForm}
         onOpenChange={(v) => { if (!v) closeForm(); else setShowDealForm(v); }}
@@ -145,9 +146,19 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
         lifecycleStages={clientLifecycleStages}
         onSaved={() => {
           queryClient.invalidateQueries({ queryKey: ["deals", organization.id] });
+          queryClient.invalidateQueries({ queryKey: ["deals-board"] });
+          queryClient.invalidateQueries({ queryKey: ["deals"] });
           setShowDealForm(false);
           setEditingDeal(null);
         }}
+      />
+
+      <DealEditorPanel
+        open={!!selectedDeal}
+        deal={selectedDeal}
+        onClose={() => setSelectedDeal(null)}
+        organizations={[organization]}
+        lifecycleStages={clientLifecycleStages}
       />
 
       {/* Delete Confirmation */}
