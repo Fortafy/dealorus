@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import DealContactFields from "@/components/deals/DealContactFields";
 import { ArrowLeft, Building2, CalendarDays, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +37,10 @@ const emptyService = () => ({ service_name: "", hours_per_month: "", total_estim
 const emptyForm = () => ({
   name: "", stage: "", organization_id: "", contract_type: "",
   start_date: "", end_date: "", expected_close_date: "",
-  value: "", description: "", remind_at: null, services: [emptyService()],
+  value: "", description: "", remind_at: null,
+  administrative_contact_id: "", administrative_contact_name: "",
+  billing_contact_id: "", billing_contact_name: "",
+  services: [emptyService()],
 });
 
 const dealToForm = (deal) => ({
@@ -50,6 +54,10 @@ const dealToForm = (deal) => ({
   value: deal.value != null ? String(deal.value) : "",
   description: deal.description || "",
   remind_at: deal.remind_at || null,
+  administrative_contact_id: deal.administrative_contact_id || "",
+  administrative_contact_name: deal.administrative_contact_name || "",
+  billing_contact_id: deal.billing_contact_id || "",
+  billing_contact_name: deal.billing_contact_name || "",
   services: deal.services?.length
     ? deal.services.map((s) => ({
         service_name: s.service_name || "",
@@ -156,6 +164,10 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
       value: form.value ? parseFloat(form.value) : null,
       description: form.description || null,
       remind_at: form.remind_at || null,
+      administrative_contact_id: form.administrative_contact_id || "",
+      administrative_contact_name: form.administrative_contact_name || "",
+      billing_contact_id: form.billing_contact_id || "",
+      billing_contact_name: form.billing_contact_name || "",
       services: parseServices(form.services),
     };
   }, [deal, form, selectedOrganization]);
@@ -185,6 +197,10 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
         value: form.value ? parseFloat(form.value) : null,
         description: form.description || null,
         remind_at: form.remind_at || null,
+        administrative_contact_id: form.administrative_contact_id || "",
+        administrative_contact_name: form.administrative_contact_name || "",
+        billing_contact_id: form.billing_contact_id || "",
+        billing_contact_name: form.billing_contact_name || "",
         services: parseServices(form.services),
       },
     });
@@ -264,6 +280,15 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
                 <div>
                   <label className="mb-1 block text-xs text-slate-500">Start Date</label>
                   <Input type="date" value={form.start_date} onChange={(e) => setField("start_date", e.target.value)} className="text-sm" />
+                </div>
+
+                <div className="col-span-2">
+                  <DealContactFields
+                    organizationId={form.organization_id || deal.organization_id}
+                    clientId={deal.client_id}
+                    value={form}
+                    onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
+                  />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-slate-500">End Date</label>

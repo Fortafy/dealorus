@@ -1,0 +1,196 @@
+{
+  "name": "Deal",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client that owns this deal"
+    },
+    "organization_id": {
+      "type": "string",
+      "description": "ID of the organization this deal is with"
+    },
+    "organization_name": {
+      "type": "string",
+      "description": "Organization name (cached for convenience)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name/title of the deal"
+    },
+    "stage": {
+      "type": "string",
+      "description": "Current lifecycle stage (references client lifecycle_stages)"
+    },
+    "value": {
+      "type": "number",
+      "description": "Dollar value of the deal"
+    },
+    "probability": {
+      "type": "integer",
+      "description": "Probability of closing (0-100)"
+    },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "monthly_retainer",
+        "ad_hoc",
+        "project"
+      ],
+      "description": "Type of contract: monthly_retainer, ad_hoc, or project"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Contract/deal term start date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Contract/deal term end date"
+    },
+    "expected_close_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expected close date for the deal"
+    },
+    "remind_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional reminder date/time for this deal"
+    },
+    "services": {
+      "type": "array",
+      "description": "Array of services included in this deal",
+      "items": {
+        "type": "object",
+        "properties": {
+          "service_name": {
+            "type": "string",
+            "enum": [
+              "Salesforce Administration",
+              "Wordpress Administration",
+              "Salesforce Development",
+              "Wordpress Development",
+              "Technical Assessment",
+              "Data Management",
+              "Data Hygiene"
+            ],
+            "description": "Name of the service"
+          },
+          "hours_per_month": {
+            "type": "number",
+            "description": "For monthly_retainer: retainer hours/month. For ad_hoc: max hours/month. Not used for project."
+          },
+          "total_estimated_hours": {
+            "type": "number",
+            "description": "For project type: total estimated hours for the entire project"
+          },
+          "rate": {
+            "type": "number",
+            "description": "Hourly rate for this service"
+          },
+          "overage_rate": {
+            "type": "number",
+            "description": "For monthly_retainer: hourly rate for hours exceeding the retainer"
+          }
+        }
+      }
+    },
+    "monthly_allocations": {
+      "type": "array",
+      "description": "Per-service monthly hour allocation overrides",
+      "items": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "description": "Month in YYYY-MM format"
+          },
+          "service_name": {
+            "type": "string",
+            "description": "The service this override applies to"
+          },
+          "hours": {
+            "type": "number",
+            "description": "Allocated hours for this service in this month"
+          }
+        }
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the deal/contract is currently active"
+    },
+    "description": {
+      "type": "string",
+      "description": "Additional notes or description about the deal"
+    },
+    "administrative_contact_id": {
+      "type": "string",
+      "description": "Selected administrative contact for this deal"
+    },
+    "administrative_contact_name": {
+      "type": "string",
+      "description": "Administrative contact name cached for convenience"
+    },
+    "billing_contact_id": {
+      "type": "string",
+      "description": "Selected billing contact for this deal"
+    },
+    "billing_contact_name": {
+      "type": "string",
+      "description": "Billing contact name cached for convenience"
+    },
+    "proposal_pdf_url": {
+      "type": "string",
+      "description": "Uploaded PDF summary/proposal file attached to this deal"
+    },
+    "proposal_pdf_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the proposal PDF was most recently generated"
+    },
+    "proposal_doc_url": {
+      "type": "string",
+      "description": "Generated Google Doc proposal URL attached to this deal"
+    },
+    "proposal_doc_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the proposal Google Doc was most recently generated"
+    },
+    "label_ids": {
+      "type": "array",
+      "description": "IDs of labels applied to this deal",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "client_id",
+    "organization_id",
+    "name",
+    "stage"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}"
+    }
+  }
+}
