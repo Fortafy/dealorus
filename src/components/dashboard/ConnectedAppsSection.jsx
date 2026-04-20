@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Calendar, HardDrive } from "lucide-react";
+import { Calendar, HardDrive, Mail } from "lucide-react";
 import GoogleIntegrationCard from "@/components/dashboard/GoogleIntegrationCard";
 
 export default function ConnectedAppsSection() {
@@ -12,6 +12,8 @@ export default function ConnectedAppsSection() {
   const searchParams = new URLSearchParams(location.search);
   const oauthStatus = searchParams.get("google_oauth");
   const oauthMessage = searchParams.get("message");
+  const [gmailRecord, setGmailRecord] = useState(null);
+  const [gmailConnected, setGmailConnected] = useState(false);
 
   const { data: integrations = [] } = useQuery({
     queryKey: ["user-integrations"],
@@ -24,6 +26,23 @@ export default function ConnectedAppsSection() {
     [integrations]
   );
 
+  const fetchGmailConnection = async () => {
+    try {
+      const response = await base44.functions.invoke("sendProposalPdfEmailWithGmail", {});
+      if (response?.data?.error === 'Missing required fields') {
+        setGmailConnected(true);
+        setGmailRecord({ status: 'connected', account_email: 'Gmail account connected' });
+      }
+    } catch {
+      setGmailConnected(false);
+      setGmailRecord(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchGmailConnection();
+  }, []);
+
   const connectMutation = useMutation({
     mutationFn: async (integrationType) => {
       const response = await base44.functions.invoke("startGoogleOAuth", {
@@ -32,6 +51,19 @@ export default function ConnectedAppsSection() {
       });
       window.location.href = response.data.authUrl;
       return response.data;
+    },
+  });
+
+  const gmailConnectMutation = useMutation({
+    mutationFn: async () => {
+      const url = await base44.connectors.connectAppUser("69e6a0603f40a2278282ab3b");
+      const popup = window.open(url, "_blank");
+      const timer = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(timer);
+          fetchGmailConnection();
+        }
+      }, 500);
     },
   });
 
@@ -53,14 +85,22 @@ export default function ConnectedAppsSection() {
     },
   });
 
-  const isBusy = connectMutation.isPending || disconnectMutation.isPending;
+  const gmailDisconnectMutation = useMutation({
+    mutationFn: async () => {
+      await base44.connectors.disconnectAppUser("69e6a0603f40a2278282ab3b");
+      setGmailConnected(false);
+      setGmailRecord(null);
+    },
+  });
+
+  const isBusy = connectMutation.isPending || disconnectMutation.isPending || gmailConnectMutation.isPending || gmailDisconnectMutation.isPending;
 
   return (
     <div className="settings-page">
       <div className="settings-stack">
         <div>
           <h1 className="settings-page-title">Connected Apps</h1>
-          <p className="text-sm text-slate-500">Connect your own Google accounts for Drive and Calendar access.</p>
+          <p className="text-sm text-slate-500">Connect your own Google accounts for Drive, Calendar, and Gmail access.</p>
         </div>
 
         {oauthStatus && oauthMessage && (
@@ -89,6 +129,15 @@ export default function ConnectedAppsSection() {
             busy={isBusy}
             onConnect={() => connectMutation.mutate("google_calendar")}
             onDisconnect={() => disconnectMutation.mutate(integrationsByType.google_calendar)}
+          />
+          <GoogleIntegrationCard
+            icon={Mail}
+            title="Gmail"
+            description="Connect your Gmail account so proposal emails can be sent to external recipients from your own inbox."
+            record={gmailRecord}
+            busy={isBusy}
+            onConnect={() => gmailConnectMutation.mutate()}
+            onDisconnect={() => gmailDisconnectMutation.mutate()}
           />
         </div>
       </div>

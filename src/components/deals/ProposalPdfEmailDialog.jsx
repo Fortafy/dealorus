@@ -27,7 +27,7 @@ export default function ProposalPdfEmailDialog({ open, onOpenChange, deal, pdfUr
   }, [open, defaultSubject, defaultBody]);
 
   const sendMutation = useMutation({
-    mutationFn: () => base44.functions.invoke("sendProposalPdfEmail", {
+    mutationFn: () => base44.functions.invoke("sendProposalPdfEmailWithGmail", {
       dealId: deal.id,
       to,
       subject,
@@ -38,6 +38,9 @@ export default function ProposalPdfEmailDialog({ open, onOpenChange, deal, pdfUr
       toast.success("Proposal email sent");
       onSent?.();
       onOpenChange(false);
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.error || error?.message || "Failed to send proposal email");
     },
   });
 
