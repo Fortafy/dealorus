@@ -52,7 +52,7 @@ export default function Sidebar() {
           <img
             src={dealorusNewIcon}
             alt="Dealorus app icon"
-            className="h-full w-full object-cover"
+            className="h-full w-full bg-black object-cover"
           />
         </div>
       </div>
