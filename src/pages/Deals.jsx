@@ -144,16 +144,14 @@ export default function Deals() {
       {/* Page Header */}
       <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <div className="bg-lime-500 rounded-md w-7 h-7 flex items-center justify-center" style={{ backgroundColor: "hsl(217, 91%, 93%)" }}>
-            <Briefcase className="w-4 h-4" style={{ color: "hsl(217, 91%, 45%)" }} />
+          <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: "hsl(262, 80%, 93%)" }}>
+            <Briefcase className="w-4 h-4" style={{ color: "hsl(262, 80%, 45%)" }} />
           </div>
           <span className="text-base font-semibold text-slate-800">Deals</span>
         </div>
         <Button
-            onClick={() => setShowNewDeal(true)}
-            style={{ backgroundColor: "hsl(217, 91%, 60%)", color: "white" }} className="bg-[hsl(var(--primary-foreground))] text-primary-foreground px-3 py-2 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary-hover hover:opacity-90 h-8">
-            
-          
+          onClick={() => setShowNewDeal(true)}
+          className="h-8 bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary-hover">
           <Plus className="w-3.5 h-3.5 mr-1.5" /> New Deal
         </Button>
       </div>

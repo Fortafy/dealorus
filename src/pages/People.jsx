@@ -239,9 +239,7 @@ export default function People() {
             </Link>
             <Button
               onClick={() => setShowAddDialog(true)}
-              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }} className="bg-[hsl(var(--primary-hover))] text-primary-foreground px-3 py-2 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary-hover hover:opacity-90 h-8">
-
-              
+              className="h-8 bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:bg-primary-hover">
               <Plus className="w-3.5 h-3.5 mr-1.5" /> New Contact
             </Button>
           </div>
