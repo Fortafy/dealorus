@@ -14,7 +14,7 @@ import ContactDetailPanel from "@/components/people/ContactDetailPanel";
 
 const EMPTY_FILTERS = {
   organization: "", title: "", department: "", starred: "", owner: "",
-  createdFrom: "", createdTo: "", updatedFrom: "", updatedTo: "",
+  createdFrom: "", createdTo: "", updatedFrom: "", updatedTo: ""
 };
 
 export default function People() {
@@ -39,7 +39,7 @@ export default function People() {
       const allowedKeys = ALL_PEOPLE_COLUMNS.map((column) => column.key);
       const parsed = JSON.parse(stored).filter((key) => allowedKeys.includes(key));
       return parsed.length ? parsed : DEFAULT_PEOPLE_VISIBLE_FIELDS;
-    } catch { return DEFAULT_PEOPLE_VISIBLE_FIELDS; }
+    } catch {return DEFAULT_PEOPLE_VISIBLE_FIELDS;}
   });
 
   useEffect(() => {
@@ -60,44 +60,44 @@ export default function People() {
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ["people", currentUser?.client_id],
     enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.client_id }, "-created_date"),
+    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.client_id }, "-created_date")
   });
 
   // Fetch all organizations so we can display org names in the table
   const { data: organizations = [] } = useQuery({
     queryKey: ["organizations-people-page", currentUser?.client_id],
     enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "organization_name"),
+    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "organization_name")
   });
 
   const orgMap = useMemo(() => {
     const map = {};
-    organizations.forEach(o => { map[o.id] = o.organization_name; });
+    organizations.forEach((o) => {map[o.id] = o.organization_name;});
     return map;
   }, [organizations]);
 
   // Enrich contacts with org name
   const enrichedContacts = useMemo(() =>
-    contacts.map(c => ({ ...c, organization_name: c.organization_id ? orgMap[c.organization_id] || "" : "" })),
-    [contacts, orgMap]
+  contacts.map((c) => ({ ...c, organization_name: c.organization_id ? orgMap[c.organization_id] || "" : "" })),
+  [contacts, orgMap]
   );
 
-  const uniqueTitles = useMemo(() => [...new Set(enrichedContacts.map(c => c.title).filter(Boolean))].sort(), [enrichedContacts]);
-  const uniqueDepartments = useMemo(() => [...new Set(enrichedContacts.map(c => c.role_department).filter(Boolean))].sort(), [enrichedContacts]);
-  const uniqueOrgs = useMemo(() => [...new Set(enrichedContacts.map(c => c.organization_name).filter(Boolean))].sort(), [enrichedContacts]);
-  const uniqueOwners = useMemo(() => [...new Set(enrichedContacts.map(c => c.created_by ? c.created_by.split("@")[0] : null).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueTitles = useMemo(() => [...new Set(enrichedContacts.map((c) => c.title).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueDepartments = useMemo(() => [...new Set(enrichedContacts.map((c) => c.role_department).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueOrgs = useMemo(() => [...new Set(enrichedContacts.map((c) => c.organization_name).filter(Boolean))].sort(), [enrichedContacts]);
+  const uniqueOwners = useMemo(() => [...new Set(enrichedContacts.map((c) => c.created_by ? c.created_by.split("@")[0] : null).filter(Boolean))].sort(), [enrichedContacts]);
 
   const handleSort = (field) => {
-    if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
-    else { setSortField(field); setSortDir("asc"); }
+    if (sortField === field) setSortDir((d) => d === "asc" ? "desc" : "asc");else
+    {setSortField(field);setSortDir("asc");}
   };
 
-  const activeFilterCount = Object.values(filters).filter(v => v !== "").length;
+  const activeFilterCount = Object.values(filters).filter((v) => v !== "").length;
   const clearFilters = () => setFilters(EMPTY_FILTERS);
 
   const handleFieldsChange = (fields) => {
     setVisibleFields(fields);
-    try { localStorage.setItem("people_visible_fields", JSON.stringify(fields)); } catch {}
+    try {localStorage.setItem("people_visible_fields", JSON.stringify(fields));} catch {}
   };
 
   const handleSelectFilter = (id, savedFilters, savedFields) => {
@@ -114,24 +114,24 @@ export default function People() {
 
   const filteredAndSorted = useMemo(() => {
     const q = searchQuery.toLowerCase();
-    let result = enrichedContacts.filter(c => {
+    let result = enrichedContacts.filter((c) => {
       if (q && !(
-        c.name?.toLowerCase().includes(q) ||
-        c.email?.toLowerCase().includes(q) ||
-        c.title?.toLowerCase().includes(q) ||
-        c.organization_name?.toLowerCase().includes(q) ||
-        c.role_department?.toLowerCase().includes(q) ||
-        c.phone?.toLowerCase().includes(q)
-      )) return false;
+      c.name?.toLowerCase().includes(q) ||
+      c.email?.toLowerCase().includes(q) ||
+      c.title?.toLowerCase().includes(q) ||
+      c.organization_name?.toLowerCase().includes(q) ||
+      c.role_department?.toLowerCase().includes(q) ||
+      c.phone?.toLowerCase().includes(q)))
+      return false;
       if (filters.organization) {
-        if (filters.organization === "__none__") { if (c.organization_id) return false; }
-        else { if (c.organization_name !== filters.organization) return false; }
+        if (filters.organization === "__none__") {if (c.organization_id) return false;} else
+        {if (c.organization_name !== filters.organization) return false;}
       }
       if (filters.title && c.title !== filters.title) return false;
       if (filters.department && c.role_department !== filters.department) return false;
       if (filters.starred === "yes" && !c.starred) return false;
       if (filters.starred === "no" && c.starred) return false;
-      if (filters.owner && (c.created_by?.split("@")[0]) !== filters.owner) return false;
+      if (filters.owner && c.created_by?.split("@")[0] !== filters.owner) return false;
       const created = c.created_date ? new Date(c.created_date) : null;
       if (filters.createdFrom && created && created < new Date(filters.createdFrom)) return false;
       if (filters.createdTo && created && created > new Date(filters.createdTo + "T23:59:59")) return false;
@@ -145,9 +145,9 @@ export default function People() {
       let av = a[sortField] ?? "";
       let bv = b[sortField] ?? "";
       if (sortField === "created_date" || sortField === "updated_date") {
-        av = new Date(av); bv = new Date(bv);
+        av = new Date(av);bv = new Date(bv);
       } else {
-        av = String(av).toLowerCase(); bv = String(bv).toLowerCase();
+        av = String(av).toLowerCase();bv = String(bv).toLowerCase();
       }
       if (av < bv) return sortDir === "asc" ? -1 : 1;
       if (av > bv) return sortDir === "asc" ? 1 : -1;
@@ -158,11 +158,11 @@ export default function People() {
   }, [enrichedContacts, searchQuery, filters, sortField, sortDir]);
 
   const [colWidths, setColWidths] = useState(() =>
-    Object.fromEntries(ALL_PEOPLE_COLUMNS.map(c => [c.key, c.defaultWidth]))
+  Object.fromEntries(ALL_PEOPLE_COLUMNS.map((c) => [c.key, c.defaultWidth]))
   );
 
   const COLUMNS = useMemo(
-    () => visibleFields.map(key => ALL_PEOPLE_COLUMNS.find(c => c.key === key)).filter(Boolean),
+    () => visibleFields.map((key) => ALL_PEOPLE_COLUMNS.find((c) => c.key === key)).filter(Boolean),
     [visibleFields]
   );
 
@@ -175,7 +175,7 @@ export default function People() {
     resizingRef.current = { key, startX, startWidth };
     const onMouseMove = (ev) => {
       const delta = ev.clientX - resizingRef.current.startX;
-      setColWidths(prev => ({ ...prev, [resizingRef.current.key]: Math.max(60, resizingRef.current.startWidth + delta) }));
+      setColWidths((prev) => ({ ...prev, [resizingRef.current.key]: Math.max(60, resizingRef.current.startWidth + delta) }));
     };
     const onMouseUp = () => {
       resizingRef.current = null;
@@ -188,9 +188,9 @@ export default function People() {
 
   const SortIcon = ({ field }) => {
     if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-400 inline ml-1" />;
-    return sortDir === "asc"
-      ? <ChevronUp className="w-3 h-3 text-blue-500 inline ml-1" />
-      : <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
+    return sortDir === "asc" ?
+    <ChevronUp className="w-3 h-3 text-blue-500 inline ml-1" /> :
+    <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
   };
 
   const renderCell = (key, contact) => {
@@ -208,8 +208,8 @@ export default function People() {
     return (
       <div className="h-full flex flex-col bg-white overflow-hidden">
         <ContactDetailPanel contactId={selectedContactId} onClose={() => setSelectedContactId(null)} />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -227,21 +227,21 @@ export default function People() {
           <div className="flex items-center gap-2">
             <Link
               to="/people/import"
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
-            >
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors">
+              
               <Upload className="w-3.5 h-3.5" /> Import
             </Link>
             <Link
               to="/people/export"
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
-            >
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors">
+              
               <Download className="w-3.5 h-3.5" /> Export
             </Link>
             <Button
               onClick={() => setShowAddDialog(true)}
-              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }}
-              className="hover:opacity-90 h-8 text-xs px-3"
-            >
+              style={{ backgroundColor: 'hsl(217, 91%, 60%)', color: 'white' }} className="bg-[hsl(var(--primary-hover))] text-primary-foreground px-3 py-2 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary-hover hover:opacity-90 h-8">
+
+              
               <Plus className="w-3.5 h-3.5 mr-1.5" /> New Contact
             </Button>
           </div>
@@ -257,80 +257,80 @@ export default function People() {
             onSelectFilter={handleSelectFilter}
             currentFilters={filters}
             currentFields={visibleFields}
-            recordCount={filteredAndSorted.length}
-          />
+            recordCount={filteredAndSorted.length} />
+          
 
           <PeopleFieldsPanel visibleFields={visibleFields} onChange={handleFieldsChange} />
 
           <div className="relative" ref={filterButtonRef}>
             <div className="flex items-center">
               <button
-                onClick={() => setShowFilterPanel(p => !p)}
+                onClick={() => setShowFilterPanel((p) => !p)}
                 className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
-                  activeFilterCount > 0
-                    ? "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium"
-                    : "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
+                activeFilterCount > 0 ?
+                "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium" :
+                "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`
+                }>
+                
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Filter</span>
-                {activeFilterCount > 0 && (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                {activeFilterCount > 0 &&
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
                     {activeFilterCount}
                   </span>
-                )}
+                }
               </button>
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
-                  title="Clear all filters"
-                >
+              {activeFilterCount > 0 &&
+              <button
+                onClick={clearFilters}
+                className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
+                title="Clear all filters">
+                
                   <X className="w-3.5 h-3.5" />
                 </button>
-              )}
+              }
             </div>
             <PeopleFilterPanel
               open={showFilterPanel}
               onClose={() => setShowFilterPanel(false)}
               filters={filters}
-              onChange={(f) => { setFilters(f); setActiveFilterId(null); }}
+              onChange={(f) => {setFilters(f);setActiveFilterId(null);}}
               uniqueTitles={uniqueTitles}
               uniqueDepartments={uniqueDepartments}
               uniqueOrgs={uniqueOrgs}
-              uniqueOwners={uniqueOwners}
-            />
+              uniqueOwners={uniqueOwners} />
+            
           </div>
 
           {/* Search */}
           <div ref={searchRef} className="flex items-center">
-            {searchExpanded ? (
-              <div className="relative flex items-center">
+            {searchExpanded ?
+            <div className="relative flex items-center">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                 <Input
-                  autoFocus
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
-                  placeholder="Search people..."
-                  className="pl-8 pr-8 h-8 text-xs w-52 transition-all"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => {setSearchQuery(e.target.value);setActiveFilterId(null);}}
+                placeholder="Search people..."
+                className="pl-8 pr-8 h-8 text-xs w-52 transition-all" />
+              
+                {searchQuery &&
+              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     <X className="w-3.5 h-3.5" />
                   </button>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => setSearchExpanded(true)}
-                className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
-                  searchQuery ? "border-blue-400 bg-blue-50 text-blue-600" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                }`}
-                title="Search"
-              >
+              }
+              </div> :
+
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
+              searchQuery ? "border-blue-400 bg-blue-50 text-blue-600" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`
+              }
+              title="Search">
+              
                 <Search className="w-3.5 h-3.5" />
               </button>
-            )}
+            }
           </div>
         </div>
 
@@ -338,71 +338,71 @@ export default function People() {
 
         {/* Table */}
         <div className="flex-1 overflow-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-24">
+          {isLoading ?
+          <div className="flex items-center justify-center py-24">
               <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
-            </div>
-          ) : (
-            <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
+            </div> :
+
+          <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
               <colgroup>
-                {COLUMNS.map(col => <col key={col.key} style={{ width: colWidths[col.key] }} />)}
+                {COLUMNS.map((col) => <col key={col.key} style={{ width: colWidths[col.key] }} />)}
               </colgroup>
               <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
-                  {COLUMNS.map((col, i) => (
-                    <th
-                      key={col.key}
-                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
-                      style={{
-                        width: colWidths[col.key],
-                        ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {}),
-                      }}
-                    >
+                  {COLUMNS.map((col, i) =>
+                <th
+                  key={col.key}
+                  className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
+                  style={{
+                    width: colWidths[col.key],
+                    ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {})
+                  }}>
+                  
                       <span onClick={() => handleSort(col.key)} className="cursor-pointer hover:text-slate-900 pl-3 pr-4 block truncate">
                         {col.label}<SortIcon field={col.key} />
                       </span>
                       <div
-                        onMouseDown={(e) => startResize(e, col.key)}
-                        className="absolute top-0 right-0 h-full w-2 cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100"
-                        style={{ userSelect: "none" }}
-                      >
+                    onMouseDown={(e) => startResize(e, col.key)}
+                    className="absolute top-0 right-0 h-full w-2 cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    style={{ userSelect: "none" }}>
+                    
                         <div className="w-0.5 h-4 bg-slate-300 rounded-full" />
                       </div>
                     </th>
-                  ))}
+                )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredAndSorted.length === 0 ? (
-                  <tr>
+                {filteredAndSorted.length === 0 ?
+              <tr>
                     <td colSpan={COLUMNS.length} className="text-center py-16 text-slate-400">
                       <Users className="w-10 h-10 mx-auto mb-2 opacity-20" />
                       <p>No contacts found</p>
                     </td>
-                  </tr>
-                ) : filteredAndSorted.map(contact => (
-                  <tr key={contact.id} className="group hover:bg-slate-50 transition-colors">
-                    {COLUMNS.map((col, i) => (
-                      <td
-                        key={col.key}
-                        className={`px-3 py-2 truncate border-r border-slate-100 last:border-r-0${i === 0 ? " bg-white group-hover:bg-slate-50" : ""}`}
-                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1 } : {}}
-                      >
-                        {i === 0 ? (
-                          <button
-                            onClick={() => setSelectedContactId(contact.id)}
-                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
-                          >
+                  </tr> :
+              filteredAndSorted.map((contact) =>
+              <tr key={contact.id} className="group hover:bg-slate-50 transition-colors">
+                    {COLUMNS.map((col, i) =>
+                <td
+                  key={col.key}
+                  className={`px-3 py-2 truncate border-r border-slate-100 last:border-r-0${i === 0 ? " bg-white group-hover:bg-slate-50" : ""}`}
+                  style={i === 0 ? { position: "sticky", left: 0, zIndex: 1 } : {}}>
+                  
+                        {i === 0 ?
+                  <button
+                    onClick={() => setSelectedContactId(contact.id)}
+                    className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full">
+                    
                             {contact[col.key] || "—"}
-                          </button>
-                        ) : renderCell(col.key, contact)}
+                          </button> :
+                  renderCell(col.key, contact)}
                       </td>
-                    ))}
+                )}
                   </tr>
-                ))}
+              )}
               </tbody>
             </table>
-          )}
+          }
         </div>
       </div>
 
@@ -410,8 +410,8 @@ export default function People() {
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         clientId={currentUser?.client_id}
-        onSaved={() => queryClient.invalidateQueries({ queryKey: ["people"] })}
-      />
-    </div>
-  );
+        onSaved={() => queryClient.invalidateQueries({ queryKey: ["people"] })} />
+      
+    </div>);
+
 }
