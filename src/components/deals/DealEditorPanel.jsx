@@ -232,12 +232,16 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold text-slate-900">Edit Deal</h2>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={handleDelete} disabled={deleteMutation.isPending || updateMutation.isPending} className="text-red-600 hover:text-red-700">
+          <div className="flex items-center gap-4">
+            <button type="button" onClick={onClose} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+              Close
+            </button>
+            <button type="button" onClick={handleSave} disabled={updateMutation.isPending || deleteMutation.isPending} className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 disabled:opacity-50">
+              Save
+            </button>
+            <button type="button" onClick={handleDelete} disabled={deleteMutation.isPending || updateMutation.isPending} className="inline-flex items-center gap-1 text-sm font-medium text-red-600 transition-colors hover:text-red-700 disabled:opacity-50">
               <Trash2 className="h-3.5 w-3.5" /> Delete
-            </Button>
-            <Button size="sm" variant="outline" onClick={onClose}>Close</Button>
-            <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || deleteMutation.isPending}>Save Changes</Button>
+            </button>
           </div>
         </div>
 
@@ -266,14 +270,14 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full flex-col">
-            <TabsList className="grid w-full grid-cols-3 rounded-none border-b border-slate-200 bg-white px-0">
-              <TabsTrigger value="details">Detail</TabsTrigger>
-              <TabsTrigger value="notes">Notes</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsList className="grid h-auto w-full grid-cols-3 rounded-none border-b border-slate-200 bg-white p-0 text-slate-500">
+              <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent px-0 py-3 data-[state=active]:border-slate-900 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 data-[state=active]:shadow-none">Detail</TabsTrigger>
+              <TabsTrigger value="notes" className="rounded-none border-b-2 border-transparent px-0 py-3 data-[state=active]:border-slate-900 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 data-[state=active]:shadow-none">Notes</TabsTrigger>
+              <TabsTrigger value="activity" className="rounded-none border-b-2 border-transparent px-0 py-3 data-[state=active]:border-slate-900 data-[state=active]:bg-slate-100 data-[state=active]:text-slate-900 data-[state=active]:shadow-none">Activity</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="details" className="mt-0 space-y-5 px-5 py-4">
-              <section className="space-y-3 rounded-xl border border-slate-200 p-4">
+            <TabsContent value="details" className="mt-0 space-y-0 px-0 py-0">
+              <section className="space-y-3 border-b border-slate-200 px-5 py-4">
                 <div>
                   <label className="mb-1 block text-xs text-slate-500">Deal Name *</label>
                   <Input placeholder="Deal name..." value={form.name} onChange={(e) => setField("name", e.target.value)} className="text-sm" />
@@ -301,7 +305,7 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
                 </div>
               </section>
 
-              <section className="space-y-3 rounded-xl border border-slate-200 p-4">
+              <section className="space-y-3 border-b border-slate-200 px-5 py-4">
                 <DealContactFields
                   organizationId={form.organization_id || deal.organization_id}
                   clientId={deal.client_id}
@@ -310,7 +314,7 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
                 />
               </section>
 
-              <section className="space-y-4 rounded-xl border border-slate-200 p-4">
+              <section className="space-y-4 border-b border-slate-200 px-5 py-4">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div>
                     <label className="mb-1 block text-xs text-slate-500">Contract Type</label>
@@ -382,13 +386,13 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
               </section>
 
               {previewDeal && showProposalSection ? (
-                <section className="space-y-4 rounded-xl border border-slate-200 p-4">
+                <section className="space-y-4 border-b border-slate-200 px-5 py-4">
                   <DealProposalPdfActions deal={previewDeal} lifecycleStages={lifecycleStages} variant="section" />
                 </section>
               ) : null}
 
               {previewDeal && showOnboardingSection ? (
-                <section className="space-y-4 rounded-xl border border-slate-200 p-4">
+                <section className="space-y-4 border-b border-slate-200 px-5 py-4">
                   <DealOnboardingSection organizationId={previewDeal.organization_id} />
                 </section>
               ) : null}
