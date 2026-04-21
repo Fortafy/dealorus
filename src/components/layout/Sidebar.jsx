@@ -6,7 +6,7 @@ import { base44 } from "@/api/base44Client";
 import dealorusNewIcon from "@/assets/dealorus-new-icon.png";
 
 const NAV_ITEMS = [
-{ label: "Organizations", icon: Building2, path: "/Organizations" },
+{ label: "Accounts", icon: Building2, path: "/Organizations" },
 { label: "People", icon: Users, path: "/People" },
 { label: "Deals", icon: Briefcase, path: "/Deals" }];
 
@@ -48,11 +48,11 @@ export default function Sidebar() {
   return (
     <aside className="flex h-full w-[92px] flex-shrink-0 flex-col border-r border-[#22252b] bg-black">
       <div className="flex w-full justify-center px-4 pb-5 pt-6">
-        <div className="flex h-[54px] w-[54px] items-center justify-center overflow-hidden rounded-[16px] border border-[#2a2a2a] bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <div className="flex h-[54px] w-[54px] items-center justify-center overflow-hidden rounded-[16px] border border-[#2a2a2a] bg-black shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <img
             src={dealorusNewIcon}
             alt="Dealorus app icon"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain bg-black"
           />
         </div>
       </div>
