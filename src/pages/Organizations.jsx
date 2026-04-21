@@ -230,16 +230,14 @@ export default function Organizations() {
   }
 
   return (
-    <div className="h-full bg-white flex flex-col overflow-hidden">
-      <div className="flex-1 flex flex-col overflow-hidden">
-
-        {/* Page Header Row */}
-        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center" style={{ backgroundColor: 'hsl(217, 91%, 93%)' }}>
-              <Building2 className="w-4 h-4" style={{ color: 'hsl(217, 91%, 45%)' }} />
+    <div className="flex h-full flex-col overflow-hidden bg-white">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-shrink-0 items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-[#e9f1ff]">
+              <Building2 className="h-4 w-4 text-[#4f7cff]" />
             </div>
-            <span className="text-base font-semibold text-slate-800">Organizations</span>
+            <span className="text-[20px] font-semibold tracking-[-0.02em] text-[#182230]">Organizations</span>
           </div>
           <div className="flex items-center gap-2">
             {isEmptyAccount && currentUser?.client_id && (
@@ -250,29 +248,28 @@ export default function Organizations() {
             )}
             <Link
               to="/organizations/import"
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+              className="flex h-8 items-center gap-1.5 rounded-[10px] border border-[#d9e2ef] bg-white px-3 text-[11px] font-medium text-[#475467] transition-colors hover:bg-[#f8fafc]"
             >
-              <Upload className="w-3.5 h-3.5" /> Import
+              <Upload className="h-3.5 w-3.5" /> Import
             </Link>
             <Link
               to="/organizations/export"
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
+              className="flex h-8 items-center gap-1.5 rounded-[10px] border border-[#d9e2ef] bg-white px-3 text-[11px] font-medium text-[#475467] transition-colors hover:bg-[#f8fafc]"
             >
-              <Download className="w-3.5 h-3.5" /> Export
+              <Download className="h-3.5 w-3.5" /> Export
             </Link>
             <Button
               onClick={() => setShowNewAccountDialog(true)}
-              className="h-8 text-xs px-3"
+              className="h-8 rounded-[10px] bg-[#5b3df5] px-3 text-[11px] font-semibold text-white hover:bg-[#4e33e8]"
             >
-              <Plus className="w-3.5 h-3.5 mr-1.5" /> New Account
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> New Account
             </Button>
           </div>
         </div>
 
-        <div className="border-t border-slate-200 flex-shrink-0" />
+        <div className="flex-shrink-0 border-t border-[#e8edf5]" />
 
-        {/* Toolbar */}
-        <div className="flex items-center gap-3 px-6 py-3 flex-shrink-0 flex-wrap">
+        <div className="flex flex-shrink-0 items-center gap-2 px-6 py-3">
           {/* Saved filter list selector */}
           <SavedFilterSelector
             currentUser={currentUser}
@@ -291,16 +288,16 @@ export default function Organizations() {
             <div className="flex items-center">
               <button
                 onClick={() => setShowFilterPanel(p => !p)}
-                className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
+                className={`flex h-8 items-center gap-2 rounded-[10px] border px-3 text-[11px] font-medium transition-colors ${
                   activeFilterCount > 0
-                    ? "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium"
-                    : "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    ? "rounded-l-[10px] border-[#c7d7fe] bg-[#eef4ff] text-[#3b5ccc]"
+                    : "border-[#d9e2ef] bg-white text-[#475467] hover:bg-[#f8fafc]"
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Filter</span>
                 {activeFilterCount > 0 && (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#5b3df5] text-[10px] font-bold text-white">
                     {activeFilterCount}
                   </span>
                 )}
@@ -308,7 +305,7 @@ export default function Organizations() {
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-r-[10px] border border-l-0 border-[#c7d7fe] bg-[#eef4ff] text-[#5b3df5] transition-colors hover:bg-[#e6eeff]"
                   title="Clear all filters"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -336,7 +333,7 @@ export default function Organizations() {
                   value={searchQuery}
                   onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
                   placeholder="Search..."
-                  className="pl-8 pr-8 h-8 text-xs w-52 transition-all"
+                  className="h-8 w-52 rounded-[10px] border-[#d9e2ef] pl-8 pr-8 text-[11px] text-[#344054] transition-all"
                 />
                 {searchQuery && (
                   <button onClick={() => { setSearchQuery(""); }} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -347,10 +344,10 @@ export default function Organizations() {
             ) : (
               <button
                 onClick={() => setSearchExpanded(true)}
-                className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
+                className={`flex h-8 w-8 items-center justify-center rounded-[10px] border transition-colors ${
                   searchQuery
-                    ? "border-blue-400 bg-blue-50 text-blue-600"
-                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                    ? "border-[#c7d7fe] bg-[#eef4ff] text-[#5b3df5]"
+                    : "border-[#d9e2ef] bg-white text-[#667085] hover:bg-[#f8fafc]"
                 }`}
                 title="Search"
               >
@@ -362,30 +359,29 @@ export default function Organizations() {
 
         </div>
 
-        <div className="border-t border-slate-200 flex-shrink-0" />
+        <div className="flex-shrink-0 border-t border-[#e8edf5]" />
 
-        {/* Table */}
         <div className="flex-1 overflow-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-24">
               <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
             </div>
           ) : (
-            <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
+            <table className="w-full text-[11px]" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
               <colgroup>
                 {COLUMNS.map(col => (
                   <col key={col.key} style={{ width: colWidths[col.key] }} />
                 ))}
               </colgroup>
-              <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
+              <thead className="sticky top-0 z-10 border-b border-[#e8edf5] bg-[#fbfcfe]">
                 <tr>
                   {COLUMNS.map((col, i) => (
                     <th
                       key={col.key}
-                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
+                      className="relative group whitespace-nowrap border-r border-[#edf1f7] py-3 text-left text-[11px] font-semibold text-[#475467] last:border-r-0 select-none"
                       style={{
                         width: colWidths[col.key],
-                        ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {}),
+                        ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "#fbfcfe" } : {}),
                       }}
                     >
                       <span
@@ -424,7 +420,7 @@ export default function Organizations() {
                     </td>
                   </tr>
                 ) : filteredAndSorted.map(org => (
-                  <tr key={org.id} className="group hover:bg-slate-50 transition-colors">
+                  <tr key={org.id} className="group transition-colors hover:bg-[#fafcff]">
                     {COLUMNS.map((col, i) => (
                       <td
                         key={col.key}
@@ -434,7 +430,7 @@ export default function Organizations() {
                         {i === 0 ? (
                           <button
                             onClick={() => setSelectedOrg(org)}
-                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
+                            className="w-full truncate text-left font-medium text-[#4f7cff] hover:underline hover:text-[#3b6df6]"
                           >
                             {org[col.key] || "—"}
                           </button>
