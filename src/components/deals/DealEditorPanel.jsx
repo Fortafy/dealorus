@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import DealContactFields from "@/components/deals/DealContactFields";
-import { Building2, CalendarDays, Plus, Trash2, X } from "lucide-react";
+import { Building2, CalendarDays, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -232,16 +232,16 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold text-slate-900">Edit Deal</h2>
           </div>
-          <div className="flex items-center gap-4">
-            <button type="button" onClick={onClose} className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900">
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={onClose}>
               Close
-            </button>
-            <button type="button" onClick={handleSave} disabled={updateMutation.isPending || deleteMutation.isPending} className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 disabled:opacity-50">
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleSave} disabled={updateMutation.isPending || deleteMutation.isPending}>
               Save
-            </button>
-            <button type="button" onClick={handleDelete} disabled={deleteMutation.isPending || updateMutation.isPending} className="inline-flex items-center gap-1 text-sm font-medium text-red-600 transition-colors hover:text-red-700 disabled:opacity-50">
-              <Trash2 className="h-3.5 w-3.5" /> Delete
-            </button>
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleDelete} disabled={deleteMutation.isPending || updateMutation.isPending} className="text-red-600 hover:text-red-700">
+              Delete
+            </Button>
           </div>
         </div>
 
