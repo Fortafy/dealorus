@@ -85,10 +85,10 @@ export default function Deals() {
   const dealsByStage = useMemo(() => {
     const map = {};
     const getSortDate = (deal) => {
-      const candidates = [deal.remind_at, deal.expected_close_date]
-        .filter(Boolean)
-        .map((value) => new Date(value))
-        .filter((date) => !Number.isNaN(date.getTime()));
+      const candidates = [deal.remind_at, deal.expected_close_date].
+      filter(Boolean).
+      map((value) => new Date(value)).
+      filter((date) => !Number.isNaN(date.getTime()));
 
       if (candidates.length > 0) {
         return Math.min(...candidates.map((date) => date.getTime()));
@@ -97,9 +97,9 @@ export default function Deals() {
       return new Date(deal.created_date).getTime();
     };
 
-    sortedStages.forEach((s) => { map[s.id] = []; });
+    sortedStages.forEach((s) => {map[s.id] = [];});
     filteredDeals.forEach((deal) => {
-      if (map[deal.stage]) map[deal.stage].push(deal); else {
+      if (map[deal.stage]) map[deal.stage].push(deal);else {
         const firstId = sortedStages[0]?.id;
         if (firstId) map[firstId].push(deal);
       }
@@ -150,9 +150,9 @@ export default function Deals() {
           <span className="text-base font-semibold text-slate-800">Deals</span>
         </div>
         <Button
-          onClick={() => setShowNewDeal(true)}
-          style={{ backgroundColor: "hsl(217, 91%, 60%)", color: "white" }}
-          className="hover:opacity-90 h-8 text-xs px-3">
+            onClick={() => setShowNewDeal(true)}
+            style={{ backgroundColor: "hsl(217, 91%, 60%)", color: "white" }} className="bg-[hsl(var(--primary-foreground))] text-primary-foreground px-3 py-2 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary-hover hover:opacity-90 h-8">
+            
           
           <Plus className="w-3.5 h-3.5 mr-1.5" /> New Deal
         </Button>
@@ -166,68 +166,68 @@ export default function Deals() {
         <div className="relative" ref={filterButtonRef}>
           <div className="flex items-center">
             <button
-              onClick={() => setShowFilterPanel((p) => !p)}
-              className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
-              activeFilterCount > 0 ?
-              "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium" :
-              "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`
-              }>
+                onClick={() => setShowFilterPanel((p) => !p)}
+                className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
+                activeFilterCount > 0 ?
+                "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium" :
+                "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`
+                }>
               
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Filter</span>
               {activeFilterCount > 0 &&
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
                   {activeFilterCount}
                 </span>
-              }
+                }
             </button>
             {activeFilterCount > 0 &&
-            <button
-              onClick={() => setFilters({ contractType: "", orgId: "" })}
-              className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors">
+              <button
+                onClick={() => setFilters({ contractType: "", orgId: "" })}
+                className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors">
               
                 <X className="w-3.5 h-3.5" />
               </button>
-            }
+              }
           </div>
           <DealsFilterPanel
-            open={showFilterPanel}
-            onClose={() => setShowFilterPanel(false)}
-            filters={filters}
-            onChange={setFilters}
-            organizations={organizations} />
+              open={showFilterPanel}
+              onClose={() => setShowFilterPanel(false)}
+              filters={filters}
+              onChange={setFilters}
+              organizations={organizations} />
           
         </div>
 
         {/* Search */}
         <div ref={searchRef} className="flex items-center">
           {searchExpanded ?
-          <div className="relative flex items-center">
+            <div className="relative flex items-center">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <Input
-              autoFocus
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search deals..."
-              className="pl-8 pr-8 h-8 text-xs w-52"
-              onBlur={() => {if (!searchQuery) setSearchExpanded(false);}} />
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search deals..."
+                className="pl-8 pr-8 h-8 text-xs w-52"
+                onBlur={() => {if (!searchQuery) setSearchExpanded(false);}} />
             
               {searchQuery &&
-            <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   <X className="w-3.5 h-3.5" />
                 </button>
-            }
+              }
             </div> :
 
-          <button
-            onClick={() => setSearchExpanded(true)}
-            className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
-            searchQuery ? "border-blue-400 bg-blue-50 text-blue-600" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`
-            }>
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
+              searchQuery ? "border-blue-400 bg-blue-50 text-blue-600" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`
+              }>
             
               <Search className="w-3.5 h-3.5" />
             </button>
-          }
+            }
         </div>
 
         {/* Summary */}
@@ -243,19 +243,19 @@ export default function Deals() {
 
       {/* Kanban Board */}
       {isLoading || isClientLoading || !currentUser ?
-      <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: "hsl(217, 91%, 60%)" }} />
         </div> :
 
-      <DragDropContext onDragEnd={onDragEnd}>
+        <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex-1 overflow-x-auto overflow-y-hidden">
             <div className="flex gap-3 p-4 h-full" style={{ minWidth: sortedStages.length * 260 + 32 }}>
               {sortedStages.map((stage) => {
-              const color = getStageColor(stage.id);
-              const stageDeals = dealsByStage[stage.id] || [];
-              const revenue = stageRevenue(stage.id);
-              return (
-                <div key={stage.id} className="flex flex-col w-60 flex-shrink-0">
+                const color = getStageColor(stage.id);
+                const stageDeals = dealsByStage[stage.id] || [];
+                const revenue = stageRevenue(stage.id);
+                return (
+                  <div key={stage.id} className="flex flex-col w-60 flex-shrink-0">
                     {/* Column Header */}
                     <div className={`flex items-center justify-between px-3 py-2 rounded-t-lg ${color.bg} border border-b-0 border-slate-200`}>
                       <div className="flex items-center gap-2">
@@ -264,67 +264,67 @@ export default function Deals() {
                         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-white/70 ${color.text}`}>{stageDeals.length}</span>
                       </div>
                       {revenue > 0 &&
-                    <span className={`text-[10px] font-medium ${color.text} opacity-80`}>
+                      <span className={`text-[10px] font-medium ${color.text} opacity-80`}>
                           ${revenue.toLocaleString()}
                         </span>
-                    }
+                      }
                     </div>
 
                     {/* Droppable column */}
                     <Droppable droppableId={stage.id}>
                       {(provided, snapshot) =>
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex-1 overflow-y-auto rounded-b-lg border border-slate-200 p-2 space-y-2 transition-colors ${
-                      snapshot.isDraggingOver ? "bg-blue-50/60" : "bg-slate-50/50"}`
-                      }
-                      style={{ minHeight: 120 }}>
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`flex-1 overflow-y-auto rounded-b-lg border border-slate-200 p-2 space-y-2 transition-colors ${
+                        snapshot.isDraggingOver ? "bg-blue-50/60" : "bg-slate-50/50"}`
+                        }
+                        style={{ minHeight: 120 }}>
                       
                           {stageDeals.map((deal, index) =>
-                      <Draggable key={deal.id} draggableId={deal.id} index={index}>
+                        <Draggable key={deal.id} draggableId={deal.id} index={index}>
                               {(provided, snapshot) =>
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}>
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}>
                           
                                   <KanbanDealCard
-                            deal={deal}
-                            isDragging={snapshot.isDragging}
-                            onSelectDeal={setSelectedDeal} />
+                              deal={deal}
+                              isDragging={snapshot.isDragging}
+                              onSelectDeal={setSelectedDeal} />
                           
                                 </div>
-                        }
+                          }
                             </Draggable>
-                      )}
+                        )}
                           {provided.placeholder}
                           {stageDeals.length === 0 && !snapshot.isDraggingOver &&
-                      <div className="text-center py-6 text-[11px] text-slate-400">
+                        <div className="text-center py-6 text-[11px] text-slate-400">
                               No deals
                             </div>
-                      }
+                        }
                         </div>
-                    }
+                      }
                     </Droppable>
                   </div>);
 
-            })}
+              })}
             </div>
           </div>
         </DragDropContext>
-      }
+        }
 
       <DealEditorDialog
-        open={showNewDeal}
-        onOpenChange={setShowNewDeal}
-        clientId={clientId}
-        organizations={organizations}
-        lifecycleStages={sortedStages}
-        onSaved={() => {
-          queryClient.invalidateQueries({ queryKey: ["deals-board"] });
-          queryClient.invalidateQueries({ queryKey: ["deals"] });
-        }} />
+          open={showNewDeal}
+          onOpenChange={setShowNewDeal}
+          clientId={clientId}
+          organizations={organizations}
+          lifecycleStages={sortedStages}
+          onSaved={() => {
+            queryClient.invalidateQueries({ queryKey: ["deals-board"] });
+            queryClient.invalidateQueries({ queryKey: ["deals"] });
+          }} />
       </div>
 
       <DealEditorPanel
@@ -332,8 +332,8 @@ export default function Deals() {
         deal={selectedDeal}
         onClose={() => setSelectedDeal(null)}
         organizations={organizations}
-        lifecycleStages={sortedStages}
-      />
+        lifecycleStages={sortedStages} />
+      
     </div>);
 
 }
