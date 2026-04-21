@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import DealContactFields from "@/components/deals/DealContactFields";
-import { ArrowLeft, Building2, CalendarDays, Plus, X } from "lucide-react";
+import { Building2, CalendarDays, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -135,6 +135,16 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Deal.delete(id),
+    onSuccess: () => {
+      toast.success("Deal deleted");
+      queryClient.invalidateQueries({ queryKey: ["deals-board"] });
+      queryClient.invalidateQueries({ queryKey: ["deals"] });
+      onClose();
+    },
+  });
+
   const setField = (key, val) => setForm((currentForm) => ({ ...currentForm, [key]: val }));
   const setServiceField = (index, key, val) => setForm((currentForm) => {
     const services = [...currentForm.services];
@@ -209,20 +219,25 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
     });
   };
 
+  const handleDelete = () => {
+    const confirmed = window.confirm(`Delete \"${deal.name}\"? This can't be undone.`);
+    if (!confirmed) return;
+    deleteMutation.mutate(deal.id);
+  };
+
   return (
     <div className="w-full max-w-[720px] border-l border-slate-200 bg-white">
       <div className="flex h-full flex-col">
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="min-w-0">
-            <button onClick={onClose} className="mb-2 inline-flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-slate-800">
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to deals
-            </button>
             <h2 className="truncate text-lg font-semibold text-slate-900">Edit Deal</h2>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={handleDelete} disabled={deleteMutation.isPending || updateMutation.isPending} className="text-red-600 hover:text-red-700">
+              <Trash2 className="h-3.5 w-3.5" /> Delete
+            </Button>
             <Button size="sm" variant="outline" onClick={onClose}>Close</Button>
-            <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>Save Changes</Button>
+            <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || deleteMutation.isPending}>Save Changes</Button>
           </div>
         </div>
 
