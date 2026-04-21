@@ -48,13 +48,11 @@ export default function Sidebar() {
   return (
     <aside className="flex h-full w-[92px] flex-shrink-0 flex-col border-r border-[#22252b] bg-black">
       <div className="flex w-full justify-center px-4 pb-5 pt-6">
-        <div className="flex h-[54px] w-[54px] items-center justify-center overflow-hidden bg-black">
-          <img
-            src={dealorusNewIcon}
-            alt="Dealorus app icon"
-            className="h-full w-full object-contain bg-black"
-          />
-        </div>
+        <img
+          src={dealorusNewIcon}
+          alt="Dealorus app icon"
+          className="h-[54px] w-[54px] object-contain"
+        />
       </div>
 
       <nav className="flex w-full flex-1 flex-col items-center gap-3 overflow-y-auto px-3 py-2">
