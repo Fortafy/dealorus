@@ -46,9 +46,9 @@ export default function Sidebar() {
 
 
   return (
-    <aside className="flex h-full w-[92px] flex-shrink-0 flex-col border-r border-[#e8edf5] bg-[#f7f9fc]">
+    <aside className="flex h-full w-[92px] flex-shrink-0 flex-col border-r border-[#22252b] bg-black">
       <div className="flex w-full justify-center px-4 pb-5 pt-6">
-        <div className="flex h-[54px] w-[54px] items-center justify-center overflow-hidden rounded-[16px] bg-[#1f2a44] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="flex h-[54px] w-[54px] items-center justify-center overflow-hidden rounded-[16px] border border-[#2a2a2a] bg-[#111111] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
           <img
             src={dealorusNewIcon}
             alt="Dealorus app icon"
@@ -66,11 +66,11 @@ export default function Sidebar() {
               to={path}
               className={`flex w-full flex-col items-center gap-2 rounded-[18px] px-2 py-3 text-center transition-all ${
                 isActive
-                  ? "bg-[#5b6477] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-                  : "text-[#667085] hover:bg-[#eef3fb] hover:text-[#1f2937]"
+                  ? "bg-[#1b1d22] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-[#2d3139]"
+                  : "text-white/70 hover:bg-[#111318] hover:text-white"
               }`}
             >
-              <div className={`flex h-10 w-10 items-center justify-center rounded-[14px] ${isActive ? "bg-white/10" : "bg-white shadow-sm ring-1 ring-[#e8edf5]"}`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-[14px] ${isActive ? "bg-[#23262d] text-[#8ab4ff]" : "bg-[#111111] text-[#b8c7ff] ring-1 ring-[#24262c]"}`}>
                 <Icon className="h-[18px] w-[18px] flex-shrink-0" />
               </div>
               <span className="text-[9px] font-semibold leading-none">{label}</span>
@@ -79,7 +79,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="relative mt-auto w-full border-t border-[#e8edf5] px-3 py-4" ref={menuRef}>
+      <div className="relative mt-auto w-full border-t border-[#22252b] px-3 py-4" ref={menuRef}>
         {/* Popup Menu */}
         {menuOpen &&
         <div className="absolute bottom-full left-full ml-3 w-64 mb-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
@@ -120,11 +120,11 @@ export default function Sidebar() {
         <button
           onClick={() => setMenuOpen((o) => !o)}
           className={`mx-auto flex w-full flex-col items-center gap-2 rounded-[18px] px-2 py-3 transition-all ${
-            menuOpen ? "bg-[#eef3fb] text-[#1f2937]" : "text-[#667085] hover:bg-[#eef3fb]"
+            menuOpen ? "bg-[#111318] text-white ring-1 ring-[#2d3139]" : "text-white/70 hover:bg-[#111318] hover:text-white"
           }`}
         >
           <Avatar className="h-10 w-10 flex-shrink-0">
-            <AvatarFallback className="bg-[#2563eb] text-white text-[10px] font-semibold">
+            <AvatarFallback className="bg-[#3b82f6] text-white text-[10px] font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
