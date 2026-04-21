@@ -29,13 +29,13 @@ export default function Organizations() {
     try {
       const stored = localStorage.getItem("org_visible_fields");
       return stored ? JSON.parse(stored) : DEFAULT_VISIBLE_FIELDS;
-    } catch { return DEFAULT_VISIBLE_FIELDS; }
+    } catch {return DEFAULT_VISIBLE_FIELDS;}
   });
   const [filters, setFilters] = useState({
     type: "", state: "", owner: "",
     createdFrom: "", createdTo: "",
     updatedFrom: "", updatedTo: "",
-    revenueMin: "", revenueMax: "",
+    revenueMin: "", revenueMax: ""
   });
   const queryClient = useQueryClient();
 
@@ -57,7 +57,7 @@ export default function Organizations() {
   const { data: organizations = [], isLoading } = useQuery({
     queryKey: ["organizations", currentUser?.client_id],
     enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "-created_date"),
+    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "-created_date")
   });
 
   // Check for pre-selected organization from URL
@@ -66,7 +66,7 @@ export default function Organizations() {
     const urlParams = new URLSearchParams(window.location.search);
     const orgId = urlParams.get("id");
     if (orgId && organizations.length > 0) {
-      const org = organizations.find(o => o.id === orgId);
+      const org = organizations.find((o) => o.id === orgId);
       if (org) setSelectedOrg(org);
     }
   }, [organizations, currentUser]);
@@ -75,16 +75,16 @@ export default function Organizations() {
     type: "", state: "", owner: "",
     createdFrom: "", createdTo: "",
     updatedFrom: "", updatedTo: "",
-    revenueMin: "", revenueMax: "",
+    revenueMin: "", revenueMax: ""
   };
 
-  const activeFilterCount = Object.values(filters).filter(v => v !== "").length;
+  const activeFilterCount = Object.values(filters).filter((v) => v !== "").length;
 
   const clearFilters = () => setFilters(EMPTY_FILTERS);
 
   const handleFieldsChange = (fields) => {
     setVisibleFields(fields);
-    try { localStorage.setItem("org_visible_fields", JSON.stringify(fields)); } catch {}
+    try {localStorage.setItem("org_visible_fields", JSON.stringify(fields));} catch {}
   };
 
   const handleSelectFilter = (id, savedFilters, savedFields) => {
@@ -100,13 +100,13 @@ export default function Organizations() {
   };
 
   // Unique values for filter dropdowns
-  const uniqueStates = useMemo(() => [...new Set(organizations.map(o => o.state).filter(Boolean))].sort(), [organizations]);
-  const uniqueTypes = useMemo(() => [...new Set(organizations.map(o => o.organization_type).filter(Boolean))].sort(), [organizations]);
-  const uniqueOwners = useMemo(() => [...new Set(organizations.map(o => o.created_by ? o.created_by.split("@")[0] : null).filter(Boolean))].sort(), [organizations]);
+  const uniqueStates = useMemo(() => [...new Set(organizations.map((o) => o.state).filter(Boolean))].sort(), [organizations]);
+  const uniqueTypes = useMemo(() => [...new Set(organizations.map((o) => o.organization_type).filter(Boolean))].sort(), [organizations]);
+  const uniqueOwners = useMemo(() => [...new Set(organizations.map((o) => o.created_by ? o.created_by.split("@")[0] : null).filter(Boolean))].sort(), [organizations]);
 
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortDir(d => d === "asc" ? "desc" : "asc");
+      setSortDir((d) => d === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
       setSortDir("asc");
@@ -115,28 +115,28 @@ export default function Organizations() {
 
   const filteredAndSorted = useMemo(() => {
     const searchLower = searchQuery.toLowerCase();
-    let result = organizations.filter(org => {
+    let result = organizations.filter((org) => {
       const matchesSearch = !searchQuery ||
-        org.organization_name?.toLowerCase().includes(searchLower) ||
-        org.state?.toLowerCase().includes(searchLower) ||
-        org.city?.toLowerCase().includes(searchLower) ||
-        org.phone?.toLowerCase().includes(searchLower) ||
-        org.organization_type?.toLowerCase().includes(searchLower);
+      org.organization_name?.toLowerCase().includes(searchLower) ||
+      org.state?.toLowerCase().includes(searchLower) ||
+      org.city?.toLowerCase().includes(searchLower) ||
+      org.phone?.toLowerCase().includes(searchLower) ||
+      org.organization_type?.toLowerCase().includes(searchLower);
       const matchesState = !filters.state || org.state === filters.state;
       const matchesType = !filters.type || org.organization_type === filters.type;
-      const matchesOwner = !filters.owner || (org.created_by && org.created_by.split("@")[0] === filters.owner);
+      const matchesOwner = !filters.owner || org.created_by && org.created_by.split("@")[0] === filters.owner;
       const createdDate = org.created_date ? new Date(org.created_date) : null;
-      const matchesCreatedFrom = !filters.createdFrom || (createdDate && createdDate >= new Date(filters.createdFrom));
-      const matchesCreatedTo = !filters.createdTo || (createdDate && createdDate <= new Date(filters.createdTo + "T23:59:59"));
+      const matchesCreatedFrom = !filters.createdFrom || createdDate && createdDate >= new Date(filters.createdFrom);
+      const matchesCreatedTo = !filters.createdTo || createdDate && createdDate <= new Date(filters.createdTo + "T23:59:59");
       const updatedDate = org.updated_date ? new Date(org.updated_date) : null;
-      const matchesUpdatedFrom = !filters.updatedFrom || (updatedDate && updatedDate >= new Date(filters.updatedFrom));
-      const matchesUpdatedTo = !filters.updatedTo || (updatedDate && updatedDate <= new Date(filters.updatedTo + "T23:59:59"));
+      const matchesUpdatedFrom = !filters.updatedFrom || updatedDate && updatedDate >= new Date(filters.updatedFrom);
+      const matchesUpdatedTo = !filters.updatedTo || updatedDate && updatedDate <= new Date(filters.updatedTo + "T23:59:59");
       const revenue = parseFloat(org.annual_revenue) || 0;
       const matchesRevenueMin = !filters.revenueMin || revenue >= parseFloat(filters.revenueMin);
       const matchesRevenueMax = !filters.revenueMax || revenue <= parseFloat(filters.revenueMax);
       return matchesSearch && matchesState && matchesType && matchesOwner &&
-        matchesCreatedFrom && matchesCreatedTo && matchesUpdatedFrom && matchesUpdatedTo &&
-        matchesRevenueMin && matchesRevenueMax;
+      matchesCreatedFrom && matchesCreatedTo && matchesUpdatedFrom && matchesUpdatedTo &&
+      matchesRevenueMin && matchesRevenueMax;
     });
 
     result.sort((a, b) => {
@@ -161,19 +161,19 @@ export default function Organizations() {
 
   const SortIcon = ({ field }) => {
     if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 text-slate-400 inline ml-1" />;
-    return sortDir === "asc"
-      ? <ChevronUp className="w-3 h-3 text-blue-500 inline ml-1" />
-      : <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
+    return sortDir === "asc" ?
+    <ChevronUp className="w-3 h-3 text-blue-500 inline ml-1" /> :
+    <ChevronDown className="w-3 h-3 text-blue-500 inline ml-1" />;
   };
 
   // All column widths stored for every possible column
   const [colWidths, setColWidths] = useState(() =>
-    Object.fromEntries(ALL_COLUMNS.map(c => [c.key, c.defaultWidth]))
+  Object.fromEntries(ALL_COLUMNS.map((c) => [c.key, c.defaultWidth]))
   );
 
   // Active columns derived from visibleFields order
   const COLUMNS = useMemo(
-    () => visibleFields.map(key => ALL_COLUMNS.find(c => c.key === key)).filter(Boolean),
+    () => visibleFields.map((key) => ALL_COLUMNS.find((c) => c.key === key)).filter(Boolean),
     [visibleFields]
   );
   const resizingRef = useRef(null);
@@ -187,7 +187,7 @@ export default function Organizations() {
     const onMouseMove = (moveEvent) => {
       const delta = moveEvent.clientX - resizingRef.current.startX;
       const newWidth = Math.max(60, resizingRef.current.startWidth + delta);
-      setColWidths(prev => ({ ...prev, [resizingRef.current.key]: newWidth }));
+      setColWidths((prev) => ({ ...prev, [resizingRef.current.key]: newWidth }));
     };
 
     const onMouseUp = () => {
@@ -223,10 +223,10 @@ export default function Organizations() {
       <div className="h-full flex flex-col bg-white overflow-hidden">
         <OrganizationDetailView
           organizationId={selectedOrg.id}
-          onClose={() => setSelectedOrg(null)}
-        />
-      </div>
-    );
+          onClose={() => setSelectedOrg(null)} />
+        
+      </div>);
+
   }
 
   return (
@@ -242,28 +242,28 @@ export default function Organizations() {
             <span className="text-base font-semibold text-slate-800">Organizations</span>
           </div>
           <div className="flex items-center gap-2">
-            {isEmptyAccount && currentUser?.client_id && (
-              <SeedDemoDataButton
-                clientId={currentUser.client_id}
-                userId={currentUser.id}
-              />
-            )}
+            {isEmptyAccount && currentUser?.client_id &&
+            <SeedDemoDataButton
+              clientId={currentUser.client_id}
+              userId={currentUser.id} />
+
+            }
             <Link
               to="/organizations/import"
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
-            >
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors">
+              
               <Upload className="w-3.5 h-3.5" /> Import
             </Link>
             <Link
               to="/organizations/export"
-              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors"
-            >
+              className="flex items-center gap-1.5 h-8 px-3 text-xs border border-slate-200 rounded-lg bg-white text-slate-600 hover:bg-slate-50 transition-colors">
+              
               <Download className="w-3.5 h-3.5" /> Export
             </Link>
             <Button
-              onClick={() => setShowNewAccountDialog(true)}
-              className="h-8 text-xs px-3"
-            >
+              onClick={() => setShowNewAccountDialog(true)} className="bg-[hsl(var(--primary))] text-primary-foreground px-3 py-2 text-xs font-medium rounded-md inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow hover:bg-primary-hover h-8">
+
+              
               <Plus className="w-3.5 h-3.5 mr-1.5" /> New Account
             </Button>
           </div>
@@ -280,8 +280,8 @@ export default function Organizations() {
             onSelectFilter={handleSelectFilter}
             currentFilters={{ state: filters.state, type: filters.type, search: searchQuery }}
             currentFields={visibleFields}
-            recordCount={filteredAndSorted.length}
-          />
+            recordCount={filteredAndSorted.length} />
+          
 
           {/* Fields button */}
           <FieldsPanel visibleFields={visibleFields} onChange={handleFieldsChange} />
@@ -290,73 +290,73 @@ export default function Organizations() {
           <div className="relative" ref={filterButtonRef}>
             <div className="flex items-center">
               <button
-                onClick={() => setShowFilterPanel(p => !p)}
+                onClick={() => setShowFilterPanel((p) => !p)}
                 className={`flex items-center gap-2 h-8 px-3 text-xs border transition-colors ${
-                  activeFilterCount > 0
-                    ? "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium"
-                    : "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
+                activeFilterCount > 0 ?
+                "rounded-l-lg border-blue-400 bg-blue-50 text-blue-700 font-medium" :
+                "rounded-lg border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`
+                }>
+                
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Filter</span>
-                {activeFilterCount > 0 && (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
+                {activeFilterCount > 0 &&
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-600 text-white text-[10px] font-bold">
                     {activeFilterCount}
                   </span>
-                )}
+                }
               </button>
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
-                  title="Clear all filters"
-                >
+              {activeFilterCount > 0 &&
+              <button
+                onClick={clearFilters}
+                className="flex items-center justify-center h-8 w-8 border border-l-0 border-blue-400 bg-blue-50 text-blue-500 hover:bg-blue-100 rounded-r-lg transition-colors"
+                title="Clear all filters">
+                
                   <X className="w-3.5 h-3.5" />
                 </button>
-              )}
+              }
             </div>
             <FilterPanel
               open={showFilterPanel}
               onClose={() => setShowFilterPanel(false)}
               filters={filters}
-              onChange={(f) => { setFilters(f); setActiveFilterId(null); }}
+              onChange={(f) => {setFilters(f);setActiveFilterId(null);}}
               uniqueStates={uniqueStates}
               uniqueTypes={uniqueTypes}
-              uniqueOwners={uniqueOwners}
-            />
+              uniqueOwners={uniqueOwners} />
+            
           </div>
 
           {/* Search — icon that expands */}
           <div ref={searchRef} className="flex items-center">
-            {searchExpanded ? (
-              <div className="relative flex items-center">
+            {searchExpanded ?
+            <div className="relative flex items-center">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                 <Input
-                  autoFocus
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setActiveFilterId(null); }}
-                  placeholder="Search..."
-                  className="pl-8 pr-8 h-8 text-xs w-52 transition-all"
-                />
-                {searchQuery && (
-                  <button onClick={() => { setSearchQuery(""); }} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                autoFocus
+                value={searchQuery}
+                onChange={(e) => {setSearchQuery(e.target.value);setActiveFilterId(null);}}
+                placeholder="Search..."
+                className="pl-8 pr-8 h-8 text-xs w-52 transition-all" />
+              
+                {searchQuery &&
+              <button onClick={() => {setSearchQuery("");}} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                     <X className="w-3.5 h-3.5" />
                   </button>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={() => setSearchExpanded(true)}
-                className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
-                  searchQuery
-                    ? "border-blue-400 bg-blue-50 text-blue-600"
-                    : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                }`}
-                title="Search"
-              >
+              }
+              </div> :
+
+            <button
+              onClick={() => setSearchExpanded(true)}
+              className={`flex items-center justify-center h-8 w-8 border rounded-lg transition-colors ${
+              searchQuery ?
+              "border-blue-400 bg-blue-50 text-blue-600" :
+              "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`
+              }
+              title="Search">
+              
                 <Search className="w-3.5 h-3.5" />
               </button>
-            )}
+            }
           </div>
 
 
@@ -366,86 +366,86 @@ export default function Organizations() {
 
         {/* Table */}
         <div className="flex-1 overflow-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-24">
+          {isLoading ?
+          <div className="flex items-center justify-center py-24">
               <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: 'hsl(217, 91%, 60%)' }} />
-            </div>
-          ) : (
-            <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
+            </div> :
+
+          <table className="text-xs w-full" style={{ tableLayout: "fixed", minWidth: COLUMNS.reduce((sum, c) => sum + (colWidths[c.key] || c.defaultWidth), 0) }}>
               <colgroup>
-                {COLUMNS.map(col => (
-                  <col key={col.key} style={{ width: colWidths[col.key] }} />
-                ))}
+                {COLUMNS.map((col) =>
+              <col key={col.key} style={{ width: colWidths[col.key] }} />
+              )}
               </colgroup>
               <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
                 <tr>
-                  {COLUMNS.map((col, i) => (
-                    <th
-                      key={col.key}
-                      className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
-                      style={{
-                        width: colWidths[col.key],
-                        ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {}),
-                      }}
-                    >
+                  {COLUMNS.map((col, i) =>
+                <th
+                  key={col.key}
+                  className="text-left py-2.5 font-semibold text-slate-600 whitespace-nowrap select-none relative group border-r border-slate-200 last:border-r-0"
+                  style={{
+                    width: colWidths[col.key],
+                    ...(i === 0 ? { position: "sticky", left: 0, zIndex: 20, background: "hsl(var(--muted))" } : {})
+                  }}>
+                  
                       <span
-                        onClick={() => handleSort(col.key)}
-                        className="cursor-pointer hover:text-slate-900 pl-3 pr-4 block truncate"
-                      >
+                    onClick={() => handleSort(col.key)}
+                    className="cursor-pointer hover:text-slate-900 pl-3 pr-4 block truncate">
+                    
                         {col.label}<SortIcon field={col.key} />
                       </span>
                       {/* Resize handle */}
                       <div
-                        onMouseDown={(e) => startResize(e, col.key)}
-                        className="absolute top-0 right-0 h-full w-2 cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100"
-                        style={{ userSelect: "none" }}
-                      >
+                    onMouseDown={(e) => startResize(e, col.key)}
+                    className="absolute top-0 right-0 h-full w-2 cursor-col-resize flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100"
+                    style={{ userSelect: "none" }}>
+                    
                         <div className="w-0.5 h-4 bg-slate-300 rounded-full" />
                       </div>
                     </th>
-                  ))}
+                )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredAndSorted.length === 0 ? (
-                  <tr>
+                {filteredAndSorted.length === 0 ?
+              <tr>
                     <td colSpan={COLUMNS.length} className="text-center py-16 text-slate-400">
                       <Building2 className="w-10 h-10 mx-auto mb-2 opacity-20" />
                       <p>No organizations found</p>
-                      {isEmptyAccount && currentUser?.client_id && (
-                        <div className="mt-4 flex justify-center">
+                      {isEmptyAccount && currentUser?.client_id &&
+                  <div className="mt-4 flex justify-center">
                           <SeedDemoDataButton
-                            clientId={currentUser.client_id}
-                            userId={currentUser.id}
-                            onSeeded={() => setActiveFilterId(null)}
-                          />
+                      clientId={currentUser.client_id}
+                      userId={currentUser.id}
+                      onSeeded={() => setActiveFilterId(null)} />
+                    
                         </div>
-                      )}
+                  }
                     </td>
-                  </tr>
-                ) : filteredAndSorted.map(org => (
-                  <tr key={org.id} className="group hover:bg-slate-50 transition-colors">
-                    {COLUMNS.map((col, i) => (
-                      <td
-                        key={col.key}
-                        className={`px-3 py-2 truncate border-r border-slate-100 last:border-r-0${i === 0 ? " bg-white group-hover:bg-slate-50" : ""}`}
-                        style={i === 0 ? { position: "sticky", left: 0, zIndex: 1 } : {}}
-                      >
-                        {i === 0 ? (
-                          <button
-                            onClick={() => setSelectedOrg(org)}
-                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full"
-                          >
+                  </tr> :
+              filteredAndSorted.map((org) =>
+              <tr key={org.id} className="group hover:bg-slate-50 transition-colors">
+                    {COLUMNS.map((col, i) =>
+                <td
+                  key={col.key}
+                  className={`px-3 py-2 truncate border-r border-slate-100 last:border-r-0${i === 0 ? " bg-white group-hover:bg-slate-50" : ""}`}
+                  style={i === 0 ? { position: "sticky", left: 0, zIndex: 1 } : {}}>
+                  
+                        {i === 0 ?
+                  <button
+                    onClick={() => setSelectedOrg(org)}
+                    className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left truncate w-full">
+                    
                             {org[col.key] || "—"}
-                          </button>
-                        ) : renderCell(col.key, org)}
+                          </button> :
+                  renderCell(col.key, org)}
                       </td>
-                    ))}
+                )}
                   </tr>
-                ))}
+              )}
               </tbody>
             </table>
-          )}
+          }
         </div>
       </div>
 
@@ -455,8 +455,8 @@ export default function Organizations() {
         onSaved={(org) => {
           queryClient.invalidateQueries({ queryKey: ["organizations"] });
           if (org?.id) setSelectedOrg(org);
-        }}
-      />
-    </div>
-  );
+        }} />
+      
+    </div>);
+
 }
