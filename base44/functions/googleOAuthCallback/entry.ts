@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const encoder = new TextEncoder();
 const STATE_MAX_AGE_MS = 15 * 60 * 1000;

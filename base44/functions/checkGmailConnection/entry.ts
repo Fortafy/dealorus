@@ -1,7 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const GMAIL_CONNECTOR_ID = "69e6a0603f40a2278282ab3b";
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -11,14 +9,30 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const connection = await base44.asServiceRole.connectors.getCurrentAppUserConnection(GMAIL_CONNECTOR_ID);
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+
+    if (!clientId || !clientSecret) {
+      return Response.json({ error: 'Google OAuth credentials are missing' }, { status: 500 });
+    }
+
+    const records = await base44.asServiceRole.entities.UserIntegration.filter({
+      user_id: user.id,
+      integration_type: 'gmail',
+    });
+
+    const record = records[0] || null;
+
+    if (!record || record.status !== 'connected') {
+      return Response.json({
+        connected: false,
+        record: null,
+      });
+    }
 
     return Response.json({
       connected: true,
-      record: {
-        status: 'connected',
-        account_email: connection?.connectionConfig?.email || 'Gmail account connected',
-      },
+      record,
     });
   } catch {
     return Response.json({

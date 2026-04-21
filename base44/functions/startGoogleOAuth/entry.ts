@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 const encoder = new TextEncoder();
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
