@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Building2, Users, Briefcase, Settings, BookOpen, ScrollText, HelpCircle, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { base44 } from "@/api/base44Client";
-import dealorusNewIcon from "@/assets/dealorus-new-icon.png";
+import dealorusNewIcon from "@/assets/sidebar-logo.png";
 
 const NAV_ITEMS = [
 { label: "Accounts", icon: Building2, path: "/Organizations" },
