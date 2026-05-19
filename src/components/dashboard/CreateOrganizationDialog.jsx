@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { AlertCircle, CheckCircle2, Loader, Plus } from "lucide-react";
 
-export default function CreateOrganizationDialog({ open, onOpenChange, allUsers }) {
+export default function CreateOrganizationDialog({ open, onOpenChange, allUsers = [] }) {
   const [formData, setFormData] = useState({
     name: "",
     admin_user_id: "",
@@ -32,26 +32,30 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
     full_name: "",
     email: "",
   });
+  const [pendingInviteEmail, setPendingInviteEmail] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const queryClient = useQueryClient();
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
-      if (!newUserData.email.trim() || !newUserData.full_name.trim()) {
+      const email = newUserData.email.trim().toLowerCase();
+      const fullName = newUserData.full_name.trim();
+
+      if (!email || !fullName) {
         throw new Error("Email and full name are required");
       }
-      await base44.users.inviteUser(newUserData.email, "admin");
-      const users = await base44.entities.User.list();
-      const newUser = users.find(u => u.email === newUserData.email);
-      return newUser;
+
+      await base44.users.inviteUser(email, "admin");
+      return { email, fullName };
     },
-    onSuccess: (newUser) => {
+    onSuccess: ({ email, fullName }) => {
       queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
-      setFormData(prev => ({ ...prev, admin_user_id: newUser.id }));
+      setPendingInviteEmail(email);
       setShowUserForm(false);
       setNewUserData({ full_name: "", email: "" });
       setError(null);
+      setSuccess(`Invitation sent to ${fullName}. They will appear as an administrator after accepting the invite.`);
     },
     onError: (err) => {
       setError(err.message || "Failed to create user");
@@ -64,7 +68,11 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
         throw new Error("Client name is required");
       }
       if (!formData.admin_user_id) {
-        throw new Error("Please select an administrator");
+        throw new Error(
+          pendingInviteEmail
+            ? "The invited user must accept their email invitation before they can be assigned as administrator."
+            : "Please select an administrator"
+        );
       }
       return await base44.entities.Client.create(formData);
     },
@@ -79,6 +87,7 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
           subscription_plan: "basic",
           subscription_status: "trial",
         });
+        setPendingInviteEmail("");
         setSuccess(null);
       }, 1500);
     },
@@ -199,22 +208,32 @@ export default function CreateOrganizationDialog({ open, onOpenChange, allUsers 
                 </div>
               </div>
             ) : (
-              <Select
-                value={formData.admin_user_id}
-                onValueChange={(value) => handleChange("admin_user_id", value)}
-                disabled={createMutation.isPending}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select administrator" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allUsers.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.full_name} ({user.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Select
+                  value={formData.admin_user_id}
+                  onValueChange={(value) => {
+                    setPendingInviteEmail("");
+                    handleChange("admin_user_id", value);
+                  }}
+                  disabled={createMutation.isPending}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select administrator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.full_name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {pendingInviteEmail && (
+                  <p className="text-xs text-amber-700">
+                    Invitation sent to {pendingInviteEmail}. Once they accept, reopen this form and select them as administrator.
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
