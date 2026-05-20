@@ -530,15 +530,25 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium">{user.full_name}</p>
+                      <p className="font-medium">{user.full_name || user.email}</p>
                       <p className="text-sm text-slate-600">{user.email}</p>
                       <div className="flex gap-2 mt-2 flex-wrap">
                         <Badge variant="outline" className="capitalize">
                           {user.client_role || user.role}
                         </Badge>
-                        {user.invitation_status === "pending" && (
+                        {user.status === "pending" && (
                           <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
                             Invited
+                          </Badge>
+                        )}
+                        {user.status === "active" && (
+                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                            Active
+                          </Badge>
+                        )}
+                        {user.status === "inactive" && (
+                          <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-100">
+                            Inactive
                           </Badge>
                         )}
                       </div>
