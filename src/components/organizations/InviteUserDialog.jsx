@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
 
 export default function InviteUserDialog({ open, onOpenChange, clientId, onSuccess }) {
@@ -25,8 +35,10 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
   const [role, setRole] = useState("member");
   const [selectedClientId, setSelectedClientId] = useState(clientId || "");
   const [currentUser, setCurrentUser] = useState(null);
+  const [existingUserMatch, setExistingUserMatch] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,35 +67,20 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       if (!selectedClientId) {
         throw new Error("Please select a client");
       }
-      
-      // Invite user via base44 SDK
-      await base44.users.inviteUser(email, "user");
-      
-      // Wait for user to be created and update with client info
-      let invitedUser = null;
-      for (let i = 0; i < 10; i++) {
-        const users = await base44.entities.User.filter({ email });
-        if (users.length > 0) {
-          invitedUser = users[0];
-          break;
-        }
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
 
-      if (invitedUser) {
-        await base44.entities.User.update(invitedUser.id, {
-          client_id: selectedClientId,
-          client_role: role,
-          is_active: true,
-        });
-      }
-      
-      return { email, role };
+      const response = await base44.functions.invoke("inviteClientMember", {
+        email: email.trim().toLowerCase(),
+      });
+
+      return response.data;
     },
     onSuccess: () => {
-      setSuccess(`Invitation sent to ${email}`);
+      setSuccess(`Invitation sent to ${email}. Status set to invited.`);
       setEmail("");
       setRole("member");
+      setExistingUserMatch(null);
+      queryClient.invalidateQueries({ queryKey: ["client-users", selectedClientId] });
+      queryClient.invalidateQueries({ queryKey: ["organization-users", selectedClientId] });
       if (onSuccess) onSuccess();
       setTimeout(() => {
         setSuccess(null);
@@ -95,7 +92,39 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
     },
   });
 
-  const handleInvite = () => {
+  const moveExistingUserMutation = useMutation({
+    mutationFn: async () => {
+      if (!existingUserMatch?.id) {
+        throw new Error("No existing user selected.");
+      }
+
+      const response = await base44.functions.invoke("updateClientMember", {
+        userId: existingUserMatch.id,
+        clientId: selectedClientId,
+        clientRole: role,
+      });
+
+      return response.data;
+    },
+    onSuccess: () => {
+      setSuccess(`User moved to this client successfully.`);
+      setEmail("");
+      setRole("member");
+      setExistingUserMatch(null);
+      queryClient.invalidateQueries({ queryKey: ["client-users", selectedClientId] });
+      queryClient.invalidateQueries({ queryKey: ["organization-users", selectedClientId] });
+      if (onSuccess) onSuccess();
+      setTimeout(() => {
+        setSuccess(null);
+        onOpenChange(false);
+      }, 2000);
+    },
+    onError: (err) => {
+      setError(err.message || "Failed to move user");
+    },
+  });
+
+  const handleInvite = async () => {
     if (!email.trim()) {
       setError("Please enter an email address");
       return;
@@ -103,6 +132,15 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
 
     if (!email.includes("@")) {
       setError("Please enter a valid email address");
+      return;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const matchedUsers = await base44.entities.User.filter({ email: normalizedEmail });
+
+    if (matchedUsers.length > 0) {
+      setExistingUserMatch(matchedUsers[0]);
+      setError("A user with this email already exists.");
       return;
     }
 
@@ -191,6 +229,11 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
                 ? "Client administrators can invite users and manage client settings"
                 : "Members can view and manage data"}
             </p>
+            {existingUserMatch && (
+              <p className="text-xs text-amber-700 mt-2">
+                {existingUserMatch.email} already exists. You can move this user to the selected client after confirmation.
+              </p>
+            )}
           </div>
 
           {/* Actions */}
@@ -219,6 +262,26 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
           </div>
         </div>
       </DialogContent>
+
+      <AlertDialog open={!!existingUserMatch} onOpenChange={() => setExistingUserMatch(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Move existing user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This email already belongs to an existing user. Do you want to move <strong>{existingUserMatch?.email}</strong> to this client account?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => moveExistingUserMutation.mutate()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {moveExistingUserMutation.isPending ? "Moving..." : "Confirm & Move"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

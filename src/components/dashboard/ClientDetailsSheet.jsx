@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -533,9 +533,16 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
                     <div>
                       <p className="font-medium">{user.full_name}</p>
                       <p className="text-sm text-slate-600">{user.email}</p>
-                      <Badge variant="outline" className="mt-2 capitalize">
-                        {user.client_role || user.role}
-                      </Badge>
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        <Badge variant="outline" className="capitalize">
+                          {user.client_role || user.role}
+                        </Badge>
+                        {user.invitation_status === "pending" && (
+                          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+                            Invited
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

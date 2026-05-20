@@ -11,6 +11,7 @@ Deno.serve(async (req) => {
 
     const payload = await req.json();
     const userId = typeof payload.userId === 'string' ? payload.userId : '';
+    const clientId = typeof payload.clientId === 'string' ? payload.clientId : '';
     const clientRole = payload.clientRole;
     const isActive = payload.isActive;
     const currentClientId = currentUser.client_id || currentUser.data?.client_id;
@@ -25,6 +26,10 @@ Deno.serve(async (req) => {
     }
 
     const updates = {};
+
+    if (clientId) {
+      updates.client_id = clientId;
+    }
 
     if (typeof clientRole === 'string') {
       if (!['admin', 'member'].includes(clientRole)) {
@@ -51,9 +56,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: "You can't change your own access here." }, { status: 400 });
     }
 
-    if ((targetUser.client_id || targetUser.data?.client_id) !== currentClientId) {
-      return Response.json({ error: 'You can only manage team members in your own client.' }, { status: 403 });
-    }
 
     const updatedUser = await base44.asServiceRole.entities.User.update(userId, updates);
 
