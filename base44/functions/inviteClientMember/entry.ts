@@ -99,6 +99,15 @@ Deno.serve(async (req) => {
       full_name: '',
     });
 
+    if (createdUser?.id) {
+      await serviceBase44.auth.admin.updateUser(createdUser.id, {
+        client_id: clientId,
+        active_client_id: clientId,
+        client_role: requestedRole,
+        client_name: '',
+      });
+    }
+
     return Response.json({
       success: true,
       invited_user_id: createdUser?.id || null,
