@@ -67,9 +67,9 @@ export default function DealContactFields({ organizationId, clientId, value, onC
   const [contactForm, setContactForm] = useState(emptyContactForm);
 
   const { data: contacts = [] } = useQuery({
-    queryKey: ["deal-organization-contacts", organizationId],
-    enabled: !!organizationId,
-    queryFn: () => base44.entities.Contact.filter({ organization_id: organizationId }, "name"),
+    queryKey: ["deal-organization-contacts", organizationId, clientId],
+    enabled: !!organizationId && !!clientId,
+    queryFn: () => base44.entities.Contact.filter({ organization_id: organizationId, client_id: clientId }, "name"),
     initialData: [],
   });
 

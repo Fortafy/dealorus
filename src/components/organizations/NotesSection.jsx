@@ -106,9 +106,12 @@ export default function NotesSection({ organization, clientId, externalOpenCreat
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(true);
 
+  const resolvedClientId = clientId || organization?.client_id || null;
+
   const { data: notes = [] } = useQuery({
-    queryKey: ["notes", organization.id],
-    queryFn: () => base44.entities.Note.filter({ organization_id: organization.id }, "-created_date"),
+    queryKey: ["notes", organization.id, resolvedClientId],
+    enabled: !!organization?.id && !!resolvedClientId,
+    queryFn: () => base44.entities.Note.filter({ organization_id: organization.id, client_id: resolvedClientId }, "-created_date"),
   });
 
   const createNoteMutation = useMutation({

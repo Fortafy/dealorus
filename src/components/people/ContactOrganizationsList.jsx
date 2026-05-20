@@ -18,7 +18,7 @@ export default function ContactOrganizationsList({ organizations = [], onOrganiz
   });
 
   const handleOrganizationLabelsChange = async (organization, labelIds) => {
-    await base44.entities.Organization.update(organization.id, { label_ids: labelIds });
+    await base44.entities.Organization.update(organization.id, { client_id: organization.client_id, label_ids: labelIds });
     onOrganizationSaved?.();
   };
 

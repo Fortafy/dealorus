@@ -78,9 +78,12 @@ export default function DealsSection({ organization, clientId, clientLifecycleSt
     if (externalOpenCreate > 0) openCreate();
   }, [externalOpenCreate]);
 
+  const resolvedClientId = clientId || organization?.client_id || null;
+
   const { data: deals = [] } = useQuery({
-    queryKey: ["deals", organization.id],
-    queryFn: () => base44.entities.Deal.filter({ organization_id: organization.id }, "-created_date"),
+    queryKey: ["deals", organization.id, resolvedClientId],
+    enabled: !!organization?.id && !!resolvedClientId,
+    queryFn: () => base44.entities.Deal.filter({ organization_id: organization.id, client_id: resolvedClientId }, "-created_date"),
   });
 
   const { data: labels = [] } = useQuery({

@@ -62,7 +62,7 @@ export default function ContactDetailsSection({ contact, organizations = [], onS
       last_modified: new Date().toISOString()
     };
 
-    await base44.entities.Contact.update(contact.id, updatedContact);
+    await base44.entities.Contact.update(contact.id, { ...updatedContact, client_id: contact.client_id });
 
     if (fieldsChanged.length > 0) {
       await base44.entities.Activity.create({

@@ -413,7 +413,7 @@ export default function NewAccountDialog({ open, onOpenChange, onSaved }) {
           <TabsContent value="manual" className="mt-0">
             {currentUser ? (
               <ManualCreateTab
-                clientId={currentUser.client_id}
+                clientId={currentUser?.data?.client_id || currentUser?.client_id}
                 userId={currentUser.id}
                 onSaved={handleSaved}
                 onClose={handleClose}
@@ -428,7 +428,7 @@ export default function NewAccountDialog({ open, onOpenChange, onSaved }) {
           <TabsContent value="search" className="mt-0">
             {currentUser ? (
               <SearchAddTab
-                clientId={currentUser.client_id}
+                clientId={currentUser?.data?.client_id || currentUser?.client_id}
                 userId={currentUser.id}
                 onSaved={handleSaved}
                 onClose={handleClose}

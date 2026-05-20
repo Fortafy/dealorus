@@ -40,12 +40,13 @@ export default function ContactsPanel({ organization, clientId, isCollapsed }) {
     fetchUser();
   }, []);
 
-  const { data: contacts = [] } = useQuery({
-    queryKey: ["contacts", organization.id],
-    queryFn: () => base44.entities.Contact.filter({ organization_id: organization.id }, "-created_date"),
-  });
+  const resolvedClientId = clientId || organization?.client_id || currentUser?.data?.client_id || currentUser?.client_id || null;
 
-  const resolvedClientId = clientId || organization?.client_id || currentUser?.client_id || currentUser?.data?.client_id;
+  const { data: contacts = [] } = useQuery({
+    queryKey: ["contacts", organization.id, resolvedClientId],
+    enabled: !!organization?.id && !!resolvedClientId,
+    queryFn: () => base44.entities.Contact.filter({ organization_id: organization.id, client_id: resolvedClientId }, "-created_date"),
+  });
 
   const { data: labels = [] } = useQuery({
     queryKey: ["labels", resolvedClientId],
@@ -187,7 +188,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
         
         const contactData = {
           organization_id: organization.id,
-          client_id: currentUser?.client_id,
+          client_id: resolvedClientId,
           name: contact.name,
           title: contact.title,
           email: contact.email,
@@ -390,7 +391,7 @@ Return ONLY contacts with publicly verified information. Do not make up or guess
       <ContactForm
         contact={editingContact}
         organizationId={organization.id}
-        clientId={currentUser?.client_id}
+        clientId={resolvedClientId}
         open={showContactForm}
         onOpenChange={setShowContactForm}
         onSave={async (formData) => {

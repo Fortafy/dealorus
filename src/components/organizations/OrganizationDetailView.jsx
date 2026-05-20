@@ -39,15 +39,6 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     document.addEventListener("mouseup", onMouseUp);
   }, []);
 
-  const { data: organization, isLoading, error } = useQuery({
-    queryKey: ["organization", organizationId],
-    queryFn: async () => {
-      const results = await base44.entities.Organization.filter({ id: organizationId });
-      return results[0] || null;
-    },
-    enabled: !!organizationId,
-  });
-
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
@@ -55,7 +46,18 @@ export default function OrganizationDetailView({ organizationId, onClose }) {
     },
   });
 
-  const clientId = organization?.client_id || currentUser?.data?.client_id || currentUser?.client_id;
+  const activeClientId = currentUser?.data?.client_id || currentUser?.client_id || null;
+
+  const { data: organization, isLoading, error } = useQuery({
+    queryKey: ["organization", organizationId, activeClientId],
+    queryFn: async () => {
+      const results = await base44.entities.Organization.filter({ id: organizationId, client_id: activeClientId });
+      return results[0] || null;
+    },
+    enabled: !!organizationId && !!activeClientId,
+  });
+
+  const clientId = organization?.client_id || activeClientId;
 
   const { data: clientData } = useQuery({
     queryKey: ["client", clientId],

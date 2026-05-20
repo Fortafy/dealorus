@@ -16,7 +16,7 @@ import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
   const { user: currentUser } = useAuth();
-  const clientId = currentUser?.data?.client_id || currentUser?.client_id;
+  const clientId = currentUser?.data?.client_id || currentUser?.client_id || null;
   const [showNewDeal, setShowNewDeal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");

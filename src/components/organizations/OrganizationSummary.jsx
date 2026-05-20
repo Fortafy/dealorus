@@ -364,7 +364,7 @@ export default function OrganizationSummary({
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      const relatedContacts = await base44.entities.Contact.filter({ organization_id: organization.id });
+      const relatedContacts = await base44.entities.Contact.filter({ organization_id: organization.id, client_id: organization.client_id });
       for (const contact of relatedContacts) {
         await base44.entities.Contact.delete(contact.id);
       }

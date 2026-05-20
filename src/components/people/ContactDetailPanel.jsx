@@ -52,19 +52,19 @@ export default function ContactDetailPanel({ contactId, onClose }) {
   }, []);
 
   const { data: contact, isLoading } = useQuery({
-    queryKey: ["contact-detail", contactId],
-    enabled: !!contactId,
+    queryKey: ["contact-detail", contactId, clientId],
+    enabled: !!contactId && !!clientId,
     queryFn: async () => {
-      const results = await base44.entities.Contact.filter({ id: contactId });
+      const results = await base44.entities.Contact.filter({ id: contactId, client_id: clientId });
       return results[0] || null;
     },
   });
 
   const { data: organization } = useQuery({
-    queryKey: ["org-for-contact", contact?.organization_id],
-    enabled: !!contact?.organization_id,
+    queryKey: ["org-for-contact", contact?.organization_id, clientId],
+    enabled: !!contact?.organization_id && !!clientId,
     queryFn: async () => {
-      const results = await base44.entities.Organization.filter({ id: contact.organization_id });
+      const results = await base44.entities.Organization.filter({ id: contact.organization_id, client_id: clientId });
       return results[0] || null;
     },
   });
@@ -80,7 +80,7 @@ export default function ContactDetailPanel({ contactId, onClose }) {
     },
   });
 
-  const clientId = currentUser?.client_id || currentUser?.data?.client_id;
+  const clientId = currentUser?.data?.client_id || currentUser?.client_id || null;
 
   const { data: relatedOrganizations = [] } = useQuery({
     queryKey: ["related-organizations-for-contact", contactId, clientId, contact?.email, contact?.linkedin, contact?.name],

@@ -46,28 +46,19 @@ export default function People() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (!searchExpanded) return;
-    const handler = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        if (!searchQuery) setSearchExpanded(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [searchExpanded, searchQuery]);
+  const activeClientId = currentUser?.data?.client_id || currentUser?.client_id || null;
 
   const { data: contacts = [], isLoading } = useQuery({
-    queryKey: ["people", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Contact.filter({ client_id: currentUser.client_id }, "-created_date")
+    queryKey: ["people", activeClientId],
+    enabled: !!activeClientId,
+    queryFn: () => base44.entities.Contact.filter({ client_id: activeClientId }, "-created_date")
   });
 
   // Fetch all organizations so we can display org names in the table
   const { data: organizations = [] } = useQuery({
-    queryKey: ["organizations-people-page", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "organization_name")
+    queryKey: ["organizations-people-page", activeClientId],
+    enabled: !!activeClientId,
+    queryFn: () => base44.entities.Organization.filter({ client_id: activeClientId }, "organization_name")
   });
 
   const orgMap = useMemo(() => {
@@ -407,7 +398,7 @@ export default function People() {
       <AddContactDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        clientId={currentUser?.client_id}
+        clientId={activeClientId}
         onSaved={() => queryClient.invalidateQueries({ queryKey: ["people"] })} />
       
     </div>);

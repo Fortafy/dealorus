@@ -43,33 +43,24 @@ export default function Organizations() {
     base44.auth.me().then(setCurrentUser).catch(() => {});
   }, []);
 
-  React.useEffect(() => {
-    if (!searchExpanded) return;
-    const handler = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        if (!searchQuery) setSearchExpanded(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [searchExpanded, searchQuery]);
+  const activeClientId = currentUser?.data?.client_id || currentUser?.client_id || null;
 
   const { data: organizations = [], isLoading } = useQuery({
-    queryKey: ["organizations", currentUser?.client_id],
-    enabled: !!currentUser?.client_id,
-    queryFn: () => base44.entities.Organization.filter({ client_id: currentUser.client_id }, "-created_date")
+    queryKey: ["organizations", activeClientId],
+    enabled: !!activeClientId,
+    queryFn: () => base44.entities.Organization.filter({ client_id: activeClientId }, "-created_date")
   });
 
   // Check for pre-selected organization from URL
   React.useEffect(() => {
-    if (!currentUser?.client_id) return;
+    if (!activeClientId) return;
     const urlParams = new URLSearchParams(window.location.search);
     const orgId = urlParams.get("id");
     if (orgId && organizations.length > 0) {
       const org = organizations.find((o) => o.id === orgId);
       if (org) setSelectedOrg(org);
     }
-  }, [organizations, currentUser]);
+  }, [organizations, activeClientId]);
 
   const EMPTY_FILTERS = {
     type: "", state: "", owner: "",
@@ -242,9 +233,9 @@ export default function Organizations() {
             <span className="text-base font-semibold text-slate-800">Organizations</span>
           </div>
           <div className="flex items-center gap-2">
-            {isEmptyAccount && currentUser?.client_id &&
+            {isEmptyAccount && activeClientId &&
             <SeedDemoDataButton
-              clientId={currentUser.client_id}
+              clientId={activeClientId}
               userId={currentUser.id} />
 
             }
@@ -411,10 +402,10 @@ export default function Organizations() {
                     <td colSpan={COLUMNS.length} className="text-center py-16 text-slate-400">
                       <Building2 className="w-10 h-10 mx-auto mb-2 opacity-20" />
                       <p>No organizations found</p>
-                      {isEmptyAccount && currentUser?.client_id &&
+                      {isEmptyAccount && activeClientId &&
                   <div className="mt-4 flex justify-center">
                           <SeedDemoDataButton
-                      clientId={currentUser.client_id}
+                      clientId={activeClientId}
                       userId={currentUser.id}
                       onSeeded={() => setActiveFilterId(null)} />
                     
