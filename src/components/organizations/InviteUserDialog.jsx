@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
+import { AlertCircle, Loader } from "lucide-react";
 
 export default function InviteUserDialog({ open, onOpenChange, clientId, onSuccess }) {
   const [email, setEmail] = useState("");
@@ -26,7 +26,6 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
   const [selectedClientId, setSelectedClientId] = useState(clientId || "");
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -66,16 +65,12 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       return response.data;
     },
     onSuccess: () => {
-      setSuccess(`Invitation sent to ${email}. Status set to invited.`);
       setEmail("");
       setRole("member");
       queryClient.invalidateQueries({ queryKey: ["client-users", selectedClientId] });
       queryClient.invalidateQueries({ queryKey: ["organization-users", selectedClientId] });
       if (onSuccess) onSuccess();
-      setTimeout(() => {
-        setSuccess(null);
-        onOpenChange(false);
-      }, 2000);
+      onOpenChange(false);
     },
     onError: (err) => {
       setError(err?.response?.data?.error || err.message || "Failed to send invitation");
@@ -112,13 +107,6 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert className="bg-green-50 border-green-200">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">{success}</AlertDescription>
             </Alert>
           )}
 

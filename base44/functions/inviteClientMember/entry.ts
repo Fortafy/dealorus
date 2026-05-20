@@ -33,16 +33,31 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Client admin or Platform Administrator access required.' }, { status: 403 });
     }
 
+    const existingClientUsers = await serviceBase44.entities.ClientUser.filter({ client_id: clientId, email });
+    const existingMembership = existingClientUsers[0] || null;
     const matchedUsers = await serviceBase44.entities.User.filter({ email });
     const invitedUser = matchedUsers[0] || null;
 
-    if (invitedUser) {
-      const existingClientUsers = await serviceBase44.entities.ClientUser.filter({ user_id: invitedUser.id, client_id: clientId });
-
-      if (existingClientUsers.length > 0) {
+    if (existingMembership) {
+      if (existingMembership.status === 'active' || existingMembership.user_id === invitedUser?.id) {
         return Response.json({ error: 'This user is already a team member for this client.' }, { status: 409 });
       }
 
+      const updatedPendingMembership = await serviceBase44.entities.ClientUser.update(existingMembership.id, {
+        role: requestedRole,
+        organization_id: requestedOrganizationId || null,
+      });
+
+      return Response.json({
+        success: true,
+        invited_user_id: invitedUser?.id || null,
+        client_user_id: updatedPendingMembership.id,
+        invitation_status: updatedPendingMembership.status,
+        message: 'This invitation already exists for this client.',
+      });
+    }
+
+    if (invitedUser) {
       const membership = await serviceBase44.entities.ClientUser.create({
         user_id: invitedUser.id,
         client_id: clientId,
@@ -51,6 +66,13 @@ Deno.serve(async (req) => {
         status: 'active',
         email: invitedUser.email,
         full_name: invitedUser.full_name || '',
+      });
+
+      await serviceBase44.auth.admin.updateUser(invitedUser.id, {
+        client_id: clientId,
+        active_client_id: clientId,
+        client_role: requestedRole,
+        client_name: '',
       });
 
       return Response.json({
@@ -64,8 +86,11 @@ Deno.serve(async (req) => {
 
     await base44.users.inviteUser(email, 'user');
 
+    const refreshedMatchedUsers = await serviceBase44.entities.User.filter({ email });
+    const createdUser = refreshedMatchedUsers[0] || null;
+
     const pendingMembership = await serviceBase44.entities.ClientUser.create({
-      user_id: email,
+      user_id: createdUser?.id || '',
       client_id: clientId,
       organization_id: requestedOrganizationId || null,
       role: requestedRole,
@@ -76,7 +101,7 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      invited_user_id: null,
+      invited_user_id: createdUser?.id || null,
       client_user_id: pendingMembership.id,
       invitation_status: 'pending',
       message: 'Invitation email sent successfully.',
