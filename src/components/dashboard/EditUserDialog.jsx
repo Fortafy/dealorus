@@ -23,7 +23,7 @@ import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
 export default function EditUserDialog({ open, onOpenChange, user, organizations }) {
   const [formData, setFormData] = useState({
     full_name: "",
-    role: "user",
+    role: "member",
     organization_id: "",
   });
   const [error, setError] = useState(null);
@@ -34,8 +34,8 @@ export default function EditUserDialog({ open, onOpenChange, user, organizations
     if (user) {
       setFormData({
         full_name: user.full_name || "",
-        role: user.role || "user",
-        organization_id: user.organization_id || "",
+        role: user.role || "member",
+        organization_id: user.client_id || "",
       });
     }
   }, [user]);
@@ -45,15 +45,15 @@ export default function EditUserDialog({ open, onOpenChange, user, organizations
       if (!formData.full_name.trim()) {
         throw new Error("Full name is required");
       }
-      return await base44.entities.User.update(user.id, {
+      return await base44.entities.ClientUser.update(user.id, {
         full_name: formData.full_name,
         role: formData.role,
-        organization_id: formData.organization_id || null,
+        client_id: formData.organization_id || null,
       });
     },
     onSuccess: () => {
       setSuccess("User updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-client-users"] });
       setTimeout(() => {
         onOpenChange(false);
         setSuccess(null);
@@ -78,7 +78,7 @@ export default function EditUserDialog({ open, onOpenChange, user, organizations
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
-            Update user details and organization assignment
+            Update membership details and client assignment
           </DialogDescription>
         </DialogHeader>
 
@@ -137,27 +137,27 @@ export default function EditUserDialog({ open, onOpenChange, user, organizations
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="admin">Client Administrator</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Organization */}
+          {/* Client */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Organization
+              Client
             </label>
             <Select
               value={formData.organization_id}
-              onValueChange={(value) => handleChange("organization_id", value)}
+              onValueChange={(value) => handleChange("organization_id", value === "unassigned" ? "" : value)}
               disabled={updateMutation.isPending}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select organization" />
+                <SelectValue placeholder="Select client" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>Not assigned</SelectItem>
+                <SelectItem value="unassigned">Not assigned</SelectItem>
                 {organizations.map((org) => (
                   <SelectItem key={org.id} value={org.id}>
                     {org.name}

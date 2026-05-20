@@ -31,22 +31,40 @@ export default function AdminUsers() {
   const [error, setError] = useState(null);
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ["admin-users-current-user"],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const activeClientId = currentUser?.active_client_id || currentUser?.data?.active_client_id;
+  const isPlatformAdmin = currentUser?.role === "admin";
+
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ["admin-all-users"],
+    queryKey: ["admin-all-client-users", isPlatformAdmin, activeClientId],
+    enabled: !!currentUser,
     queryFn: async () => {
-      return await base44.entities.User.list("-created_date");
+      if (isPlatformAdmin) {
+        return await base44.entities.ClientUser.list("-created_date");
+      }
+
+      if (!activeClientId) {
+        return [];
+      }
+
+      return await base44.entities.ClientUser.filter({ client_id: activeClientId }, "-created_date");
     },
   });
 
-  const { data: organizations = [] } = useQuery({
-    queryKey: ["admin-user-management-orgs"],
+  const { data: clients = [] } = useQuery({
+    queryKey: ["admin-user-management-clients"],
     queryFn: async () => {
-      return await base44.entities.Organization.list();
+      return await base44.entities.Client.list();
     },
+    enabled: isPlatformAdmin,
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: (userId) => base44.entities.User.delete(userId),
+    mutationFn: (userId) => base44.entities.ClientUser.delete(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
       setDeleteConfirm(null);
@@ -84,10 +102,10 @@ export default function AdminUsers() {
     }
   };
 
-  const getOrgName = (orgId) => {
-    if (!orgId) return "-";
-    const org = organizations.find(o => o.id === orgId);
-    return org?.name || "Unknown";
+  const getClientName = (clientId) => {
+    if (!clientId) return "-";
+    const client = clients.find((item) => item.id === clientId);
+    return client?.name || "Unknown";
   };
 
   return (
@@ -197,7 +215,7 @@ export default function AdminUsers() {
                         </div>
                       </th>
                       <th className="text-left py-3 px-4 font-semibold text-slate-900 text-sm">
-                        Organization
+                        Client
                       </th>
                       <th className="text-right py-3 px-4 font-semibold text-slate-900 text-sm">
                         Actions
@@ -229,10 +247,13 @@ export default function AdminUsers() {
                           >
                             {user.role}
                           </Badge>
+                          {user.status === "pending" && (
+                            <Badge className="ml-2 bg-blue-100 text-blue-800">Pending</Badge>
+                          )}
                         </td>
                         <td className="py-3 px-4">
                           <p className="text-sm text-slate-600">
-                            {getOrgName(user.organization_id)}
+                            {getClientName(user.client_id)}
                           </p>
                         </td>
                         <td className="py-3 px-4 text-right">
@@ -269,7 +290,8 @@ export default function AdminUsers() {
       <InviteUserDialog
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
-        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin-all-users"] })}
+        clientId={!isPlatformAdmin ? activeClientId : undefined}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["admin-all-client-users"] })}
       />
 
       {/* Edit User Dialog */}
@@ -278,7 +300,7 @@ export default function AdminUsers() {
           open={!!editingUser}
           onOpenChange={(open) => !open && setEditingUser(null)}
           user={editingUser}
-          organizations={organizations}
+          organizations={clients}
         />
       )}
 
