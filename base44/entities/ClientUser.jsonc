@@ -58,7 +58,7 @@
     "update": {
       "$or": [
         {
-          "data.client_id": "{{user.data.client_id}}"
+          "data.client_id": "{{user.data.active_client_id}}"
         },
         {
           "user_condition": {
@@ -73,23 +73,6 @@
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "data.client_id": "{{user.data.client_id}}"
-        },
-        {
-          "user_condition": {
-            "data.client_role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
-    "write": {
       "$or": [
         {
           "data.client_id": "{{user.data.client_id}}"
