@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Client admin or Platform Administrator access required.' }, { status: 403 });
     }
 
-    await base44.asServiceRole.users.inviteUser(email, 'user');
+    await base44.users.inviteUser(email, 'user');
 
     let invitedUser = null;
 
@@ -46,7 +46,12 @@ Deno.serve(async (req) => {
     }
 
     if (!invitedUser) {
-      return Response.json({ error: 'Invitation was sent, but the user record is not ready yet. Please try again in a moment.' }, { status: 500 });
+      return Response.json({
+        success: true,
+        invited_user_id: null,
+        invitation_status: 'pending',
+        message: 'Invitation email sent successfully.',
+      });
     }
 
     await base44.asServiceRole.entities.User.update(invitedUser.id, {
