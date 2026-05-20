@@ -50,7 +50,7 @@
   ],
   "rls": {
     "read": {
-      "data.client_id": "{{user.data.client_id}}"
+      "data.client_id": "{{user.data.active_client_id}}"
     },
     "create": {
       "data.client_id": "{{user.data.active_client_id}}"
