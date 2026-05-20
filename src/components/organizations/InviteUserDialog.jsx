@@ -21,6 +21,7 @@ import {
 import { AlertCircle, Loader } from "lucide-react";
 
 export default function InviteUserDialog({ open, onOpenChange, clientId, onSuccess }) {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
   const [selectedClientId, setSelectedClientId] = useState(clientId || "");
@@ -57,6 +58,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       }
 
       const response = await base44.functions.invoke("inviteClientMember", {
+        fullName: fullName.trim(),
         email: email.trim().toLowerCase(),
         clientId: selectedClientId,
         clientRole: role,
@@ -65,6 +67,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       return response.data;
     },
     onSuccess: () => {
+      setFullName("");
       setEmail("");
       setRole("member");
       queryClient.invalidateQueries({ queryKey: ["client-users", selectedClientId] });
@@ -78,6 +81,11 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
   });
 
   const handleInvite = async () => {
+    if (!fullName.trim()) {
+      setError("Please enter a full name");
+      return;
+    }
+
     if (!email.trim()) {
       setError("Please enter an email address");
       return;
@@ -131,7 +139,22 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
             </div>
           )}
 
-          {/* Email Input */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Full Name
+            </label>
+            <Input
+              type="text"
+              placeholder="Jane Doe"
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+                setError(null);
+              }}
+              disabled={inviteMutation.isPending}
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Email Address

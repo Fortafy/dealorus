@@ -11,6 +11,7 @@ Deno.serve(async (req) => {
     }
 
     const payload = await req.json();
+    const fullName = typeof payload.fullName === 'string' ? payload.fullName.trim() : '';
     const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
     const requestedClientId = typeof payload.clientId === 'string' ? payload.clientId : '';
     const requestedOrganizationId = typeof payload.organizationId === 'string' ? payload.organizationId : '';
@@ -20,6 +21,10 @@ Deno.serve(async (req) => {
     const clientId = isPlatformAdmin
       ? requestedClientId
       : (currentUser.client_id || currentUser.data?.client_id);
+
+    if (!fullName) {
+      return Response.json({ error: 'Please enter a full name.' }, { status: 400 });
+    }
 
     if (!email || !email.includes('@')) {
       return Response.json({ error: 'Please enter a valid email address.' }, { status: 400 });
@@ -46,6 +51,7 @@ Deno.serve(async (req) => {
       const updatedPendingMembership = await serviceBase44.entities.ClientUser.update(existingMembership.id, {
         role: requestedRole,
         organization_id: requestedOrganizationId || null,
+        full_name: fullName,
       });
 
       return Response.json({
@@ -65,10 +71,11 @@ Deno.serve(async (req) => {
         role: requestedRole,
         status: 'active',
         email: invitedUser.email,
-        full_name: invitedUser.full_name || '',
+        full_name: fullName,
       });
 
       await serviceBase44.auth.admin.updateUser(invitedUser.id, {
+        full_name: fullName,
         client_id: clientId,
         active_client_id: clientId,
         client_role: requestedRole,
@@ -96,11 +103,12 @@ Deno.serve(async (req) => {
       role: requestedRole,
       status: 'pending',
       email,
-      full_name: '',
+      full_name: fullName,
     });
 
     if (createdUser?.id) {
       await serviceBase44.auth.admin.updateUser(createdUser.id, {
+        full_name: fullName,
         client_id: clientId,
         active_client_id: clientId,
         client_role: requestedRole,
