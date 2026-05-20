@@ -1,0 +1,68 @@
+{
+  "name": "ClientUser",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Built-in User record id"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "Tenant/client id this team member belongs to"
+    },
+    "organization_id": {
+      "type": "string",
+      "description": "Optional organization id for the team member"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "member"
+      ],
+      "default": "member",
+      "description": "Role within the client"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "inactive"
+      ],
+      "default": "pending",
+      "description": "Membership status"
+    },
+    "email": {
+      "type": "string",
+      "description": "Cached user email"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Cached user full name"
+    }
+  },
+  "required": [
+    "user_id",
+    "client_id",
+    "role",
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}"
+    }
+  }
+}

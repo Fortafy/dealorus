@@ -12,6 +12,8 @@ Deno.serve(async (req) => {
     const payload = await req.json();
     const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
     const requestedClientId = typeof payload.clientId === 'string' ? payload.clientId : '';
+    const requestedOrganizationId = typeof payload.organizationId === 'string' ? payload.organizationId : '';
+    const requestedRole = payload.clientRole === 'admin' ? 'admin' : 'member';
     const clientRole = currentUser.client_role || currentUser.data?.client_role;
     const isPlatformAdmin = currentUser.role === 'admin';
     const clientId = isPlatformAdmin
@@ -50,16 +52,30 @@ Deno.serve(async (req) => {
         success: true,
         invited_user_id: null,
         invitation_status: 'pending',
-        message: 'Invitation email sent successfully.',
+        message: 'Invitation email sent successfully. The team member record will be created after the user record is available.',
       });
     }
 
     await base44.asServiceRole.entities.User.update(invitedUser.id, {
       client_id: clientId,
-      client_role: 'member',
+      client_role: requestedRole,
       invitation_status: 'pending',
       is_active: true,
     });
+
+    const existingClientUsers = await base44.asServiceRole.entities.ClientUser.filter({ user_id: invitedUser.id, client_id: clientId });
+
+    if (existingClientUsers.length === 0) {
+      await base44.asServiceRole.entities.ClientUser.create({
+        user_id: invitedUser.id,
+        client_id: clientId,
+        organization_id: requestedOrganizationId || null,
+        role: requestedRole,
+        status: 'pending',
+        email: invitedUser.email,
+        full_name: invitedUser.full_name || '',
+      });
+    }
 
     return Response.json({
       success: true,

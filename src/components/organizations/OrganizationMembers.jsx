@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,12 @@ function InviteOrganizationUserDialog({ open, onOpenChange, organizationId, orga
         throw new Error(`Cannot invite more users. Your plan allows up to ${maxUsers} users.`);
       }
 
-      const response = await base44.functions.invoke("inviteClientMember", { email, organizationId });
+      const response = await base44.functions.invoke("inviteClientMember", {
+        email,
+        clientId: organizationId,
+        organizationId,
+        clientRole: 'member',
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -160,7 +165,7 @@ export default function OrganizationMembers({ organizationId }) {
     queryKey: ["organizationUsers", organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
-      return await base44.entities.User.filter({ client_id: organizationId }, "-created_date");
+      return await base44.entities.ClientUser.filter({ client_id: organizationId }, "-created_date");
     },
     enabled: !!organizationId,
   });

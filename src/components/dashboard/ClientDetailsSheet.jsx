@@ -70,8 +70,7 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
     queryKey: ["client-users", client?.id],
     enabled: !!client?.id && open,
     queryFn: async () => {
-      const allUsers = await base44.entities.User.list();
-      return allUsers.filter(u => u.client_id === client.id);
+      return await base44.entities.ClientUser.filter({ client_id: client.id }, "-created_date");
     },
   });
 
