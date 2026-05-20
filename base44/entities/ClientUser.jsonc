@@ -50,42 +50,98 @@
   ],
   "rls": {
     "read": {
-      "data.client_id": "{{user.data.active_client_id}}"
-    },
-    "create": {
-      "data.client_id": "{{user.data.active_client_id}}"
-    },
-    "update": {
       "$or": [
-        {
-          "data.client_id": "{{user.data.active_client_id}}"
-        },
-        {
-          "user_condition": {
-            "data.client_role": "admin"
-          }
-        },
         {
           "user_condition": {
             "role": "admin"
           }
+        },
+        {
+          "data.client_id": "{{user.data.active_client_id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.client_role": "admin"
+              }
+            },
+            {
+              "data.client_id": "{{user.data.active_client_id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.client_role": "admin"
+              }
+            },
+            {
+              "data.client_id": "{{user.data.active_client_id}}"
+            }
+          ]
         }
       ]
     },
     "delete": {
       "$or": [
         {
-          "data.client_id": "{{user.data.client_id}}"
-        },
-        {
           "user_condition": {
-            "data.client_role": "admin"
+            "role": "admin"
           }
         },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.client_role": "admin"
+              }
+            },
+            {
+              "data.client_id": "{{user.data.active_client_id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "write": {
+      "$or": [
         {
           "user_condition": {
             "role": "admin"
           }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.client_role": "admin"
+              }
+            },
+            {
+              "data.client_id": "{{user.data.active_client_id}}"
+            }
+          ]
         }
       ]
     }

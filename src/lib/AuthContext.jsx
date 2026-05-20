@@ -3,6 +3,15 @@ import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
+const serviceClient = createAxiosClient({
+  baseURL: '/api/functions',
+  headers: {
+    'X-App-Id': appParams.appId,
+  },
+  token: appParams.token,
+  interceptResponses: true,
+});
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -89,21 +98,10 @@ export const AuthProvider = ({ children }) => {
 
   const checkUserAuth = async () => {
     try {
-      // Now check if the user is authenticated
       setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
+      let currentUser = await base44.auth.me();
 
-      const claimedPendingMemberships = await base44.entities.ClientUser.filter({ email: currentUser.email, status: 'pending' }, '-created_date');
-      await Promise.all(
-        claimedPendingMemberships.map((membership) =>
-          base44.entities.ClientUser.update(membership.id, {
-            user_id: currentUser.id,
-            email: currentUser.email,
-            full_name: currentUser.full_name || membership.full_name || '',
-            status: 'active',
-          })
-        )
-      );
+      await serviceClient.post('/claimPendingClientMemberships', {});
 
       const memberships = await base44.entities.ClientUser.filter({ user_id: currentUser.id, status: 'active' }, '-created_date');
       const activeClientId = currentUser.active_client_id || currentUser.data?.active_client_id;
@@ -117,7 +115,7 @@ export const AuthProvider = ({ children }) => {
           client_id: selectedMembership.client_id,
           active_client_id: selectedMembership.client_id,
           client_role: selectedMembership.role,
-          full_name: selectedMembership.full_name || currentUser.full_name || '',
+          full_name: currentUser.full_name || selectedMembership.full_name || '',
         };
 
         if (client?.name) {
@@ -135,8 +133,7 @@ export const AuthProvider = ({ children }) => {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
-      // If user auth fails, it might be an expired token
+
       if (error.status === 401 || error.status === 403) {
         setAuthError({
           type: 'auth_required',
