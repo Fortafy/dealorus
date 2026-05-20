@@ -18,16 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { AlertCircle, CheckCircle2, Loader } from "lucide-react";
 
 export default function InviteUserDialog({ open, onOpenChange, clientId, onSuccess }) {
@@ -35,7 +25,6 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
   const [role, setRole] = useState("member");
   const [selectedClientId, setSelectedClientId] = useState(clientId || "");
   const [currentUser, setCurrentUser] = useState(null);
-  const [existingUserMatch, setExistingUserMatch] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const queryClient = useQueryClient();
@@ -46,8 +35,8 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       setCurrentUser(user);
       if (clientId) {
         setSelectedClientId(clientId);
-      } else if (!selectedClientId && user?.client_id) {
-        setSelectedClientId(user.client_id);
+      } else if (!selectedClientId && (user?.active_client_id || user?.data?.active_client_id)) {
+        setSelectedClientId(user.active_client_id || user?.data?.active_client_id);
       }
     };
     fetchUser();
@@ -60,7 +49,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
   });
 
   const isSystemAdmin = currentUser?.role === "admin";
-  const isClientAdmin = currentUser?.client_role === "admin";
+  const isClientAdmin = true;
 
   const inviteMutation = useMutation({
     mutationFn: async () => {
@@ -80,7 +69,6 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       setSuccess(`Invitation sent to ${email}. Status set to invited.`);
       setEmail("");
       setRole("member");
-      setExistingUserMatch(null);
       queryClient.invalidateQueries({ queryKey: ["client-users", selectedClientId] });
       queryClient.invalidateQueries({ queryKey: ["organization-users", selectedClientId] });
       if (onSuccess) onSuccess();
@@ -90,39 +78,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       }, 2000);
     },
     onError: (err) => {
-      setError(err.message || "Failed to send invitation");
-    },
-  });
-
-  const moveExistingUserMutation = useMutation({
-    mutationFn: async () => {
-      if (!existingUserMatch?.id) {
-        throw new Error("No existing user selected.");
-      }
-
-      const response = await base44.functions.invoke("updateClientMember", {
-        userId: existingUserMatch.id,
-        clientId: selectedClientId,
-        clientRole: role,
-      });
-
-      return response.data;
-    },
-    onSuccess: () => {
-      setSuccess(`User moved to this client successfully.`);
-      setEmail("");
-      setRole("member");
-      setExistingUserMatch(null);
-      queryClient.invalidateQueries({ queryKey: ["client-users", selectedClientId] });
-      queryClient.invalidateQueries({ queryKey: ["organization-users", selectedClientId] });
-      if (onSuccess) onSuccess();
-      setTimeout(() => {
-        setSuccess(null);
-        onOpenChange(false);
-      }, 2000);
-    },
-    onError: (err) => {
-      setError(err.message || "Failed to move user");
+      setError(err?.response?.data?.error || err.message || "Failed to send invitation");
     },
   });
 
@@ -137,15 +93,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
       return;
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const matchedUsers = await base44.entities.User.filter({ email: normalizedEmail });
-
-    if (matchedUsers.length > 0) {
-      setExistingUserMatch(matchedUsers[0]);
-      setError("A user with this email already exists.");
-      return;
-    }
-
+    setError(null);
     inviteMutation.mutate();
   };
 
@@ -231,11 +179,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
                 ? "Client administrators can invite users and manage client settings"
                 : "Members can view and manage data"}
             </p>
-            {existingUserMatch && (
-              <p className="text-xs text-amber-700 mt-2">
-                {existingUserMatch.email} already exists. You can move this user to the selected client after confirmation.
-              </p>
-            )}
+
           </div>
 
           {/* Actions */}
@@ -265,25 +209,6 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
         </div>
       </DialogContent>
 
-      <AlertDialog open={!!existingUserMatch} onOpenChange={() => setExistingUserMatch(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Move existing user?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This email already belongs to an existing user. Do you want to move <strong>{existingUserMatch?.email}</strong> to this client account?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => moveExistingUserMutation.mutate()}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {moveExistingUserMutation.isPending ? "Moving..." : "Confirm & Move"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Dialog>
   );
 }

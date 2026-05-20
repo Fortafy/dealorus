@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeSection, setActiveSection] = useState("preferences");
   const location = useLocation();
-  const clientId = currentUser?.client_id || currentUser?.data?.client_id;
+  const clientId = currentUser?.active_client_id || currentUser?.data?.active_client_id;
 
   // Fetch current user
   useEffect(() => {

@@ -194,7 +194,7 @@ export default function OrganizationMembers({ organizationId }) {
         return (
           user.full_name?.toLowerCase().includes(searchLower) ||
           user.email?.toLowerCase().includes(searchLower) ||
-          user.client_role?.toLowerCase().includes(searchLower)
+          user.role?.toLowerCase().includes(searchLower)
         );
       })
       .sort((a, b) => {
@@ -205,8 +205,8 @@ export default function OrganizationMembers({ organizationId }) {
           aVal = new Date(aVal);
           bVal = new Date(bVal);
         } else if (sortField === "is_active") {
-          aVal = a.is_active === false ? "inactive" : "active";
-          bVal = b.is_active === false ? "inactive" : "active";
+          aVal = a.status === "inactive" ? "inactive" : "active";
+          bVal = b.status === "inactive" ? "inactive" : "active";
         } else {
           aVal = String(aVal).toLowerCase();
           bVal = String(bVal).toLowerCase();
@@ -219,7 +219,7 @@ export default function OrganizationMembers({ organizationId }) {
   }, [users, searchQuery, sortField, sortDirection]);
 
   const currentActiveUsers = useMemo(() => {
-    return users.filter((user) => user.is_active !== false).length;
+    return users.filter((user) => user.status !== "inactive").length;
   }, [users]);
 
   const handleSort = (field) => {
@@ -243,7 +243,7 @@ export default function OrganizationMembers({ organizationId }) {
   const columns = [
     { key: "full_name", label: "Name", width: 220, sortable: true },
     { key: "email", label: "Email", width: 280, sortable: true },
-    { key: "client_role", label: "Role", width: 140, sortable: true },
+    { key: "role", label: "Role", width: 140, sortable: true },
     { key: "is_active", label: "Status", width: 140, sortable: true },
     { key: "created_date", label: "Joined", width: 140, sortable: true },
     { key: "actions", label: "Actions", width: 220, sortable: false },
@@ -381,13 +381,13 @@ export default function OrganizationMembers({ organizationId }) {
                   </td>
                   <td className="px-3 py-2 truncate border-r border-slate-100 text-slate-600">{user.email || "—"}</td>
                   <td className="px-3 py-2 border-r border-slate-100">
-                    <Badge className={user.client_role === "admin" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-800"}>
-                      {user.client_role || "member"}
+                    <Badge className={user.role === "admin" ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-800"}>
+                      {user.role || "member"}
                     </Badge>
                   </td>
                   <td className="px-3 py-2 border-r border-slate-100">
-                    <Badge className={user.is_active === false ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}>
-                      {user.is_active === false ? "Inactive" : "Active"}
+                    <Badge className={user.status === "inactive" ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}>
+                      {user.status === "inactive" ? "Inactive" : "Active"}
                     </Badge>
                   </td>
                   <td className="px-3 py-2 truncate border-r border-slate-100 text-slate-500">
@@ -407,9 +407,9 @@ export default function OrganizationMembers({ organizationId }) {
                         variant="ghost"
                         size="sm"
                         onClick={() => setDeactivateConfirm(user)}
-                        className={user.is_active === false ? "h-7 text-green-600 hover:text-green-700 hover:bg-green-50" : "h-7 text-red-600 hover:text-red-700 hover:bg-red-50"}
+                        className={user.status === "inactive" ? "h-7 text-green-600 hover:text-green-700 hover:bg-green-50" : "h-7 text-red-600 hover:text-red-700 hover:bg-red-50"}
                       >
-                        {user.is_active === false ? "Activate" : "Deactivate"}
+                        {user.status === "inactive" ? "Activate" : "Deactivate"}
                       </Button>
                     </div>
                   </td>
@@ -435,7 +435,7 @@ export default function OrganizationMembers({ organizationId }) {
         onOpenChange={(open) => !open && setEditingUser(null)}
         onSave={({ clientRole, isActive }) =>
           updateMemberMutation.mutate({
-            userId: editingUser.id,
+            userId: editingUser.user_id,
             clientRole,
             isActive,
           })
@@ -447,11 +447,11 @@ export default function OrganizationMembers({ organizationId }) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deactivateConfirm?.is_active === false ? "Activate User?" : "Deactivate User?"}
+              {deactivateConfirm?.status === "inactive" ? "Activate User?" : "Deactivate User?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to {deactivateConfirm?.is_active === false ? "activate" : "deactivate"} <strong>{deactivateConfirm?.full_name}</strong>?
-              They will {deactivateConfirm?.is_active === false ? "be able to log in" : "not be able to log in"}.
+              Are you sure you want to {deactivateConfirm?.status === "inactive" ? "activate" : "deactivate"} <strong>{deactivateConfirm?.full_name}</strong>?
+              They will {deactivateConfirm?.status === "inactive" ? "be able to access this client" : "lose access to this client"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -460,13 +460,13 @@ export default function OrganizationMembers({ organizationId }) {
               onClick={() =>
                 updateMemberMutation.mutate({
                   userId: deactivateConfirm.id,
-                  clientRole: deactivateConfirm.client_role,
-                  isActive: !deactivateConfirm.is_active,
+                  clientRole: deactivateConfirm.role,
+                  isActive: deactivateConfirm.status === "inactive",
                 })
               }
-              className={deactivateConfirm?.is_active === false ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
+              className={deactivateConfirm?.status === "inactive" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
             >
-              {updateMemberMutation.isPending ? "Updating..." : (deactivateConfirm?.is_active === false ? "Activate" : "Deactivate")}
+              {updateMemberMutation.isPending ? "Updating..." : (deactivateConfirm?.status === "inactive" ? "Activate" : "Deactivate")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

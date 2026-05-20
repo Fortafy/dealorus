@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Building2, Users, Briefcase, Settings, BookOpen, ScrollText, HelpCircle, LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { base44 } from "@/api/base44Client";
 const dealorusNewIcon = "https://media.base44.com/images/public/696a507ebd3734abacaf302c/832e0fac6_Heart-shapedhandshakeicononblack.png";
@@ -14,11 +15,25 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const location = useLocation();
   const [currentUser, setCurrentUser] = useState(null);
+  const [clientMemberships, setClientMemberships] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isSwitchingClient, setIsSwitchingClient] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
-    base44.auth.me().then(setCurrentUser).catch(() => {});
+    const loadSidebarData = async () => {
+      const user = await base44.auth.me();
+      setCurrentUser(user);
+
+      if (user?.id) {
+        const memberships = await base44.entities.ClientUser.filter({ user_id: user.id, status: 'active' });
+        const clientIds = memberships.map((membership) => membership.client_id).filter(Boolean);
+        const clients = await Promise.all(clientIds.map((id) => base44.entities.Client.get(id)));
+        setClientMemberships(clients.filter(Boolean));
+      }
+    };
+
+    loadSidebarData().catch(() => {});
   }, []);
 
   // Close menu when clicking outside
@@ -36,6 +51,13 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     base44.auth.logout();
+  };
+
+  const handleClientSwitch = async (clientId) => {
+    if (!clientId || clientId === currentUser?.active_client_id) return;
+    setIsSwitchingClient(true);
+    await base44.functions.invoke('switchClient', { clientId });
+    window.location.reload();
   };
 
   const menuItems = [
@@ -82,9 +104,32 @@ export default function Sidebar() {
         {menuOpen &&
         <div className="absolute bottom-full left-full ml-3 w-64 mb-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden z-50">
             {/* User info */}
-            <div className="px-4 py-3 border-b border-slate-100">
-              <p className="text-sm font-semibold text-slate-900">{currentUser?.full_name || "My Account"}</p>
-              <p className="text-xs text-slate-500">{currentUser?.email || ""}</p>
+            <div className="px-4 py-3 border-b border-slate-100 space-y-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{currentUser?.full_name || "My Account"}</p>
+                <p className="text-xs text-slate-500">{currentUser?.email || ""}</p>
+              </div>
+              {clientMemberships.length > 0 && (
+                <div>
+                  <p className="mb-1 text-[11px] font-medium text-slate-500">Current Client</p>
+                  <Select
+                    value={currentUser?.active_client_id || ""}
+                    onValueChange={handleClientSwitch}
+                    disabled={isSwitchingClient}
+                  >
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue placeholder="Select client" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {clientMemberships.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             {/* Menu items */}

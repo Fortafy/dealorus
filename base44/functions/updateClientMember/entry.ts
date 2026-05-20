@@ -11,13 +11,19 @@ Deno.serve(async (req) => {
 
     const payload = await req.json();
     const userId = typeof payload.userId === 'string' ? payload.userId : '';
-    const clientId = typeof payload.clientId === 'string' ? payload.clientId : '';
+    const clientId = typeof payload.clientId === 'string' ? payload.clientId : (currentUser.active_client_id || currentUser.data?.active_client_id || '');
     const clientRole = payload.clientRole;
     const isActive = payload.isActive;
-    const currentClientId = currentUser.client_id || currentUser.data?.client_id;
-    const currentClientRole = currentUser.client_role || currentUser.data?.client_role;
+    const currentClientId = currentUser.active_client_id || currentUser.data?.active_client_id;
+    const currentMemberships = await base44.asServiceRole.entities.ClientUser.filter({
+      user_id: currentUser.id,
+      client_id: currentClientId,
+      status: 'active',
+    });
+    const currentMembership = currentMemberships[0] || null;
+    const currentClientRole = currentMembership?.role;
 
-    if (currentClientRole !== 'admin') {
+    if (currentUser.role !== 'admin' && currentClientRole !== 'admin') {
       return Response.json({ error: 'Forbidden: Client admin access required.' }, { status: 403 });
     }
 
@@ -25,41 +31,37 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Missing team member ID.' }, { status: 400 });
     }
 
-    const updates = {};
+    const memberships = await base44.asServiceRole.entities.ClientUser.filter({ user_id: userId, client_id: clientId });
+    const membership = memberships[0];
 
-    if (clientId) {
-      updates.client_id = clientId;
+    if (!membership) {
+      return Response.json({ error: 'Team member not found.' }, { status: 404 });
     }
+
+    if (membership.user_id === currentUser.id) {
+      return Response.json({ error: "You can't change your own access here." }, { status: 400 });
+    }
+
+    const updates = {};
 
     if (typeof clientRole === 'string') {
       if (!['admin', 'member'].includes(clientRole)) {
         return Response.json({ error: 'Invalid client role.' }, { status: 400 });
       }
-      updates.client_role = clientRole;
+      updates.role = clientRole;
     }
 
     if (typeof isActive === 'boolean') {
-      updates.is_active = isActive;
+      updates.status = isActive ? 'active' : 'inactive';
     }
 
     if (Object.keys(updates).length === 0) {
       return Response.json({ error: 'No member changes were provided.' }, { status: 400 });
     }
 
-    const targetUser = await base44.asServiceRole.entities.User.get(userId);
+    const updatedMembership = await base44.asServiceRole.entities.ClientUser.update(membership.id, updates);
 
-    if (!targetUser) {
-      return Response.json({ error: 'Team member not found.' }, { status: 404 });
-    }
-
-    if (targetUser.id === currentUser.id) {
-      return Response.json({ error: "You can't change your own access here." }, { status: 400 });
-    }
-
-
-    const updatedUser = await base44.asServiceRole.entities.User.update(userId, updates);
-
-    return Response.json({ success: true, user: updatedUser });
+    return Response.json({ success: true, user: updatedMembership });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

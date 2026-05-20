@@ -32,55 +32,53 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Client admin or Platform Administrator access required.' }, { status: 403 });
     }
 
-    await base44.users.inviteUser(email, 'user');
+    const matchedUsers = await base44.asServiceRole.entities.User.filter({ email });
+    const invitedUser = matchedUsers[0] || null;
 
-    let invitedUser = null;
+    if (invitedUser) {
+      const existingClientUsers = await base44.asServiceRole.entities.ClientUser.filter({ user_id: invitedUser.id, client_id: clientId });
 
-    for (let attempt = 0; attempt < 20; attempt += 1) {
-      const matchedUsers = await base44.asServiceRole.entities.User.filter({ email });
-
-      if (matchedUsers.length > 0) {
-        invitedUser = matchedUsers[0];
-        break;
+      if (existingClientUsers.length > 0) {
+        return Response.json({ error: 'This user is already a team member for this client.' }, { status: 409 });
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 750));
-    }
-
-    if (!invitedUser) {
-      return Response.json({
-        success: true,
-        invited_user_id: null,
-        invitation_status: 'pending',
-        message: 'Invitation email sent successfully. The team member record will be created after the user record is available.',
-      });
-    }
-
-    await base44.asServiceRole.entities.User.update(invitedUser.id, {
-      client_id: clientId,
-      client_role: requestedRole,
-      invitation_status: 'pending',
-      is_active: true,
-    });
-
-    const existingClientUsers = await base44.asServiceRole.entities.ClientUser.filter({ user_id: invitedUser.id, client_id: clientId });
-
-    if (existingClientUsers.length === 0) {
-      await base44.asServiceRole.entities.ClientUser.create({
+      const membership = await base44.asServiceRole.entities.ClientUser.create({
         user_id: invitedUser.id,
         client_id: clientId,
         organization_id: requestedOrganizationId || null,
         role: requestedRole,
-        status: 'pending',
+        status: 'active',
         email: invitedUser.email,
         full_name: invitedUser.full_name || '',
       });
+
+      return Response.json({
+        success: true,
+        invited_user_id: invitedUser.id,
+        client_user_id: membership.id,
+        invitation_status: 'active',
+        message: 'Existing user added to this client successfully.',
+      });
     }
+
+    await base44.users.inviteUser(email, 'user');
+
+    const pendingMembership = await base44.asServiceRole.entities.ClientUser.create({
+      user_id: email,
+      client_id: clientId,
+      organization_id: requestedOrganizationId || null,
+      role: requestedRole,
+      status: 'pending',
+      email,
+      full_name: '',
+    });
 
     return Response.json({
       success: true,
-      invited_user_id: invitedUser.id,
+      invited_user_id: null,
+      client_user_id: pendingMembership.id,
       invitation_status: 'pending',
+      message: 'Invitation email sent successfully.',
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

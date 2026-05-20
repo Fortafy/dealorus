@@ -196,21 +196,11 @@
         "type": "string"
       },
       "description": "User-defined priority order for data sources",
-      "default": [
-        "CharityAPI",
-        "ProPublica",
-        "NonprofitCheckPlus",
-        "AI"
-      ]
+      "default": ["CharityAPI", "ProPublica", "NonprofitCheckPlus", "AI"]
     },
     "source_system": {
       "type": "string",
-      "enum": [
-        "Salesforce",
-        "Manual",
-        "AI Search",
-        "CSV Import"
-      ],
+      "enum": ["Salesforce", "Manual", "AI Search", "CSV Import"],
       "default": "Manual",
       "description": "System where this organization originated"
     },
@@ -220,10 +210,7 @@
     },
     "client_status": {
       "type": "string",
-      "enum": [
-        "active",
-        "inactive"
-      ],
+      "enum": ["active", "inactive"],
       "default": "active",
       "description": "Whether this organization is an active client"
     },
@@ -259,23 +246,42 @@
       "default": []
     }
   },
-  "required": [
-    "client_id",
-    "organization_name",
-    "state"
-  ],
+  "required": ["client_id", "organization_name", "state"],
   "rls": {
     "create": {
-      "data.client_id": "{{user.data.client_id}}"
+      "data.client_id": "{{user.data.active_client_id}}"
+    },
+    "read": {
+      "data.client_id": "{{user.data.active_client_id}}"
     },
     "update": {
-      "data.client_id": "{{user.data.client_id}}"
+      "data.client_id": "{{user.data.active_client_id}}",
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "data.client_id": "{{user.data.client_id}}"
+      "data.client_id": "{{user.data.active_client_id}}",
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "write": {
-      "data.client_id": "{{user.data.client_id}}"
+      "data.client_id": "{{user.data.active_client_id}}"
     }
   }
 }
