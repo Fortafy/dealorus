@@ -53,21 +53,7 @@
       "data.client_id": "{{user.data.client_id}}"
     },
     "create": {
-      "$or": [
-        {
-          "data.client_id": "{{user.data.client_id}}"
-        },
-        {
-          "user_condition": {
-            "data.client_role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
+      "data.client_id": "{{user.data.active_client_id}}"
     },
     "update": {
       "$or": [
