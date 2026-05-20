@@ -99,23 +99,27 @@ export const AuthProvider = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
-      let currentUser = await base44.auth.me();
+      const currentUser = await base44.auth.me();
 
       await serviceClient.post('/claimPendingClientMemberships', {});
 
-      const memberships = await base44.entities.ClientUser.filter({ user_id: currentUser.id, status: 'active' }, '-created_date');
-      const activeClientId = currentUser.active_client_id || currentUser.data?.active_client_id;
+      const refreshedUser = await base44.auth.me();
+      const memberships = await base44.entities.ClientUser.filter({ user_id: refreshedUser.id, status: 'active' }, '-created_date');
+      const activeClientId = refreshedUser.active_client_id || refreshedUser.data?.active_client_id;
       const selectedMembership = memberships.find((membership) => membership.client_id === activeClientId) || memberships[0] || null;
 
-      let hydratedUser = currentUser;
+      let hydratedUser = refreshedUser;
 
       if (selectedMembership) {
         const client = await base44.entities.Client.get(selectedMembership.client_id);
+        const invitedFullName = selectedMembership.full_name || '';
+        const currentFullName = refreshedUser.full_name || '';
+        const hasGeneratedName = currentFullName.toLowerCase() === refreshedUser.email.split('@')[0].toLowerCase();
         const userUpdates = {
           client_id: selectedMembership.client_id,
           active_client_id: selectedMembership.client_id,
           client_role: selectedMembership.role,
-          full_name: currentUser.full_name || selectedMembership.full_name || '',
+          full_name: invitedFullName && hasGeneratedName ? invitedFullName : currentFullName || invitedFullName,
         };
 
         if (client?.name) {
