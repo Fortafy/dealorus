@@ -1,9 +1,10 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const currentUser = await base44.auth.me();
+    const serviceBase44 = base44.asServiceRole;
 
     if (!currentUser) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -32,17 +33,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Client admin or Platform Administrator access required.' }, { status: 403 });
     }
 
-    const matchedUsers = await base44.asServiceRole.entities.User.filter({ email });
+    const matchedUsers = await serviceBase44.entities.User.filter({ email });
     const invitedUser = matchedUsers[0] || null;
 
     if (invitedUser) {
-      const existingClientUsers = await base44.asServiceRole.entities.ClientUser.filter({ user_id: invitedUser.id, client_id: clientId });
+      const existingClientUsers = await serviceBase44.entities.ClientUser.filter({ user_id: invitedUser.id, client_id: clientId });
 
       if (existingClientUsers.length > 0) {
         return Response.json({ error: 'This user is already a team member for this client.' }, { status: 409 });
       }
 
-      const membership = await base44.asServiceRole.entities.ClientUser.create({
+      const membership = await serviceBase44.entities.ClientUser.create({
         user_id: invitedUser.id,
         client_id: clientId,
         organization_id: requestedOrganizationId || null,
@@ -63,7 +64,7 @@ Deno.serve(async (req) => {
 
     await base44.users.inviteUser(email, 'user');
 
-    const pendingMembership = await base44.asServiceRole.entities.ClientUser.create({
+    const pendingMembership = await serviceBase44.entities.ClientUser.create({
       user_id: email,
       client_id: clientId,
       organization_id: requestedOrganizationId || null,
