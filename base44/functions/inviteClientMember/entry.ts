@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     }
 
     const existingClientUsers = await serviceBase44.entities.ClientUser.filter({ client_id: clientId, email });
-    const existingMembership = existingClientUsers[0] || null;
+    const existingMembership = existingClientUsers.find((membership) => membership.status !== 'inactive') || null;
     const matchedUsers = await serviceBase44.entities.User.filter({ email });
     const invitedUser = matchedUsers[0] || null;
 

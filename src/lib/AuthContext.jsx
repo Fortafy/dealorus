@@ -93,6 +93,18 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
 
+      const claimedPendingMemberships = await base44.entities.ClientUser.filter({ email: currentUser.email, status: 'pending' }, '-created_date');
+      await Promise.all(
+        claimedPendingMemberships.map((membership) =>
+          base44.entities.ClientUser.update(membership.id, {
+            user_id: currentUser.id,
+            email: currentUser.email,
+            full_name: currentUser.full_name || membership.full_name || '',
+            status: 'active',
+          })
+        )
+      );
+
       const memberships = await base44.entities.ClientUser.filter({ user_id: currentUser.id, status: 'active' }, '-created_date');
       const activeClientId = currentUser.active_client_id || currentUser.data?.active_client_id;
       const selectedMembership = memberships.find((membership) => membership.client_id === activeClientId) || memberships[0] || null;
