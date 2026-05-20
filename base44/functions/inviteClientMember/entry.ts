@@ -11,8 +11,12 @@ Deno.serve(async (req) => {
 
     const payload = await req.json();
     const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : '';
-    const clientId = currentUser.client_id || currentUser.data?.client_id;
+    const requestedClientId = typeof payload.clientId === 'string' ? payload.clientId : '';
     const clientRole = currentUser.client_role || currentUser.data?.client_role;
+    const isPlatformAdmin = currentUser.role === 'admin';
+    const clientId = isPlatformAdmin
+      ? requestedClientId
+      : (currentUser.client_id || currentUser.data?.client_id);
 
     if (!email || !email.includes('@')) {
       return Response.json({ error: 'Please enter a valid email address.' }, { status: 400 });
@@ -22,11 +26,11 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Your account is not assigned to a client organization.' }, { status: 400 });
     }
 
-    if (clientRole !== 'admin') {
-      return Response.json({ error: 'Forbidden: Client admin access required.' }, { status: 403 });
+    if (!isPlatformAdmin && clientRole !== 'admin') {
+      return Response.json({ error: 'Forbidden: Client admin or Platform Administrator access required.' }, { status: 403 });
     }
 
-    await base44.auth.inviteUser(email, 'user');
+    await base44.asServiceRole.users.inviteUser(email, 'user');
 
     let invitedUser = null;
 

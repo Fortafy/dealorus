@@ -70,6 +70,7 @@ export default function InviteUserDialog({ open, onOpenChange, clientId, onSucce
 
       const response = await base44.functions.invoke("inviteClientMember", {
         email: email.trim().toLowerCase(),
+        clientId: selectedClientId,
       });
 
       return response.data;
