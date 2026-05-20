@@ -14,6 +14,11 @@ Deno.serve(async (req) => {
       email: currentUser.email,
       status: 'pending',
     }, '-created_date');
+    const activeMemberships = await serviceBase44.entities.ClientUser.filter({
+      email: currentUser.email,
+      status: 'active',
+    }, '-created_date');
+    const preferredFullName = pendingMemberships[0]?.full_name || activeMemberships[0]?.full_name || currentUser.full_name || '';
 
     const activatedMemberships = [];
 
@@ -22,27 +27,40 @@ Deno.serve(async (req) => {
         user_id: currentUser.id,
         client_id: membership.client_id,
         email: currentUser.email,
-        full_name: currentUser.full_name || membership.full_name || '',
+        full_name: membership.full_name || preferredFullName,
         status: 'active',
       });
 
       activatedMemberships.push(updatedMembership);
     }
 
-    const primaryMembership = activatedMemberships[0] || (await serviceBase44.entities.ClientUser.filter({
-      user_id: currentUser.id,
-      status: 'active',
-    }, '-created_date'))[0] || null;
+    const linkedActiveMemberships = [];
+
+    for (const membership of activeMemberships) {
+      if (!membership.user_id || membership.user_id !== currentUser.id || !membership.full_name) {
+        const updatedMembership = await serviceBase44.entities.ClientUser.update(membership.id, {
+          user_id: currentUser.id,
+          full_name: membership.full_name || preferredFullName,
+          email: currentUser.email,
+        });
+        linkedActiveMemberships.push(updatedMembership);
+      } else {
+        linkedActiveMemberships.push(membership);
+      }
+    }
+
+    const allMemberships = [...activatedMemberships, ...linkedActiveMemberships];
+    const primaryMembership = allMemberships[0] || null;
 
     if (primaryMembership) {
       const client = await serviceBase44.entities.Client.get(primaryMembership.client_id);
 
-      await base44.auth.updateMe({
+      await serviceBase44.auth.admin.updateUser(currentUser.id, {
+        full_name: preferredFullName,
         client_id: primaryMembership.client_id,
         active_client_id: primaryMembership.client_id,
         client_role: primaryMembership.role,
         client_name: client?.name || currentUser.client_name || '',
-        full_name: currentUser.full_name || primaryMembership.full_name || '',
       });
     }
 
