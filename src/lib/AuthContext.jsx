@@ -92,7 +92,31 @@ export const AuthProvider = ({ children }) => {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
-      setUser(currentUser);
+
+      const memberships = await base44.entities.ClientUser.filter({ user_id: currentUser.id, status: 'active' }, '-created_date');
+      const activeClientId = currentUser.active_client_id || currentUser.data?.active_client_id;
+      const selectedMembership = memberships.find((membership) => membership.client_id === activeClientId) || memberships[0] || null;
+
+      let hydratedUser = currentUser;
+
+      if (selectedMembership) {
+        const client = await base44.entities.Client.get(selectedMembership.client_id);
+        const userUpdates = {
+          client_id: selectedMembership.client_id,
+          active_client_id: selectedMembership.client_id,
+          client_role: selectedMembership.role,
+          full_name: selectedMembership.full_name || currentUser.full_name || '',
+        };
+
+        if (client?.name) {
+          userUpdates.client_name = client.name;
+        }
+
+        await base44.auth.updateMe(userUpdates);
+        hydratedUser = await base44.auth.me();
+      }
+
+      setUser(hydratedUser);
       setIsAuthenticated(true);
       setIsLoadingAuth(false);
     } catch (error) {

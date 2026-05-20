@@ -25,12 +25,13 @@ export default function PreferencesSection({ user }) {
   const [themePreference, setThemePreference] = useState("system");
   const [feedback, setFeedback] = useState(null);
 
+  const resolvedClientId = user?.client_id || user?.active_client_id || user?.data?.client_id || user?.data?.active_client_id;
+
   const { data: client } = useQuery({
-    queryKey: ["user-client", user?.client_id],
-    enabled: !!user?.client_id,
+    queryKey: ["user-client", resolvedClientId],
+    enabled: !!resolvedClientId,
     queryFn: async () => {
-      const clients = await base44.entities.Client.filter({ id: user.client_id });
-      return clients[0];
+      return await base44.entities.Client.get(resolvedClientId);
     }
   });
 
