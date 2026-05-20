@@ -66,8 +66,8 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
     queryFn: () => base44.entities.ClientDocument.filter({ client_id: client.id }, "-created_date"),
   });
 
-  const { data: users = [] } = useQuery({
-    queryKey: ["client-users", client?.id],
+  const { data: users = [], refetch: refetchUsers } = useQuery({
+    queryKey: ["client-users", client?.id, open],
     enabled: !!client?.id && open,
     queryFn: async () => {
       return await base44.entities.ClientUser.filter({ client_id: client.id }, "-created_date");
@@ -169,6 +169,13 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
     if (client) setFormData(client);
   }, [client]);
 
+  useEffect(() => {
+    if (open && client?.id) {
+      queryClient.removeQueries({ queryKey: ["client-users"] });
+      refetchUsers();
+    }
+  }, [open, client?.id, queryClient, refetchUsers]);
+
   if (!client) return null;
 
   return (
@@ -221,8 +228,9 @@ export default function ClientDetailsSheet({ client, open, onOpenChange, allUser
             onOpenChange={setShowInviteDialog}
             clientId={client.id}
             onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ["client-users", client.id] });
+              queryClient.invalidateQueries({ queryKey: ["client-users"] });
               queryClient.invalidateQueries({ queryKey: ["client-activities", client.id] });
+              refetchUsers();
             }}
           />
 
