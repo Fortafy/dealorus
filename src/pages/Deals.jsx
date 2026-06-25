@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/AuthContext";
@@ -15,8 +15,9 @@ import DealEditorPanel from "@/components/deals/DealEditorPanel";
 import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
 
 export default function Deals() {
-  const { user: currentUser } = useAuth();
-  const clientId = currentUser?.data?.client_id || currentUser?.client_id || null;
+  const { user: authUser } = useAuth();
+  const [currentUser, setCurrentUser] = useState(authUser || null);
+  const clientId = currentUser?.data?.active_client_id || currentUser?.active_client_id || currentUser?.data?.client_id || currentUser?.client_id || null;
   const [showNewDeal, setShowNewDeal] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,6 +27,15 @@ export default function Deals() {
   const filterButtonRef = useRef(null);
   const searchRef = useRef(null);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (authUser) {
+      setCurrentUser(authUser);
+      return;
+    }
+
+    base44.auth.me().then(setCurrentUser).catch(() => {});
+  }, [authUser]);
 
   const { data: deals = [], isLoading } = useQuery({
     queryKey: ["deals-board", clientId],
@@ -240,7 +250,7 @@ export default function Deals() {
       <div className="border-t border-slate-200 flex-shrink-0" />
 
       {/* Kanban Board */}
-      {isLoading || isClientLoading || !currentUser ?
+      {isLoading || isClientLoading || !clientId ?
         <div className="flex-1 flex items-center justify-center">
           <div className="w-7 h-7 border-2 border-blue-100 rounded-full animate-spin" style={{ borderTopColor: "hsl(217, 91%, 60%)" }} />
         </div> :
