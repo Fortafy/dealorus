@@ -1,0 +1,68 @@
+{
+  "name": "Reminder",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this reminder belongs to"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who created this reminder"
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "Note",
+        "Deal",
+        "Organization",
+        "Contact"
+      ],
+      "description": "Type of the entity this reminder is attached to"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the specific entity this reminder is attached to"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title or label for the reminder"
+    },
+    "remind_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time when the reminder should fire"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the reminder is still pending (true) or dismissed/triggered (false)"
+    },
+    "triggered_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when the reminder was triggered"
+    }
+  },
+  "required": [
+    "client_id",
+    "user_id",
+    "entity_type",
+    "entity_id",
+    "remind_at"
+  ],
+  "rls": {
+    "read": {
+      "data.user_id": "{{user.id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.user_id": "{{user.id}}"
+    },
+    "delete": {
+      "data.user_id": "{{user.id}}"
+    }
+  }
+}

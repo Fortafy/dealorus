@@ -1,0 +1,36 @@
+{
+  "name": "SalesforceFieldMapping",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this mapping belongs to"
+    },
+    "dealorous_field": {
+      "type": "string",
+      "description": "Field name from the Organization entity in Dealorous"
+    },
+    "salesforce_field": {
+      "type": "string",
+      "description": "API field name on the Salesforce Account object"
+    },
+    "salesforce_field_label": {
+      "type": "string",
+      "description": "Human-readable label of the Salesforce field"
+    },
+    "salesforce_field_type": {
+      "type": "string",
+      "description": "Data type of the Salesforce field (string, double, boolean, date, etc.)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this mapping is currently active"
+    }
+  },
+  "required": [
+    "client_id",
+    "dealorous_field",
+    "salesforce_field"
+  ]
+}

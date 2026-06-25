@@ -1,0 +1,75 @@
+{
+  "name": "Note",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client that owns this note"
+    },
+    "organization_id": {
+      "type": "string",
+      "description": "ID of the organization this note belongs to"
+    },
+    "contact_id": {
+      "type": "string",
+      "description": "Optional ID of the contact this note belongs to"
+    },
+    "title": {
+      "type": "string",
+      "description": "Title of the note"
+    },
+    "content": {
+      "type": "string",
+      "description": "Rich text content of the note"
+    },
+    "remind_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional reminder date/time for this note"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "description": "URL to the attached file"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Original file name"
+          },
+          "file_type": {
+            "type": "string",
+            "description": "MIME type of the file"
+          }
+        }
+      },
+      "description": "Array of file attachments"
+    }
+  },
+  "required": [
+    "client_id",
+    "organization_id",
+    "title",
+    "content"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}"
+    }
+  }
+}

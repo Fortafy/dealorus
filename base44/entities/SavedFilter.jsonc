@@ -1,0 +1,57 @@
+{
+  "name": "SavedFilter",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this saved filter belongs to"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who created this saved filter"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the saved filter"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Filter configuration object",
+      "properties": {
+        "state": {
+          "type": "string"
+        },
+        "organization_type": {
+          "type": "string"
+        },
+        "ntee_code": {
+          "type": "string"
+        },
+        "min_revenue": {
+          "type": "string"
+        },
+        "max_revenue": {
+          "type": "string"
+        }
+      }
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ordered list of visible column keys for this saved view"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this filter should be applied by default"
+    }
+  },
+  "required": [
+    "client_id",
+    "user_id",
+    "name",
+    "filters"
+  ]
+}

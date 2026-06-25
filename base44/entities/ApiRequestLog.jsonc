@@ -1,0 +1,54 @@
+{
+  "name": "ApiRequestLog",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client that made the request"
+    },
+    "api_key_prefix": {
+      "type": "string",
+      "description": "First 8 characters of the API key used (for identification without exposing full key)"
+    },
+    "request_source": {
+      "type": "string",
+      "description": "Source/label of the request (e.g., 'Salesforce', 'Custom Integration')"
+    },
+    "search_params": {
+      "type": "object",
+      "description": "Search parameters provided in the request"
+    },
+    "result_count": {
+      "type": "integer",
+      "description": "Number of results returned"
+    },
+    "enrichment_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Data sources used during enrichment (ProPublica, CharityAPI, NonprofitCheckPlus, AI)"
+    },
+    "response_status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "error",
+        "no_results"
+      ],
+      "description": "Outcome status of the API request"
+    },
+    "response_time_ms": {
+      "type": "integer",
+      "description": "Total response time in milliseconds"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message if the request failed"
+    }
+  },
+  "required": [
+    "client_id",
+    "response_status"
+  ]
+}

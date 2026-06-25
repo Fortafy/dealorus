@@ -1,0 +1,100 @@
+{
+  "name": "Contact",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client that owns this contact"
+    },
+    "organization_id": {
+      "type": "string",
+      "description": "ID of the nonprofit organization this contact belongs to"
+    },
+    "name": {
+      "type": "string",
+      "description": "Full name of the contact"
+    },
+    "title": {
+      "type": "string",
+      "description": "Job title/position"
+    },
+    "email": {
+      "type": "string",
+      "description": "Primary email address"
+    },
+    "email_addresses": {
+      "type": "array",
+      "description": "All email addresses for this contact",
+      "items": {
+        "type": "string"
+      }
+    },
+    "phone": {
+      "type": "string",
+      "description": "Primary phone number"
+    },
+    "phone_numbers": {
+      "type": "array",
+      "description": "All phone numbers for this contact",
+      "items": {
+        "type": "string"
+      }
+    },
+    "linkedin": {
+      "type": "string",
+      "description": "LinkedIn profile URL"
+    },
+    "role_department": {
+      "type": "string",
+      "description": "Role or department within organization"
+    },
+    "description": {
+      "type": "string",
+      "description": "Additional description about the contact"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source of contact information (AI-found or Manual)"
+    },
+    "last_modified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Date when the contact was last modified"
+    },
+    "starred": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the contact is bookmarked/starred"
+    },
+    "label_ids": {
+      "type": "array",
+      "description": "IDs of labels applied to this contact",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "client_id",
+    "organization_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}"
+    }
+  }
+}

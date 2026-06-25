@@ -1,0 +1,113 @@
+{
+  "name": "ClientIntegration",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this integration belongs to"
+    },
+    "integration_type": {
+      "type": "string",
+      "description": "Type of integration, such as CharityAPI, ProPublica, or NonprofitCheckPlus"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-friendly name of the integration"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "API key or access token for the integration"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this integration is active for the client"
+    },
+    "config": {
+      "type": "object",
+      "description": "Optional extra settings for this integration"
+    }
+  },
+  "required": [
+    "client_id",
+    "integration_type",
+    "api_key"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

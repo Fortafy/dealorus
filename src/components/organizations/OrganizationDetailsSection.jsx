@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 import InlineTextDetailField from "@/components/people/InlineTextDetailField";
 import InlineNTEEField from "@/components/organizations/InlineNTEEField";
+import MostRecent990DetailField from "@/components/organizations/MostRecent990DetailField";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 
 const buildAddressValue = (organization) => [
@@ -150,6 +151,11 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
                 onSave={(value) => saveField("ruling_date", value)}
                 placeholder="Add Tax-Exempt Date"
               />
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
+              <div className="pt-2 text-xs text-slate-500">Most Recent 990</div>
+              <MostRecent990DetailField value={organization.most_recent_990} />
             </div>
 
             <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">

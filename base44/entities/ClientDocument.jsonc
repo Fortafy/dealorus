@@ -1,0 +1,50 @@
+{
+  "name": "ClientDocument",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this document belongs to"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the document"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL to the uploaded document"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "Type/extension of the file"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "Size of the file in bytes"
+    },
+    "uploaded_by": {
+      "type": "string",
+      "description": "ID of the user who uploaded the document"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "contract",
+        "invoice",
+        "report",
+        "other"
+      ],
+      "default": "other",
+      "description": "Category of the document"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the document"
+    }
+  },
+  "required": [
+    "client_id",
+    "name",
+    "file_url"
+  ]
+}

@@ -1,0 +1,272 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the client organization"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "suspended",
+        "canceled"
+      ],
+      "default": "trial",
+      "description": "Current subscription status"
+    },
+    "subscription_plan": {
+      "type": "string",
+      "default": "basic",
+      "description": "Subscription plan (e.g., 'basic', 'premium')"
+    },
+    "admin_user_id": {
+      "type": "string",
+      "description": "ID of the user designated as the organization administrator"
+    },
+    "billing_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email for billing correspondence"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID for billing integration"
+    },
+    "max_users": {
+      "type": "integer",
+      "default": 1,
+      "description": "Maximum number of users allowed for this client's plan"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL to client logo for branding"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#3b82f6",
+      "description": "Primary brand color (hex format)"
+    },
+    "website": {
+      "type": "string",
+      "description": "Client website URL"
+    },
+    "industry": {
+      "type": "string",
+      "description": "Industry or sector"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "enterprise",
+        "mid-market",
+        "small-business",
+        "startup",
+        "non-profit"
+      ],
+      "default": "small-business",
+      "description": "Client categorization"
+    },
+    "company_size": {
+      "type": "string",
+      "enum": [
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-500",
+        "501+"
+      ],
+      "description": "Number of employees"
+    },
+    "address": {
+      "type": "string",
+      "description": "Physical address"
+    },
+    "city": {
+      "type": "string",
+      "description": "City"
+    },
+    "state": {
+      "type": "string",
+      "description": "State/Province"
+    },
+    "zip_code": {
+      "type": "string",
+      "description": "Zip/Postal code"
+    },
+    "country": {
+      "type": "string",
+      "default": "USA",
+      "description": "Country"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Primary phone number"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes about the client"
+    },
+    "account_manager": {
+      "type": "string",
+      "description": "Name of the account manager"
+    },
+    "custom_fields": {
+      "type": "object",
+      "description": "Custom key-value pairs for additional client data"
+    },
+    "default_notifications_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Default notification setting for new members"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the trial subscription ends"
+    },
+    "default_data_source_priority": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "CharityAPI",
+        "ProPublica",
+        "NonprofitCheckPlus",
+        "AI"
+      ],
+      "description": "Default data source priority order for all client users"
+    },
+    "api_key": {
+      "type": "string",
+      "description": "Unique API key for external integrations (e.g., Salesforce callouts)"
+    },
+    "salesforce_connected": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether Salesforce External Client App is connected"
+    },
+    "salesforce_instance_url": {
+      "type": "string",
+      "description": "Salesforce instance URL (e.g., https://yourinstance.my.salesforce.com)"
+    },
+    "salesforce_consumer_key": {
+      "type": "string",
+      "description": "Salesforce External Client App Consumer Key (encrypted)"
+    },
+    "salesforce_consumer_secret": {
+      "type": "string",
+      "description": "Salesforce External Client App Consumer Secret (encrypted)"
+    },
+    "salesforce_access_token": {
+      "type": "string",
+      "description": "Current OAuth access token (encrypted)"
+    },
+    "salesforce_token_expiry": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current access token expires"
+    },
+    "salesforce_last_sync": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time Salesforce was synced"
+    },
+    "lifecycle_stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this stage"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the lifecycle stage"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Order of this stage in the pipeline"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "order"
+        ]
+      },
+      "default": [
+        {
+          "id": "prospect",
+          "name": "Prospect",
+          "order": 1
+        },
+        {
+          "id": "in_conversation",
+          "name": "In Conversation",
+          "order": 2
+        },
+        {
+          "id": "agreement",
+          "name": "Agreement",
+          "order": 3
+        },
+        {
+          "id": "closed_won",
+          "name": "Closed Won",
+          "order": 4
+        },
+        {
+          "id": "closed_lost",
+          "name": "Closed Lost",
+          "order": 5
+        }
+      ],
+      "description": "Customizable lifecycle stages for lead/prospect tracking"
+    }
+  },
+  "required": [
+    "name",
+    "admin_user_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "id": "{{user.data.client_id}}"
+        },
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.admin_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "data.client_role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "name": "UserIntegration",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user who owns this integration"
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "google"
+      ],
+      "default": "google",
+      "description": "OAuth provider"
+    },
+    "integration_type": {
+      "type": "string",
+      "enum": [
+        "google_drive",
+        "google_calendar"
+      ],
+      "description": "Connected Google service"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "disconnected",
+        "error",
+        "pending_reauth"
+      ],
+      "default": "disconnected",
+      "description": "Current connection status"
+    },
+    "access_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "OAuth access token"
+    },
+    "refresh_token": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "OAuth refresh token"
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "When the current access token expires"
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Scopes granted by the user"
+    },
+    "account_email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Google account email"
+    },
+    "account_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Google account display name"
+    },
+    "error_message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Last connection error if one exists"
+    },
+    "metadata": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Flexible provider metadata"
+    }
+  },
+  "required": [
+    "user_id",
+    "provider",
+    "integration_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "SavedContactFilter",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this saved filter belongs to"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who created this saved filter"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the saved filter"
+    },
+    "filters": {
+      "type": "object",
+      "description": "Filter configuration object"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ordered list of visible column keys for this saved view"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "client_id",
+    "user_id",
+    "name",
+    "filters"
+  ]
+}

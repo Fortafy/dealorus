@@ -1,0 +1,106 @@
+{
+  "name": "Label",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client that owns this label"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the label"
+    },
+    "color": {
+      "type": "string",
+      "default": "#7c3aed",
+      "description": "Hex color for the label"
+    },
+    "applicable_objects": {
+      "type": "array",
+      "description": "Which record types this label can be used with",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Organization",
+          "Contact",
+          "Deal"
+        ]
+      },
+      "default": [
+        "Organization",
+        "Contact",
+        "Deal"
+      ],
+      "minItems": 1
+    }
+  },
+  "required": [
+    "client_id",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "write": {
+      "data.client_id": "{{user.data.client_id}}",
+      "$or": [
+        {
+          "user_condition": {
+            "data.client_role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

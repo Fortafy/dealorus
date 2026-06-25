@@ -1,0 +1,40 @@
+{
+  "name": "ClientActivity",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client this activity belongs to"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who performed the action"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "created",
+        "updated",
+        "user_added",
+        "user_removed",
+        "document_uploaded",
+        "settings_changed",
+        "subscription_changed"
+      ],
+      "description": "Type of action performed"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the action"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata about the action"
+    }
+  },
+  "required": [
+    "client_id",
+    "action_type",
+    "description"
+  ]
+}
