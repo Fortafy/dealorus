@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Building2, CalendarDays } from "lucide-react";
 import moment from "moment";
+import { isClosedStage } from "@/components/deals/dealStageUtils";
 
 const CONTRACT_TYPES = [
   { value: "monthly_retainer", label: "Monthly Retainer" },
@@ -10,14 +11,15 @@ const CONTRACT_TYPES = [
   { value: "project", label: "Project" },
 ];
 
-export default function KanbanDealCard({ deal, isDragging, onSelectDeal }) {
+export default function KanbanDealCard({ deal, isDragging, onSelectDeal, lifecycleStages = [] }) {
   const contractLabel = CONTRACT_TYPES.find((t) => t.value === deal.contract_type)?.label;
-  const displayDate = deal.remind_at || deal.expected_close_date;
+  const isClosed = isClosedStage(deal.stage, lifecycleStages);
+  const displayDate = isClosed ? deal.expected_close_date : (deal.remind_at || deal.expected_close_date);
   const isPastOrToday = displayDate
     ? moment(displayDate).startOf("day").isSameOrBefore(moment().startOf("day"))
     : false;
   const dateToneClass = isPastOrToday ? "text-red-600" : "text-slate-400";
-  const dateLabel = deal.remind_at ? "Reminder" : "Close";
+  const dateLabel = isClosed ? "Closed" : deal.remind_at ? "Reminder" : "Close";
 
   return (
     <>

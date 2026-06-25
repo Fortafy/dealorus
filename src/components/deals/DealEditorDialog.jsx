@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import DealDialog from "@/components/deals/DealDialog";
+import { applyClosedStageRules } from "@/components/deals/dealStageUtils";
 
 export default function DealEditorDialog({
   open,
@@ -37,19 +38,31 @@ export default function DealEditorDialog({
 
   const handleSubmit = (payload, dealId) => {
     if (dealId) {
-      updateMutation.mutate({ id: dealId, data: payload });
+      updateMutation.mutate({
+        id: dealId,
+        data: applyClosedStageRules({
+          payload,
+          nextStage: payload.stage,
+          previousStage: deal?.stage,
+          lifecycleStages,
+        }),
+      });
       return;
     }
 
     const selectedOrganization = organization || organizations?.find((item) => item.id === payload.organization_id);
 
-    createMutation.mutate({
-      ...payload,
-      client_id: resolvedClientId,
-      organization_id: selectedOrganization?.id || payload.organization_id,
-      organization_name: selectedOrganization?.organization_name || "",
-      is_active: true,
-    });
+    createMutation.mutate(applyClosedStageRules({
+      payload: {
+        ...payload,
+        client_id: resolvedClientId,
+        organization_id: selectedOrganization?.id || payload.organization_id,
+        organization_name: selectedOrganization?.organization_name || "",
+        is_active: true,
+      },
+      nextStage: payload.stage,
+      lifecycleStages,
+    }));
   };
 
   return (

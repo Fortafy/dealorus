@@ -13,6 +13,7 @@ import KanbanDealCard from "@/components/deals/KanbanDealCard";
 import DealEditorDialog from "@/components/deals/DealEditorDialog";
 import DealEditorPanel from "@/components/deals/DealEditorPanel";
 import DealsFilterPanel from "@/components/deals/DealsFilterPanel";
+import { applyClosedStageRules } from "@/components/deals/dealStageUtils";
 
 export default function Deals() {
   const { user: authUser } = useAuth();
@@ -74,7 +75,14 @@ export default function Deals() {
     if (!destination) return;
     if (destination.droppableId === source.droppableId) return;
     const newStage = destination.droppableId;
-    updateDealMutation.mutate({ id: draggableId, data: { stage: newStage } });
+    const currentDeal = deals.find((deal) => deal.id === draggableId);
+    const data = applyClosedStageRules({
+      payload: { stage: newStage },
+      nextStage: newStage,
+      previousStage: currentDeal?.stage,
+      lifecycleStages: sortedStages,
+    });
+    updateDealMutation.mutate({ id: draggableId, data });
     toast.success("Deal stage updated");
   };
 
@@ -300,7 +308,8 @@ export default function Deals() {
                                   <KanbanDealCard
                               deal={deal}
                               isDragging={snapshot.isDragging}
-                              onSelectDeal={setSelectedDeal} />
+                              onSelectDeal={setSelectedDeal}
+                              lifecycleStages={sortedStages} />
                           
                                 </div>
                           }

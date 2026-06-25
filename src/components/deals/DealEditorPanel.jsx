@@ -13,6 +13,7 @@ import DealProposalPdfActions from "@/components/deals/DealProposalPdfActions";
 import DealOnboardingSection from "@/components/deals/DealOnboardingSection";
 import DealNotesSection from "@/components/deals/DealNotesSection";
 import DealActivityFeed from "@/components/deals/DealActivityFeed";
+import { applyClosedStageRules } from "@/components/deals/dealStageUtils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import moment from "moment";
@@ -198,24 +199,29 @@ export default function DealEditorPanel({ deal, open, onClose, organizations = [
 
     updateMutation.mutate({
       id: deal.id,
-      data: {
-        name: form.name,
-        stage: form.stage,
-        organization_id: form.organization_id || deal.organization_id,
-        organization_name: selectedOrganization?.organization_name || deal.organization_name || "",
-        contract_type: form.contract_type || null,
-        start_date: form.start_date || null,
-        end_date: form.end_date || null,
-        expected_close_date: form.expected_close_date || null,
-        value: form.value ? parseFloat(form.value) : null,
-        description: form.description || null,
-        remind_at: form.remind_at || null,
-        administrative_contact_id: form.administrative_contact_id || "",
-        administrative_contact_name: form.administrative_contact_name || "",
-        billing_contact_id: form.billing_contact_id || "",
-        billing_contact_name: form.billing_contact_name || "",
-        services: parseServices(form.services),
-      },
+      data: applyClosedStageRules({
+        payload: {
+          name: form.name,
+          stage: form.stage,
+          organization_id: form.organization_id || deal.organization_id,
+          organization_name: selectedOrganization?.organization_name || deal.organization_name || "",
+          contract_type: form.contract_type || null,
+          start_date: form.start_date || null,
+          end_date: form.end_date || null,
+          expected_close_date: form.expected_close_date || null,
+          value: form.value ? parseFloat(form.value) : null,
+          description: form.description || null,
+          remind_at: form.remind_at || null,
+          administrative_contact_id: form.administrative_contact_id || "",
+          administrative_contact_name: form.administrative_contact_name || "",
+          billing_contact_id: form.billing_contact_id || "",
+          billing_contact_name: form.billing_contact_name || "",
+          services: parseServices(form.services),
+        },
+        nextStage: form.stage,
+        previousStage: deal.stage,
+        lifecycleStages,
+      }),
     });
   };
 
