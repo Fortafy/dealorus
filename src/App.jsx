@@ -23,6 +23,17 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const urlParams = new URLSearchParams(window.location.search);
+  const isPublicOnePagerShareRoute = window.location.pathname === '/organization-one-pager' && urlParams.has('share');
+
+  if (isPublicOnePagerShareRoute) {
+    return (
+      <Routes>
+        <Route path="/organization-one-pager" element={<OrganizationOnePager />} />
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    );
+  }
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {

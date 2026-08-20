@@ -335,6 +335,7 @@ export default function OrganizationSummary({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isPushingToSalesforce, setIsPushingToSalesforce] = useState(false);
+  const [isGeneratingOnePagerLink, setIsGeneratingOnePagerLink] = useState(false);
   const [clientStatus, setClientStatus] = useState(organization.client_status || "active");
 
   const displayData = React.useMemo(() => {
@@ -404,6 +405,26 @@ export default function OrganizationSummary({
     const newStatus = clientStatus === "active" ? "inactive" : "active";
     setClientStatus(newStatus);
     if (onEdit) onEdit({ ...organization, client_status: newStatus });
+  };
+
+  const handleOpenOnePager = async () => {
+    if (!organization.id || isGeneratingOnePagerLink) return;
+    setIsGeneratingOnePagerLink(true);
+    try {
+      const response = await base44.functions.invoke("generateOrganizationOnePagerShare", {
+        organization_id: organization.id,
+      });
+      if (response.data?.token) {
+        const shareUrl = `${window.location.origin}/organization-one-pager?share=${response.data.token}`;
+        window.open(shareUrl, "_blank", "noopener,noreferrer");
+      } else {
+        toast.error("Unable to generate the one-pager link.");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.error || err.message || "Unable to generate the one-pager link.");
+    } finally {
+      setIsGeneratingOnePagerLink(false);
+    }
   };
 
   if (isDeleted) {
@@ -477,11 +498,9 @@ export default function OrganizationSummary({
           {/* Right: status toggle + ellipsis menu */}
           <div className="flex items-center gap-2 flex-shrink-0">
             {isSaved && organization.id ? (
-              <Button asChild variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs">
-                <a href={`/organization-one-pager?id=${organization.id}`} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  One-Pager
-                </a>
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs" onClick={handleOpenOnePager} disabled={isGeneratingOnePagerLink}>
+                {isGeneratingOnePagerLink ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                One-Pager
               </Button>
             ) : null}
             {/* Active/Inactive toggle */}

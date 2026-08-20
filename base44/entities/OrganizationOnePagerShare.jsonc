@@ -1,0 +1,61 @@
+{
+  "name": "OrganizationOnePagerShare",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "ID of the client that owns this public one-pager share link"
+    },
+    "organization_id": {
+      "type": "string",
+      "description": "ID of the organization exposed by this public share link"
+    },
+    "share_type": {
+      "type": "string",
+      "enum": [
+        "organization_one_pager"
+      ],
+      "default": "organization_one_pager",
+      "description": "Type of public share link"
+    },
+    "token": {
+      "type": "string",
+      "description": "Unpredictable token embedded in the public share URL"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the public link stops working"
+    },
+    "created_by_user_id": {
+      "type": "string",
+      "description": "ID of the user who generated this public link"
+    },
+    "last_accessed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time the public link was opened"
+    }
+  },
+  "required": [
+    "client_id",
+    "organization_id",
+    "share_type",
+    "token",
+    "expires_at"
+  ],
+  "rls": {
+    "read": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "create": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "update": {
+      "data.client_id": "{{user.data.client_id}}"
+    },
+    "delete": {
+      "data.client_id": "{{user.data.client_id}}"
+    }
+  }
+}
