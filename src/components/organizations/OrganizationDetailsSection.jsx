@@ -6,7 +6,6 @@ import RecordLabelsEditor from "@/components/labels/RecordLabelsEditor";
 import InlineTextDetailField from "@/components/people/InlineTextDetailField";
 import InlineNTEEField from "@/components/organizations/InlineNTEEField";
 import MostRecent990DetailField from "@/components/organizations/MostRecent990DetailField";
-import OrganizationContactSelect from "@/components/organizations/OrganizationContactSelect";
 import { getNTEEDescription } from "@/components/utils/nteeCodeLookup";
 
 const buildAddressValue = (organization) => [
@@ -43,12 +42,6 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
     queryFn: () => base44.entities.Label.filter({ client_id: organization.client_id }, "name"),
   });
 
-  const { data: contacts = [] } = useQuery({
-    queryKey: ["organization-contacts", organization.id, organization.client_id],
-    enabled: !!organization.id && !!organization.client_id,
-    queryFn: () => base44.entities.Contact.filter({ organization_id: organization.id, client_id: organization.client_id }, "name"),
-  });
-
   const saveField = async (field, value) => {
     if (!isSaved || !organization.id) return;
     const updatedData = { ...organization, [field]: value };
@@ -76,19 +69,6 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
     const updatedData = { ...organization, ...addressPatch };
     await base44.entities.Organization.update(organization.id, addressPatch);
     if (onEdit) onEdit(updatedData);
-  };
-
-  const saveContactRole = async (role, contactId) => {
-    if (!isSaved || !organization.id) return;
-    const selectedContact = contacts.find((contact) => contact.id === contactId) || null;
-    const idField = `${role}_contact_id`;
-    const nameField = `${role}_contact_name`;
-    const patch = {
-      [idField]: selectedContact?.id || null,
-      [nameField]: selectedContact?.name || null,
-    };
-    await base44.entities.Organization.update(organization.id, patch);
-    if (onEdit) onEdit({ ...organization, ...patch });
   };
 
   return (
@@ -176,26 +156,6 @@ export default function OrganizationDetailsSection({ organization, onEdit, isSav
             <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
               <div className="pt-2 text-xs text-slate-500">Most Recent 990</div>
               <MostRecent990DetailField value={organization.most_recent_990} />
-            </div>
-
-            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
-              <div className="pt-2 text-xs text-slate-500">Primary Contact</div>
-              <OrganizationContactSelect
-                value={organization.primary_contact_id}
-                contacts={contacts}
-                placeholder="Select primary contact"
-                onChange={(value) => saveContactRole("primary", value)}
-              />
-            </div>
-
-            <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">
-              <div className="pt-2 text-xs text-slate-500">Decision Maker</div>
-              <OrganizationContactSelect
-                value={organization.decision_maker_contact_id}
-                contacts={contacts}
-                placeholder="Select decision maker"
-                onChange={(value) => saveContactRole("decision_maker", value)}
-              />
             </div>
 
             <div className="grid gap-2 md:grid-cols-[120px_minmax(0,1fr)] md:gap-3">

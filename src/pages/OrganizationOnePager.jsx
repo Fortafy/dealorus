@@ -55,17 +55,23 @@ export default function OrganizationOnePager() {
     enabled: !isPublicShare && !!organizationId && !!activeClientId,
   });
 
+  const { data: labels = [], isLoading: isLoadingLabels } = useQuery({
+    queryKey: ["organization-one-pager-labels", activeClientId],
+    queryFn: () => base44.entities.Label.filter({ client_id: activeClientId }, "name"),
+    enabled: !isPublicShare && !!activeClientId,
+  });
+
   const pageOrganization = isPublicShare ? publicShareData?.organization : organization;
   const primaryContact = isPublicShare
     ? publicShareData?.primary_contact || null
-    : contacts.find((contact) => contact.id === organization?.primary_contact_id) || null;
+    : findTaggedContact(contacts, labels, "Primary");
   const decisionMakerContact = isPublicShare
     ? publicShareData?.decision_maker_contact || null
-    : contacts.find((contact) => contact.id === organization?.decision_maker_contact_id) || null;
+    : findTaggedContact(contacts, labels, "Decision Maker");
   const expiresAt = publicShareData?.expires_at || null;
   const links = pageOrganization ? getDataSourceLinks(pageOrganization).filter((link) => ONE_PAGER_LINKS.includes(link.name)) : [];
 
-  if (isLoadingPublicShare || isLoadingUser || isLoadingOrganization || isLoadingContacts) {
+  if (isLoadingPublicShare || isLoadingUser || isLoadingOrganization || isLoadingContacts || isLoadingLabels) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-100">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-slate-700" />
@@ -166,6 +172,12 @@ function InfoText({ icon: Icon, label }) {
       <span>{label}</span>
     </div>
   );
+}
+
+function findTaggedContact(contacts, labels, tagName) {
+  const tag = labels.find((label) => label.name?.toLowerCase() === tagName.toLowerCase());
+  if (!tag) return null;
+  return contacts.find((contact) => (contact.label_ids || []).includes(tag.id)) || null;
 }
 
 function formatDate(value) {

@@ -17,8 +17,6 @@ function pickOrganizationData(organization) {
     zip_code: organization.zip_code,
     annual_revenue: organization.annual_revenue,
     ein: organization.ein,
-    primary_contact_id: organization.primary_contact_id,
-    decision_maker_contact_id: organization.decision_maker_contact_id,
   };
 }
 
@@ -34,6 +32,12 @@ function pickContactData(contact) {
     linkedin: contact.linkedin,
     source: contact.source,
   };
+}
+
+function findTaggedContact(contacts, labels, tagName) {
+  const tag = labels.find((label) => label.name?.toLowerCase() === tagName.toLowerCase());
+  if (!tag) return null;
+  return contacts.find((contact) => (contact.label_ids || []).includes(tag.id)) || null;
 }
 
 export default async function(req: Request): Promise<Response> {
@@ -64,12 +68,16 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: 'Organization not found' }, { status: 404 });
     }
 
-    const primaryContact = organization.primary_contact_id
-      ? await base44.asServiceRole.entities.Contact.get(organization.primary_contact_id)
-      : null;
-    const decisionMakerContact = organization.decision_maker_contact_id
-      ? await base44.asServiceRole.entities.Contact.get(organization.decision_maker_contact_id)
-      : null;
+    const contacts = await base44.asServiceRole.entities.Contact.filter({
+      organization_id: organization.id,
+      client_id: organization.client_id,
+    }, 'name', 200);
+    const labels = await base44.asServiceRole.entities.Label.filter({
+      client_id: organization.client_id,
+    }, 'name', 200);
+
+    const primaryContact = findTaggedContact(contacts, labels, 'Primary');
+    const decisionMakerContact = findTaggedContact(contacts, labels, 'Decision Maker');
 
     waitUntil(
       base44.asServiceRole.entities.OrganizationOnePagerShare.update(share.id, {
