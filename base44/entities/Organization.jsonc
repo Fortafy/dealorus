@@ -269,6 +269,22 @@
         "type": "string"
       },
       "default": []
+    },
+    "primary_contact_id": {
+      "type": "string",
+      "description": "ID of the primary contact shown on the organization one-pager"
+    },
+    "primary_contact_name": {
+      "type": "string",
+      "description": "Cached name of the primary contact"
+    },
+    "decision_maker_contact_id": {
+      "type": "string",
+      "description": "ID of the decision maker contact shown on the organization one-pager"
+    },
+    "decision_maker_contact_name": {
+      "type": "string",
+      "description": "Cached name of the decision maker contact"
     }
   },
   "required": [

@@ -11,6 +11,7 @@ import OrganizationsImport from './pages/OrganizationsImport';
 import OrganizationsExport from './pages/OrganizationsExport';
 import People from './pages/People';
 import Deals from './pages/Deals';
+import OrganizationOnePager from './pages/OrganizationOnePager';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/organizations/import" element={<LayoutWrapper currentPageName="OrganizationsImport"><OrganizationsImport /></LayoutWrapper>} />
       <Route path="/organizations/export" element={<LayoutWrapper currentPageName="OrganizationsExport"><OrganizationsExport /></LayoutWrapper>} />
+      <Route path="/organization-one-pager" element={<LayoutWrapper currentPageName="OrganizationOnePager"><OrganizationOnePager /></LayoutWrapper>} />
       <Route path="/People" element={<LayoutWrapper currentPageName="People"><People /></LayoutWrapper>} />
       <Route path="/Deals" element={<LayoutWrapper currentPageName="Deals"><Deals /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />

@@ -476,6 +476,14 @@ export default function OrganizationSummary({
 
           {/* Right: status toggle + ellipsis menu */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {isSaved && organization.id ? (
+              <Button asChild variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs">
+                <a href={`/organization-one-pager?id=${organization.id}`} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  One-Pager
+                </a>
+              </Button>
+            ) : null}
             {/* Active/Inactive toggle */}
             <div
               style={{ backgroundColor: clientStatus === "active" ? "hsl(142, 76%, 36%)" : "hsl(210, 40%, 80%)" }}

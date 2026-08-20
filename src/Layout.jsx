@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "@/components/layout/Sidebar";
 
 // Pages that manage their own sidebar/layout
-const HIDE_SIDEBAR_PATHS = ["/Settings"];
+const HIDE_SIDEBAR_PATHS = ["/Settings", "/organization-one-pager"];
 
 export default function Layout({ children }) {
   const location = useLocation();
